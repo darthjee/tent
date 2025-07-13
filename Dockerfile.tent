@@ -4,9 +4,6 @@ FROM darthjee/tent-base:0.0.1
 # Copy the project code to the default Apache directory
 COPY . /var/www/html
 
-# Set permissions for the Apache directory
-RUN chown -R www-data:www-data /var/www/html
-
 # Expose the default Apache port
 EXPOSE 80
 
