@@ -1,14 +1,14 @@
-# Use a base image com Apache e PHP pré-instalados
+# Use a base image from Dockerfile.tent-base
 FROM darthjee/tent-base:0.0.1
     
-# Copie o código do projeto para o diretório padrão do Apache
+# Copy the project code to the default Apache directory
 COPY . /var/www/html
 
-# Defina permissões para o diretório do Apache
+# Set permissions for the Apache directory
 RUN chown -R www-data:www-data /var/www/html
 
-# Exponha a porta padrão do Apache
+# Expose the default Apache port
 EXPOSE 80
 
-# Inicie o Apache quando o container for iniciado
+# Start Apache when the container is launched
 CMD ["apache2-foreground"]
