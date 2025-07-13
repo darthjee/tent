@@ -1,5 +1,4 @@
-# Use a base image with Apache and PHP pre-installed
-FROM php:7.3.33-apache
+FROM circleci/php:7.3.33-apache
 
 # Install necessary dependencies for Composer and PHP extensions
 RUN apt-get update && apt-get install -y \
