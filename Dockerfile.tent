@@ -1,16 +1,5 @@
 # Use a base image com Apache e PHP pré-instalados
-FROM php:8.2-apache
-
-# Instale dependências necessárias para o Composer e extensões PHP
-RUN apt-get update && apt-get install -y \
-    unzip \
-    git \
-    curl \
-    libzip-dev \
-    && docker-php-ext-install zip
-
-# Instale o Composer globalmente
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+FROM darthjee/tent-base:0.0.1
 
 # Copie o código do projeto para o diretório padrão do Apache
 COPY . /var/www/html
