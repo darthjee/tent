@@ -23,9 +23,9 @@ services:
       - PHP_ENV=test
     command: /bin/bash
 
-  tent_dev:
+  tent_app:
     depends_on: [base_build]
-    container_name: tent_dev
+    container_name: tent_app
     <<: *base
     ports:
       - 127.0.0.1:8080:80
