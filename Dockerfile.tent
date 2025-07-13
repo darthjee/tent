@@ -1,6 +1,6 @@
 # Use a base image com Apache e PHP pré-instalados
 FROM darthjee/tent-base:0.0.1
-
+    
 # Copie o código do projeto para o diretório padrão do Apache
 COPY . /var/www/html
 
