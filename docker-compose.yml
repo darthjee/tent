@@ -32,3 +32,5 @@ services:
     environment:
       - PHP_ENV=development
     command: apache2-foreground
+    volumes:
+      - ./tests:/var/www/test
