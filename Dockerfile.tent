@@ -3,9 +3,3 @@ FROM darthjee/tent-base:0.0.1
     
 # Copy the project code to the default Apache directory
 COPY . /var/www/html
-
-# Expose the default Apache port
-EXPOSE 80
-
-# Start Apache when the container is launched
-CMD ["apache2-foreground"]

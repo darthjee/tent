@@ -2,7 +2,9 @@ services:
   base: &base
     image: tent
     volumes:
-      - ./source:/var/www/html
+      - ./source:/home/app/app
+      - ./tests:/home/app/tests
+    working_dir: /home/app
 
   base_build:
     <<: *base
@@ -32,5 +34,3 @@ services:
     environment:
       - PHP_ENV=development
     command: apache2-foreground
-    volumes:
-      - ./tests:/var/www/test
