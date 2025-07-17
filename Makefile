@@ -1,4 +1,4 @@
-.PHONY: build-base push-base build push dev
+.PHONY: build-base push-base build push dev tests
 
 PROJECT?=tent
 IMAGE?=$(PROJECT)
