@@ -3,8 +3,7 @@ services:
     image: tent
     volumes:
       - ./source:/home/app/app
-      - ./tests:/home/app/tests
-    working_dir: /home/app
+    working_dir: /home/app/app
 
   base_build:
     <<: *base

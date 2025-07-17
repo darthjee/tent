@@ -19,3 +19,4 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 USER app
 
 RUN composer global require phpunit/phpunit
+RUN ln -s /home/app/app/html /var/www/html
