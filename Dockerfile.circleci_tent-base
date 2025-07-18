@@ -14,4 +14,5 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 
 USER circleci
 
-RUN composer global require phpunit/phpunit
+RUN composer global require phpunit/phpunit; \
+    ln -s $HOME/.composer/vendor/phpunit/phpunit/phpunit /usr/local/sbin/
