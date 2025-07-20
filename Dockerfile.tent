@@ -2,6 +2,6 @@
 FROM darthjee/tent-base:0.0.1
     
 # Copy the project code to the default Apache directory
-COPY ./source/autoload.php /home/app/app/html
+COPY ./source/composer.json /home/app/app
 
 RUN composer dump-autoload
