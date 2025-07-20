@@ -4,7 +4,6 @@ services:
     volumes:
       - ./source/html:/home/app/app/html
       - ./source/tests:/home/app/app/tests
-    working_dir: /home/app/app
 
   base_build:
     <<: *base
