@@ -19,24 +19,25 @@ jobs:
   test:
     docker:
       - image: darthjee/circleci_tent-base:0.0.1
-    working_directory: /home/circleci/source
-    steps:
-      - run:
-          name: Prepare source
-          command: mkdir -p /home/circleci/source
       - checkout
       - run:
           name: Copy files
-          command: cp source/* /home/circleci/project -r
+          command: cp source/* ./ -r
+      - run:
+          name: Copy dependencies
+          command: cp /home/circleci/vendor/ ./vendor/ -R
+      - run:
+          name: Debug
+          command: tree .
       - run:
           name: Install dependencies
-          command: cd /home/circleci/project; composer install
+          command: composer install
       - run:
           name: Prepare autoload
-          command: cd /home/circleci/project; composer dump-autoload
+          command: composer dump-autoload
       - run:
           name: PHPUnit Tests
-          command: cd /home/circleci/project; phpunit tests
+          command: phpunit tests
 
   build-and-release:
     machine: true
