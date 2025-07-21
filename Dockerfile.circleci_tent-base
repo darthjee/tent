@@ -9,6 +9,9 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     && docker-php-ext-install zip
 
+RUN mkdir -p /home/circleci/project; \
+    chown circleci.circleci -R /home/circleci
+
 # Install Composer globally
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
