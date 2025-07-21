@@ -3,6 +3,8 @@ services:
     image: tent
     volumes:
       - ./source/html:/home/app/app/html
+      - ./source/composer.json:/home/app/app/composer.json
+      - ./source/composer.lock:/home/app/app/composer.lock
       - ./source/tests:/home/app/app/tests
 
   base_build:
