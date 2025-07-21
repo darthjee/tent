@@ -25,6 +25,9 @@ jobs:
           name: Set folder
           command: cp source/* ./ -r; rm source -rf
       - run:
+          name: Install dependencies
+          command: composer install
+      - run:
           name: Prepare autoload
           command: composer dump-autoload
       - run:
