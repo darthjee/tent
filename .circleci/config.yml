@@ -19,6 +19,7 @@ jobs:
   test:
     docker:
       - image: darthjee/circleci_tent-base:0.0.1
+    working_directory: /home/circleci/app/source
     steps:
       - checkout
       - run:
