@@ -23,6 +23,12 @@ jobs:
     steps:
       - checkout
       - run:
+          name: DEBUG1
+          command: ls -la
+      - run:
+          name: PWD
+          command: pwd
+      - run:
           name: Set folder
           command: cp source/* ./ -r; rm source -rf
       - run:
