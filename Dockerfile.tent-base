@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y \
 # Install Composer globally
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-RUN ln -s /home/app/app/vendor/phpunit/phpunit/phpunit /usr/local/sbin/
+RUN export PATH="$PATH:/home/app/app/vendor/bin"
 
 USER app
 
