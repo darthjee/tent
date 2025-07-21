@@ -12,10 +12,10 @@ RUN apt-get update && apt-get install -y \
 # Install Composer globally
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-RUN ln -s /home/circleci/app/vendor/phpunit/phpunit/phpunit /usr/local/sbin/
+RUN ln -s /home/circleci/project/vendor/phpunit/phpunit/phpunit /usr/local/sbin/
 
-COPY ./source/composer.json /home/circleci/app/composer.json
-WORKDIR /home/circleci/app
+COPY ./source/composer.json /home/circleci/project/composer.json
+WORKDIR /home/circleci/project
 
 RUN composer install
 
