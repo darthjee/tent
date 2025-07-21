@@ -26,17 +26,20 @@ jobs:
           command: mkdir -p /home/circleci/source
       - checkout
       - run:
+          name: DEBUG
+          command: ls -la /home/circleci/
+      - run:
+          name: DEBUG2
+          command: pwd
+      - run:
+          name: DEBUG3
+          command: ls -la /home/circleci/project
+      - run:
           name: Copy files
           command: cp source/* /home/circleci/project -r
       - run:
           name: Install dependencies
           command: cd /home/circleci/project; composer install
-      - run:
-          name: DEBUG
-          command: ls -la
-      - run:
-          name: DEBUG2
-          command: pwd
       - run:
           name: Prepare autoload
           command: cd /home/circleci/project; composer dump-autoload
