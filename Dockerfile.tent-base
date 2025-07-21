@@ -21,6 +21,7 @@ RUN ln -s /home/app/.composer/vendor/phpunit/phpunit/phpunit /usr/local/sbin/
 USER app
 
 WORKDIR /home/app/app
+COPY ./source/composer.json /home/app/app
 
-RUN composer global require phpunit/phpunit; \
+RUN composer install; \
     ln -s /home/app/app/html /var/www/html
