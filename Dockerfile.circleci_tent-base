@@ -15,11 +15,12 @@ RUN mkdir -p /home/circleci/project; \
 # Install Composer globally
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-RUN ln -s /home/circleci/project/vendor/phpunit/phpunit/phpunit /usr/local/sbin/
+RUN ln -s /home/circleci/vendor/phpunit/phpunit/phpunit /usr/local/sbin/
 
 USER circleci
 
-COPY --chown=circleci:circleci ./source/composer.json /home/circleci/project/composer.json
-WORKDIR /home/circleci/project
+COPY --chown=circleci:circleci ./source/composer.json /home/circleci/composer.json
 
-RUN composer install
+RUN cd /home/circleci; \
+    composer install
+WORKDIR /home/circleci/project
