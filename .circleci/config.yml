@@ -28,6 +28,9 @@ jobs:
           name: Install dependencies
           command: composer install
       - run:
+          name: DEBUG
+          command: ls -la
+      - run:
           name: Prepare autoload
           command: composer dump-autoload
       - run:
