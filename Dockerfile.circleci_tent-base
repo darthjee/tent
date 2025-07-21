@@ -17,9 +17,9 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 
 RUN ln -s /home/circleci/project/vendor/phpunit/phpunit/phpunit /usr/local/sbin/
 
-COPY ./source/composer.json /home/circleci/project/composer.json
+USER circleci
+
+COPY ./source/composer.json /home/circleci/composer.json
 WORKDIR /home/circleci/project
 
 RUN composer install
-
-USER circleci
