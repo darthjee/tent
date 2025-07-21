@@ -22,8 +22,17 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Set folder
-          command: cp source/* ./ -r; rm source -rf
+          name: Copy files
+          command: cp source/* ./ -r
+      - run:
+          name: Copy dependencies
+          command: cp /home/circleci/vendor/ ./vendor/ -R
+      - run:
+          name: Debug
+          command: ls vendor
+      - run:
+          name: Install dependencies
+          command: composer install
       - run:
           name: Prepare autoload
           command: composer dump-autoload
