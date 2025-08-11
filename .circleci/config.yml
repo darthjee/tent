@@ -7,8 +7,12 @@ workflows:
           filters:
             tags:
               only: /.*/
+      - checks:
+          filters:
+            tags:
+              only: /.*/
       - build-and-release:
-          requires: [test]
+          requires: [test, checks]
           filters:
             tags:
               only: /.*/
@@ -36,6 +40,23 @@ jobs:
       - run:
           name: PHPUnit Tests
           command: phpunit tests
+  checks:
+    docker:
+      - image: darthjee/circleci_tent-base:0.0.1
+    steps:
+      - checkout
+      - run:
+          name: Copy files
+          command: cp source/* ./ -r
+      - run:
+          name: Copy dependencies
+          command: cp /home/circleci/vendor/ ./vendor/ -R
+      - run:
+          name: Install dependencies
+          command: composer install
+      - run:
+          name: Run Lint
+          command: composer lint
 
   build-and-release:
     machine: true
