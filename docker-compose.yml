@@ -5,7 +5,7 @@ services:
       - ./source/html:/home/app/app/html
       - ./source/composer.json:/home/app/app/composer.json
       - ./source/composer.lock:/home/app/app/composer.lock
-      - ./source/composer.lock:/home/app/app/phpcs.xml
+      - ./source/phpcs.xml:/home/app/app/phpcs.xml
       - ./source/tests:/home/app/app/tests
 
   base_build:
