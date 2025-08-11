@@ -39,7 +39,7 @@ jobs:
           command: composer dump-autoload
       - run:
           name: PHPUnit Tests
-          command: phpunit tests
+          command: composer tests
   checks:
     docker:
       - image: darthjee/circleci_tent-base:0.0.1
