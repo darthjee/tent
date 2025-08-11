@@ -1,9 +1,6 @@
 # Use a base image with Apache and PHP pre-installed
 FROM php:7.3.33-apache
 
-# Enable Apache mod_rewrite
-RUN a2enmod rewrite
-
 RUN useradd -u 1000 app; \
     mkdir -p /home/app/app; \
     chown app.app -R /home/app
@@ -14,9 +11,10 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     libzip-dev \
-    && docker-php-ext-install zip
+    && docker-php-ext-install zip; \
+    a2enmod rewrite
 
-# Install Composer globally
+# Install composer globally
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 RUN rm -rf /var/www/html; \
