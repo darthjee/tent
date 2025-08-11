@@ -55,6 +55,9 @@ jobs:
           name: Install dependencies
           command: composer install
       - run:
+          name: Debug
+          command: ls -la
+      - run:
           name: Run Lint
           command: composer lint
 
