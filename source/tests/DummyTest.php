@@ -1,7 +1,5 @@
 <?php
 
-// filepath: /Users/darthjee/projetos/mine/tent/source/tests/DummyTest.php
-
 namespace Tent\Tests;
 
 require_once __DIR__ . '/../vendor/autoload.php';
