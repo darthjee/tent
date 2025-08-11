@@ -19,12 +19,17 @@ jobs:
   test:
     docker:
       - image: darthjee/circleci_tent-base:0.0.1
-    working_directory: /home/circleci/app
     steps:
       - checkout
       - run:
-          name: Set folder
-          command: cp source/* ./ -r; rm source -rf
+          name: Copy files
+          command: cp source/* ./ -r
+      - run:
+          name: Copy dependencies
+          command: cp /home/circleci/vendor/ ./vendor/ -R
+      - run:
+          name: Debug
+          command: ls vendor
       - run:
           name: Install dependencies
           command: composer install
