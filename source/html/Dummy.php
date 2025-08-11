@@ -9,4 +9,3 @@ class Dummy
         return "Hello, world!";
     }
 }
-?>
