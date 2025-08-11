@@ -1,6 +1,9 @@
 # Use a base image with Apache and PHP pre-installed
 FROM php:7.3.33-apache
 
+# Enable Apache mod_rewrite
+RUN a2enmod rewrite
+
 RUN useradd -u 1000 app; \
     mkdir -p /home/app/app; \
     chown app.app -R /home/app
