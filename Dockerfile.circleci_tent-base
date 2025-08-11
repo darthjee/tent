@@ -19,7 +19,9 @@ RUN ln -s /home/circleci/project/vendor/phpunit/phpunit/phpunit /usr/local/sbin/
 
 USER circleci
 
-COPY --chown=circleci:circleci ./source/composer.json /home/circleci/composer.json
+ENV PATH="$PATH://home/circleci/project/vendor/bin"
+
+COPY --chown=circleci:circleci ./source/composer.* /home/circleci/
 
 RUN cd /home/circleci; \
     composer install
