@@ -28,9 +28,6 @@ jobs:
           name: Copy dependencies
           command: cp /home/circleci/vendor/ ./vendor/ -R
       - run:
-          name: Debug
-          command: ls vendor
-      - run:
           name: Install dependencies
           command: composer install
       - run:
