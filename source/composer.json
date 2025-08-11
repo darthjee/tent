@@ -12,7 +12,7 @@
         "squizlabs/php_codesniffer": "^3.13"
     },
     "scripts": {
-        "tests": "phpcs phpunit tests",
+        "tests": "phpunit tests",
         "lint": "phpcs --standard=PSR12 html tests",
         "lint:fix": "phpcbf --standard=PSR12 html tests"
     }
