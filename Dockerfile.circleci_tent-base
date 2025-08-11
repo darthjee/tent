@@ -19,6 +19,8 @@ RUN ln -s /home/circleci/project/vendor/phpunit/phpunit/phpunit /usr/local/sbin/
 
 USER circleci
 
+ENV PATH="$PATH://home/circleci/project/vendor/bin"
+
 COPY --chown=circleci:circleci ./source/composer.* /home/circleci/
 
 RUN cd /home/circleci; \
