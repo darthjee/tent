@@ -13,7 +13,7 @@
     },
     "scripts": {
         "tests": "phpunit tests",
-        "lint": "phpcs --standard=PSR12 html tests",
-        "lint:fix": "phpcbf --standard=PSR12 html tests"
+        "lint": "phpcs --standard=phpcs.xml",
+        "lint:fix": "phpcbf --standard=phpcs.xml"
     }
 }
