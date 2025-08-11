@@ -10,5 +10,9 @@
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "^3.13"
+    },
+    "scripts": {
+        "lint": "phpcs --standard=PSR12 html",
+        "lint:fix": "phpcbf --standard=PSR12 html"
     }
 }
