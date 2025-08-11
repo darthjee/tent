@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<ruleset name="Custom">
+    <description>Custom PHP_CodeSniffer ruleset</description>
+    
+    <!-- Use PSR12 as base -->
+    <rule ref="PSR12"/>
+    
+    <!-- Exclude side effects rule for tests directory -->
+    <rule ref="PSR1.Files.SideEffects.FoundWithSymbols">
+        <exclude-pattern>tests/*</exclude-pattern>
+    </rule>
+    
+    <!-- Include source files -->
+    <file>html</file>
+    <file>tests</file>
+</ruleset>
