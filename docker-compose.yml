@@ -27,6 +27,8 @@ services:
     environment:
       - PHP_ENV=test
     command: /bin/bash
+    links:
+      - tent_app:tent_app
 
   tent_app:
     depends_on: [base_build]

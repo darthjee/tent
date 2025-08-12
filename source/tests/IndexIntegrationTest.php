@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 
 class IndexIntegrationTest extends TestCase
 {
-    private const BASE_URL = 'http://localhost:8080';
+    private const BASE_URL = 'http://tent_app:80';
 
     private function makeRequest(string $path): array
     {
