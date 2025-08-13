@@ -13,6 +13,8 @@
     },
     "scripts": {
         "tests": "phpunit tests",
+        "tests:unit": "phpunit tests/unit",
+        "tests:integration": "phpunit tests/integration",
         "lint": "phpcs --standard=phpcs.xml",
         "lint:fix": "phpcbf --standard=phpcs.xml"
     }

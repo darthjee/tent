@@ -3,7 +3,11 @@ workflows:
   version: 2
   test:
     jobs:
-      - test:
+      - unit_test:
+          filters:
+            tags:
+              only: /.*/
+      - integration:
           filters:
             tags:
               only: /.*/
@@ -12,7 +16,7 @@ workflows:
             tags:
               only: /.*/
       - build-and-release:
-          requires: [test, checks]
+          requires: [unit_test, integration, checks]
           filters:
             tags:
               only: /.*/
@@ -20,7 +24,7 @@ workflows:
               only:
                 - master
 jobs:
-  test:
+  unit_test:
     docker:
       - image: darthjee/circleci_tent-base:0.0.1
     steps:
@@ -39,7 +43,43 @@ jobs:
           command: composer dump-autoload
       - run:
           name: PHPUnit Tests
-          command: composer tests
+          command: composer tests:unit
+  integration:
+    docker:
+      - image: darthjee/circleci_tent-base:0.0.1
+    environment:
+      - TEST_SERVER_DOMAIN=localhost
+    steps:
+      - checkout
+      - run:
+          name: Copy files
+          command: cp source/* ./ -r
+      - run:
+          name: Copy dependencies
+          command: cp /home/circleci/vendor/ ./vendor/ -R
+      - run:
+          name: Install dependencies
+          command: composer install
+      - run:
+          name: Prepare autoload
+          command: composer dump-autoload
+      - run:
+          name: Prepare apache folder
+          command: |
+            sudo rm -rf /var/www/html
+            sudo ln -s /home/circleci/project/html /var/www/html
+      - run:
+          name: Start Apache in background
+          command: apache2-foreground
+          background: true
+      - run:
+          name: Wait for Apache to be ready
+          command: |
+            timeout 60 bash -c 'until curl -f http://localhost/; do sleep 2; done'
+      - run:
+          name: Integration Tests
+          command: composer tests:integration
+
   checks:
     docker:
       - image: darthjee/circleci_tent-base:0.0.1

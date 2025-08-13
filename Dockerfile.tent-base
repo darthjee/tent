@@ -11,10 +11,14 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     libzip-dev \
-    && docker-php-ext-install zip
+    && docker-php-ext-install zip; \
+    a2enmod rewrite
 
-# Install Composer globally
+# Install composer globally
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+RUN rm -rf /var/www/html; \
+    ln -s /home/app/app/html /var/www/html
 
 USER app
 
@@ -23,5 +27,4 @@ ENV PATH="$PATH:/home/app/app/vendor/bin"
 WORKDIR /home/app/app
 COPY --chown=app:app ./source/composer.* /home/app/app/
 
-RUN composer install; \
-    ln -s /home/app/app/html /var/www/html
+RUN composer install

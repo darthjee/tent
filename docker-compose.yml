@@ -14,6 +14,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.tent
+    image: darthjee/tent
     command: echo done
 
   ###################
@@ -25,7 +26,10 @@ services:
     <<: *base
     environment:
       - PHP_ENV=test
+      - TEST_SERVER_DOMAIN=tent_app
     command: /bin/bash
+    links:
+      - tent_app:tent_app
 
   tent_app:
     depends_on: [base_build]
