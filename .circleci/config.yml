@@ -47,10 +47,11 @@ jobs:
   integration:
     docker:
       - image: darthjee/circleci_tent-base:0.0.1
-      - image: darthjee/circleci_tent-base:0.0.1
-        name: tent_app
     steps:
       - checkout
+      - setup_remote_docker:
+          version: 20.10.14
+          docker_layer_caching: true
       - run:
           name: Copy files
           command: cp source/* ./ -r
@@ -64,9 +65,23 @@ jobs:
           name: Prepare autoload
           command: composer dump-autoload
       - run:
-          name: Prepare http server
+          name: Start tent_app container
           command: |
-            docker cp ./ tent_app:/home/circleci/project/
+            docker run -d --name tent_app \
+              -p 8080:80 \
+              darthjee/circleci_tent-base:0.0.1 \
+              apache2-foreground
+      - run:
+          name: Copy files to tent_app
+          command: |
+            docker cp ./html/ tent_app:/var/www/html/
+            docker cp ./composer.json tent_app:/home/circleci/project/
+            docker cp ./composer.lock tent_app:/home/circleci/project/
+      - run:
+          name: Install dependencies in tent_app
+          command: |
+            docker exec tent_app composer install
+            docker exec tent_app composer dump-autoload
       - run:
           name: Integration Tests
           command: composer tests:integration
