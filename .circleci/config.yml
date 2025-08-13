@@ -62,6 +62,9 @@ jobs:
           name: Prepare autoload
           command: composer dump-autoload
       - run:
+          name: Prepare apache folder
+          command: rm -rf /var/www/html; ln -s /home/circleci/project/html /var/www/html
+      - run:
           name: Start Apache in background
           command: apache2-foreground
           background: true
