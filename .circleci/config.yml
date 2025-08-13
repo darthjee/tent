@@ -28,16 +28,16 @@ jobs:
     docker:
       - image: darthjee/circleci_tent-base:0.0.1
     steps:
-      - checkout
-      - run:
-          name: Copy files
-          command: cp source/* ./ -r
       - run:
           name: Debug
           command: pwd
       - run:
           name: Debug2
           command: ls -la
+      - checkout
+      - run:
+          name: Copy files
+          command: cp source/* ./ -r
       - run:
           name: Copy dependencies
           command: cp /home/circleci/vendor/ ./vendor/ -R
