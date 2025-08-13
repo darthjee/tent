@@ -23,8 +23,13 @@ jobs:
   test:
     docker:
       - image: darthjee/circleci_tent-base:0.0.1
+      - image: darthjee/circleci_tent-base:0.0.1
+        name: tent_app
     steps:
       - checkout
+      - run:
+          name: Setup httpd
+          command: docker cp ./source/html/ tent_app:/var/www/html/
       - run:
           name: Copy files
           command: cp source/* ./ -r
@@ -40,6 +45,7 @@ jobs:
       - run:
           name: PHPUnit Tests
           command: composer tests
+
   checks:
     docker:
       - image: darthjee/circleci_tent-base:0.0.1
