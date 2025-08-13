@@ -33,12 +33,6 @@ jobs:
           name: Copy files
           command: cp source/* ./ -r
       - run:
-          name: Debug
-          command: pwd
-      - run:
-          name: Debug2
-          command: ls -la
-      - run:
           name: Copy dependencies
           command: cp /home/circleci/vendor/ ./vendor/ -R
       - run:
