@@ -28,12 +28,6 @@ jobs:
     docker:
       - image: darthjee/circleci_tent-base:0.0.1
     steps:
-      - run:
-          name: Debug 1
-          command: ls -lrt
-      - run:
-          name: Debug 2
-          command: ls -lrt /var/www
       - checkout
       - run:
           name: Copy files
