@@ -6,11 +6,15 @@ use PHPUnit\Framework\TestCase;
 
 class IndexIntegrationTest extends TestCase
 {
-    private const BASE_URL = 'http://localhost:80';
+    private function getBaseUrl(): string
+    {
+        $domain = $_ENV['TEST_SERVER_DOMAIN'] ?? 'localhost';
+        return "http://{$domain}";
+    }
 
     private function makeRequest(string $path): array
     {
-        $url = self::BASE_URL . $path;
+        $url = $this->getBaseUrl() . $path;
         $response = file_get_contents($url);
 
         if ($response === false) {

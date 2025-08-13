@@ -47,6 +47,8 @@ jobs:
   integration:
     docker:
       - image: darthjee/circleci_tent-base:0.0.1
+    environment:
+      - TEST_SERVER_DOMAIN=localhost
     steps:
       - checkout
       - run:

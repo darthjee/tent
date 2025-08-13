@@ -26,6 +26,7 @@ services:
     <<: *base
     environment:
       - PHP_ENV=test
+      - TEST_SERVER_DOMAIN=tent_app
     command: /bin/bash
     links:
       - tent_app:tent_app
