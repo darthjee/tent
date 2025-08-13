@@ -65,7 +65,8 @@ jobs:
           command: composer dump-autoload
       - run:
           name: Prepare http server
-          command: docker cp ./ tent_app:/home/circleci/project/
+          command: |
+            docker cp ./ tent_app:/home/circleci/project/
       - run:
           name: Integration Tests
           command: composer tests:integration
