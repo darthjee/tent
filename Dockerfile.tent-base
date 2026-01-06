@@ -1,9 +1,9 @@
-# Use a base image with Apache and PHP pre-installed
-FROM php:7.3.33-apache
+FROM php:8.4-apache as base
 
+# Create app user and directory structure
 RUN useradd -u 1000 app; \
     mkdir -p /home/app/app; \
-    chown app.app -R /home/app
+    chown app:app -R /home/app
 
 # Install necessary dependencies for Composer and PHP extensions
 RUN apt-get update && apt-get install -y \
@@ -12,11 +12,13 @@ RUN apt-get update && apt-get install -y \
     curl \
     libzip-dev \
     && docker-php-ext-install zip; \
-    a2enmod rewrite
+    a2enmod rewrite; \
+    rm -rf /var/lib/apt/lists/*
 
 # Install composer globally
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
+# Create symbolic link from source to Apache's web root
 RUN rm -rf /var/www/html; \
     ln -s /home/app/app/html /var/www/html
 
@@ -28,3 +30,5 @@ WORKDIR /home/app/app
 COPY --chown=app:app ./source/composer.* /home/app/app/
 
 RUN composer install
+
+CMD ["apache2-foreground"]
