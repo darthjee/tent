@@ -11,7 +11,10 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     libzip-dev \
-    && docker-php-ext-install zip; \
+    $PHPIZE_DEPS \
+    && docker-php-ext-install zip \
+    && pecl install pcov \
+    && docker-php-ext-enable pcov; \
     a2enmod rewrite; \
     rm -rf /var/lib/apt/lists/*
 
