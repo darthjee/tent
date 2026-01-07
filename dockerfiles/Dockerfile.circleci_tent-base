@@ -1,4 +1,4 @@
-FROM circleci/php:7.3.33-apache
+FROM cimg/php:8.4
 
 USER root
 # Install necessary dependencies for Composer and PHP extensions
