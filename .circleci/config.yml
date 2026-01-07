@@ -23,6 +23,8 @@ jobs:
   unit_test:
     docker:
       - image: darthjee/circleci_tent-base:0.0.1
+      - image: kennethreitz/httpbin
+        name: httpbin
     steps:
       - checkout
       - run:
