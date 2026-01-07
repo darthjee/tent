@@ -7,16 +7,12 @@ workflows:
           filters:
             tags:
               only: /.*/
-      - integration:
-          filters:
-            tags:
-              only: /.*/
       - checks:
           filters:
             tags:
               only: /.*/
       - build-and-release:
-          requires: [unit_test, integration, checks]
+          requires: [unit_test, checks]
           filters:
             tags:
               only: /.*/
@@ -27,58 +23,19 @@ jobs:
   unit_test:
     docker:
       - image: darthjee/circleci_tent-base:0.0.1
+      - image: kennethreitz/httpbin
+        name: httpbin
     steps:
       - checkout
       - run:
-          name: Copy files
-          command: cp source/* ./ -r
+          name: Set folder
+          command: mv source old; mv old/* ./; rm -rf old;
       - run:
-          name: Copy dependencies
-          command: cp /home/circleci/vendor/ ./vendor/ -R
-      - run:
-          name: Install dependencies
+          name: composer install
           command: composer install
       - run:
-          name: Prepare autoload
-          command: composer dump-autoload
-      - run:
-          name: PHPUnit Tests
-          command: composer tests:unit
-  integration:
-    docker:
-      - image: darthjee/circleci_tent-base:0.0.1
-    environment:
-      - TEST_SERVER_DOMAIN=localhost
-    steps:
-      - checkout
-      - run:
-          name: Copy files
-          command: cp source/* ./ -r
-      - run:
-          name: Copy dependencies
-          command: cp /home/circleci/vendor/ ./vendor/ -R
-      - run:
-          name: Install dependencies
-          command: composer install
-      - run:
-          name: Prepare autoload
-          command: composer dump-autoload
-      - run:
-          name: Prepare apache folder
-          command: |
-            sudo rm -rf /var/www/html
-            sudo ln -s /home/circleci/project/source /var/www/html
-      - run:
-          name: Start Apache in background
-          command: apache2-foreground
-          background: true
-      - run:
-          name: Wait for Apache to be ready
-          command: |
-            timeout 60 bash -c 'until curl -f http://localhost/; do sleep 2; done'
-      - run:
-          name: Integration Tests
-          command: composer tests:integration
+          name: Tests
+          command: composer tests
 
   checks:
     docker:
@@ -87,16 +44,13 @@ jobs:
       - checkout
       - run:
           name: Copy files
-          command: cp source/* ./ -r
+          command: mv source old; mv old/* ./; rm -rf old;
       - run:
           name: Copy dependencies
           command: cp /home/circleci/vendor/ ./vendor/ -R
       - run:
           name: Install dependencies
           command: composer install
-      - run:
-          name: Debug
-          command: ls -la
       - run:
           name: Run Lint
           command: composer lint

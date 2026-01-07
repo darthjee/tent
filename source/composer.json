@@ -4,7 +4,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Tent\\": "source/"
+            "Tent\\": "html/"
         }
     },
     "require-dev": {
@@ -12,9 +12,9 @@
         "squizlabs/php_codesniffer": "^3.13"
     },
     "scripts": {
-        "tests": "vendor/bin/phpunit tests",
-        "tests:unit": "vendor/bin/phpunit tests/unit",
-        "tests:integration": "vendor/bin/phpunit tests/integration",
+        "tests": "vendor/bin/phpunit --coverage-html coverage/ tests",
+        "tests:unit": "vendor/bin/phpunit --coverage-html coverage/ tests/unit",
+        "tests:integration": "vendor/bin/phpunit --coverage-html coverage/ tests/integration",
         "lint": "phpcs --standard=phpcs.xml",
         "lint:fix": "phpcbf --standard=phpcs.xml"
     }
