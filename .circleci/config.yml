@@ -27,7 +27,7 @@ jobs:
       - checkout
       - run:
           name: Set folder
-          command: mv source/* ./ -r
+          command: mv source/* ./
       - run:
           name: composer install
           command: composer install
@@ -42,7 +42,7 @@ jobs:
       - checkout
       - run:
           name: Copy files
-          command: cp source/* ./ -r
+          command: mv source/* ./
       - run:
           name: Copy dependencies
           command: cp /home/circleci/vendor/ ./vendor/ -R
