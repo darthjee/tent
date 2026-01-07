@@ -23,7 +23,7 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 
 # Create symbolic link from source to Apache's web root
 RUN rm -rf /var/www/html; \
-    ln -s /home/app/app/html /var/www/html
+    ln -s /home/app/app/source /var/www/html
 
 USER app
 

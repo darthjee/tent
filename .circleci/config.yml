@@ -67,7 +67,7 @@ jobs:
           name: Prepare apache folder
           command: |
             sudo rm -rf /var/www/html
-            sudo ln -s /home/circleci/project/html /var/www/html
+            sudo ln -s /home/circleci/project/source /var/www/html
       - run:
           name: Start Apache in background
           command: apache2-foreground
