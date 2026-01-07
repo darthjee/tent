@@ -2,18 +2,15 @@ services:
   base: &base
     image: tent
     volumes:
-      - ./source/source:/home/app/app/source
-      - ./source/composer.json:/home/app/app/composer.json
-      - ./source/composer.lock:/home/app/app/composer.lock
-      - ./source/phpcs.xml:/home/app/app/phpcs.xml
-      - ./source/tests:/home/app/app/tests
+      - ./docker_volumes/vendor:/home/app/app/vendor
+      - ./source:/home/app/app
 
   base_build:
     <<: *base
     container_name: tent_build
     build:
       context: .
-      dockerfile: Dockerfile.tent
+      dockerfile: dockerfiles/Dockerfile.tent
     image: darthjee/tent
     command: echo done
 
