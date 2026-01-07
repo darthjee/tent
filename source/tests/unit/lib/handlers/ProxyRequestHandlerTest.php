@@ -1,0 +1,144 @@
+<?php
+
+namespace Tent\Tests;
+
+use PHPUnit\Framework\TestCase;
+use Tent\ProxyRequestHandler;
+use Tent\Request;
+use Tent\Response;
+
+require_once __DIR__ . '/../../../../source/lib/handlers/ProxyRequestHandler.php';
+require_once __DIR__ . '/../../../../source/lib/models/Request.php';
+require_once __DIR__ . '/../../../../source/lib/models/Response.php';
+require_once __DIR__ . '/../../../../source/lib/http/HttpClientInterface.php';
+
+class ProxyRequestHandlerTest extends TestCase
+{
+    public function testHandleRequestBuildsCorrectUrl()
+    {
+        $request = $this->createMockRequest('GET', '/api/users', '');
+        $httpClient = $this->createMockHttpClient(
+            'http://backend:8080/api/users',
+            [],
+            ['body' => 'response body', 'httpCode' => 200, 'headers' => []]
+        );
+
+        $handler = new ProxyRequestHandler('http://backend:8080', $httpClient);
+        $response = $handler->handleRequest($request);
+
+        $this->assertInstanceOf(Response::class, $response);
+    }
+
+    public function testHandleRequestAppendsQueryString()
+    {
+        $request = $this->createMockRequest('GET', '/api/users', 'page=1&limit=10');
+        $httpClient = $this->createMockHttpClient(
+            'http://backend:8080/api/users?page=1&limit=10',
+            [],
+            ['body' => 'response body', 'httpCode' => 200, 'headers' => []]
+        );
+
+        $handler = new ProxyRequestHandler('http://backend:8080', $httpClient);
+        $response = $handler->handleRequest($request);
+
+        $this->assertInstanceOf(Response::class, $response);
+    }
+
+    public function testHandleRequestForwardsHeaders()
+    {
+        $request = $this->createMockRequest('POST', '/api/users', '', [
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer token123'
+        ]);
+
+        $expectedHeaders = [
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer token123'
+        ];
+
+        $httpClient = $this->createMockHttpClient(
+            'http://backend:8080/api/users',
+            $expectedHeaders,
+            ['body' => 'created', 'httpCode' => 201, 'headers' => ['Location: /api/users/1']]
+        );
+
+        $handler = new ProxyRequestHandler('http://backend:8080', $httpClient);
+        $response = $handler->handleRequest($request);
+
+        $this->assertInstanceOf(Response::class, $response);
+    }
+
+    public function testHandleRequestReturnsResponseWithCorrectData()
+    {
+        $request = $this->createMockRequest('GET', '/api/users', '');
+        $httpClient = $this->createMockHttpClient(
+            'http://backend:8080/api/users',
+            [],
+            [
+                'body' => '{"users": []}',
+                'httpCode' => 200,
+                'headers' => ['Content-Type: application/json']
+            ]
+        );
+
+        $handler = new ProxyRequestHandler('http://backend:8080', $httpClient);
+        $response = $handler->handleRequest($request);
+
+        $this->assertEquals('{"users": []}', $response->body);
+        $this->assertEquals(200, $response->httpCode);
+        $this->assertEquals(['Content-Type: application/json'], $response->headerLines);
+    }
+
+    public function testHandleRequestWithNoQueryString()
+    {
+        $request = $this->createMockRequest('GET', '/api/users', null);
+        $httpClient = $this->createMockHttpClient(
+            'http://backend:8080/api/users',
+            [],
+            ['body' => 'response', 'httpCode' => 200, 'headers' => []]
+        );
+
+        $handler = new ProxyRequestHandler('http://backend:8080', $httpClient);
+        $response = $handler->handleRequest($request);
+
+        $this->assertInstanceOf(Response::class, $response);
+    }
+
+    public function testHandleRequestWithEmptyHeaders()
+    {
+        $request = $this->createMockRequest('GET', '/api/users', '', []);
+        $httpClient = $this->createMockHttpClient(
+            'http://backend:8080/api/users',
+            [],
+            ['body' => 'response', 'httpCode' => 200, 'headers' => []]
+        );
+
+        $handler = new ProxyRequestHandler('http://backend:8080', $httpClient);
+        $response = $handler->handleRequest($request);
+
+        $this->assertInstanceOf(Response::class, $response);
+    }
+
+    private function createMockRequest($method, $url, $query = '', $headers = [])
+    {
+        $request = $this->createMock(Request::class);
+        $request->method('requestMethod')->willReturn($method);
+        $request->method('requestUrl')->willReturn($url);
+        $request->method('query')->willReturn($query);
+        $request->method('headers')->willReturn($headers);
+
+        return $request;
+    }
+
+    private function createMockHttpClient($expectedUrl, $expectedHeaders, $returnValue)
+    {
+        $httpClient = $this->createMock(\Tent\HttpClientInterface::class);
+
+        $httpClient->expects($this->once())
+            ->method('request')
+            ->with($expectedUrl, $expectedHeaders)
+            ->willReturn($returnValue);
+
+        return $httpClient;
+    }
+}

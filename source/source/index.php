@@ -1,21 +1,29 @@
 <?php
 
-namespace Tent;
+use Tent\Request;
+use Tent\RequestProcessor;
 
-// Enable error reporting for development
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+require_once __DIR__ . '/lib/models/Response.php';
+require_once __DIR__ . '/lib/models/MissingResponse.php';
+require_once __DIR__ . '/lib/models/Request.php';
+require_once __DIR__ . '/lib/utils/CurlUtils.php';
+require_once __DIR__ . '/lib/http/HttpClientInterface.php';
+require_once __DIR__ . '/lib/http/CurlHttpClient.php';
+require_once __DIR__ . '/lib/handlers/ProxyRequestHandler.php';
+require_once __DIR__ . '/lib/handlers/MissingRequestHandler.php';
+require_once __DIR__ . '/lib/models/RequestMatcher.php';
+require_once __DIR__ . '/lib/service/RequestProcessor.php';
 
-// Set content type to JSON
-header('Content-Type: application/json');
+function send_response($response)
+{
+    http_response_code($response->httpCode);
+    foreach ($response->headerLines as $header) {
+        header($header);
+    }
+    echo $response->body;
+}
 
-// Simple response
-$response = [
-    'status' => 'ok',
-    'message' => 'Request received',
-    'method' => $_SERVER['REQUEST_METHOD'],
-    'uri' => $_SERVER['REQUEST_URI'],
-    'timestamp' => date('c')
-];
+$request = new Request();
+$response = RequestProcessor::handleRequest($request);
 
-echo json_encode($response, JSON_PRETTY_PRINT);
+send_response($response);
