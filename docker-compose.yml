@@ -13,7 +13,7 @@ services:
     container_name: tent_build
     build:
       context: .
-      dockerfile: Dockerfile.tent
+      dockerfile: dockerfiles/Dockerfile.tent
     image: darthjee/tent
     command: echo done
 
