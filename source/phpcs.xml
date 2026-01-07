@@ -11,6 +11,6 @@
     </rule>
     
     <!-- Include source files -->
-    <file>html</file>
+    <file>source</file>
     <file>tests</file>
 </ruleset>
