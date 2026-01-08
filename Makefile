@@ -14,19 +14,10 @@ all:
 	@echo "  make push-base\n    Pushes base docker image for $(PROJECT) to dockerhub"
 
 build-base:
-	if (docker images | grep $(BASE_IMAGE):latest); then \
-		docker tag $(BASE_IMAGE):latest $(BASE_IMAGE):cached; \
-		docker rmi $(BASE_IMAGE):latest; \
-	fi
-	docker build -f $(DOCKER_FILE_BASE) . -t $(BASE_IMAGE):latest -t $(BASE_IMAGE):$(BASE_VERSION)
-	if (docker images | grep $(BASE_IMAGE):cached); then \
-	  docker rmi $(BASE_IMAGE):cached; \
-	fi
+	make IMAGE=$(BASE_IMAGE) build
 
 push-base:
-	make build-base
-	docker push $(BASE_IMAGE)
-	docker push $(BASE_IMAGE):$(BASE_VERSION)
+	make IMAGE=$(BASE_IMAGE) push
 
 build:
 	if (docker images | grep $(IMAGE):latest); then \
