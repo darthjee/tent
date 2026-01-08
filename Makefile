@@ -3,10 +3,11 @@
 PROJECT?=tent
 BASE_VERSION?=0.0.1
 VERSION?=0.0.1
-BASE_IMAGE?=$(DOCKER_ID_USER)/$(PROJECT)-base
-IMAGE?=$(DOCKER_ID_USER)/$(PROJECT)
-DOCKER_FILE_BASE?=dockerfiles/Dockerfile.$(PROJECT)-base
-DOCKER_FILE?=dockerfiles/Dockerfile.$(PROJECT)
+MOD?=dev_
+BASE_IMAGE?=$(DOCKER_ID_USER)/$(MOD)$(PROJECT)-base
+IMAGE?=$(DOCKER_ID_USER)/$(MOD)$(PROJECT)
+DOCKER_FILE_BASE?=dockerfiles/Dockerfile.$(MOD)$(PROJECT)-base
+DOCKER_FILE?=dockerfiles/Dockerfile.$(MOD)$(PROJECT)
 
 all:
 	@echo "Usage:"
