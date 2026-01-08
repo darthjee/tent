@@ -7,10 +7,10 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     libzip-dev \
-    $PHPIZE_DEPS; \
-    && docker-php-ext-install zip; \
-    && pecl install pcov; \
-    && docker-php-ext-enable pcov;
+    $PHPIZE_DEPS;
+ RUN docker-php-ext-install zip;
+ RUN pecl install pcov;
+ RUN docker-php-ext-enable pcov;
 
 RUN mkdir -p /home/circleci/project; \
     chown circleci.circleci -R /home/circleci
