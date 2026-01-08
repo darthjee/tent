@@ -1,11 +1,10 @@
 .PHONY: build-base push-base build push dev tests
 
 PROJECT?=tent
-IMAGE?=$(PROJECT)
 BASE_VERSION?=0.0.1
 VERSION?=0.0.1
 BASE_IMAGE?=$(DOCKER_ID_USER)/$(PROJECT)-base
-PUSH_IMAGE=$(DOCKER_ID_USER)/$(PROJECT)
+IMAGE=$(DOCKER_ID_USER)/$(PROJECT)
 DOCKER_FILE_BASE=dockerfiles/Dockerfile.$(PROJECT)-base
 
 all:
@@ -30,19 +29,19 @@ push-base:
 	docker push $(BASE_IMAGE):$(BASE_VERSION)
 
 build:
-	if (docker images | grep $(PUSH_IMAGE):latest); then \
-		docker tag $(PUSH_IMAGE):latest $(PUSH_IMAGE):cached; \
-		docker rmi $(PUSH_IMAGE):latest; \
+	if (docker images | grep $(IMAGE):latest); then \
+		docker tag $(IMAGE):latest $(IMAGE):cached; \
+		docker rmi $(IMAGE):latest; \
 	fi
-	docker build -f dockerfiles/Dockerfile.$(PROJECT) . -t $(IMAGE) -t $(PUSH_IMAGE) -t $(PUSH_IMAGE):$(BASE_VERSION)
-	if (docker images | grep $(PUSH_IMAGE) | grep cached); then \
-	  docker rmi $(PUSH_IMAGE):cached; \
+	docker build -f dockerfiles/Dockerfile.$(PROJECT) . -t $(IMAGE) -t $(IMAGE) -t $(IMAGE):$(BASE_VERSION)
+	if (docker images | grep $(IMAGE) | grep cached); then \
+	  docker rmi $(IMAGE):cached; \
 	fi
 
 push:
 	make build
-	docker push $(PUSH_IMAGE)
-	docker push $(PUSH_IMAGE):$(BASE_VERSION)
+	docker push $(IMAGE)
+	docker push $(IMAGE):$(BASE_VERSION)
 
 tests:
 	docker-compose run $(PROJECT)_tests /bin/bash
