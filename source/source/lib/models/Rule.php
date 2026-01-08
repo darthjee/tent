@@ -2,7 +2,7 @@
 
 namespace Tent;
 
-class ProxyTarget
+class Rule
 {
     private $handler;
     private $matchers;

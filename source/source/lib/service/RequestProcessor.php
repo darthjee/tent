@@ -25,24 +25,12 @@ class RequestProcessor
 
     private function getRequestHandler()
     {
-        $targets = $this->getTargets();
+        $rules = Configuration::getRules();
 
-        foreach ($targets as $target) {
-            if ($target->match($this->request)) {
-                return $target->handler();
+        foreach ($rules as $rule) {
+            if ($rule->match($this->request)) {
+                return $rule->handler();
             }
         }
-    }
-
-    private function getTargets()
-    {
-        return [
-            new ProxyTarget(
-                new ProxyRequestHandler(new Server('http://frontend:8080')),
-                [
-                ]
-            ),
-            new ProxyTarget(new MissingRequestHandler())
-        ];
     }
 }
