@@ -4,8 +4,9 @@ PROJECT?=tent
 BASE_VERSION?=0.0.1
 VERSION?=0.0.1
 BASE_IMAGE?=$(DOCKER_ID_USER)/$(PROJECT)-base
-IMAGE=$(DOCKER_ID_USER)/$(PROJECT)
-DOCKER_FILE_BASE=dockerfiles/Dockerfile.$(PROJECT)-base
+IMAGE?=$(DOCKER_ID_USER)/$(PROJECT)
+DOCKER_FILE_BASE?=dockerfiles/Dockerfile.$(PROJECT)-base
+DOCKER_FILE?=dockerfiles/Dockerfile.$(PROJECT)
 
 all:
 	@echo "Usage:"
@@ -14,17 +15,17 @@ all:
 	@echo "  make push-base\n    Pushes base docker image for $(PROJECT) to dockerhub"
 
 build-base:
-	make IMAGE=$(BASE_IMAGE) build
+	make DOCKER_FILE=$(DOCKER_FILE_BASE) IMAGE=$(BASE_IMAGE) build
 
 push-base:
-	make IMAGE=$(BASE_IMAGE) push
+	make DOCKER_FILE=$(DOCKER_FILE_BASE) IMAGE=$(BASE_IMAGE) push
 
 build:
 	if (docker images | grep $(IMAGE):latest); then \
 		docker tag $(IMAGE):latest $(IMAGE):cached; \
 		docker rmi $(IMAGE):latest; \
 	fi
-	docker build -f dockerfiles/Dockerfile.$(PROJECT) . -t $(IMAGE) -t $(IMAGE) -t $(IMAGE):$(BASE_VERSION)
+	docker build -f $(DOCKER_FILE) . -t $(IMAGE) -t $(IMAGE) -t $(IMAGE):$(BASE_VERSION)
 	if (docker images | grep $(IMAGE) | grep cached); then \
 	  docker rmi $(IMAGE):cached; \
 	fi
