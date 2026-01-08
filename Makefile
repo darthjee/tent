@@ -25,7 +25,7 @@ build:
 		docker tag $(IMAGE):latest $(IMAGE):cached; \
 		docker rmi $(IMAGE):latest; \
 	fi
-	docker build -f $(DOCKER_FILE) . -t $(IMAGE) -t $(IMAGE) -t $(IMAGE):$(BASE_VERSION)
+	docker build --platform linux/amd64 -f $(DOCKER_FILE) . -t $(IMAGE) -t $(IMAGE) -t $(IMAGE):$(BASE_VERSION)
 	if (docker images | grep $(IMAGE) | grep cached); then \
 	  docker rmi $(IMAGE):cached; \
 	fi
