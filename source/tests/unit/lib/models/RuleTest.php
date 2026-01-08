@@ -3,16 +3,16 @@
 namespace Tent\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Tent\ProxyTarget;
+use Tent\Rule;
 use Tent\RequestMatcher;
 use Tent\Request;
 
-require_once __DIR__ . '/../../../../source/lib/models/ProxyTarget.php';
+require_once __DIR__ . '/../../../../source/lib/models/Rule.php';
 require_once __DIR__ . '/../../../../source/lib/models/RequestMatcher.php';
 require_once __DIR__ . '/../../../../source/lib/models/Request.php';
 require_once __DIR__ . '/../../../../source/lib/handlers/RequestHandler.php';
 
-class ProxyTargetTest extends TestCase
+class RuleTest extends TestCase
 {
     public function testMatchReturnsTrueWhenAMatcherMatches()
     {
@@ -25,9 +25,9 @@ class ProxyTargetTest extends TestCase
         $matcher1 = new RequestMatcher('POST', '/test', 'exact');
         $matcher2 = new RequestMatcher('GET', '/test', 'exact');
 
-        $target = new ProxyTarget($handler, [$matcher1, $matcher2]);
+        $rule = new Rule($handler, [$matcher1, $matcher2]);
 
-        $this->assertTrue($target->match($request));
+        $this->assertTrue($rule->match($request));
     }
 
     public function testMatchReturnsFalseWhenNoMatcherMatches()
@@ -41,9 +41,9 @@ class ProxyTargetTest extends TestCase
         $matcher1 = new RequestMatcher('POST', '/test', 'exact');
         $matcher2 = new RequestMatcher('PUT', '/test', 'exact');
 
-        $target = new ProxyTarget($handler, [$matcher1, $matcher2]);
+        $rule = new Rule($handler, [$matcher1, $matcher2]);
 
-        $this->assertFalse($target->match($request));
+        $this->assertFalse($rule->match($request));
     }
 
     public function testMatchReturnsFalseWhenNoMatchers()
@@ -51,9 +51,9 @@ class ProxyTargetTest extends TestCase
         $request = $this->createMock(Request::class);
         $handler = $this->createMock(\Tent\RequestHandler::class);
 
-        $target = new ProxyTarget($handler, []);
+        $rule = new Rule($handler, []);
 
-        $this->assertFalse($target->match($request));
+        $this->assertFalse($rule->match($request));
     }
 
     public function testMatchReturnsFalseWhenMatchersNotProvided()
@@ -61,9 +61,9 @@ class ProxyTargetTest extends TestCase
         $request = $this->createMock(Request::class);
         $handler = $this->createMock(\Tent\RequestHandler::class);
 
-        $target = new ProxyTarget($handler);
+        $rule = new Rule($handler);
 
-        $this->assertFalse($target->match($request));
+        $this->assertFalse($rule->match($request));
     }
 
     public function testMatchReturnsTrueOnFirstMatch()
@@ -77,17 +77,17 @@ class ProxyTargetTest extends TestCase
         $matcher1 = new RequestMatcher('GET', '/test', 'exact');
         $matcher2 = new RequestMatcher('GET', '/other', 'exact');
 
-        $target = new ProxyTarget($handler, [$matcher1, $matcher2]);
+        $rule = new Rule($handler, [$matcher1, $matcher2]);
 
-        $this->assertTrue($target->match($request));
+        $this->assertTrue($rule->match($request));
     }
 
     public function testHandlerReturnsTheHandler()
     {
         $handler = $this->createMock(\Tent\RequestHandler::class);
 
-        $target = new ProxyTarget($handler);
+        $rule = new Rule($handler);
 
-        $this->assertSame($handler, $target->handler());
+        $this->assertSame($handler, $rule->handler());
     }
 }

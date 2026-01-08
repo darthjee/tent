@@ -7,7 +7,7 @@ require_once __DIR__ . '/lib/models/Response.php';
 require_once __DIR__ . '/lib/models/MissingResponse.php';
 require_once __DIR__ . '/lib/models/Request.php';
 require_once __DIR__ . '/lib/models/Server.php';
-require_once __DIR__ . '/lib/models/ProxyTarget.php';
+require_once __DIR__ . '/lib/models/Rule.php';
 require_once __DIR__ . '/lib/utils/CurlUtils.php';
 require_once __DIR__ . '/lib/http/HttpClientInterface.php';
 require_once __DIR__ . '/lib/http/CurlHttpClient.php';
@@ -15,7 +15,13 @@ require_once __DIR__ . '/lib/handlers/RequestHandler.php';
 require_once __DIR__ . '/lib/handlers/ProxyRequestHandler.php';
 require_once __DIR__ . '/lib/handlers/MissingRequestHandler.php';
 require_once __DIR__ . '/lib/models/RequestMatcher.php';
+require_once __DIR__ . '/lib/Configuration.php';
 require_once __DIR__ . '/lib/service/RequestProcessor.php';
+
+$configFile = __DIR__ . '/configuration/configure.php';
+if (file_exists($configFile)) {
+    require_once $configFile;
+}
 
 function send_response($response)
 {
