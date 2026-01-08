@@ -37,6 +37,7 @@ ensure-image:
 push: ensure-image
 	docker push $(IMAGE)
 	docker push $(IMAGE):$(BASE_VERSION)
+	docker push $(IMAGE):latest
 
 tests:
 	docker-compose run $(PROJECT)_tests /bin/bash
