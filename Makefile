@@ -28,6 +28,8 @@ push-base:
 	docker push $(BASE_IMAGE):$(BASE_VERSION)
 
 build:
+	docker tag $(IMAGE):latest $(IMAGE):cached
+	docker rmi $(IMAGE):latest
 	docker build -f dockerfiles/Dockerfile.$(PROJECT) . -t $(IMAGE) -t $(PUSH_IMAGE) -t $(PUSH_IMAGE):$(BASE_VERSION)
 
 push:
