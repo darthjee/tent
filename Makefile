@@ -3,6 +3,7 @@
 PROJECT?=tent
 IMAGE?=$(PROJECT)
 BASE_VERSION?=0.0.1
+VERSION?=0.0.1
 BASE_IMAGE?=$(DOCKER_ID_USER)/$(PROJECT)-base
 PUSH_IMAGE=$(DOCKER_ID_USER)/$(PROJECT)
 DOCKER_FILE_BASE=dockerfiles/Dockerfile.$(PROJECT)-base
@@ -14,9 +15,9 @@ all:
 	@echo "  make push-base\n    Pushes base docker image for $(PROJECT) to dockerhub"
 
 build-base:
-	docker tag $(BASE_IMAGE):latest $(BASE_IMAGE):cached; \
-	docker rmi $(BASE_IMAGE):latest; \
-	docker build -f $(DOCKER_FILE_BASE) . -t $(BASE_IMAGE):latest -t $(BASE_IMAGE):$(BASE_VERSION); \
+	docker tag $(BASE_IMAGE):latest $(BASE_IMAGE):cached
+	docker rmi $(BASE_IMAGE):latest
+	docker build -f $(DOCKER_FILE_BASE) . -t $(BASE_IMAGE):latest -t $(BASE_IMAGE):$(BASE_VERSION)
 	if (docker images | grep $(BASE_IMAGE) | grep cached); then \
 	  docker rmi $(BASE_IMAGE):cached; \
 	fi \
