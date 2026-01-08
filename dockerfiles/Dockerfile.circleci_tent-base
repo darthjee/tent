@@ -1,4 +1,4 @@
-FROM circleci/php:7.3.33-apache
+FROM cimg/php:8.4
 
 USER root
 # Install necessary dependencies for Composer and PHP extensions
@@ -10,8 +10,7 @@ RUN apt-get update && apt-get install -y \
     $PHPIZE_DEPS \
     && docker-php-ext-install zip \
     && pecl install pcov \
-    && docker-php-ext-enable pcov; \
-    a2enmod rewrite
+    && docker-php-ext-enable pcov;
 
 RUN mkdir -p /home/circleci/project; \
     chown circleci.circleci -R /home/circleci
