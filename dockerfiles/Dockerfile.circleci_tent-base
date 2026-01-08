@@ -11,7 +11,6 @@ RUN apt-get update && apt-get install -y \
  RUN docker-php-ext-install zip;
  RUN pecl install pcov;
  RUN docker-php-ext-enable pcov;
- RUN a2enmod rewrite
 
 RUN mkdir -p /home/circleci/project; \
     chown circleci.circleci -R /home/circleci
