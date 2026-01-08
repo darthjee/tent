@@ -30,8 +30,10 @@ push-base:
 	docker push $(BASE_IMAGE):$(BASE_VERSION)
 
 build:
-	docker tag $(IMAGE):latest $(IMAGE):cached
-	docker rmi $(IMAGE):latest
+	if (docker images | grep $(PUSH_IMAGE):latest); then \
+		docker tag $(PUSH_IMAGE):latest $(PUSH_IMAGE):cached; \
+		docker rmi $(PUSH_IMAGE):latest; \
+	fi
 	docker build -f dockerfiles/Dockerfile.$(PROJECT) . -t $(IMAGE) -t $(PUSH_IMAGE) -t $(PUSH_IMAGE):$(BASE_VERSION)
 	if (docker images | grep $(PUSH_IMAGE) | grep cached); then \
 	  docker rmi $(PUSH_IMAGE):cached; \
