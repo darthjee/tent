@@ -29,8 +29,12 @@ build:
 	  docker rmi $(IMAGE):cached; \
 	fi
 
-push:
-	make build
+ensure-image:
+	if !(docker images | grep $(IMAGE):latest); then \
+		make build; \
+	fi
+
+push: ensure-image
 	docker push $(IMAGE)
 	docker push $(IMAGE):$(BASE_VERSION)
 
