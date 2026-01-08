@@ -2,7 +2,7 @@
 
 namespace Tent;
 
-class MissingRequestHandler
+class MissingRequestHandler implements RequestHandler
 {
     public function handleRequest($request)
     {

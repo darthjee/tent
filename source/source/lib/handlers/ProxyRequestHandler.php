@@ -2,21 +2,21 @@
 
 namespace Tent;
 
-class ProxyRequestHandler
+class ProxyRequestHandler implements RequestHandler
 {
-    private $targetHost;
+    private $server;
     private $httpClient;
 
-    public function __construct($targetHost, $httpClient = null)
+    public function __construct($server, $httpClient = null)
     {
-        $this->targetHost = $targetHost;
+        $this->server = $server;
         $this->httpClient = $httpClient ?? new CurlHttpClient();
     }
 
     public function handleRequest($request)
     {
         // Build full URL from target host and request path
-        $url = $this->targetHost . $request->requestUrl();
+        $url = $this->server->targetHost() . $request->requestUrl();
         if ($request->query()) {
             $url .= '?' . $request->query();
         }

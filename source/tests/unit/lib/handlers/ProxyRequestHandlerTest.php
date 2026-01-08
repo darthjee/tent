@@ -6,10 +6,13 @@ use PHPUnit\Framework\TestCase;
 use Tent\ProxyRequestHandler;
 use Tent\Request;
 use Tent\Response;
+use Tent\Server;
 
+require_once __DIR__ . '/../../../../source/lib/handlers/RequestHandler.php';
 require_once __DIR__ . '/../../../../source/lib/handlers/ProxyRequestHandler.php';
 require_once __DIR__ . '/../../../../source/lib/models/Request.php';
 require_once __DIR__ . '/../../../../source/lib/models/Response.php';
+require_once __DIR__ . '/../../../../source/lib/models/Server.php';
 require_once __DIR__ . '/../../../../source/lib/http/HttpClientInterface.php';
 
 class ProxyRequestHandlerTest extends TestCase
@@ -23,7 +26,8 @@ class ProxyRequestHandlerTest extends TestCase
             ['body' => 'response body', 'httpCode' => 200, 'headers' => []]
         );
 
-        $handler = new ProxyRequestHandler('http://backend:8080', $httpClient);
+        $server = new Server('http://backend:8080');
+        $handler = new ProxyRequestHandler($server, $httpClient);
         $response = $handler->handleRequest($request);
 
         $this->assertInstanceOf(Response::class, $response);
@@ -38,7 +42,8 @@ class ProxyRequestHandlerTest extends TestCase
             ['body' => 'response body', 'httpCode' => 200, 'headers' => []]
         );
 
-        $handler = new ProxyRequestHandler('http://backend:8080', $httpClient);
+        $server = new Server('http://backend:8080');
+        $handler = new ProxyRequestHandler($server, $httpClient);
         $response = $handler->handleRequest($request);
 
         $this->assertInstanceOf(Response::class, $response);
@@ -62,7 +67,8 @@ class ProxyRequestHandlerTest extends TestCase
             ['body' => 'created', 'httpCode' => 201, 'headers' => ['Location: /api/users/1']]
         );
 
-        $handler = new ProxyRequestHandler('http://backend:8080', $httpClient);
+        $server = new Server('http://backend:8080');
+        $handler = new ProxyRequestHandler($server, $httpClient);
         $response = $handler->handleRequest($request);
 
         $this->assertInstanceOf(Response::class, $response);
@@ -81,7 +87,8 @@ class ProxyRequestHandlerTest extends TestCase
             ]
         );
 
-        $handler = new ProxyRequestHandler('http://backend:8080', $httpClient);
+        $server = new Server('http://backend:8080');
+        $handler = new ProxyRequestHandler($server, $httpClient);
         $response = $handler->handleRequest($request);
 
         $this->assertEquals('{"users": []}', $response->body);
@@ -98,7 +105,8 @@ class ProxyRequestHandlerTest extends TestCase
             ['body' => 'response', 'httpCode' => 200, 'headers' => []]
         );
 
-        $handler = new ProxyRequestHandler('http://backend:8080', $httpClient);
+        $server = new Server('http://backend:8080');
+        $handler = new ProxyRequestHandler($server, $httpClient);
         $response = $handler->handleRequest($request);
 
         $this->assertInstanceOf(Response::class, $response);
@@ -113,7 +121,8 @@ class ProxyRequestHandlerTest extends TestCase
             ['body' => 'response', 'httpCode' => 200, 'headers' => []]
         );
 
-        $handler = new ProxyRequestHandler('http://backend:8080', $httpClient);
+        $server = new Server('http://backend:8080');
+        $handler = new ProxyRequestHandler($server, $httpClient);
         $response = $handler->handleRequest($request);
 
         $this->assertInstanceOf(Response::class, $response);
