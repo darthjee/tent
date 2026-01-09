@@ -19,7 +19,7 @@ class ConnectionTest extends TestCase
         $user = getenv('API_DEV_MYSQL_USER') ?: 'root';
         $password = getenv('API_DEV_MYSQL_PASSWORD') ?: '';
         $port = getenv('API_DEV_MYSQL_PORT') ?: 3306;
-        $database = getenv('API_DEV_MYSQL_DATABASE') ?: 'test_db';
+        $database = getenv('API_DEV_MYSQL_TEST_DATABASE') ?: 'test_db';
 
         Configuration::configure($host, $database, $user, $password, $port);
         $this->connection = Configuration::connect();
