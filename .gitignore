@@ -1,3 +1,5 @@
 docker_volumes/vendor/
 source/.phpunit.result.cache
 source/coverage
+
+source/source/static/
