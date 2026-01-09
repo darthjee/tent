@@ -35,7 +35,7 @@ class DatabaseWaiter {
     public static function wait() {
         $database = self::getDatabase();
         $maxTries = 10;
-        
+
         for ($i = 0; $i < $maxTries; $i++) {
             if (self::databaseFound()) {
                 return;
