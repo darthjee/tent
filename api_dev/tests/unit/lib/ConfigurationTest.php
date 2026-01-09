@@ -68,7 +68,7 @@ class ConfigurationTest extends TestCase
         $this->assertCount(1, Configuration::getConfigurations());
 
         Configuration::reset();
-        
+
         $configurations = Configuration::getConfigurations();
         $this->assertCount(0, $configurations);
     }
@@ -85,10 +85,10 @@ class ConfigurationTest extends TestCase
     public function testConfigurationsPersistAcrossGetInstanceCalls()
     {
         Configuration::add('GET', '/health', HealthCheckEndpoint::class);
-        
+
         $instance1 = Configuration::getInstance();
         $instance2 = Configuration::getInstance();
-        
+
         $this->assertCount(1, $instance1->fetchConfigurations());
         $this->assertCount(1, $instance2->fetchConfigurations());
         $this->assertSame($instance1->fetchConfigurations(), $instance2->fetchConfigurations());
