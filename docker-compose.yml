@@ -1,6 +1,6 @@
 services:
   base: &base
-    image: tent
+    image: darthjee/dev_tent
     volumes:
       - ./docker_volumes/vendor:/home/app/app/vendor
       - ./source:/home/app/app
@@ -11,7 +11,6 @@ services:
     build:
       context: .
       dockerfile: dockerfiles/Dockerfile.dev_tent
-    image: darthjee/dev_tent
     command: echo done
 
   ###################
