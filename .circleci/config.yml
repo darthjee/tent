@@ -11,8 +11,16 @@ workflows:
           filters:
             tags:
               only: /.*/
+      - dev_api_test:
+          filters:
+            tags:
+              only: /.*/
+      - dev_api_checks:
+          filters:
+            tags:
+              only: /.*/
       - build-and-release:
-          requires: [unit_test, checks]
+          requires: [unit_test, checks, dev_api_test, dev_api_checks]
           filters:
             tags:
               only: /.*/
@@ -45,6 +53,72 @@ jobs:
       - run:
           name: Copy files
           command: mv source old; mv old/* ./; rm -rf old;
+      - run:
+          name: Copy dependencies
+          command: cp /home/circleci/vendor/ ./vendor/ -R
+      - run:
+          name: Install dependencies
+          command: composer install
+      - run:
+          name: Run Lint
+          command: composer lint
+
+  dev_api_test:
+    docker:
+      - image: darthjee/circleci_tent-base:0.0.1
+    steps:
+      - checkout
+      - run:
+          name: Set folder
+          command: mv api_dev old; mv old/* ./; rm -rf old;
+      - run:
+          name: composer install
+          command: composer install
+      - run:
+          name: Tests
+          command: composer tests
+
+  dev_api_checks:
+    docker:
+      - image: darthjee/circleci_tent-base:0.0.1
+    steps:
+      - checkout
+      - run:
+          name: Copy files
+          command: mv api_dev old; mv old/* ./; rm -rf old;
+      - run:
+          name: Copy dependencies
+          command: cp /home/circleci/vendor/ ./vendor/ -R
+      - run:
+          name: Install dependencies
+          command: composer install
+      - run:
+          name: Run Lint
+          command: composer lint
+
+  dev_api_test:
+    docker:
+      - image: darthjee/circleci_tent-base:0.0.1
+    steps:
+      - checkout
+      - run:
+          name: Set folder
+          command: mv api_dev old; mv old/* ./; rm -rf old;
+      - run:
+          name: composer install
+          command: composer install
+      - run:
+          name: Tests
+          command: composer tests
+
+  dev_api_checks:
+    docker:
+      - image: darthjee/circleci_tent-base:0.0.1
+    steps:
+      - checkout
+      - run:
+          name: Copy files
+          command: mv api_dev old; mv old/* ./; rm -rf old;
       - run:
           name: Copy dependencies
           command: cp /home/circleci/vendor/ ./vendor/ -R
