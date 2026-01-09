@@ -98,7 +98,7 @@ jobs:
           command: composer install
       - run:
           name: Tests
-          command: composer tests
+          command: sleep 5; composer tests
 
   dev_api_checks:
     docker:
