@@ -42,6 +42,9 @@ jobs:
           name: Set folder
           command: mv source old; mv old/* ./; rm -rf old;
       - run:
+          name: Copy dependencies
+          command: cp /home/circleci/vendor/ ./vendor/ -R
+      - run:
           name: composer install
           command: composer install
       - run:
@@ -72,6 +75,19 @@ jobs:
   dev_api_test:
     docker:
       - image: darthjee/circleci_tent-base:0.0.1
+        environment:
+          API_DEV_MYSQL_HOST: mysql
+          API_DEV_MYSQL_PORT: 3306
+          API_DEV_MYSQL_USER: tent
+          API_DEV_MYSQL_PASSWORD: tent
+          API_DEV_MYSQL_TEST_DATABASE: tent
+      - image: cimg/mysql:8.0
+        name: mysql
+        environment:
+          MYSQL_DATABASE: tent
+          MYSQL_USER: tent
+          MYSQL_PASSWORD: tent
+          MYSQL_ROOT_PASSWORD: tent
     steps:
       - checkout
       - run:
@@ -81,8 +97,17 @@ jobs:
           name: Set folder
           command: mv api_dev/* ./; rm -rf api_dev;
       - run:
+          name: Copy dependencies
+          command: cp /home/circleci/vendor/ ./vendor/ -R
+      - run:
           name: composer install
           command: composer install
+      - run:
+          name: Wait for DB
+          command: ./bin/wait_for_database.php
+      - run:
+          name: Ensure database exists
+          command: php ./bin/create_database.php
       - run:
           name: Tests
           command: composer tests

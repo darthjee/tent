@@ -5,8 +5,7 @@ namespace ApiDev\Tests;
 use PHPUnit\Framework\TestCase;
 use ApiDev\MissingResponse;
 
-require_once __DIR__ . '/../../../../source/lib/models/Response.php';
-require_once __DIR__ . '/../../../../source/lib/models/MissingResponse.php';
+require_once __DIR__ . '/../../../../../source/lib/api_dev/models/MissingResponse.php';
 
 class MissingResponseTest extends TestCase
 {

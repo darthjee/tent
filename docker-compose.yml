@@ -1,4 +1,12 @@
 services:
+  api_dev_mysql:
+    image: mysql:9.3.0
+    container_name: api_dev_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: tent
+    volumes:
+      - ./docker_volumes/mysql_data:/var/lib/mysql
+
   base: &base
     image: darthjee/dev_tent
     volumes:
@@ -17,7 +25,7 @@ services:
   # Services
 
   tent_tests:
-    depends_on: [base_build, weave_httpbin, api_dev]
+    depends_on: [base_build, tent_httpbin, api_dev]
     container_name: tent_tests
     <<: *base
     environment:
@@ -26,11 +34,11 @@ services:
     command: /bin/bash
     links:
       - tent_app:tent_app
-      - weave_httpbin:httpbin
+      - tent_httpbin:httpbin
       - api_dev:api_dev
 
   tent_app:
-    depends_on: [base_build, weave_httpbin, api_dev]
+    depends_on: [base_build, tent_httpbin, api_dev]
     container_name: tent_app
     <<: *base
     ports:
@@ -39,11 +47,11 @@ services:
       - PHP_ENV=development
     command: apache2-foreground
     links:
-      - weave_httpbin:httpbin
+      - tent_httpbin:httpbin
       - api_dev:api_dev
 
   api_dev:
-    depends_on: [base_build]
+    depends_on: [base_build, api_dev_mysql, api_dev_phpmyadmin]
     container_name: api_dev
     <<: *base
     volumes:
@@ -51,10 +59,28 @@ services:
       - ./api_dev:/home/app/app
     ports:
       - 127.0.0.1:8040:80
+    env_file: .env
+    links:
+      - api_dev_mysql:mysql
     command: apache2-foreground
+  
+  api_dev_phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: api_dev_phpmyadmin
+    depends_on: [api_dev_mysql]
+    links:
+      - api_dev_mysql:mysql
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      MYSQL_USER: root
+      MYSQL_ROOT_PASSWORD: api_dev
+      MYSQL_PASSWORD: api_dev
+    ports:
+      - 127.0.0.1:3050:80
 
-  weave_httpbin:
+  tent_httpbin:
     image: kennethreitz/httpbin
-    container_name: weave_httpbin
+    container_name: tent_httpbin
     ports:
       - 127.0.0.1:3060:80
