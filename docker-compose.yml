@@ -26,7 +26,7 @@ services:
   # Services
 
   tent_tests:
-    depends_on: [base_build, weave_httpbin, api_dev]
+    depends_on: [base_build, tent_httpbin, api_dev]
     container_name: tent_tests
     <<: *base
     environment:
@@ -35,11 +35,11 @@ services:
     command: /bin/bash
     links:
       - tent_app:tent_app
-      - weave_httpbin:httpbin
+      - tent_httpbin:httpbin
       - api_dev:api_dev
 
   tent_app:
-    depends_on: [base_build, weave_httpbin, api_dev]
+    depends_on: [base_build, tent_httpbin, api_dev]
     container_name: tent_app
     <<: *base
     ports:
@@ -48,7 +48,7 @@ services:
       - PHP_ENV=development
     command: apache2-foreground
     links:
-      - weave_httpbin:httpbin
+      - tent_httpbin:httpbin
       - api_dev:api_dev
 
   api_dev:
@@ -79,8 +79,8 @@ services:
     ports:
       - 127.0.0.1:3050:80
 
-  weave_httpbin:
+  tent_httpbin:
     image: kennethreitz/httpbin
-    container_name: weave_httpbin
+    container_name: tent_httpbin
     ports:
       - 127.0.0.1:3060:80
