@@ -21,9 +21,13 @@ class ConnectionTest extends TestCase
         $port = getenv('API_DEV_MYSQL_PORT') ?: 3306;
         $database = getenv('API_DEV_MYSQL_TEST_DATABASE') ?: 'test_db';
 
-        Configuration::configure($host, $database, $user, $password, $port);
-        $this->connection = Configuration::connect();
-        $this->connection->ensureDatabaseExists($database);
+        // Conecta sem banco e garante que existe
+        $connNoDb = \ApiDev\Mysql\Configuration::connectWithoutDatabase($host, $user, $password, $port);
+        $connNoDb->ensureDatabaseExists($database);
+
+        // Agora conecta normalmente
+        \ApiDev\Mysql\Configuration::configure($host, $database, $user, $password, $port);
+        $this->connection = \ApiDev\Mysql\Configuration::connect();
 
         // Create test table
         $this->connection->execute("DROP TABLE IF EXISTS test_users");
