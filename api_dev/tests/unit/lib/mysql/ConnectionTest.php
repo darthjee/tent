@@ -15,7 +15,7 @@ class ConnectionTest extends TestCase
 
     protected function setUp(): void
     {
-        $host = getenv('API_DEV_MYSQL_HOST') ?: 'mysql';
+        $host = getenv('API_DEV_MYSQL_HOST') ?: 'localhost';
         $user = getenv('API_DEV_MYSQL_USER') ?: 'root';
         $password = getenv('API_DEV_MYSQL_PASSWORD') ?: '';
         $port = getenv('API_DEV_MYSQL_PORT') ?: 3306;
