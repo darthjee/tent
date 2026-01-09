@@ -59,6 +59,11 @@ services:
       - ./api_dev:/home/app/app
     ports:
       - 127.0.0.1:8040:80
+    environment:
+      - API_DEV_MYSQL_HOST=mysql
+      - API_DEV_MYSQL_USER=root
+      - API_DEV_MYSQL_PASSWORD=tent
+      - API_DEV_MYSQL_PORT=3306
     links:
       - api_dev_mysql:mysql
     command: apache2-foreground
