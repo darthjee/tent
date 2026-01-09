@@ -10,7 +10,9 @@ class RequestHandler
 
         foreach ($configurations as $config) {
             if ($config->match($request)) {
-                return $config->handle($request);
+                $response = $config->handle($request);
+                $this->sendResponse($response);
+                return;
             }
         }
 
