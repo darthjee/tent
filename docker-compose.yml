@@ -59,7 +59,7 @@ services:
       - ./api_dev:/home/app/app
     ports:
       - 127.0.0.1:8040:80
-    env_file: ../.env
+    env_file: .env
     links:
       - api_dev_mysql:mysql
     command: apache2-foreground
