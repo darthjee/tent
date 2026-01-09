@@ -72,6 +72,19 @@ jobs:
   dev_api_test:
     docker:
       - image: darthjee/circleci_tent-base:0.0.1
+        environment:
+          API_DEV_MYSQL_HOST: mysql
+          API_DEV_MYSQL_PORT: 3306
+          API_DEV_MYSQL_USER: tent
+          API_DEV_MYSQL_NAME: tent
+          API_DEV_MYSQL_PASSWORD: tent
+      - image: cimg/mysql:8.0
+        name: mysql
+        environment:
+          MYSQL_DATABASE: tent
+          MYSQL_USER: tent
+          MYSQL_PASSWORD: tent
+          MYSQL_ROOT_PASSWORD: tent
     steps:
       - checkout
       - run:
