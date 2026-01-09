@@ -1,6 +1,6 @@
 services:
   base: &base
-    image: tent
+    image: darthjee/dev_tent
     volumes:
       - ./docker_volumes/vendor:/home/app/app/vendor
       - ./source:/home/app/app
@@ -11,14 +11,13 @@ services:
     build:
       context: .
       dockerfile: dockerfiles/Dockerfile.dev_tent
-    image: darthjee/dev_tent
     command: echo done
 
   ###################
   # Services
 
   tent_tests:
-    depends_on: [base_build, weave_httpbin]
+    depends_on: [base_build, weave_httpbin, api_dev]
     container_name: tent_tests
     <<: *base
     environment:
@@ -28,9 +27,10 @@ services:
     links:
       - tent_app:tent_app
       - weave_httpbin:httpbin
+      - api_dev:api_dev
 
   tent_app:
-    depends_on: [base_build, weave_httpbin]
+    depends_on: [base_build, weave_httpbin, api_dev]
     container_name: tent_app
     <<: *base
     ports:
@@ -40,6 +40,18 @@ services:
     command: apache2-foreground
     links:
       - weave_httpbin:httpbin
+      - api_dev:api_dev
+
+  api_dev:
+    depends_on: [base_build]
+    container_name: api_dev
+    <<: *base
+    volumes:
+      - ./docker_volumes/vendor:/home/app/app/vendor
+      - ./api_dev:/home/app/app
+    ports:
+      - 127.0.0.1:8040:80
+    command: apache2-foreground
 
   weave_httpbin:
     image: kennethreitz/httpbin
