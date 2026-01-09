@@ -22,19 +22,31 @@ class Migration
      * @param string $sqlFilePath
      * @throws Exception if file does not exist or execution fails
      */
+    private $fileContent = null;
+
     public function run(): void
     {
         $this->checkFileExistence();
-        $sql = file_get_contents($this->sqlFilePath);
-        if ($sql === false) {
-            throw new Exception("Failed to read SQL file: {$this->sqlFilePath}");
-        }
+        $sql = $this->fileContent();
         $statements = array_filter(array_map('trim', explode(';', $sql)));
         foreach ($statements as $statement) {
             if ($statement !== '') {
                 $this->connection->execute($statement);
             }
         }
+    }
+
+    private function fileContent(): string
+    {
+        if ($this->fileContent !== null) {
+            return $this->fileContent;
+        }
+        $content = file_get_contents($this->sqlFilePath);
+        if ($content === false) {
+            throw new Exception("Failed to read SQL file: {$this->sqlFilePath}");
+        }
+        $this->fileContent = $content;
+        return $content;
     }
 
     private function checkFileExistence(): void
