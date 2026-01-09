@@ -6,17 +6,21 @@ class RequestHandler
 {
     public function handle($request)
     {
+        $response = $this->getResponse($request);
+        $this->sendResponse($response);
+    }
+
+    private function getResponse($request)
+    {
         $configurations = Configuration::getConfigurations();
 
         foreach ($configurations as $config) {
             if ($config->match($request)) {
-                $response = $config->handle($request);
-                $this->sendResponse($response);
-                return;
+                return $config->handle($request);
             }
         }
 
-        return null;
+        return new MissingResponse();
     }
 
     private function sendResponse($response)
