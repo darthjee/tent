@@ -97,6 +97,9 @@ jobs:
           name: composer install
           command: composer install
       - run:
+          name: Wait for DB
+          command: ./bin/wait_for_db.sh
+      - run:
           name: Tests
           command: composer tests
 
