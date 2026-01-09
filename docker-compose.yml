@@ -63,6 +63,21 @@ services:
     links:
       - api_dev_mysql:mysql
     command: apache2-foreground
+  
+  api_dev_phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: api_dev_phpmyadmin
+    depends_on: [api_dev_mysql]
+    links:
+      - api_dev_mysql:mysql
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      MYSQL_USER: root
+      MYSQL_ROOT_PASSWORD: api_dev
+      MYSQL_PASSWORD: api_dev
+    ports:
+      - 127.0.0.1:3050:80
 
   weave_httpbin:
     image: kennethreitz/httpbin
