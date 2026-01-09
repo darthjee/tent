@@ -8,12 +8,12 @@ use ApiDev\Request;
 use ApiDev\Response;
 use ApiDev\HealthCheckEndpoint;
 
-require_once __DIR__ . '/../../../source/lib/models/Request.php';
-require_once __DIR__ . '/../../../source/lib/models/Response.php';
-require_once __DIR__ . '/../../../source/lib/Route.php';
-require_once __DIR__ . '/../../../source/lib/Endpoint.php';
-require_once __DIR__ . '/../../../source/lib/endpoints/HealthCheckEndpoint.php';
-require_once __DIR__ . '/../../../source/lib/RouteConfiguration.php';
+require_once __DIR__ . '/../../../../source/lib/api_dev/models/Request.php';
+require_once __DIR__ . '/../../../../source/lib/api_dev/models/Response.php';
+require_once __DIR__ . '/../../../../source/lib/api_dev/Route.php';
+require_once __DIR__ . '/../../../../source/lib/api_dev/Endpoint.php';
+require_once __DIR__ . '/../../../../source/lib/api_dev/endpoints/HealthCheckEndpoint.php';
+require_once __DIR__ . '/../../../../source/lib/api_dev/RouteConfiguration.php';
 
 class RouteConfigurationTest extends TestCase
 {

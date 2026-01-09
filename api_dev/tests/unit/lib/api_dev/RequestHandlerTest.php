@@ -10,15 +10,15 @@ use ApiDev\Response;
 use ApiDev\MissingResponse;
 use ApiDev\HealthCheckEndpoint;
 
-require_once __DIR__ . '/../../../source/lib/models/Request.php';
-require_once __DIR__ . '/../../../source/lib/models/Response.php';
-require_once __DIR__ . '/../../../source/lib/models/MissingResponse.php';
-require_once __DIR__ . '/../../../source/lib/Route.php';
-require_once __DIR__ . '/../../../source/lib/Endpoint.php';
-require_once __DIR__ . '/../../../source/lib/endpoints/HealthCheckEndpoint.php';
-require_once __DIR__ . '/../../../source/lib/RouteConfiguration.php';
-require_once __DIR__ . '/../../../source/lib/Configuration.php';
-require_once __DIR__ . '/../../../source/lib/RequestHandler.php';
+require_once __DIR__ . '/../../../../source/lib/api_dev/models/Request.php';
+require_once __DIR__ . '/../../../../source/lib/api_dev/models/Response.php';
+require_once __DIR__ . '/../../../../source/lib/api_dev/models/MissingResponse.php';
+require_once __DIR__ . '/../../../../source/lib/api_dev/Route.php';
+require_once __DIR__ . '/../../../../source/lib/api_dev/Endpoint.php';
+require_once __DIR__ . '/../../../../source/lib/api_dev/endpoints/HealthCheckEndpoint.php';
+require_once __DIR__ . '/../../../../source/lib/api_dev/RouteConfiguration.php';
+require_once __DIR__ . '/../../../../source/lib/api_dev/Configuration.php';
+require_once __DIR__ . '/../../../../source/lib/api_dev/RequestHandler.php';
 
 class RequestHandlerTest extends TestCase
 {

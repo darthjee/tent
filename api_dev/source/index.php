@@ -5,15 +5,15 @@ use ApiDev\RequestHandler;
 use ApiDev\Configuration;
 use ApiDev\HealthCheckEndpoint;
 
-require_once __DIR__ . '/lib/models/Request.php';
-require_once __DIR__ . '/lib/models/Response.php';
-require_once __DIR__ . '/lib/models/MissingResponse.php';
-require_once __DIR__ . '/lib/Route.php';
-require_once __DIR__ . '/lib/Endpoint.php';
-require_once __DIR__ . '/lib/endpoints/HealthCheckEndpoint.php';
-require_once __DIR__ . '/lib/RouteConfiguration.php';
-require_once __DIR__ . '/lib/Configuration.php';
-require_once __DIR__ . '/lib/RequestHandler.php';
+require_once __DIR__ . '/lib/api_dev/models/Request.php';
+require_once __DIR__ . '/lib/api_dev/models/Response.php';
+require_once __DIR__ . '/lib/api_dev/models/MissingResponse.php';
+require_once __DIR__ . '/lib/api_dev/Route.php';
+require_once __DIR__ . '/lib/api_dev/Endpoint.php';
+require_once __DIR__ . '/lib/api_dev/endpoints/HealthCheckEndpoint.php';
+require_once __DIR__ . '/lib/api_dev/RouteConfiguration.php';
+require_once __DIR__ . '/lib/api_dev/Configuration.php';
+require_once __DIR__ . '/lib/api_dev/RequestHandler.php';
 
 Configuration::add('GET', '/health', HealthCheckEndpoint::class);
 
