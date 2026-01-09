@@ -26,7 +26,13 @@ class Configuration
     {
         $config = self::getInstance();
 
-        $dsn = "mysql:host={$config->host};port={$config->port};dbname={$config->database};charset=utf8mb4";
+        $dsn_parts = [
+            "mysql:host={$config->host}",
+            "port={$config->port}",
+            "dbname={$config->database}",
+            "charset=utf8mb4"
+        ];
+        $dsn = implode(';', $dsn_parts);
 
         $pdo = new \PDO($dsn, $config->username, $config->password, [
             \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
@@ -51,13 +57,15 @@ class Configuration
     public static function createDatabase($host, $username, $password, $port, $databaseName)
     {
         $conn = self::connectWithoutDatabase($host, $username, $password, $port);
-        $conn->getPdo()->exec("CREATE DATABASE IF NOT EXISTS `{$databaseName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+        $command = "CREATE DATABASE IF NOT EXISTS `{$databaseName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci";
+        $conn->getPdo()->exec($command);
     }
 
     public static function databaseExists($host, $username, $password, $port, $databaseName)
     {
         $conn = self::connectWithoutDatabase($host, $username, $password, $port);
-        $stmt = $conn->getPdo()->query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '{$databaseName}'");
+        $command = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '{$databaseName}'";
+        $stmt = $conn->getPdo()->query($command);
         return (bool) $stmt->fetchColumn();
     }
 
