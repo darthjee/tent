@@ -1,3 +1,6 @@
 docker_volumes/vendor/
 source/.phpunit.result.cache
 source/coverage
+
+source/source/static/
+source/source/configuration/configure.php

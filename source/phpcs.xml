@@ -19,4 +19,7 @@
     <!-- Include source files -->
     <file>source</file>
     <file>tests</file>
+    
+    <!-- Exclude static directory -->
+    <exclude-pattern>source/static/*</exclude-pattern>
 </ruleset>
