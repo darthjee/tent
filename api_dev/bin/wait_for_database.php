@@ -25,8 +25,12 @@ class DatabaseWaiter {
         $password = self::getPassword();
         $port = self::getPort();
         $database = self::getDatabase();
-        
-        return !\ApiDev\Mysql\Configuration::databaseExists($host, $user, $password, $port, $database);
+        try {
+            return !\ApiDev\Mysql\Configuration::databaseExists($host, $user, $password, $port, $database);
+        } catch (\PDOException $e) {
+            // If connection fails, consider database as missing
+            return true;
+        }
     }
     public static function wait() {
         $database = self::getDatabase();
