@@ -43,12 +43,15 @@ services:
       - api_dev:api_dev
 
   api_dev:
-    image: php:8.4-apache
+    depends_on: [base_build]
     container_name: api_dev
+    <<: *base
     volumes:
-      - ./api_dev:/var/www/html
+      - ./docker_volumes/vendor:/home/app/app/vendor
+      - ./api_dev:/home/app/app
     ports:
       - 127.0.0.1:8040:80
+    command: apache2-foreground
 
   weave_httpbin:
     image: kennethreitz/httpbin
