@@ -97,14 +97,14 @@ jobs:
           name: Set folder
           command: mv api_dev/* ./; rm -rf api_dev;
       - run:
+          name: Wait for DB
+          command: ./bin/wait_for_database.php
+      - run:
           name: Copy dependencies
           command: cp /home/circleci/vendor/ ./vendor/ -R
       - run:
           name: composer install
           command: composer install
-      - run:
-          name: Wait for DB
-          command: ./bin/wait_for_database.php
       - run:
           name: Ensure database exists
           command: php ./bin/create_database.php
