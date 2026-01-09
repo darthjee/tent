@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     libzip-dev \
+    telnet \
     $PHPIZE_DEPS \
     && docker-php-ext-install zip pdo pdo_mysql \
     && pecl install pcov \
