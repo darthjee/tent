@@ -34,7 +34,7 @@ class Configuration
             \PDO::ATTR_EMULATE_PREPARES => false,
         ]);
         
-        return $pdo;
+        return new Connection($pdo);
     }
 
     public function __construct($host, $database, $username, $password, $port = 3306)
