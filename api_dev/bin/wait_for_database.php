@@ -4,7 +4,27 @@ require_once __DIR__ . '/../source/lib/mysql/Connection.php';
 require_once __DIR__ . '/../source/lib/mysql/Configuration.php';
 
 class DatabaseWaiter {
-    public static function wait($host, $user, $password, $port, $database) {
+    public static function getHost() {
+        return getenv('API_DEV_MYSQL_HOST') ?: 'localhost';
+    }
+    public static function getUser() {
+        return getenv('API_DEV_MYSQL_USER') ?: 'root';
+    }
+    public static function getPassword() {
+        return getenv('API_DEV_MYSQL_PASSWORD') ?: '';
+    }
+    public static function getPort() {
+        return getenv('API_DEV_MYSQL_PORT') ?: 3306;
+    }
+    public static function getDatabase() {
+        return getenv('API_DEV_MYSQL_TEST_DATABASE') ?: 'test_db';
+    }
+    public static function wait() {
+        $host = self::getHost();
+        $user = self::getUser();
+        $password = self::getPassword();
+        $port = self::getPort();
+        $database = self::getDatabase();
         while (!\ApiDev\Mysql\Configuration::databaseExists($host, $user, $password, $port, $database)) {
             echo "Waiting for database '$database'...\n";
             sleep(1);
@@ -12,12 +32,5 @@ class DatabaseWaiter {
     }
 }
 
-$host = getenv('API_DEV_MYSQL_HOST') ?: 'localhost';
-$user = getenv('API_DEV_MYSQL_USER') ?: 'root';
-$password = getenv('API_DEV_MYSQL_PASSWORD') ?: '';
-$port = getenv('API_DEV_MYSQL_PORT') ?: 3306;
-$database = getenv('API_DEV_MYSQL_TEST_DATABASE') ?: 'test_db';
-
-DatabaseWaiter::wait($host, $user, $password, $port, $database);
-
-echo "Database '$database' ensured!\n";
+DatabaseWaiter::wait();
+echo "Database '" . DatabaseWaiter::getDatabase() . "' ensured!\n";
