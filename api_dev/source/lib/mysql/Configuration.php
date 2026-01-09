@@ -4,11 +4,23 @@ namespace ApiDev\Mysql;
 
 class Configuration
 {
+    private static $instance;
     private $host;
     private $database;
     private $username;
     private $password;
     private $port;
+
+    public static function getInstance()
+    {
+        return self::$instance;
+    }
+
+    public static function configure($host, $database, $username, $password, $port = 3306)
+    {
+        self::$instance = new Configuration($host, $database, $username, $password, $port);
+        return self::$instance;
+    }
 
     public function __construct($host, $database, $username, $password, $port = 3306)
     {
