@@ -36,6 +36,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Remove other folders
+          command: rm -rf api_dev
+      - run:
           name: Set folder
           command: mv source old; mv old/* ./; rm -rf old;
       - run:
@@ -50,6 +53,9 @@ jobs:
       - image: darthjee/circleci_tent-base:0.0.1
     steps:
       - checkout
+      - run:
+          name: Remove other folders
+          command: rm -rf api_dev
       - run:
           name: Copy files
           command: mv source old; mv old/* ./; rm -rf old;
@@ -69,8 +75,11 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Remove other folders
+          command: rm -rf source
+      - run:
           name: Set folder
-          command: mv api_dev old; mv old/* ./; rm -rf old;
+          command: mv api_dev/* ./; rm -rf api_dev;
       - run:
           name: composer install
           command: composer install
@@ -84,8 +93,11 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Copy files
-          command: mv api_dev old; mv old/* ./; rm -rf old;
+          name: Remove other folders
+          command: rm -rf source
+      - run:
+          name: Set folder
+          command: mv api_dev/* ./; rm -rf api_dev;
       - run:
           name: Copy dependencies
           command: cp /home/circleci/vendor/ ./vendor/ -R
