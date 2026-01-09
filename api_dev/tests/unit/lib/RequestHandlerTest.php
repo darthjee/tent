@@ -35,16 +35,16 @@ class RequestHandlerTest extends TestCase
     public function testGetResponseReturnsMatchingRouteResponse()
     {
         Configuration::add('GET', '/health', HealthCheckEndpoint::class);
-        
+
         $request = $this->createMockRequest('GET', '/health');
         $handler = new RequestHandler();
-        
+
         $reflection = new \ReflectionClass($handler);
         $method = $reflection->getMethod('getResponse');
         $method->setAccessible(true);
-        
+
         $response = $method->invoke($handler, $request);
-        
+
         $this->assertInstanceOf(Response::class, $response);
         $this->assertEquals(200, $response->httpCode);
         $this->assertEquals('{"status":"ok"}', $response->body);
@@ -53,16 +53,16 @@ class RequestHandlerTest extends TestCase
     public function testGetResponseReturnsMissingResponseWhenNoMatch()
     {
         Configuration::add('GET', '/health', HealthCheckEndpoint::class);
-        
+
         $request = $this->createMockRequest('GET', '/unknown');
         $handler = new RequestHandler();
-        
+
         $reflection = new \ReflectionClass($handler);
         $method = $reflection->getMethod('getResponse');
         $method->setAccessible(true);
-        
+
         $response = $method->invoke($handler, $request);
-        
+
         $this->assertInstanceOf(MissingResponse::class, $response);
         $this->assertEquals(404, $response->httpCode);
     }
@@ -71,16 +71,16 @@ class RequestHandlerTest extends TestCase
     {
         Configuration::add('GET', '/health', HealthCheckEndpoint::class);
         Configuration::add('POST', '/health', HealthCheckEndpoint::class);
-        
+
         $request = $this->createMockRequest('GET', '/health');
         $handler = new RequestHandler();
-        
+
         $reflection = new \ReflectionClass($handler);
         $method = $reflection->getMethod('getResponse');
         $method->setAccessible(true);
-        
+
         $response = $method->invoke($handler, $request);
-        
+
         $this->assertInstanceOf(Response::class, $response);
         $this->assertEquals(200, $response->httpCode);
     }
@@ -88,16 +88,16 @@ class RequestHandlerTest extends TestCase
     public function testGetResponseWithDifferentHttpMethods()
     {
         Configuration::add('POST', '/api', HealthCheckEndpoint::class);
-        
+
         $request = $this->createMockRequest('POST', '/api');
         $handler = new RequestHandler();
-        
+
         $reflection = new \ReflectionClass($handler);
         $method = $reflection->getMethod('getResponse');
         $method->setAccessible(true);
-        
+
         $response = $method->invoke($handler, $request);
-        
+
         $this->assertEquals(200, $response->httpCode);
     }
 
@@ -106,16 +106,16 @@ class RequestHandlerTest extends TestCase
         Configuration::add('GET', '/health', HealthCheckEndpoint::class);
         Configuration::add('GET', '/api', HealthCheckEndpoint::class);
         Configuration::add('POST', '/users', HealthCheckEndpoint::class);
-        
+
         $request = $this->createMockRequest('GET', '/api');
         $handler = new RequestHandler();
-        
+
         $reflection = new \ReflectionClass($handler);
         $method = $reflection->getMethod('getResponse');
         $method->setAccessible(true);
-        
+
         $response = $method->invoke($handler, $request);
-        
+
         $this->assertEquals(200, $response->httpCode);
     }
 
@@ -123,45 +123,45 @@ class RequestHandlerTest extends TestCase
     {
         $request = $this->createMockRequest('GET', '/health');
         $handler = new RequestHandler();
-        
+
         $reflection = new \ReflectionClass($handler);
         $method = $reflection->getMethod('getResponse');
         $method->setAccessible(true);
-        
+
         $response = $method->invoke($handler, $request);
-        
+
         $this->assertInstanceOf(MissingResponse::class, $response);
     }
 
     public function testGetResponseWithMethodMismatch()
     {
         Configuration::add('GET', '/health', HealthCheckEndpoint::class);
-        
+
         $request = $this->createMockRequest('POST', '/health');
         $handler = new RequestHandler();
-        
+
         $reflection = new \ReflectionClass($handler);
         $method = $reflection->getMethod('getResponse');
         $method->setAccessible(true);
-        
+
         $response = $method->invoke($handler, $request);
-        
+
         $this->assertInstanceOf(MissingResponse::class, $response);
     }
 
     public function testGetResponseWithPathMismatch()
     {
         Configuration::add('GET', '/health', HealthCheckEndpoint::class);
-        
+
         $request = $this->createMockRequest('GET', '/health/check');
         $handler = new RequestHandler();
-        
+
         $reflection = new \ReflectionClass($handler);
         $method = $reflection->getMethod('getResponse');
         $method->setAccessible(true);
-        
+
         $response = $method->invoke($handler, $request);
-        
+
         $this->assertInstanceOf(MissingResponse::class, $response);
     }
 
