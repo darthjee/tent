@@ -97,8 +97,11 @@ jobs:
           name: composer install
           command: composer install
       - run:
+          name: Ensure database exists
+          command: php ./bin/create_database.php
+      - run:
           name: Tests
-          command: sleep 5; composer tests
+          command: composer tests
 
   dev_api_checks:
     docker:
