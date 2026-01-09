@@ -48,6 +48,26 @@ class Configuration
         return new \ApiDev\Mysql\Connection($pdo);
     }
 
+    public static function createDatabase($host, $username, $password, $port, $databaseName)
+    {
+        $conn = self::connectWithoutDatabase($host, $username, $password, $port);
+        $conn->getPdo()->exec("CREATE DATABASE IF NOT EXISTS `{$databaseName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+    }
+
+    public static function databaseExists($host, $username, $password, $port, $databaseName)
+    {
+        $conn = self::connectWithoutDatabase($host, $username, $password, $port);
+        $stmt = $conn->getPdo()->query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '{$databaseName}'");
+        return (bool) $stmt->fetchColumn();
+    }
+
+    public static function ensureDatabaseExists($host, $username, $password, $port, $databaseName)
+    {
+        if (!self::databaseExists($host, $username, $password, $port, $databaseName)) {
+            self::createDatabase($host, $username, $password, $port, $databaseName);
+        }
+    }
+
     public function __construct($host, $database, $username, $password, $port = 3306)
     {
         $this->host = $host;
