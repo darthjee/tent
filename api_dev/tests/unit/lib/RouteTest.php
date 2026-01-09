@@ -70,11 +70,11 @@ class RouteTest extends TestCase
     public function testMatchesDifferentHttpMethods()
     {
         $methods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
-        
+
         foreach ($methods as $method) {
             $request = $this->createMockRequest($method, '/api');
             $route = new Route($method, '/api');
-            
+
             $this->assertTrue($route->matches($request));
         }
     }

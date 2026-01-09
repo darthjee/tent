@@ -18,9 +18,9 @@ class HealthCheckEndpointTest extends TestCase
     {
         $request = new Request();
         $endpoint = new HealthCheckEndpoint($request);
-        
+
         $response = $endpoint->handle();
-        
+
         $this->assertInstanceOf(Response::class, $response);
     }
 
@@ -28,9 +28,9 @@ class HealthCheckEndpointTest extends TestCase
     {
         $request = new Request();
         $endpoint = new HealthCheckEndpoint($request);
-        
+
         $response = $endpoint->handle();
-        
+
         $this->assertEquals(200, $response->httpCode);
     }
 
@@ -38,9 +38,9 @@ class HealthCheckEndpointTest extends TestCase
     {
         $request = new Request();
         $endpoint = new HealthCheckEndpoint($request);
-        
+
         $response = $endpoint->handle();
-        
+
         $this->assertEquals('{"status":"ok"}', $response->body);
     }
 
@@ -48,9 +48,9 @@ class HealthCheckEndpointTest extends TestCase
     {
         $request = new Request();
         $endpoint = new HealthCheckEndpoint($request);
-        
+
         $response = $endpoint->handle();
-        
+
         $this->assertContains('Content-Type: application/json', $response->headerLines);
     }
 
@@ -58,10 +58,10 @@ class HealthCheckEndpointTest extends TestCase
     {
         $request = new Request();
         $endpoint = new HealthCheckEndpoint($request);
-        
+
         $response = $endpoint->handle();
         $data = json_decode($response->body, true);
-        
+
         $this->assertIsArray($data);
         $this->assertArrayHasKey('status', $data);
         $this->assertEquals('ok', $data['status']);
