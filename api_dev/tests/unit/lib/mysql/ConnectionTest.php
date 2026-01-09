@@ -23,6 +23,7 @@ class ConnectionTest extends TestCase
 
         Configuration::configure($host, $database, $user, $password, $port);
         $this->connection = Configuration::connect();
+        $this->connection->ensureDatabaseExists($database);
 
         // Create test table
         $this->connection->execute("DROP TABLE IF EXISTS test_users");
