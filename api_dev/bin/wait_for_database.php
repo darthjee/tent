@@ -19,22 +19,22 @@ class DatabaseWaiter {
     public static function getDatabase() {
         return getenv('API_DEV_MYSQL_TEST_DATABASE') ?: 'test_db';
     }
-    public static function missingDatabase() {
+    public static function databaseFound() {
         $host = self::getHost();
         $user = self::getUser();
         $password = self::getPassword();
         $port = self::getPort();
         $database = self::getDatabase();
         try {
-            return !\ApiDev\Mysql\Configuration::databaseExists($host, $user, $password, $port, $database);
+            return \ApiDev\Mysql\Configuration::databaseExists($host, $user, $password, $port, $database);
         } catch (\PDOException $e) {
-            // If connection fails, consider database as missing
-            return true;
+            // If connection fails, consider database as not found
+            return false;
         }
     }
     public static function wait() {
         $database = self::getDatabase();
-        while (self::missingDatabase()) {
+        while (!self::databaseFound()) {
             echo "Waiting for database '$database'...\n";
             sleep(1);
         }
