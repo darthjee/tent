@@ -76,8 +76,8 @@ jobs:
           API_DEV_MYSQL_HOST: mysql
           API_DEV_MYSQL_PORT: 3306
           API_DEV_MYSQL_USER: tent
-          API_DEV_MYSQL_NAME: tent
           API_DEV_MYSQL_PASSWORD: tent
+          API_DEV_MYSQL_TEST_DATABASE: tent
       - image: cimg/mysql:8.0
         name: mysql
         environment:
