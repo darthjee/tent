@@ -7,3 +7,5 @@ source/source/configuration/configure.php
 
 api_dev/.phpunit.result.cache
 api_dev/coverage
+
+docker_volumes/mysql_data
