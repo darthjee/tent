@@ -45,4 +45,22 @@ class Connection
     {
         return $this->pdo->lastInsertId();
     }
+
+    public function createDatabase($databaseName)
+    {
+        $this->pdo->exec("CREATE DATABASE IF NOT EXISTS `{$databaseName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+    }
+
+    public function databaseExists($databaseName)
+    {
+        $stmt = $this->pdo->query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '{$databaseName}'");
+        return (bool) $stmt->fetchColumn();
+    }
+
+    public function ensureDatabaseExists($databaseName)
+    {
+        if (!$this->databaseExists($databaseName)) {
+            $this->createDatabase($databaseName);
+        }
+    }
 }
