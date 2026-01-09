@@ -97,11 +97,8 @@ jobs:
           name: composer install
           command: composer install
       - run:
-          name: Wait for DB
-          command: sleep 10
-      - run:
           name: Tests
-          command: composer tests
+          command: sleep 10; composer tests
 
   dev_api_checks:
     docker:
