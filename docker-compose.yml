@@ -2,7 +2,6 @@ services:
   api_dev_mysql:
     image: mysql:9.3.0
     container_name: api_dev_mysql
-    env_file: .env
     environment:
       MYSQL_ROOT_PASSWORD: tent
     volumes:
@@ -52,7 +51,7 @@ services:
       - api_dev:api_dev
 
   api_dev:
-    depends_on: [base_build, api_dev_mysql]
+    depends_on: [base_build, api_dev_mysql, api_dev_phpmyadmin]
     container_name: api_dev
     <<: *base
     volumes:
