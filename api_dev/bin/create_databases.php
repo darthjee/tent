@@ -5,6 +5,12 @@ require_once __DIR__ . '/../source/lib/mysql/Connection.php';
 require_once __DIR__ . '/../source/lib/mysql/Configuration.php';
 
 class DatabaseEnsurer {
+    private $database;
+
+    public function __construct($database) {
+        $this->database = $database;
+    }
+
     public function getHost() {
         return getenv('API_DEV_MYSQL_HOST') ?: 'localhost';
     }
@@ -18,7 +24,7 @@ class DatabaseEnsurer {
         return getenv('API_DEV_MYSQL_PORT') ?: 3306;
     }
     public function getDatabase() {
-        return getenv('API_DEV_MYSQL_TEST_DATABASE') ?: 'test_db';
+        return $this->database;
     }
 
     public function ensure() {
@@ -36,4 +42,10 @@ class DatabaseEnsurer {
     }
 }
 
-(new DatabaseEnsurer())->ensure();
+$databases = [
+    getenv('API_DEV_MYSQL_TEST_DATABASE') ?: 'api_tent_test_db',
+    getenv('API_DEV_MYSQL_TEST_DATABASE_2') ?: 'api_tent_dev_db',
+];
+foreach ($databases as $database) {
+    (new DatabaseEnsurer($database))->ensure();
+}
