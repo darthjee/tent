@@ -3,6 +3,7 @@
 <?php
 require_once __DIR__ . '/../source/lib/mysql/Connection.php';
 require_once __DIR__ . '/../source/lib/mysql/Configuration.php';
+require_once __DIR__ . '/../source/lib/mysql/DatabaseInitializer.php';
 
 class DatabaseEnsurer {
     private $database;
@@ -11,30 +12,36 @@ class DatabaseEnsurer {
         $this->database = $database;
     }
 
-    public function getHost() {
+    public function ensure() {
+        $initializer = new \ApiDev\Mysql\DatabaseInitializer($this->connection());
+
+        $initializer->initialize();
+    }
+
+    private function getHost() {
         return getenv('API_DEV_MYSQL_HOST') ?: 'localhost';
     }
-    public function getUser() {
+    private function getUser() {
         return getenv('API_DEV_MYSQL_USER') ?: 'root';
     }
-    public function getPassword() {
+    private function getPassword() {
         return getenv('API_DEV_MYSQL_PASSWORD') ?: '';
     }
-    public function getPort() {
+    private function getPort() {
         return getenv('API_DEV_MYSQL_PORT') ?: 3306;
     }
-    public function getDatabase() {
+    private function getDatabase() {
         return $this->database;
     }
 
-    public function ensure() {
+    private function connection() {
         $host = $this->getHost();
         $user = $this->getUser();
         $password = $this->getPassword();
         $port = $this->getPort();
         $database = $this->getDatabase();
 
-        \ApiDev\Mysql\Configuration::ensureDatabaseExists(
+        return \ApiDev\Mysql\Configuration::ensureDatabaseExists(
             $host, $user, $password, $port, $database
         );
 
