@@ -19,7 +19,6 @@ class Migration
     /**
      * Runs the SQL statements from a file
      *
-     * @param string $sqlFilePath
      * @throws Exception if file does not exist or execution fails
      */
     private $fileContent = null;
