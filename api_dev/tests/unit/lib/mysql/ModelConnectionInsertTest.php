@@ -16,13 +16,7 @@ class ModelConnectionInsertTest extends TestCase
 
     protected function setUp(): void
     {
-        $host = getenv('API_DEV_MYSQL_HOST') ?: 'localhost';
-        $user = getenv('API_DEV_MYSQL_USER') ?: 'root';
-        $password = getenv('API_DEV_MYSQL_PASSWORD') ?: '';
-        $port = getenv('API_DEV_MYSQL_PORT') ?: 3306;
-        $this->database = getenv('API_DEV_MYSQL_TEST_DATABASE') ?: 'api_tent_test_db';
-
-        $this->connection = Connection::build($host, $port, $this->database, $user, $password);
+        $this->connection = \ApiDev\Mysql\Configuration::connect();
         $this->model = new ModelConnection($this->connection, 'persons');
     }
 
