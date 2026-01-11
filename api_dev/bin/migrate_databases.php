@@ -14,9 +14,7 @@ class DatabaseMigrater {
     }
 
     public function migrate() {
-        $migrater = \ApiDev\Mysql\MigrationsProcessor::migrate($this->connection());
-
-        $migrater->process();
+        \ApiDev\Mysql\MigrationsProcessor::migrate($this->connection());
 
         echo "Database '$this->database' migrated!\n";
     }
