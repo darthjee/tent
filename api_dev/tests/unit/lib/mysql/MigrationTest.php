@@ -29,13 +29,18 @@ class MigrationTest extends TestCase
         }
     }
 
-    public function testRunExecutesAllStatements()
+    public function testRunExecutesAllStatementsAndInsertsMigration()
     {
-        $this->connection->expects($this->exactly(2))
+        $filename = basename($this->sqlFile);
+        $this->connection->expects($this->exactly(3))
             ->method('execute')
             ->withConsecutive(
                 [$this->stringContains('CREATE TABLE test_table (id INT)')],
-                [$this->stringContains('INSERT INTO test_table (id) VALUES (1)')]
+                [$this->stringContains('INSERT INTO test_table (id) VALUES (1)')],
+                [
+                    $this->stringContains('INSERT INTO migrations (name) VALUES (?)'),
+                    [$filename]
+                ]
             );
 
         $migration = new Migration($this->connection, $this->sqlFile);
