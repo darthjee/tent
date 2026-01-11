@@ -107,7 +107,7 @@ jobs:
           command: ./bin/wait_for_database.php
       - run:
           name: Ensure database exists
-          command: php ./bin/create_database.php
+          command: php ./bin/create_databases.php
       - run:
           name: Tests
           command: composer tests
