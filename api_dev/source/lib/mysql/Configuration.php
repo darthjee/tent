@@ -11,6 +11,8 @@ class Configuration
     private $password;
     private $port;
 
+    private $connection;
+
     public static function getInstance()
     {
         return self::$instance;
@@ -25,16 +27,28 @@ class Configuration
     public static function connect()
     {
         $config = self::getInstance();
+        return $config->getConnection();
+    }
 
+    public function getConnection()
+    {
+        if ($this->connection === null) {
+            $this->connection = $this->createConnection();
+        }
+        return $this->connection;
+    }
+
+    private function createConnection()
+    {
         $dsn_parts = [
-            "mysql:host={$config->host}",
-            "port={$config->port}",
-            "dbname={$config->database}",
+            "mysql:host={$this->host}",
+            "port={$this->port}",
+            "dbname={$this->database}",
             "charset=utf8mb4"
         ];
         $dsn = implode(';', $dsn_parts);
 
-        $pdo = new \PDO($dsn, $config->username, $config->password, [
+        $pdo = new \PDO($dsn, $this->username, $this->password, [
             \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
             \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
             \PDO::ATTR_EMULATE_PREPARES => false,
