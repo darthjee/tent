@@ -4,6 +4,7 @@ use ApiDev\Request;
 use ApiDev\RequestHandler;
 use ApiDev\Configuration;
 use ApiDev\HealthCheckEndpoint;
+use ApiDev\ListPersonsEndpoint;
 
 require_once __DIR__ . '/lib/api_dev/models/Request.php';
 require_once __DIR__ . '/lib/api_dev/models/Response.php';
