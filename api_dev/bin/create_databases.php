@@ -51,7 +51,7 @@ class DatabaseEnsurer {
             $host, $database, $user, $password, $port
         );
 
-        return $configuration->connect();
+        return $configuration->getConnection();
     }
 }
 
