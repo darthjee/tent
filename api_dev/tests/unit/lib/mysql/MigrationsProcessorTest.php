@@ -41,18 +41,22 @@ class MigrationsProcessorTest extends TestCase
 
     public function testRunExecutesAllMigrationsInOrder()
     {
-        $this->connection->expects($this->at(0))
+        $filename1 = basename($this->files[0]);
+        $filename2 = basename($this->files[1]);
+        $this->connection->expects($this->exactly(4))
             ->method('execute')
-            ->with($this->stringContains('CREATE TABLE test (id INT)'));
-        $this->connection->expects($this->at(1))
-            ->method('execute')
-            ->with($this->stringContains('INSERT INTO migrations (name) VALUES (?)'), ['001_create_table.sql']);
-        $this->connection->expects($this->at(2))
-            ->method('execute')
-            ->with($this->stringContains('INSERT INTO test (id) VALUES (1)'));
-        $this->connection->expects($this->at(3))
-            ->method('execute')
-            ->with($this->stringContains('INSERT INTO migrations (name) VALUES (?)'), ['002_insert_data.sql']);
+            ->withConsecutive(
+                [$this->stringContains('CREATE TABLE test (id INT)')],
+                [
+                    $this->stringContains('INSERT INTO migrations (name) VALUES (?)'),
+                    [$filename1]
+                ],
+                [$this->stringContains('INSERT INTO test (id) VALUES (1)')],
+                [
+                    $this->stringContains('INSERT INTO migrations (name) VALUES (?)'),
+                    [$filename2]
+                ]
+            );
 
         $processor = new MigrationsProcessor($this->migrationsDir, $this->connection);
         $processor->run();
