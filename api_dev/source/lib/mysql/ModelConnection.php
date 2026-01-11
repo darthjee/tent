@@ -38,6 +38,26 @@ class ModelConnection
         return $this->connection->fetch($sql, $params);
     }
 
+    /**
+     * Inserts a row into the table.
+     *
+     * @param array $attributes Associative array of column => value
+     * @return int Last insert ID
+     */
+    public function insert(array $attributes): int
+    {
+        $columns = array_keys($attributes);
+        $placeholders = array_fill(0, count($columns), '?');
+        $sql = sprintf(
+            "INSERT INTO %s (%s) VALUES (%s)",
+            $this->tableName,
+            implode(', ', $columns),
+            implode(', ', $placeholders)
+        );
+        $this->connection->execute($sql, array_values($attributes));
+        return $this->connection->lastInsertId();
+    }
+
     public function getConnection(): Connection
     {
         return $this->connection;
