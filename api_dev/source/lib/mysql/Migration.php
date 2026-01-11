@@ -27,15 +27,20 @@ class Migration
     public function run(): void
     {
         $this->execute();
+        $this->recordMigration();
+    }
+
+    private function recordMigration(): void
+    {
         // Insert migration record (just the filename, not full path)
-        $filename = basename($this->sqlFilePath);
+        $filename = $this->fileName();
         $this->connection->execute(
             "INSERT INTO migrations (name) VALUES (?)",
             [$filename]
         );
     }
 
-    public function execute(): void
+    private function execute(): void
     {
         $this->checkFileExistence();
         $sql = $this->fileContent();
@@ -65,5 +70,10 @@ class Migration
         if (!file_exists($this->sqlFilePath)) {
             throw new Exception("SQL file not found: {$this->sqlFilePath}");
         }
+    }
+
+    private function fileName(): string
+    {
+        return basename($this->sqlFilePath);
     }
 }
