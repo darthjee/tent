@@ -2,7 +2,7 @@
 
 namespace ApiDev\Tests;
 
-use \ApiDev\Mysql\Configuration;
+use ApiDev\Mysql\Configuration;
 
 Configuration::configure(
     getenv('API_DEV_MYSQL_HOST') ?: 'localhost',

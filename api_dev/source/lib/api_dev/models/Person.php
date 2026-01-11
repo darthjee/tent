@@ -9,7 +9,6 @@ use ApiDev\Mysql\Configuration;
 
 class Person
 {
-
     /**
      * Returns all rows from the 'persons' table.
      *
@@ -63,7 +62,7 @@ class Person
             return new self($attrs);
         }, $rows);
     }
-    
+
     /**
      * Returns a ModelConnection for the 'persons' table.
      *
