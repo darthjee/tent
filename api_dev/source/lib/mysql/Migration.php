@@ -23,7 +23,19 @@ class Migration
      */
     private $fileContent = null;
 
+
     public function run(): void
+    {
+        $this->execute();
+        // Insert migration record (just the filename, not full path)
+        $filename = basename($this->sqlFilePath);
+        $this->connection->execute(
+            "INSERT INTO migrations (name) VALUES (?)",
+            [$filename]
+        );
+    }
+
+    public function execute(): void
     {
         $this->checkFileExistence();
         $sql = $this->fileContent();
