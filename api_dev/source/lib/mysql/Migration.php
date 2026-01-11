@@ -11,6 +11,27 @@ class Migration
     private $sqlFilePath;
 
     /**
+     * Runs the SQL statements from a file
+     *
+     * @throws Exception if file does not exist or execution fails
+     */
+    private $fileContent = null;
+
+    public function __construct(Connection $connection, string $sqlFilePath)
+    {
+        $this->connection = $connection;
+        $this->sqlFilePath = $sqlFilePath;
+    }
+
+    public function run(): void
+    {
+        if (!$this->isMigrated()) {
+            $this->execute();
+            $this->recordMigration();
+        }
+    }
+
+    /**
      * Checks if this migration has already been applied.
      *
      * @return bool
@@ -23,25 +44,6 @@ class Migration
             [$filename]
         );
         return !empty($result);
-    }
-    public function __construct(Connection $connection, string $sqlFilePath)
-    {
-        $this->connection = $connection;
-        $this->sqlFilePath = $sqlFilePath;
-    }
-
-    /**
-     * Runs the SQL statements from a file
-     *
-     * @throws Exception if file does not exist or execution fails
-     */
-    private $fileContent = null;
-
-
-    public function run(): void
-    {
-        $this->execute();
-        $this->recordMigration();
     }
 
     private function recordMigration(): void
