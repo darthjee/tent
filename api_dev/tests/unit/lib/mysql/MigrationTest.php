@@ -81,4 +81,18 @@ class MigrationTest extends TestCase
         $this->expectException(\Exception::class);
         $migration->run();
     }
+
+    public function testRunDoesNotExecuteIfAlreadyMigrated()
+    {
+        $filename = basename($this->sqlFile);
+        // Simulate migration already done
+        $this->connection->method('fetch')
+            ->willReturn([['name' => $filename]]);
+        // Should not call execute at all
+        $this->connection->expects($this->never())
+            ->method('execute');
+
+        $migration = new Migration($this->connection, $this->sqlFile);
+        $migration->run();
+    }
 }
