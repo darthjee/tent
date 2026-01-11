@@ -2,7 +2,9 @@
 
 namespace ApiDev\Tests;
 
-\ApiDev\Mysql\Configuration::configure(
+use \ApiDev\Mysql\Configuration;
+
+Configuration::configure(
     getenv('API_DEV_MYSQL_HOST') ?: 'localhost',
     getenv('API_DEV_MYSQL_TEST_DATABASE') ?: 'api_tent_test_db',
     getenv('API_DEV_MYSQL_USER') ?: 'root',
