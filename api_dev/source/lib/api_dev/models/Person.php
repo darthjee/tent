@@ -12,11 +12,27 @@ class Person
      *
      * @return ModelConnection
      */
+    private static $connection = null;
+
     public static function getConnection(): ModelConnection
     {
-        return new ModelConnection(
+        if (self::$connection instanceof ModelConnection) {
+            return self::$connection;
+        }
+        self::$connection = new ModelConnection(
             Configuration::connect(),
             'persons'
         );
+        return self::$connection;
+    }
+
+    /**
+     * Returns all rows from the 'persons' table.
+     *
+     * @return array
+     */
+    public static function all(): array
+    {
+        return self::getConnection()->list();
     }
 }
