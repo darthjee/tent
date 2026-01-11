@@ -2,8 +2,6 @@
 
 namespace ApiDev\Models;
 
-require_once __DIR__ . '/../../mysql/ModelConnection.php';
-
 use ApiDev\Mysql\ModelConnection;
 use ApiDev\Mysql\Configuration;
 

@@ -2,8 +2,6 @@
 
 namespace ApiDev;
 
-require_once __DIR__ . '/../models/Person.php';
-
 use ApiDev\Models\Person;
 
 class ListPersonsEndpoint extends Endpoint

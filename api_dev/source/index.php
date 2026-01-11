@@ -15,9 +15,13 @@ require_once __DIR__ . '/lib/api_dev/RouteConfiguration.php';
 require_once __DIR__ . '/lib/api_dev/Configuration.php';
 require_once __DIR__ . '/lib/api_dev/RequestHandler.php';
 
+require_once __DIR__ . '/lib/api_dev/models/Person.php';
+
 require_once __DIR__ . '/lib/api_dev/endpoints/HealthCheckEndpoint.php';
 require_once __DIR__ . '/lib/api_dev/endpoints/ListPersonsEndpoint.php';
 
+require_once __DIR__ . '/lib/mysql/Connection.php';
+require_once __DIR__ . '/lib/mysql/ModelConnection.php';
 require_once __DIR__ . '/lib/mysql/Configuration.php';
 
 Configuration::add('GET', '/health', HealthCheckEndpoint::class);
