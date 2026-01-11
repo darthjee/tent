@@ -13,6 +13,25 @@ class MigrationTest extends TestCase
     private $connection;
     private $sqlFile;
 
+    public function testIsMigratedReturnsTrueIfMigrationExists()
+    {
+        $filename = basename($this->sqlFile);
+        $this->connection->method('fetch')
+            ->willReturn([['name' => $filename]]);
+
+        $migration = new Migration($this->connection, $this->sqlFile);
+        $this->assertTrue($migration->isMigrated());
+    }
+
+    public function testIsMigratedReturnsFalseIfMigrationDoesNotExist()
+    {
+        $this->connection->method('fetch')
+            ->willReturn([]);
+
+        $migration = new Migration($this->connection, $this->sqlFile);
+        $this->assertFalse($migration->isMigrated());
+    }
+
     protected function setUp(): void
     {
         // Setup a mock Connection
