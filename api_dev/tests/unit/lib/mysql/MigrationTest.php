@@ -2,7 +2,7 @@
 
 namespace ApiDev\Tests;
 
-require_once __DIR__ . '/../../../../source/lib/mysql/Migration.php';
+require_once __DIR__ . '/../../../support/tests_loader.php';
 
 use PHPUnit\Framework\TestCase;
 use ApiDev\Mysql\Migration;

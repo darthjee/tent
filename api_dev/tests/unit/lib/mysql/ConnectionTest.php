@@ -6,8 +6,7 @@ use PHPUnit\Framework\TestCase;
 use ApiDev\Mysql\Configuration;
 use ApiDev\Mysql\Connection;
 
-require_once __DIR__ . '/../../../../source/lib/mysql/Configuration.php';
-require_once __DIR__ . '/../../../../source/lib/mysql/Connection.php';
+require_once __DIR__ . '/../../../support/tests_loader.php';
 
 class ConnectionTest extends TestCase
 {
