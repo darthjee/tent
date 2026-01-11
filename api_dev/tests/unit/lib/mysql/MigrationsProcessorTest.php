@@ -46,13 +46,13 @@ class MigrationsProcessorTest extends TestCase
             ->with($this->stringContains('CREATE TABLE test (id INT)'));
         $this->connection->expects($this->at(1))
             ->method('execute')
-            ->with($this->stringContains('INSERT INTO migrations (name) VALUES (?)'));
+            ->with($this->stringContains('INSERT INTO migrations (name) VALUES (?)'), ['001_create_table.sql']);
         $this->connection->expects($this->at(2))
             ->method('execute')
-            ->with($this->stringContains('INSERT INTO test (id) VALUES (1);'));
+            ->with($this->stringContains('INSERT INTO test (id) VALUES (1)'));
         $this->connection->expects($this->at(3))
             ->method('execute')
-            ->with($this->stringContains('INSERT INTO migrations (name) VALUES (?)'));
+            ->with($this->stringContains('INSERT INTO migrations (name) VALUES (?)'), ['002_insert_data.sql']);
 
         $processor = new MigrationsProcessor($this->migrationsDir, $this->connection);
         $processor->run();
