@@ -57,8 +57,12 @@ class DatabaseEnsurer {
 
 $databases = [
     getenv('API_DEV_MYSQL_TEST_DATABASE') ?: 'api_tent_test_db',
-    getenv('API_DEV_MYSQL_TEST_DATABASE_2') ?: 'api_tent_dev_db'
+    getenv('API_DEV_MYSQL_DEV_DATABASE') ?: null,
 ];
+
 foreach ($databases as $database) {
+    if ($database === null) {
+        continue;
+    }
     (new DatabaseEnsurer($database))->ensure();
 }
