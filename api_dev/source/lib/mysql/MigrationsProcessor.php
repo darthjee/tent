@@ -6,6 +6,7 @@ use Exception;
 
 class MigrationsProcessor
 {
+    private const MIGRATIONS_DIR = './migrations';
     private $directoryPath;
     private $connection;
 
@@ -13,6 +14,17 @@ class MigrationsProcessor
     {
         $this->directoryPath = $directoryPath;
         $this->connection = $connection;
+    }
+
+    /**
+     * Runs all migrations from the default './migrations' directory using the given connection.
+     *
+     * @param Connection $connection
+     */
+    public static function migrate(Connection $connection): void
+    {
+        $processor = new self(self::MIGRATIONS_DIR, $connection);
+        $processor->run();
     }
 
     /**

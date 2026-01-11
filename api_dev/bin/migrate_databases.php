@@ -13,7 +13,7 @@ class DatabaseMigrater {
     }
 
     public function migrate() {
-        $migrater = new \ApiDev\Mysql\MigrationsProcessor($this->connection());
+        $migrater = \ApiDev\Mysql\MigrationsProcessor::migrate($this->connection());
 
         $migrater->process();
 
