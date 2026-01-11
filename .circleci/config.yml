@@ -109,6 +109,9 @@ jobs:
           name: Ensure database exists
           command: php ./bin/create_databases.php
       - run:
+          name: EnsurMigrate database
+          command: php ./bin/migrate_databases.php
+      - run:
           name: Tests
           command: composer tests
 

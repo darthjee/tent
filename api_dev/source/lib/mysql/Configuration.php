@@ -33,29 +33,17 @@ class Configuration
     public function getConnection()
     {
         if ($this->connection === null) {
-            $this->connection = $this->createConnection();
+            $this->connection = Connection::build(
+                $this->host,
+                $this->port,
+                $this->database,
+                $this->username,
+                $this->password
+            );
         }
         return $this->connection;
     }
 
-    private function createConnection()
-    {
-        $dsn_parts = [
-            "mysql:host={$this->host}",
-            "port={$this->port}",
-            "dbname={$this->database}",
-            "charset=utf8mb4"
-        ];
-        $dsn = implode(';', $dsn_parts);
-
-        $pdo = new \PDO($dsn, $this->username, $this->password, [
-            \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
-            \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
-            \PDO::ATTR_EMULATE_PREPARES => false,
-        ]);
-
-        return new Connection($pdo);
-    }
 
     public static function connectWithoutDatabase($host, $username, $password, $port = 3306)
     {
