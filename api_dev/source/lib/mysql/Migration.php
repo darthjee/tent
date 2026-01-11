@@ -10,12 +10,6 @@ class Migration
     private $connection;
     private $sqlFilePath;
 
-    public function __construct(Connection $connection, string $sqlFilePath)
-    {
-        $this->connection = $connection;
-        $this->sqlFilePath = $sqlFilePath;
-    }
-
     /**
      * Runs the SQL statements from a file
      *
@@ -23,11 +17,33 @@ class Migration
      */
     private $fileContent = null;
 
+    public function __construct(Connection $connection, string $sqlFilePath)
+    {
+        $this->connection = $connection;
+        $this->sqlFilePath = $sqlFilePath;
+    }
 
     public function run(): void
     {
-        $this->execute();
-        $this->recordMigration();
+        if (!$this->isMigrated()) {
+            $this->execute();
+            $this->recordMigration();
+        }
+    }
+
+    /**
+     * Checks if this migration has already been applied.
+     *
+     * @return bool
+     */
+    public function isMigrated(): bool
+    {
+        $filename = $this->fileName();
+        $result = $this->connection->fetch(
+            "SELECT 1 FROM migrations WHERE name = ? LIMIT 1",
+            [$filename]
+        );
+        return !empty($result);
     }
 
     private function recordMigration(): void

@@ -13,6 +13,25 @@ class MigrationTest extends TestCase
     private $connection;
     private $sqlFile;
 
+    public function testIsMigratedReturnsTrueIfMigrationExists()
+    {
+        $filename = basename($this->sqlFile);
+        $this->connection->method('fetch')
+            ->willReturn([['name' => $filename]]);
+
+        $migration = new Migration($this->connection, $this->sqlFile);
+        $this->assertTrue($migration->isMigrated());
+    }
+
+    public function testIsMigratedReturnsFalseIfMigrationDoesNotExist()
+    {
+        $this->connection->method('fetch')
+            ->willReturn([]);
+
+        $migration = new Migration($this->connection, $this->sqlFile);
+        $this->assertFalse($migration->isMigrated());
+    }
+
     protected function setUp(): void
     {
         // Setup a mock Connection
@@ -60,6 +79,20 @@ class MigrationTest extends TestCase
         unlink($file); // Remove file to simulate unreadable
         $migration = new Migration($this->connection, $file);
         $this->expectException(\Exception::class);
+        $migration->run();
+    }
+
+    public function testRunDoesNotExecuteIfAlreadyMigrated()
+    {
+        $filename = basename($this->sqlFile);
+        // Simulate migration already done
+        $this->connection->method('fetch')
+            ->willReturn([['name' => $filename]]);
+        // Should not call execute at all
+        $this->connection->expects($this->never())
+            ->method('execute');
+
+        $migration = new Migration($this->connection, $this->sqlFile);
         $migration->run();
     }
 }
