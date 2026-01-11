@@ -4,7 +4,6 @@
 require_once __DIR__ . '/../../source/lib/mysql/Migration.php';
 require_once __DIR__ . '/../../source/lib/mysql/ModelConnection.php';
 require_once __DIR__ . '/../../source/lib/mysql/MigrationsProcessor.php';
-
 require_once __DIR__ . '/../../source/lib/mysql/Configuration.php';
 require_once __DIR__ . '/../../source/lib/mysql/Connection.php';
 

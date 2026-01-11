@@ -14,14 +14,6 @@ class ConnectionTest extends TestCase
 
     protected function setUp(): void
     {
-        $host = getenv('API_DEV_MYSQL_HOST') ?: 'localhost';
-        $user = getenv('API_DEV_MYSQL_USER') ?: 'root';
-        $password = getenv('API_DEV_MYSQL_PASSWORD') ?: '';
-        $port = getenv('API_DEV_MYSQL_PORT') ?: 3306;
-        $database = getenv('API_DEV_MYSQL_TEST_DATABASE') ?: 'test_db';
-
-        // Agora conecta normalmente
-        \ApiDev\Mysql\Configuration::configure($host, $database, $user, $password, $port);
         $this->connection = \ApiDev\Mysql\Configuration::connect();
 
         // Create test table
