@@ -19,6 +19,35 @@ class Person
     {
         $this->attributes = $attributes;
     }
+    public function getId()
+    {
+        return $this->attributes['id'] ?? null;
+    }
+
+    public function getFirstName()
+    {
+        return $this->attributes['first_name'] ?? null;
+    }
+
+    public function getLastName()
+    {
+        return $this->attributes['last_name'] ?? null;
+    }
+
+    public function getBirthdate()
+    {
+        return $this->attributes['birthdate'] ?? null;
+    }
+
+    public function getCreatedAt()
+    {
+        return $this->attributes['created_at'] ?? null;
+    }
+
+    public function getUpdatedAt()
+    {
+        return $this->attributes['updated_at'] ?? null;
+    }
 
     public static function all(): array
     {
