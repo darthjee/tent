@@ -20,9 +20,6 @@ class DatabaseInitializer
      */
     public function initialize(): void
     {
-        // Ensure the database exists
-        Configuration::ensureDatabaseExists();
-
         // Create migrations table if it does not exist
         $this->connection->execute(
             "CREATE TABLE IF NOT EXISTS migrations (
