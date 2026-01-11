@@ -1,6 +1,5 @@
 <?php
 
-
 namespace ApiDev\Tests;
 
 require_once __DIR__ . '/../../../../source/lib/mysql/Migration.php';

@@ -38,7 +38,8 @@ class Configuration
         return $this->connection;
     }
 
-    private function createConnection() {
+    private function createConnection()
+    {
         $dsn_parts = [
             "mysql:host={$this->host}",
             "port={$this->port}",
