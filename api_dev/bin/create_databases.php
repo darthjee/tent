@@ -17,7 +17,7 @@ class DatabaseEnsurer {
 
         $initializer->initialize();
 
-        echo "Database '$database' ensured!\n";
+        echo "Database '$this->database' ensured!\n";
     }
 
     private function getHost() {
