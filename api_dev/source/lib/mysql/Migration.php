@@ -10,6 +10,20 @@ class Migration
     private $connection;
     private $sqlFilePath;
 
+    /**
+     * Checks if this migration has already been applied.
+     *
+     * @return bool
+     */
+    public function isMigrated(): bool
+    {
+        $filename = $this->fileName();
+        $result = $this->connection->fetch(
+            "SELECT 1 FROM migrations WHERE name = ? LIMIT 1",
+            [$filename]
+        );
+        return !empty($result);
+    }
     public function __construct(Connection $connection, string $sqlFilePath)
     {
         $this->connection = $connection;
