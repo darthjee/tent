@@ -46,7 +46,7 @@ class MigrationTest extends TestCase
     public function testThrowsExceptionIfFileMissing()
     {
         $migration = new Migration($this->connection, '/non/existent/file.sql');
-        $this->expectException(Exception::class);
+        $this->expectException(\Exception::class);
         $migration->run();
     }
 
@@ -55,7 +55,7 @@ class MigrationTest extends TestCase
         $file = tempnam(sys_get_temp_dir(), 'sql');
         unlink($file); // Remove file to simulate unreadable
         $migration = new Migration($this->connection, $file);
-        $this->expectException(Exception::class);
+        $this->expectException(\Exception::class);
         $migration->run();
     }
 }
