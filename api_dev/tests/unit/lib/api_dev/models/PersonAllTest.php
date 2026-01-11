@@ -14,9 +14,11 @@ class PersonAllTest extends TestCase
     {
         $connection = Configuration::connect();
         $connection->execute('DELETE FROM persons');
-        $connection->execute('INSERT INTO persons (first_name, last_name, birthdate) VALUES (?, ?, ?)', ['Alice', 'Smith', '1991-01-01']);
-        $connection->execute('INSERT INTO persons (first_name, last_name, birthdate) VALUES (?, ?, ?)', ['Bob', 'Jones', '1992-02-02']);
-        $connection->execute('INSERT INTO persons (first_name, last_name, birthdate) VALUES (?, ?, ?)', ['Carol', 'Brown', '1993-03-03']);
+
+        $query = 'INSERT INTO persons (first_name, last_name, birthdate) VALUES (?, ?, ?)';
+        $connection->execute($query, ['Alice', 'Smith', '1991-01-01']);
+        $connection->execute($query, ['Bob', 'Jones', '1992-02-02']);
+        $connection->execute($query, ['Carol', 'Brown', '1993-03-03']);
     }
 
     public function testAllReturnsAllPersons()
