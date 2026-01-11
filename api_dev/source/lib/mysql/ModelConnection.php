@@ -35,7 +35,7 @@ class ModelConnection
             $sql .= " OFFSET ?";
             $params[] = (int)$options['offset'];
         }
-        return $this->connection->fetch($sql, $params);
+        return $this->connection->fetchAll($sql, $params);
     }
 
     /**
