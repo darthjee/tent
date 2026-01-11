@@ -49,6 +49,11 @@ class Person
         return $this->attributes['updated_at'] ?? null;
     }
 
+    public function getAttributes()
+    {
+        return $this->attributes;
+    }
+
     public static function all(): array
     {
         $rows = self::getConnection()->list();
