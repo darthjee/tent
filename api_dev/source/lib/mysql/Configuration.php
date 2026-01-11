@@ -2,6 +2,8 @@
 
 namespace ApiDev\Mysql;
 
+use ApiDev\Mysql\Connection;
+
 class Configuration
 {
     private static $instance;

@@ -14,4 +14,19 @@ class Response
         $this->httpCode = $httpCode;
         $this->headerLines = $headerLines;
     }
+
+    public function getHttpCode(): int
+    {
+        return $this->httpCode;
+    }
+
+    public function getHeaders(): array
+    {
+        return $this->headerLines;
+    }
+
+    public function getBody()
+    {
+        return $this->body;
+    }
 }
