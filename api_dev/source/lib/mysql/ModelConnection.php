@@ -2,6 +2,8 @@
 
 namespace ApiDev\Mysql;
 
+require_once __DIR__ . '/Configuration.php';
+
 class ModelConnection
 {
     private $connection;
