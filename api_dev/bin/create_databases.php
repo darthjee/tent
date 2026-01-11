@@ -16,6 +16,8 @@ class DatabaseEnsurer {
         $initializer = new \ApiDev\Mysql\DatabaseInitializer($this->connection());
 
         $initializer->initialize();
+
+        echo "Database '$database' ensured!\n";
     }
 
     private function getHost() {
@@ -41,17 +43,21 @@ class DatabaseEnsurer {
         $port = $this->getPort();
         $database = $this->getDatabase();
 
-        return \ApiDev\Mysql\Configuration::ensureDatabaseExists(
+        \ApiDev\Mysql\Configuration::ensureDatabaseExists(
             $host, $user, $password, $port, $database
         );
 
-        echo "Database '$database' ensured!\n";
+        $configuration = new \ApiDev\Mysql\Configuration(
+            $host, $database, $user, $password, $port
+        );
+
+        return $configuration->connect();
     }
 }
 
 $databases = [
     getenv('API_DEV_MYSQL_TEST_DATABASE') ?: 'api_tent_test_db',
-    getenv('API_DEV_MYSQL_TEST_DATABASE_2') ?: 'api_tent_dev_db',
+    getenv('API_DEV_MYSQL_TEST_DATABASE_2') ?: 'api_tent_dev_db'
 ];
 foreach ($databases as $database) {
     (new DatabaseEnsurer($database))->ensure();
