@@ -14,6 +14,7 @@ class DatabaseMigrater {
     }
 
     public function migrate() {
+        echo "Migrating '$this->database' migrated!\n";
         \ApiDev\Mysql\MigrationsProcessor::migrate($this->connection());
 
         echo "Database '$this->database' migrated!\n";
@@ -60,4 +61,5 @@ foreach ($databases as $database) {
         continue;
     }
     (new DatabaseMigrater($database))->migrate();
+    echo "\n";
 }

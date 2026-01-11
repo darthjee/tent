@@ -58,6 +58,7 @@ class Migration
 
     private function execute(): void
     {
+        echo "Executing migration: " . $this->fileName() . "\n";
         $this->checkFileExistence();
         $sql = $this->fileContent();
         $statements = array_filter(array_map('trim', explode(';', $sql)));
