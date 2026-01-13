@@ -1,0 +1,8 @@
+{
+  "plugins": ["complexity"],
+  "rules": {
+    "complexity": ["warn", { "max": 10 }],
+    "max-lines": ["warn", { "max": 300 }],
+    "max-depth": ["warn", { "max": 4 }]
+  }
+}

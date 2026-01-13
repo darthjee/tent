@@ -11,6 +11,7 @@ services:
     image: darthjee/dev_tent
     volumes:
       - ./docker_volumes/vendor:/home/app/app/vendor
+      - ./docker_volumes/configuration:/home/app/app/source/configuration/
       - ./source:/home/app/app
 
   base_build:
@@ -38,7 +39,7 @@ services:
       - api_dev:api_dev
 
   tent_app:
-    depends_on: [base_build, tent_httpbin, api_dev]
+    depends_on: [base_build, tent_httpbin, api_dev, frontend_dev]
     container_name: tent_app
     <<: *base
     ports:
@@ -48,21 +49,32 @@ services:
     command: apache2-foreground
     links:
       - tent_httpbin:httpbin
-      - api_dev:api_dev
+      - api_dev:api
+      - frontend_dev:frontend
 
   api_dev:
+    <<: *base
     depends_on: [base_build, api_dev_mysql, api_dev_phpmyadmin]
     container_name: api_dev
-    <<: *base
     volumes:
       - ./docker_volumes/vendor:/home/app/app/vendor
-      - ./api_dev:/home/app/app
+      - ./dev/api:/home/app/app
     ports:
       - 127.0.0.1:8040:80
     env_file: .env
     links:
       - api_dev_mysql:mysql
     command: apache2-foreground
+
+  frontend_dev:
+    container_name: frontend_dev
+    image: darthjee/node:0.2.1
+    command: npm run server
+    volumes:
+      - ./dev/frontend:/home/node/app
+      - ./docker_volumes/node_modules:/home/node/app/node_modules
+    ports:
+      - 127.0.0.1:8030:8080
   
   api_dev_phpmyadmin:
     image: phpmyadmin/phpmyadmin

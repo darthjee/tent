@@ -19,8 +19,16 @@ workflows:
           filters:
             tags:
               only: /.*/
+      - dev_frontend_test:
+          filters:
+            tags:
+              only: /.*/
+      - dev_frontend_checks:
+          filters:
+            tags:
+              only: /.*/
       - build-and-release:
-          requires: [unit_test, checks, dev_api_test, dev_api_checks]
+          requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks]
           filters:
             tags:
               only: /.*/
@@ -37,7 +45,7 @@ jobs:
       - checkout
       - run:
           name: Remove other folders
-          command: rm -rf api_dev
+          command: rm -rf dev
       - run:
           name: Set folder
           command: mv source old; mv old/* ./; rm -rf old;
@@ -58,7 +66,7 @@ jobs:
       - checkout
       - run:
           name: Remove other folders
-          command: rm -rf api_dev
+          command: rm -rf dev
       - run:
           name: Copy files
           command: mv source old; mv old/* ./; rm -rf old;
@@ -95,7 +103,7 @@ jobs:
           command: rm -rf source
       - run:
           name: Set folder
-          command: mv api_dev/* ./; rm -rf api_dev;
+          command: mv dev/api/* ./; rm -rf dev;
       - run:
           name: Copy dependencies
           command: cp /home/circleci/vendor/ ./vendor/ -R
@@ -125,7 +133,7 @@ jobs:
           command: rm -rf source
       - run:
           name: Set folder
-          command: mv api_dev/* ./; rm -rf api_dev;
+          command: mv dev/api/* ./; rm -rf dev;
       - run:
           name: Copy dependencies
           command: cp /home/circleci/vendor/ ./vendor/ -R
@@ -135,6 +143,42 @@ jobs:
       - run:
           name: Run Lint
           command: composer lint
+
+  dev_frontend_test:
+    docker:
+      - image: darthjee/circleci_node:0.2.1
+    steps:
+      - checkout
+      - run:
+          name: Remove other folders
+          command: rm -rf source
+      - run:
+          name: Set folder
+          command: mv dev/frontend/* ./; rm -rf dev;
+      - run:
+          name: Yarn install
+          command: yarn install
+      - run:
+          name: Tests
+          command: npm test
+
+  dev_frontend_checks:
+    docker:
+      - image: darthjee/circleci_node:0.2.1
+    steps:
+      - checkout
+      - run:
+          name: Remove other folders
+          command: rm -rf source
+      - run:
+          name: Set folder
+          command: mv dev/frontend/* ./; rm -rf dev;
+      - run:
+          name: Yarn install
+          command: yarn install
+      - run:
+          name: Check JS Lint
+          command: npm run lint
 
   build-and-release:
     machine: true

@@ -5,7 +5,10 @@ source/coverage
 source/source/static/
 source/source/configuration/configure.php
 
-api_dev/.phpunit.result.cache
-api_dev/coverage
+dev/api/.phpunit.result.cache
+dev/api/coverage
+
+dev/frontend/.nyc_output/
 
 docker_volumes/mysql_data
+docker_volumes/node_modules

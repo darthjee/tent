@@ -1,0 +1,47 @@
+plugins:
+  - jasmine
+  - react
+env:
+  jasmine: true
+  browser: true
+  commonjs: true
+  es2021: true
+extends: 
+  - eslint:recommended
+  - plugin:react/recommended
+  - plugin:react/jsx-runtime
+settings:
+  react:
+    version: detect
+overrides: []
+parserOptions:
+  ecmaVersion: latest
+  sourceType: module
+  ecmaFeatures:
+    jsx: true
+ignorePatterns:
+  - weave/static/**/*.js
+  - static/**/*.js
+  - report/**
+rules:
+  indent:
+    - error
+    - 2
+  linebreak-style:
+    - error
+    - unix
+  quotes:
+    - error
+    - single
+  semi:
+    - error
+    - always
+  complexity:
+    - error
+    - 10
+  max-depth:
+    - error
+    - 4
+  max-lines:
+    - error
+    - 300
