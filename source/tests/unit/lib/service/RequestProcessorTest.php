@@ -48,6 +48,7 @@ use Tent\ProxyRequestHandler;
 use Tent\StaticFileHandler;
 use Tent\FolderLocation;
 use Tent\Request;
+use Tent\Response;
 use Tent\RequestMatcher;
 use Tent\Server;
 use Tent\CurlHttpClient;
@@ -71,7 +72,7 @@ class RequestProcessorTest extends TestCase {
 
         Configuration::addRule(
             new Rule(new ProxyRequestHandler($server), [
-                new RequestMatcher('GET', '/api/', 'begins_with')
+                new RequestMatcher('GET', '/get', 'exact')
             ])
         );
     }
@@ -103,7 +104,7 @@ class RequestProcessorTest extends TestCase {
         // Setup ProxyRequestHandler to httpbin
         $server = new Server('http://httpbin');
         $request = new Request([
-            'requestUrl' => '/api/persons',
+            'requestUrl' => '/get',
             'requestMethod' => 'GET',
             'query' => '',
             'headers' => []
@@ -117,6 +118,6 @@ class RequestProcessorTest extends TestCase {
         $json = json_decode($response->body, true);
         $this->assertIsArray($json);
         $this->assertArrayHasKey('url', $json);
-        $this->assertStringContainsString('/api/persons', $json['url']);
+        $this->assertStringContainsString('/get', $json['url']);
     }
 }
