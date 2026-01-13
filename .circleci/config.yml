@@ -37,7 +37,7 @@ jobs:
       - checkout
       - run:
           name: Remove other folders
-          command: rm -rf api_dev
+          command: rm -rf dev
       - run:
           name: Set folder
           command: mv source old; mv old/* ./; rm -rf old;
@@ -58,7 +58,7 @@ jobs:
       - checkout
       - run:
           name: Remove other folders
-          command: rm -rf api_dev
+          command: rm -rf dev
       - run:
           name: Copy files
           command: mv source old; mv old/* ./; rm -rf old;
@@ -95,7 +95,7 @@ jobs:
           command: rm -rf source
       - run:
           name: Set folder
-          command: mv api_dev/* ./; rm -rf api_dev;
+          command: mv dev/api/* ./; rm -rf dev;
       - run:
           name: Copy dependencies
           command: cp /home/circleci/vendor/ ./vendor/ -R
@@ -125,7 +125,7 @@ jobs:
           command: rm -rf source
       - run:
           name: Set folder
-          command: mv api_dev/* ./; rm -rf api_dev;
+          command: mv dev/api/* ./; rm -rf dev;
       - run:
           name: Copy dependencies
           command: cp /home/circleci/vendor/ ./vendor/ -R
