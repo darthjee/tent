@@ -1,36 +1,10 @@
 <?php
 
+namespace Tent\Tests;
+
 require_once __DIR__ . '/../../../../source/lib/service/RequestProcessor.php';
 require_once __DIR__ . '/../../../../source/lib/Configuration.php';
 require_once __DIR__ . '/../../../../source/lib/handlers/MissingRequestHandler.php';
-
-use PHPUnit\Framework\TestCase;
-use Tent\RequestProcessor;
-use Tent\Configuration;
-use Tent\Rule;
-
-class DummyRequestHandler {
-    public $handledRequest = null;
-    public function handleRequest($request) {
-        $this->handledRequest = $request;
-        return "handled: " . $request;
-    }
-}
-
-class DummyRule {
-    private $shouldMatch;
-    private $handler;
-    public function __construct($shouldMatch, $handler) {
-        $this->shouldMatch = $shouldMatch;
-        $this->handler = $handler;
-    }
-    public function match($request) {
-        return $this->shouldMatch;
-    }
-    public function handler() {
-        return $this->handler;
-    }
-}
 
 require_once __DIR__ . '/../../../../source/lib/handlers/StaticFileHandler.php';
 require_once __DIR__ . '/../../../../source/lib/handlers/ProxyRequestHandler.php';
@@ -40,9 +14,12 @@ require_once __DIR__ . '/../../../../source/lib/models/Response.php';
 require_once __DIR__ . '/../../../../source/lib/models/RequestMatcher.php';
 require_once __DIR__ . '/../../../../source/lib/models/Server.php';
 
-require_once __DIR__ . '/../../../../source/lib/handlers/ProxyRequestHandler.php';
-require_once __DIR__ . '/../../../../source/lib/models/Server.php';
 require_once __DIR__ . '/../../../../source/lib/http/CurlHttpClient.php';
+
+use PHPUnit\Framework\TestCase;
+use Tent\RequestProcessor;
+use Tent\Configuration;
+use Tent\Rule;
 
 use Tent\ProxyRequestHandler;
 use Tent\StaticFileHandler;
@@ -53,10 +30,12 @@ use Tent\RequestMatcher;
 use Tent\Server;
 use Tent\CurlHttpClient;
 
-class RequestProcessorTest extends TestCase {
+class RequestProcessorTest extends TestCase
+{
     private $staticPath;
-    
-    protected function setupStatic() {
+
+    protected function setupStatic()
+    {
         $this->staticPath = __DIR__ . '/../../../fixtures/static';
         $staticLocation = new FolderLocation($this->staticPath);
 
@@ -66,8 +45,9 @@ class RequestProcessorTest extends TestCase {
             ])
         );
     }
-    
-    protected function setupProxy() {
+
+    protected function setupProxy()
+    {
         $server = new Server('http://httpbin');
 
         Configuration::addRule(
@@ -77,14 +57,16 @@ class RequestProcessorTest extends TestCase {
         );
     }
 
-    protected function setUp(): void {
+    protected function setUp(): void
+    {
         // Reset rules before each test
         Configuration::reset();
         $this->setupStatic();
         $this->setupProxy();
     }
 
-    public function testStaticFileHandlerReturnsIndexHtml() {
+    public function testStaticFileHandlerReturnsIndexHtml()
+    {
 
         // Create a request to /index.html using named parameters
         $request = new Request([
@@ -100,7 +82,8 @@ class RequestProcessorTest extends TestCase {
         $this->assertStringContainsString('Content-Type: text/html', implode("\n", $response->headerLines));
     }
 
-    public function testProxyRequestHandlerForwardsToHttpbin() {
+    public function testProxyRequestHandlerForwardsToHttpbin()
+    {
         // Setup ProxyRequestHandler to httpbin
         $server = new Server('http://httpbin');
         $request = new Request([
@@ -110,7 +93,7 @@ class RequestProcessorTest extends TestCase {
             'headers' => []
         ]);
         $response = RequestProcessor::handleRequest($request);
-        
+
         $this->assertInstanceOf(Response::class, $response);
         $this->assertEquals(200, $response->httpCode);
         $this->assertNotEmpty($response->body);
