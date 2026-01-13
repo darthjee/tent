@@ -9,3 +9,4 @@ dev/api/.phpunit.result.cache
 dev/api/coverage
 
 docker_volumes/mysql_data
+docker_volumes/node_modules
