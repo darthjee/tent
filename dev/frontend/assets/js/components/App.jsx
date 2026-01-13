@@ -1,6 +1,6 @@
-import React from "react";
-import PersonList from "./PersonList";
+import React from 'react';
+import PersonList from './PersonList';
 
 export default function App() {
-    return <PersonList />;
+  return <PersonList />;
 }

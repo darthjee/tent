@@ -11,11 +11,11 @@ describe('PersonClient', function() {
     it('should fetch persons data successfully', async function() {
       const mockPersonsData = {
         id: 1,
-        first_name: "FirstName",
-        last_name: "LastName",
-        birthdate: "1985-03-05",
-        created_at: "2026-01-11 21:59:45",
-        updated_at: "2026-01-11 21:59:45"
+        first_name: 'FirstName',
+        last_name: 'LastName',
+        birthdate: '1985-03-05',
+        created_at: '2026-01-11 21:59:45',
+        updated_at: '2026-01-11 21:59:45'
       };
 
       spyOn(global, 'fetch').and.returnValue(
@@ -28,7 +28,7 @@ describe('PersonClient', function() {
       const result = await client.list();
 
       expect(global.fetch).toHaveBeenCalledWith(
-        `/persons`
+        '/persons'
       );
       expect(result).toEqual(mockPersonsData);
     });
@@ -49,7 +49,7 @@ describe('PersonClient', function() {
       }
 
       expect(global.fetch).toHaveBeenCalledWith(
-        `/persons`
+        '/persons'
       );
     });
 
