@@ -57,9 +57,11 @@ class RequestProcessorTest extends TestCase {
         ]);
         Configuration::addRule($rule);
 
-        // Simulate a request to /static/index.html
-        $_SERVER['REQUEST_URI'] = '/static/index.html';
-        $request = new Request();
+        // Create a request to /index.html using named parameters
+        $request = new Request([
+            'requestUrl' => '/index.html',
+            'requestMethod' => 'GET'
+        ]);
         $response = RequestProcessor::handleRequest($request);
 
         $expectedContent = file_get_contents($staticPath . '/index.html');
