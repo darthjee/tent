@@ -28,6 +28,8 @@ if (getenv('FRONTEND_DEV_MODE') === 'true') {
         new Rule(
             new StaticFileHandler(new FolderLocation('/var/www/html/static')),
             [
+                new RequestMatcher('GET', '/index.html', 'exact'),
+                new RequestMatcher('GET', '/assets', 'begins_with'),
             ]
         )
     );
