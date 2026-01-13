@@ -8,5 +8,7 @@ source/source/configuration/configure.php
 dev/api/.phpunit.result.cache
 dev/api/coverage
 
+dev/frontend/.nyc_output/
+
 docker_volumes/mysql_data
 docker_volumes/node_modules
