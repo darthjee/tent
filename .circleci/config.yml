@@ -23,8 +23,12 @@ workflows:
           filters:
             tags:
               only: /.*/
+      - dev_frontend_checks:
+          filters:
+            tags:
+              only: /.*/
       - build-and-release:
-          requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test]
+          requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks]
           filters:
             tags:
               only: /.*/
@@ -157,6 +161,24 @@ jobs:
       - run:
           name: Tests
           command: npm test
+
+  frontend-checks:
+    docker:
+      - image: darthjee/circleci_node:0.2.1
+    steps:
+      - checkout
+      - run:
+          name: Remove other folders
+          command: rm -rf source
+      - run:
+          name: Set folder
+          command: mv dev/frontend/* ./; rm -rf dev;
+      - run:
+          name: Yarn install
+          command: yarn install
+      - run:
+          name: Check JS Lint
+          command: npm run lint
 
   build-and-release:
     machine: true
