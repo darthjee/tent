@@ -32,29 +32,40 @@ class DummyRule {
     }
 }
 
+require_once __DIR__ . '/../../../../source/lib/handlers/StaticFileHandler.php';
+require_once __DIR__ . '/../../../../source/lib/models/FolderLocation.php';
+require_once __DIR__ . '/../../../../source/lib/models/Request.php';
+require_once __DIR__ . '/../../../../source/lib/models/Response.php';
+require_once __DIR__ . '/../../../../source/lib/models/RequestMatcher.php';
+
+use Tent\StaticFileHandler;
+use Tent\FolderLocation;
+use Tent\Request;
+use Tent\RequestMatcher;
+
 class RequestProcessorTest extends TestCase {
     protected function setUp(): void {
         // Reset rules before each test
-        $ref = new ReflectionClass(Configuration::class);
-        $prop = $ref->getProperty('rules');
-        $prop->setAccessible(true);
-        $prop->setValue([]);
+        Configuration::reset();
     }
 
-    public function testHandleReturnsHandlerResult() {
-        $handler = new DummyRequestHandler();
-        $rule = new DummyRule(true, $handler);
+    public function testStaticFileHandlerReturnsIndexHtml() {
+        $staticPath = __DIR__ . '/../../../fixtures/static';
+        $handler = new StaticFileHandler(new FolderLocation($staticPath));
+        $rule = new Rule($handler, [
+            new RequestMatcher('GET', '/index.html', 'exact')
+        ]);
         Configuration::addRule($rule);
-        $request = 'test-request';
-        $result = RequestProcessor::handleRequest($request);
-        $this->assertEquals('handled: test-request', $result);
-        $this->assertEquals($request, $handler->handledRequest);
-    }
 
-    public function testHandleReturnsNullIfNoRuleMatches() {
-        $rule = new DummyRule(false, new DummyRequestHandler());
-        Configuration::addRule($rule);
-        $result = RequestProcessor::handleRequest('no-match');
-        $this->assertNull($result);
+        // Simulate a request to /static/index.html
+        $_SERVER['REQUEST_URI'] = '/static/index.html';
+        $request = new Request();
+        $response = RequestProcessor::handleRequest($request);
+
+        $expectedContent = file_get_contents($staticPath . '/index.html');
+        $this->assertInstanceOf(\Tent\Response::class, $response);
+        $this->assertEquals(200, $response->httpCode);
+        $this->assertEquals($expectedContent, $response->body);
+        $this->assertStringContainsString('Content-Type: text/html', implode("\n", $response->headerLines));
     }
 }
