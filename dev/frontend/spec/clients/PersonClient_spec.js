@@ -1,31 +1,86 @@
-import PersonClient from "../../assets/js/clients/PersonClient.js";
+import { PersonClient } from '../../assets/js/clients/PersonClient.js';
 
-describe("PersonClient", () => {
-  beforeEach(() => {
-    global.fetch = jest.fn();
+describe('PersonClient', function() {
+  let client;
+
+  beforeEach(function() {
+    client = new PersonClient();
   });
 
-  afterEach(() => {
-    jest.resetAllMocks();
-  });
+  describe('list()', function() {
+    it('should fetch persons data successfully', async function() {
+      const mockPersonsData = {
+        id: 1,
+        first_name: "FirstName",
+        last_name: "LastName",
+        birthdate: "1985-03-05",
+        created_at: "2026-01-11 21:59:45",
+        updated_at: "2026-01-11 21:59:45"
+      };
 
-  it("calls /persons and returns data", async () => {
-    const mockData = [
-      { id: 1, first_name: "Alice", last_name: "Smith", birthdate: "1991-01-01" },
-      { id: 2, first_name: "Bob", last_name: "Jones", birthdate: "1992-02-02" }
-    ];
-    global.fetch.mockResolvedValue({
-      ok: true,
-      json: async () => mockData
+      spyOn(global, 'fetch').and.returnValue(
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockPersonsData)
+        })
+      );
+
+      const result = await client.list();
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        `/persons`
+      );
+      expect(result).toEqual(mockPersonsData);
     });
 
-    const result = await PersonClient.list();
-    expect(global.fetch).toHaveBeenCalledWith("/persons");
-    expect(result).toEqual(mockData);
-  });
+    it('should throw error when fetch fails', async function() {
+      spyOn(global, 'fetch').and.returnValue(
+        Promise.resolve({
+          ok: false,
+          status: 500
+        })
+      );
 
-  it("throws error if fetch fails", async () => {
-    global.fetch.mockResolvedValue({ ok: false });
-    await expect(PersonClient.list()).rejects.toThrow("Failed to fetch persons");
+      try {
+        await client.list();
+        fail('Expected an error to be thrown');
+      } catch (error) {
+        expect(error.message).toBe('Failed to fetch persons data');
+      }
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        `/persons`
+      );
+    });
+
+    it('should throw error when fetch rejects', async function() {
+      const networkError = new Error('Network error');
+      spyOn(global, 'fetch').and.returnValue(
+        Promise.reject(networkError)
+      );
+
+      try {
+        await client.list();
+        fail('Expected an error to be thrown');
+      } catch (error) {
+        expect(error).toBe(networkError);
+      }
+    });
+
+    it('should handle 404 not found', async function() {
+      spyOn(global, 'fetch').and.returnValue(
+        Promise.resolve({
+          ok: false,
+          status: 404
+        })
+      );
+
+      try {
+        await client.list();
+        fail('Expected an error to be thrown');
+      } catch (error) {
+        expect(error.message).toBe('Failed to fetch persons data');
+      }
+    });
   });
 });
