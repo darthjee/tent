@@ -27,9 +27,10 @@ services:
   # Services
 
   tent_tests:
+    <<: *base
+    env_file: .env
     depends_on: [base_build, tent_httpbin, api_dev]
     container_name: tent_tests
-    <<: *base
     environment:
       - PHP_ENV=test
       - TEST_SERVER_DOMAIN=tent_app
@@ -40,9 +41,10 @@ services:
       - api_dev:api_dev
 
   tent_app:
+    <<: *base
+    env_file: .env
     depends_on: [base_build, tent_httpbin, api_dev, frontend_dev]
     container_name: tent_app
-    <<: *base
     ports:
       - 127.0.0.1:8080:80
     environment:
@@ -68,6 +70,7 @@ services:
     command: apache2-foreground
 
   frontend_dev:
+    env_file: .env
     container_name: frontend_dev
     image: darthjee/node:0.2.1
     command: npm run server
@@ -78,6 +81,7 @@ services:
       - 127.0.0.1:8030:8080
   
   api_dev_phpmyadmin:
+    env_file: .env
     image: phpmyadmin/phpmyadmin
     container_name: api_dev_phpmyadmin
     depends_on: [api_dev_mysql]
@@ -93,6 +97,7 @@ services:
       - 127.0.0.1:3050:80
 
   tent_httpbin:
+    env_file: .env
     image: kennethreitz/httpbin
     container_name: tent_httpbin
     ports:
