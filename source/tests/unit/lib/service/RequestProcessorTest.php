@@ -33,23 +33,24 @@ class DummyRule {
 }
 
 require_once __DIR__ . '/../../../../source/lib/handlers/StaticFileHandler.php';
+require_once __DIR__ . '/../../../../source/lib/handlers/ProxyRequestHandler.php';
 require_once __DIR__ . '/../../../../source/lib/models/FolderLocation.php';
 require_once __DIR__ . '/../../../../source/lib/models/Request.php';
 require_once __DIR__ . '/../../../../source/lib/models/Response.php';
 require_once __DIR__ . '/../../../../source/lib/models/RequestMatcher.php';
+require_once __DIR__ . '/../../../../source/lib/models/Server.php';
 
+use Tent\ProxyRequestHandler;
 use Tent\StaticFileHandler;
 use Tent\FolderLocation;
 use Tent\Request;
 use Tent\RequestMatcher;
+use Tent\Server;
 
 class RequestProcessorTest extends TestCase {
     private $staticPath;
     
-    protected function setUp(): void {
-        // Reset rules before each test
-        Configuration::reset();
-
+    protected function setupStatic() {
         $this->staticPath = __DIR__ . '/../../../fixtures/static';
         $staticLocation = new FolderLocation($this->staticPath);
 
@@ -58,6 +59,23 @@ class RequestProcessorTest extends TestCase {
                 new RequestMatcher('GET', '/index.html', 'exact')
             ])
         );
+    }
+    
+    protected function setupProxy() {
+        $server = new Server('http://httpbin');
+
+        Configuration::addRule(
+            new Rule(new ProxyRequestHandler($server), [
+                new RequestMatcher('GET', '/api/', 'begins_with')
+            ])
+        );
+    }
+
+    protected function setUp(): void {
+        // Reset rules before each test
+        Configuration::reset();
+        $this->setupStatic();
+        $this->setupProxy();
     }
 
     public function testStaticFileHandlerReturnsIndexHtml() {
