@@ -32,5 +32,7 @@ class RequestProcessor
                 return $rule->handler();
             }
         }
+
+        return new MissingRequestHandler();
     }
 }

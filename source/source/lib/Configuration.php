@@ -18,4 +18,9 @@ class Configuration
             [new Rule(new MissingRequestHandler())]
         );
     }
+
+    public static function reset()
+    {
+        self::$rules = [];
+    }
 }

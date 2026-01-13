@@ -8,7 +8,6 @@ use Tent\Server;
 use Tent\FolderLocation;
 use Tent\RequestMatcher;
 
-
 if (getenv('FRONTEND_DEV_MODE') === 'true') {
     Configuration::addRule(
         new Rule(
