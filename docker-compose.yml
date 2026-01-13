@@ -38,7 +38,7 @@ services:
       - api_dev:api_dev
 
   tent_app:
-    depends_on: [base_build, tent_httpbin, api_dev]
+    depends_on: [base_build, tent_httpbin, api_dev, frontend_dev]
     container_name: tent_app
     <<: *base
     ports:
@@ -63,6 +63,16 @@ services:
     links:
       - api_dev_mysql:mysql
     command: apache2-foreground
+
+  frontend_dev:
+    container_name: frontend_dev
+    image: darthjee/node:0.2.1
+    command: npm run server
+    volumes:
+      - ./dev/frontend:/home/node/app
+      - ./docker_volumes/node_modules:/home/node/app/node_modules
+    ports:
+      - 127.0.0.1:8030:8080
   
   api_dev_phpmyadmin:
     image: phpmyadmin/phpmyadmin
