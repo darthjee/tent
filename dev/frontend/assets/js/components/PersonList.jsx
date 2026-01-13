@@ -6,7 +6,7 @@ const PersonList = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch("/api/persons")
+    fetch("/persons")
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch persons");
         return res.json();

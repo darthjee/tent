@@ -29,3 +29,12 @@ Configuration::addRule(
         ]
     )
 );
+
+Configuration::addRule(
+    new Rule(
+        new ProxyRequestHandler(new Server('http://api:80')),
+        [
+            new RequestMatcher('GET', '/persons', 'exact')
+        ]
+    )
+);
