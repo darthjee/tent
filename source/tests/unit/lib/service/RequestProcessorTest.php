@@ -91,4 +91,18 @@ class RequestProcessorTest extends TestCase
         $this->assertArrayHasKey('url', $json);
         $this->assertStringContainsString('/get', $json['url']);
     }
+
+    public function testReturnsMissingResponseForUnmatchedRoute()
+    {
+        // No rules added, so fallback handler should be used
+        $request = new \Tent\Request([
+            'requestUrl' => '/other',
+            'requestMethod' => 'GET'
+        ]);
+        $response = \Tent\RequestProcessor::handleRequest($request);
+
+        $this->assertInstanceOf(\Tent\Response::class, $response);
+        $this->assertEquals(404, $response->httpCode);
+        $this->assertStringContainsString('Not Found', $response->body);
+    }
 }
