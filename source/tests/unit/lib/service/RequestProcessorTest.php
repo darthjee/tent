@@ -40,12 +40,17 @@ require_once __DIR__ . '/../../../../source/lib/models/Response.php';
 require_once __DIR__ . '/../../../../source/lib/models/RequestMatcher.php';
 require_once __DIR__ . '/../../../../source/lib/models/Server.php';
 
+require_once __DIR__ . '/../../../../source/lib/handlers/ProxyRequestHandler.php';
+require_once __DIR__ . '/../../../../source/lib/models/Server.php';
+require_once __DIR__ . '/../../../../source/lib/http/CurlHttpClient.php';
+
 use Tent\ProxyRequestHandler;
 use Tent\StaticFileHandler;
 use Tent\FolderLocation;
 use Tent\Request;
 use Tent\RequestMatcher;
 use Tent\Server;
+use Tent\CurlHttpClient;
 
 class RequestProcessorTest extends TestCase {
     private $staticPath;
@@ -92,5 +97,26 @@ class RequestProcessorTest extends TestCase {
         $this->assertEquals(200, $response->httpCode);
         $this->assertEquals($expectedContent, $response->body);
         $this->assertStringContainsString('Content-Type: text/html', implode("\n", $response->headerLines));
+    }
+
+    public function testProxyRequestHandlerForwardsToHttpbin() {
+        // Setup ProxyRequestHandler to httpbin
+        $server = new Server('http://httpbin');
+        $request = new Request([
+            'requestUrl' => '/api/persons',
+            'requestMethod' => 'GET',
+            'query' => '',
+            'headers' => []
+        ]);
+        $response = RequestProcessor::handleRequest($request);
+        
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertEquals(200, $response->httpCode);
+        $this->assertNotEmpty($response->body);
+        // httpbin returns JSON for /anything and /get endpoints, so we check for JSON
+        $json = json_decode($response->body, true);
+        $this->assertIsArray($json);
+        $this->assertArrayHasKey('url', $json);
+        $this->assertStringContainsString('/api/persons', $json['url']);
     }
 }
