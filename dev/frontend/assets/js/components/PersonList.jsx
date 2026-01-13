@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import PersonClient from "../clients/PersonClient";
 
 const PersonList = () => {
   const [persons, setPersons] = useState([]);
@@ -6,11 +7,7 @@ const PersonList = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch("/persons")
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch persons");
-        return res.json();
-      })
+    PersonClient.list()
       .then((data) => {
         setPersons(data);
         setLoading(false);
