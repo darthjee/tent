@@ -48,7 +48,8 @@ services:
     command: apache2-foreground
     links:
       - tent_httpbin:httpbin
-      - api_dev:api_dev
+      - api_dev:api
+      - frontend_dev:frontend
 
   api_dev:
     <<: *base
