@@ -44,18 +44,23 @@ use Tent\Request;
 use Tent\RequestMatcher;
 
 class RequestProcessorTest extends TestCase {
+    private $staticPath;
+    
     protected function setUp(): void {
         // Reset rules before each test
         Configuration::reset();
+
+        $this->staticPath = __DIR__ . '/../../../fixtures/static';
+        $staticLocation = new FolderLocation($this->staticPath);
+
+        Configuration::addRule(
+            new Rule(new StaticFileHandler($staticLocation), [
+                new RequestMatcher('GET', '/index.html', 'exact')
+            ])
+        );
     }
 
     public function testStaticFileHandlerReturnsIndexHtml() {
-        $staticPath = __DIR__ . '/../../../fixtures/static';
-        $handler = new StaticFileHandler(new FolderLocation($staticPath));
-        $rule = new Rule($handler, [
-            new RequestMatcher('GET', '/index.html', 'exact')
-        ]);
-        Configuration::addRule($rule);
 
         // Create a request to /index.html using named parameters
         $request = new Request([
@@ -64,7 +69,7 @@ class RequestProcessorTest extends TestCase {
         ]);
         $response = RequestProcessor::handleRequest($request);
 
-        $expectedContent = file_get_contents($staticPath . '/index.html');
+        $expectedContent = file_get_contents($this->staticPath . '/index.html');
         $this->assertInstanceOf(\Tent\Response::class, $response);
         $this->assertEquals(200, $response->httpCode);
         $this->assertEquals($expectedContent, $response->body);
