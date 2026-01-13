@@ -8,7 +8,6 @@ use PHPUnit\Framework\TestCase;
 use Tent\RequestProcessor;
 use Tent\Configuration;
 use Tent\Rule;
-
 use Tent\ProxyRequestHandler;
 use Tent\StaticFileHandler;
 use Tent\FolderLocation;
@@ -16,7 +15,6 @@ use Tent\Request;
 use Tent\Response;
 use Tent\RequestMatcher;
 use Tent\Server;
-use Tent\CurlHttpClient;
 
 class RequestProcessorTest extends TestCase
 {
