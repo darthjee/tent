@@ -11,6 +11,7 @@ services:
     image: darthjee/dev_tent
     volumes:
       - ./docker_volumes/vendor:/home/app/app/vendor
+      - ./docker_volumes/configuration:/home/app/app/source/configuration/
       - ./source:/home/app/app
 
   base_build:
