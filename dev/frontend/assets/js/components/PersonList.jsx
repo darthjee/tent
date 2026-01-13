@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import PersonClient from "../clients/PersonClient";
+import { PersonClient } from "../clients/PersonClient";
 
 const PersonList = () => {
   const [persons, setPersons] = useState([]);
@@ -7,7 +7,7 @@ const PersonList = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    PersonClient.list()
+    (new PersonClient()).list()
       .then((data) => {
         setPersons(data);
         setLoading(false);

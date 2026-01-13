@@ -1,9 +1,12 @@
 class PersonClient {
-  static async list() {
-    const res = await fetch("/persons");
-    if (!res.ok) throw new Error("Failed to fetch persons");
-    return await res.json();
+  async list() {
+    const response = await fetch('/persons');
+    if (!response.ok) {
+      throw new Error('Failed to fetch persons data');
+    }
+    return response.json();
   }
 }
 
-export default PersonClient;
+// Export class for testing or custom instances
+export { PersonClient };
