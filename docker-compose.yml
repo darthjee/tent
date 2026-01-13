@@ -51,12 +51,12 @@ services:
       - api_dev:api_dev
 
   api_dev:
+    <<: *base
     depends_on: [base_build, api_dev_mysql, api_dev_phpmyadmin]
     container_name: api_dev
-    <<: *base
     volumes:
       - ./docker_volumes/vendor:/home/app/app/vendor
-      - ./api_dev:/home/app/app
+      - ./dev/api:/home/app/app
     ports:
       - 127.0.0.1:8040:80
     env_file: .env
