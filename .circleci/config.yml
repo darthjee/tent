@@ -162,7 +162,7 @@ jobs:
           name: Tests
           command: npm test
 
-  frontend-checks:
+  dev_frontend_checks:
     docker:
       - image: darthjee/circleci_node:0.2.1
     steps:
