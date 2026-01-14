@@ -68,8 +68,6 @@ class RequestProcessorTest extends TestCase
 
     public function testProxyRequestHandlerForwardsToHttpbin()
     {
-        // Setup ProxyRequestHandler to httpbin
-        $server = new Server('http://httpbin');
         $request = new Request([
             'requestUrl' => '/get',
             'requestMethod' => 'GET',
