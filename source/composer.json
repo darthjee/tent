@@ -22,6 +22,6 @@
         "tests:integration": "vendor/bin/phpunit --coverage-html coverage/ tests/integration",
         "lint": "phpcs --standard=phpcs.xml",
         "lint:fix": "phpcbf --standard=phpcs.xml",
-        "docs": "vendor/bin/phpdoc"
+        "docs": "vendor/bin/phpdoc -d source"
     }
 }
