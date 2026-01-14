@@ -13,7 +13,7 @@ use Tent\ContentType;
  */
 abstract class FileHandler implements RequestHandler
 {
-    abstract protected function getFilePath($request);
+    abstract protected function getFilePath(Request $request);
 
     /**
      * Reads the file defined by getFilePath and returns its contents as a Response.
@@ -26,7 +26,7 @@ abstract class FileHandler implements RequestHandler
      * @return Response The HTTP response containing the file contents, or MissingResponse if not found.
      * @see ContentType::getContentType()
      */
-    public function handleRequest($request)
+    public function handleRequest(Request $request)
     {
         $filePath = $this->getFilePath($request);
         if (!file_exists($filePath) || !is_file($filePath)) {

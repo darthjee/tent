@@ -27,7 +27,7 @@ class StaticFileHandler extends FileHandler
      * @param Request $request The incoming HTTP request.
      * @return string The full file path to the static asset.
      */
-    protected function getFilePath($request)
+    protected function getFilePath(Request $request)
     {
         return $this->folderLocation->basePath() . $request->requestUrl();
     }

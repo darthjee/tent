@@ -18,7 +18,7 @@ class MissingRequestHandler implements RequestHandler
      * @param Request $request The incoming HTTP request.
      * @return MissingResponse The 404 response.
      */
-    public function handleRequest($request)
+    public function handleRequest(Request $request)
     {
         return new MissingResponse();
     }

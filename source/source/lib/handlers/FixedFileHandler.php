@@ -18,7 +18,7 @@ class FixedFileHandler extends FileHandler
     /**
      * @param string $filePath The path to the file to be served for all requests.
      */
-    public function __construct($filePath)
+    public function __construct(string $filePath)
     {
         $this->filePath = $filePath;
     }
@@ -29,7 +29,7 @@ class FixedFileHandler extends FileHandler
      * @param Request $request The incoming HTTP request (ignored).
      * @return string The file path to be served.
      */
-    protected function getFilePath($request)
+    protected function getFilePath(Request $request)
     {
         return $this->filePath;
     }

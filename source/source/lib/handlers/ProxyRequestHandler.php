@@ -39,7 +39,7 @@ class ProxyRequestHandler implements RequestHandler
      * @param Request $request The incoming HTTP request to be proxied.
      * @return Response The response from the target server.
      */
-    public function handleRequest($request)
+    public function handleRequest(Request $request)
     {
         // Build full URL from target host and request path
         $url = $this->server->targetHost() . $request->requestUrl();
