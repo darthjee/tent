@@ -17,7 +17,9 @@ class RequestMatcher
     /**
      * @param string|null $requestMethod HTTP method to match (e.g., GET, POST), or null for any.
      * @param string|null $requestUri URI to match, or null for any.
-     * @param string $matchType Type of URI match: 'exact' or 'begins_with'.
+     * @param string $matchType URI match type:
+     *   - 'exact': the request URI must be exactly equal to $requestUri.
+     *   - 'begins_with': the request URI must start with $requestUri (prefix match).
      */
     public function __construct($requestMethod = null, $requestUri = null, $matchType = 'exact')
     {
@@ -50,6 +52,10 @@ class RequestMatcher
 
     /**
      * Checks if the request URI matches according to matchType.
+     *
+     * Available matchType values:
+     *   - 'exact': requires the request URI to be exactly equal to $requestUri.
+     *   - 'begins_with': requires the request URI to start with $requestUri (prefix match).
      *
      * @param Request $request
      * @return bool
