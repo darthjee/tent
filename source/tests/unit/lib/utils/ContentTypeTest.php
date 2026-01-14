@@ -30,4 +30,28 @@ class ContentTypeTest extends TestCase
         $filePath = './tests/fixtures/style.css';
         $this->assertEquals('text/css', ContentType::getContentType($filePath));
     }
+
+    public function testReturnsJsContentType()
+    {
+        $filePath = './tests/fixtures/script.js';
+        $this->assertEquals('application/javascript', ContentType::getContentType($filePath));
+    }
+
+    public function testReturnsTxtContentType()
+    {
+        $filePath = './tests/fixtures/sample.txt';
+        $this->assertEquals('text/plain', ContentType::getContentType($filePath));
+    }
+
+    public function testReturnsHtmlContentTypeForHtmlExtension()
+    {
+        $filePath = './tests/fixtures/sample.html';
+        $this->assertEquals('text/html', ContentType::getContentType($filePath));
+    }
+
+    public function testReturnsHtmlContentTypeForHtmExtension()
+    {
+        $filePath = './tests/fixtures/sample.htm';
+        $this->assertEquals('text/html', ContentType::getContentType($filePath));
+    }
 }
