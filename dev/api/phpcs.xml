@@ -19,4 +19,5 @@
     <!-- Include source files -->
     <file>source</file>
     <file>tests</file>
+    <file>bin</file>
 </ruleset>
