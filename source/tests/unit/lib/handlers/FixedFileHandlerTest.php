@@ -44,4 +44,13 @@ class FixedFileHandlerTest extends \PHPUnit\Framework\TestCase
         $this->assertNotEmpty($response->body);
         $this->assertContains('Content-Type: image/gif', $response->headerLines);
     }
+
+    public function testReturnsMissingResponseWhenFileNotFound()
+    {
+        $handler = new FixedFileHandler(__DIR__ . '/../fixtures/nonexistent.txt');
+        $request = $this->createMock(\Tent\Request::class);
+        $response = $handler->handleRequest($request);
+
+        $this->assertInstanceOf(\Tent\MissingResponse::class, $response);
+    }
 }
