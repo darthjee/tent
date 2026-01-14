@@ -29,7 +29,13 @@ if (file_exists($configFile)) {
     require_once $configFile;
 }
 
-function send_response($response)
+/**
+ * Sends the HTTP response to the client.
+ *
+ * @param Tent\Response $response The response to send.
+ * @return void
+ */
+function send_response(Tent\Response $response)
 {
     http_response_code($response->httpCode);
     foreach ($response->headerLines as $header) {

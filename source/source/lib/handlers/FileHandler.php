@@ -4,11 +4,42 @@ namespace Tent;
 
 use Tent\ContentType;
 
+/**
+ * Abstract RequestHandler for serving file contents as HTTP responses.
+ *
+ * This class provides the base logic for reading files and returning their contents
+ * as HTTP responses. It is intended to be extended by concrete handlers such as
+ * StaticFileHandler (serving files from a directory) and FixedFileHandler (serving a fixed file).
+ */
 abstract class FileHandler implements RequestHandler
 {
-    abstract protected function getFilePath($request);
+    /**
+     * Returns the file path to be used as the response body for the given request.
+     *
+     * This method must be implemented by subclasses to determine how the file path is resolved.
+     * For example, StaticFileHandler uses the request URL and a base directory, while
+     * FixedFileHandler always returns a fixed path.
+     *
+     * @param Request $request The incoming HTTP request.
+     * @return string The file path to be served as the response body.
+     *
+     * @see StaticFileHandler
+     * @see FixedFileHandler
+     */
+    abstract protected function getFilePath(Request $request);
 
-    public function handleRequest($request)
+    /**
+     * Reads the file defined by getFilePath and returns its contents as a Response.
+     *
+     * The file path is determined by the concrete implementation of getFilePath($request).
+     * If the file does not exist or is not a regular file, a MissingResponse is returned.
+     * The Content-Type header is determined using the ContentType utility.
+     *
+     * @param Request $request The incoming HTTP request.
+     * @return Response The HTTP response containing the file contents, or MissingResponse if not found.
+     * @see ContentType::getContentType()
+     */
+    public function handleRequest(Request $request)
     {
         $filePath = $this->getFilePath($request);
         if (!file_exists($filePath) || !is_file($filePath)) {

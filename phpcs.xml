@@ -6,4 +6,13 @@
         <exclude-pattern>source/tests/*</exclude-pattern>
         <exclude-pattern>dev/api/tests/*</exclude-pattern>
     </rule>
+
+    <!-- Require code documentation (PHPDoc) -->
+    <rule ref="Squiz.Commenting.FileComment">
+        <exclude-pattern>dev/api/*</exclude-pattern>
+        <exclude-pattern>source/*</exclude-pattern>
+    </rule>
+    <rule ref="Squiz.Commenting.FunctionComment">
+        <exclude-pattern>dev/api/*</exclude-pattern>
+    </rule>
 </ruleset>

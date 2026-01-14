@@ -25,5 +25,5 @@ interface RequestHandler
      * @param Request $request The incoming request to process.
      * @return Response The response to be sent back.
      */
-    public function handleRequest($request);
+    public function handleRequest(Request $request);
 }
