@@ -2,6 +2,8 @@
 
 namespace Tent;
 
+use Tent\HttpClientInterface;
+
 class CurlHttpClient implements HttpClientInterface
 {
     public function request($url, $headers)
