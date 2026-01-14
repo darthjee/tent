@@ -14,6 +14,7 @@ require_once __DIR__ . '/../../source/lib/handlers/ProxyRequestHandler.php';
 require_once __DIR__ . '/../../source/lib/handlers/StaticFileHandler.php';
 require_once __DIR__ . '/../../source/lib/http/CurlHttpClient.php';
 require_once __DIR__ . '/../../source/lib/models/FolderLocation.php';
+require_once __DIR__ . '/../../source/lib/models/ForbiddenResponse.php';
 require_once __DIR__ . '/../../source/lib/models/MissingResponse.php';
 require_once __DIR__ . '/../../source/lib/models/Request.php';
 require_once __DIR__ . '/../../source/lib/models/RequestMatcher.php';
