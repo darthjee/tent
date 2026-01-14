@@ -11,6 +11,7 @@ require_once __DIR__ . '/../../source/lib/handlers/FileHandler.php';
 require_once __DIR__ . '/../../source/lib/handlers/FixedFileHandler.php';
 require_once __DIR__ . '/../../source/lib/handlers/MissingRequestHandler.php';
 require_once __DIR__ . '/../../source/lib/handlers/ProxyRequestHandler.php';
+require_once __DIR__ . '/../../source/lib/handlers/RequestPathValidator.php';
 require_once __DIR__ . '/../../source/lib/handlers/StaticFileHandler.php';
 require_once __DIR__ . '/../../source/lib/http/CurlHttpClient.php';
 require_once __DIR__ . '/../../source/lib/models/FolderLocation.php';
