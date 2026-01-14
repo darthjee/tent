@@ -13,12 +13,13 @@ class FixedFileHandler implements RequestHandler
 
     public function handleRequest($request)
     {
-        if (!file_exists($this->filePath) || !is_file($this->filePath)) {
+        $filePath = $this->getFilePath();
+        if (!file_exists($filePath) || !is_file($filePath)) {
             return new MissingResponse();
         }
 
-        $content = file_get_contents($this->filePath);
-        $contentType = $this->getContentType($this->filePath);
+        $content = file_get_contents($filePath);
+        $contentType = $this->getContentType($filePath);
         $contentLength = strlen($content);
 
         return new Response(
@@ -29,6 +30,11 @@ class FixedFileHandler implements RequestHandler
                 "Content-Length: $contentLength"
             ]
         );
+    }
+
+    private function getFilePath()
+    {
+        return $this->filePath;
     }
 
     private function getContentType($filePath)

@@ -13,7 +13,7 @@ class StaticFileHandler implements RequestHandler
 
     public function handleRequest($request)
     {
-        $filePath = $this->folderLocation->basePath() . $request->requestUrl();
+        $filePath = $this->getFilePath($request);
 
         if (!file_exists($filePath) || !is_file($filePath)) {
             return new MissingResponse();
@@ -31,6 +31,11 @@ class StaticFileHandler implements RequestHandler
                 "Content-Length: $contentLength"
             ]
         );
+    }
+
+    private function getFilePath($request)
+    {
+        return $this->folderLocation->basePath() . $request->requestUrl();
     }
 
     private function getContentType($filePath)
