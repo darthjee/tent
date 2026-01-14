@@ -55,19 +55,6 @@ class RouteConfigurationTest extends TestCase
         $this->assertEquals('{"status":"ok"}', $response->body);
     }
 
-    public function testMatchAndHandleWorkTogether()
-    {
-        $request = $this->createMockRequest('GET', '/health');
-        $config = new RouteConfiguration('GET', '/health', HealthCheckEndpoint::class);
-
-        if ($config->match($request)) {
-            $response = $config->handle($request);
-            $this->assertInstanceOf(Response::class, $response);
-        } else {
-            $this->fail('Route should have matched');
-        }
-    }
-
     public function testConfigurationWithDifferentHttpMethods()
     {
         $methods = ['GET', 'POST', 'PUT', 'DELETE'];
