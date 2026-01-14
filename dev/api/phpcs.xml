@@ -6,8 +6,7 @@
     <rule ref="PSR12"/>
     <!-- Detect unused variables -->
     <rule ref="SlevomatCodingStandard.Variables.UnusedVariable"/>
-    <!-- Detect unused private elements -->
-    <rule ref="SlevomatCodingStandard.Classes.UnusedPrivateElements"/>
+    <rule ref="SlevomatCodingStandard.Variables.UselessVariable"/>
     
     <!-- Exclude side effects rule for tests and bin directories -->
     <rule ref="PSR1.Files.SideEffects.FoundWithSymbols">
@@ -25,4 +24,7 @@
     <file>source</file>
     <file>tests</file>
     <file>bin</file>
+
+    <!-- Exclude static directory -->
+    <exclude-pattern>vendor/*</exclude-pattern>
 </ruleset>
