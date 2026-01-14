@@ -41,6 +41,12 @@ class ProxyRequestHandler implements RequestHandler
      */
     public function handleRequest(Request $request)
     {
+        // Validate request path for traversal attacks
+        $validator = new RequestPathValidator($request);
+        if (!$validator->isValid()) {
+            return new ForbiddenResponse();
+        }
+
         // Build full URL from target host and request path
         $url = $this->server->targetHost() . $request->requestUrl();
         if ($request->query()) {
