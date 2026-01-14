@@ -2,8 +2,6 @@
 
 namespace Tent\Tests;
 
-require_once __DIR__ . '/../../../support/tests_loader.php';
-
 use PHPUnit\Framework\TestCase;
 use Tent\RequestProcessor;
 use Tent\Configuration;

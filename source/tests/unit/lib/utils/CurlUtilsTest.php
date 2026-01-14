@@ -5,8 +5,6 @@ namespace Tent\Tests;
 use PHPUnit\Framework\TestCase;
 use Tent\CurlUtils;
 
-require_once __DIR__ . '/../../../../source/lib/utils/CurlUtils.php';
-
 class CurlUtilsTest extends TestCase
 {
     public function testBuildHeaderLinesWithSingleHeader()

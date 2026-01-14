@@ -7,8 +7,6 @@ use Tent\Rule;
 use Tent\RequestMatcher;
 use Tent\Request;
 
-require_once __DIR__ . '/../../../support/tests_loader.php';
-
 class RuleTest extends TestCase
 {
     public function testMatchReturnsTrueWhenAMatcherMatches()
