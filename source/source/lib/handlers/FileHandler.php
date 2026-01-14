@@ -28,6 +28,4 @@ abstract class FileHandler implements RequestHandler
             ]
         );
     }
-
-    // Content type logic moved to Tent\Utils\ContentType
 }
