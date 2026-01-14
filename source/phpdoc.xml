@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<phpdoc>
+  <files>
+    <directory>./</directory>
+    <exclude>vendor/</exclude>
+  </files>
+</phpdoc>
