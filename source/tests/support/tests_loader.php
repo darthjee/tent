@@ -7,6 +7,8 @@ require_once __DIR__ . '/../../source/lib/http/HttpClientInterface.php';
 require_once __DIR__ . '/../../source/lib/models/Response.php';
 
 require_once __DIR__ . '/../../source/lib/Configuration.php';
+require_once __DIR__ . '/../../source/lib/handlers/FileHandler.php';
+require_once __DIR__ . '/../../source/lib/handlers/FixedFileHandler.php';
 require_once __DIR__ . '/../../source/lib/handlers/MissingRequestHandler.php';
 require_once __DIR__ . '/../../source/lib/handlers/ProxyRequestHandler.php';
 require_once __DIR__ . '/../../source/lib/handlers/StaticFileHandler.php';
@@ -19,3 +21,4 @@ require_once __DIR__ . '/../../source/lib/models/Rule.php';
 require_once __DIR__ . '/../../source/lib/models/Server.php';
 require_once __DIR__ . '/../../source/lib/service/RequestProcessor.php';
 require_once __DIR__ . '/../../source/lib/utils/CurlUtils.php';
+require_once __DIR__ . '/../../source/lib/utils/ContentType.php';
