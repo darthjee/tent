@@ -5,8 +5,6 @@ namespace ApiDev\Tests;
 use PHPUnit\Framework\TestCase;
 use ApiDev\Request;
 
-require_once __DIR__ . '/../../../../../source/lib/api_dev/models/Request.php';
-
 class RequestTest extends TestCase
 {
     private $originalServer;
