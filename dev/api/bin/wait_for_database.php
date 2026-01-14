@@ -48,15 +48,19 @@ class DatabaseWaiter
 
         for ($i = 0; $i < $maxTries; $i++) {
             if (self::databaseFound()) {
-                return;
+                return self::success();
             }
             echo "Waiting for database '$database'...\n";
             sleep(1);
         }
         echo "Database '$database' not found after $maxTries attempts.\n";
-        exit(1);
+    }
+
+    private static function success()
+    {
+        $database = self::getDatabase();
+        echo "Database '" . $database . "' ensured!\n";
     }
 }
 
 DatabaseWaiter::wait();
-echo "Database '" . DatabaseWaiter::getDatabase() . "' ensured!\n";
