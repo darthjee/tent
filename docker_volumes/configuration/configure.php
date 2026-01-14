@@ -2,6 +2,7 @@
 
 use Tent\Configuration;
 use Tent\Rule;
+use Tent\FixedFileHandler;
 use Tent\ProxyRequestHandler;
 use Tent\StaticFileHandler;
 use Tent\Server;
@@ -29,6 +30,14 @@ if (getenv('FRONTEND_DEV_MODE') === 'true') {
             [
                 new RequestMatcher('GET', '/index.html', 'exact'),
                 new RequestMatcher('GET', '/assets', 'begins_with'),
+            ]
+        )
+    );
+    Configuration::addRule(
+        new Rule(
+            new FixedFileHandler('/var/www/html/static/index.html'),
+            [
+                new RequestMatcher('GET', '/', 'exact'),
             ]
         )
     );

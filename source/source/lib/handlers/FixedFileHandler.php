@@ -2,7 +2,6 @@
 
 namespace Tent;
 
-
 class FixedFileHandler implements RequestHandler
 {
     private $filePath;
