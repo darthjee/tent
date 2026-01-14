@@ -13,6 +13,18 @@ use Tent\ContentType;
  */
 abstract class FileHandler implements RequestHandler
 {
+    /**
+     * Returns the file path to be used as the response body for the given request.
+     *
+     * This method must be implemented by subclasses to determine how the file path is resolved.
+     * For example, StaticFileHandler uses the request URL and a base directory, while FixedFileHandler always returns a fixed path.
+     *
+     * @param Request $request The incoming HTTP request.
+     * @return string The file path to be served as the response body.
+     *
+     * @see StaticFileHandler
+     * @see FixedFileHandler
+     */
     abstract protected function getFilePath(Request $request);
 
     /**
