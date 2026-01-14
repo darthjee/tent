@@ -5,9 +5,7 @@ namespace Tent\Tests;
 use PHPUnit\Framework\TestCase;
 use Tent\CurlHttpClient;
 
-require_once __DIR__ . '/../../../../source/lib/http/HttpClientInterface.php';
-require_once __DIR__ . '/../../../../source/lib/http/CurlHttpClient.php';
-require_once __DIR__ . '/../../../../source/lib/utils/CurlUtils.php';
+require_once __DIR__ . '/../../../support/tests_loader.php';
 
 class CurlHttpClientTest extends TestCase
 {
