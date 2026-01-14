@@ -25,8 +25,8 @@ class PersonAllTest extends TestCase
         $this->assertIsArray($persons);
         $this->assertCount(3, $persons);
         $this->assertInstanceOf(Person::class, $persons[0]);
-        $names = array_map(function ($p) {
-            return $p->getFirstName();
+        $names = array_map(function ($person) {
+            return $person->getFirstName();
         }, $persons);
         $this->assertContains('Alice', $names);
         $this->assertContains('Bob', $names);
