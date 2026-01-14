@@ -8,9 +8,6 @@ use ApiDev\Request;
 use ApiDev\Response;
 
 require_once __DIR__ . '/../../../../../source/lib/api_dev/models/Request.php';
-require_once __DIR__ . '/../../../../../source/lib/api_dev/models/Response.php';
-require_once __DIR__ . '/../../../../../source/lib/api_dev/Endpoint.php';
-require_once __DIR__ . '/../../../../../source/lib/api_dev/endpoints/HealthCheckEndpoint.php';
 
 class HealthCheckEndpointTest extends TestCase
 {
