@@ -1,6 +1,6 @@
-docker_volumes/vendor/
 source/.phpunit.result.cache
 source/coverage
+source/.phpdoc/
 
 source/source/static/
 source/source/configuration/configure.php
@@ -12,3 +12,4 @@ dev/frontend/.nyc_output/
 
 docker_volumes/mysql_data
 docker_volumes/node_modules
+docker_volumes/vendor/
