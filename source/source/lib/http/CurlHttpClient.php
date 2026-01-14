@@ -16,9 +16,26 @@ class CurlHttpClient implements HttpClientInterface
     /**
      * Sends an HTTP GET request to the given URL with the provided headers.
      *
-     * @param string $url The target URL for the request.
-     * @param array $headers The headers to send with the request.
-     * @return array An array with 'body', 'httpCode', and 'headers' from the response.
+     * This method performs a GET request using cURL. It accepts a URL and an associative array of headers.
+     * The response is returned as an array containing:
+     *   - 'body': The response body as a string
+     *   - 'httpCode': The HTTP status code (e.g., 200, 404)
+     *   - 'headers': An array of response headers in "Key: Value" format
+     *
+     * Usage example:
+     *   $client = new CurlHttpClient();
+     *   $result = $client->request('http://httpbin/get', ['User-Agent' => 'PHPUnit-Test']);
+     *   // $result['body'] contains the response body
+     *   // $result['httpCode'] contains the status code
+     *   // $result['headers'] contains the response headers
+     *
+     * @param string $url The target URL for the GET request (may include query parameters).
+     * @param array $headers Associative array of headers to send (e.g., ['User-Agent' => 'Test']).
+     * @return array{
+     *   body: string,
+     *   httpCode: int,
+     *   headers: string[]
+     * } Array with response body, status code, and headers.
      */
     public function request($url, $headers)
     {
