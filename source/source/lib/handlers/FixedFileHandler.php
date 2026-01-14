@@ -14,6 +14,7 @@ class FixedFileHandler implements RequestHandler
     public function handleRequest($request)
     {
         if (!file_exists($this->filePath) || !is_file($this->filePath)) {
+            echo "\n********** File not found: " . $this->filePath . " **********\n";
             return new MissingResponse();
         }
 
