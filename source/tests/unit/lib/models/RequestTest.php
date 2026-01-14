@@ -5,8 +5,6 @@ namespace Tent\Tests;
 use PHPUnit\Framework\TestCase;
 use Tent\Request;
 
-require_once __DIR__ . '/../../../../source/lib/models/Request.php';
-
 class RequestTest extends TestCase
 {
     private $originalServer;

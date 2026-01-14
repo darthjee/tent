@@ -2,8 +2,6 @@
 
 namespace ApiDev\Tests;
 
-require_once __DIR__ . '/../../../support/tests_loader.php';
-
 use PHPUnit\Framework\TestCase;
 use ApiDev\Mysql\MigrationsProcessor;
 use ApiDev\Mysql\Connection;

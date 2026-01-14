@@ -5,7 +5,7 @@ namespace Tent\Tests;
 use PHPUnit\Framework\TestCase;
 use Tent\FolderLocation;
 
-require_once __DIR__ . '/../../../../source/lib/models/FolderLocation.php';
+require_once __DIR__ . '/../../../support/tests_loader.php';
 
 class FolderLocationTest extends TestCase
 {

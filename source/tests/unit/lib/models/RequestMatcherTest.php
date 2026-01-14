@@ -6,9 +6,6 @@ use PHPUnit\Framework\TestCase;
 use Tent\RequestMatcher;
 use Tent\Request;
 
-require_once __DIR__ . '/../../../../source/lib/models/RequestMatcher.php';
-require_once __DIR__ . '/../../../../source/lib/models/Request.php';
-
 class RequestMatcherTest extends TestCase
 {
     public function testMatchesWithExactMatch()

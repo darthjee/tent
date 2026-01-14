@@ -2,6 +2,8 @@
 
 namespace Tent;
 
+use Tent\Response;
+
 class MissingResponse extends Response
 {
     public function __construct()

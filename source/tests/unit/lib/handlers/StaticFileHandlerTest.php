@@ -8,12 +8,7 @@ use Tent\FolderLocation;
 use Tent\Request;
 use Tent\MissingResponse;
 
-require_once __DIR__ . '/../../../../source/lib/handlers/RequestHandler.php';
-require_once __DIR__ . '/../../../../source/lib/handlers/StaticFileHandler.php';
-require_once __DIR__ . '/../../../../source/lib/models/FolderLocation.php';
-require_once __DIR__ . '/../../../../source/lib/models/Request.php';
-require_once __DIR__ . '/../../../../source/lib/models/Response.php';
-require_once __DIR__ . '/../../../../source/lib/models/MissingResponse.php';
+require_once __DIR__ . '/../../../support/tests_loader.php';
 
 class StaticFileHandlerTest extends TestCase
 {
