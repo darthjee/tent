@@ -4,6 +4,8 @@
     
     <!-- Use PSR12 as base -->
     <rule ref="PSR12"/>
+    <!-- Detect unused variables -->
+    <rule ref="SlevomatCodingStandard.Variables.UnusedVariable"/>
     
     <!-- Exclude side effects rule for tests and bin directories -->
     <rule ref="PSR1.Files.SideEffects.FoundWithSymbols">
