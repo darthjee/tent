@@ -5,8 +5,7 @@ namespace Tent\Tests;
 use PHPUnit\Framework\TestCase;
 use Tent\MissingResponse;
 
-require_once __DIR__ . '/../../../../source/lib/models/Response.php';
-require_once __DIR__ . '/../../../../source/lib/models/MissingResponse.php';
+require_once __DIR__ . '/../../../support/tests_loader.php';
 
 class MissingResponseTest extends TestCase
 {
