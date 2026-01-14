@@ -16,7 +16,7 @@ class StaticFileHandler extends FileHandler
     /**
      * @param FolderLocation $folderLocation The base directory for static files.
      */
-    public function __construct($folderLocation)
+    public function __construct(FolderLocation $folderLocation)
     {
         $this->folderLocation = $folderLocation;
     }

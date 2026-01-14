@@ -37,7 +37,7 @@ class CurlHttpClient implements HttpClientInterface
      *   headers: string[]
      * } Array with response body, status code, and headers.
      */
-    public function request($url, $headers)
+    public function request(string $url, array $headers)
     {
         $headerLines = CurlUtils::buildHeaderLines($headers);
 

@@ -27,7 +27,7 @@ class ProxyRequestHandler implements RequestHandler
      * @param Server                   $server     The target server to which requests will be proxied.
      * @param HttpClientInterface|null $httpClient Optional HTTP client to use for requests. Defaults to CurlHttpClient.
      */
-    public function __construct($server, $httpClient = null)
+    public function __construct(Server $server, HttpClientInterface $httpClient = null)
     {
         $this->server = $server;
         $this->httpClient = $httpClient ?? new CurlHttpClient();

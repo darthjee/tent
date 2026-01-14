@@ -20,7 +20,7 @@ class RequestProcessor
      *
      * @param Request $request The incoming HTTP request.
      */
-    public function __construct($request)
+    public function __construct(Request $request)
     {
         $this->request = $request;
     }
@@ -31,7 +31,7 @@ class RequestProcessor
      * @param Request $request The incoming HTTP request.
      * @return Response The processed response.
      */
-    public static function handleRequest($request)
+    public static function handleRequest(Request $request)
     {
         return (new RequestProcessor($request))->handle();
     }

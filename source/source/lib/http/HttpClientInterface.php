@@ -18,5 +18,5 @@ interface HttpClientInterface
      * @param array  $headers Associative array of headers to send.
      * @return array Response data (format depends on implementation).
      */
-    public function request($url, $headers);
+    public function request(string $url, array $headers);
 }
