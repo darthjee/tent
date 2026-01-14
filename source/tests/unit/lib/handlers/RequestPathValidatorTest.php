@@ -6,13 +6,6 @@ use PHPUnit\Framework\TestCase;
 use Tent\RequestPathValidator;
 use Tent\Request;
 
-class DummyRequest
-{
-    private $url;
-    public function __construct(string $url) { $this->url = $url; }
-    public function requestUrl() { return $this->url; }
-}
-
 class RequestPathValidatorTest extends TestCase
 {
     public function testValidPaths()

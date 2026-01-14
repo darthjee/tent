@@ -29,7 +29,7 @@ class RequestPathValidator
     /**
      * Checks if the request path is valid (no path traversal).
      *
-     * @return bool True if valid, false if path traversal detected.
+     * @return boolean True if valid, false if path traversal detected.
      */
     public function isValid(): bool
     {
