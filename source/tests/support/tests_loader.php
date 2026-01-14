@@ -7,6 +7,7 @@ require_once __DIR__ . '/../../source/lib/http/HttpClientInterface.php';
 require_once __DIR__ . '/../../source/lib/models/Response.php';
 
 require_once __DIR__ . '/../../source/lib/Configuration.php';
+require_once __DIR__ . '/../../source/lib/handlers/FileHandler.php';
 require_once __DIR__ . '/../../source/lib/handlers/FixedFileHandler.php';
 require_once __DIR__ . '/../../source/lib/handlers/MissingRequestHandler.php';
 require_once __DIR__ . '/../../source/lib/handlers/ProxyRequestHandler.php';

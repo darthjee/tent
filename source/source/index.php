@@ -8,6 +8,7 @@ require_once __DIR__ . '/lib/http/HttpClientInterface.php';
 require_once __DIR__ . '/lib/models/Response.php';
 
 require_once __DIR__ . '/lib/Configuration.php';
+require_once __DIR__ . '/lib/handlers/FileHandler.php';
 require_once __DIR__ . '/lib/handlers/FixedFileHandler.php';
 require_once __DIR__ . '/lib/handlers/MissingRequestHandler.php';
 require_once __DIR__ . '/lib/handlers/ProxyRequestHandler.php';
