@@ -2,6 +2,8 @@
 
 namespace Tent;
 
+use Tent\ContentType;
+
 abstract class FileHandler implements RequestHandler
 {
     abstract protected function getFilePath($request);
@@ -14,7 +16,7 @@ abstract class FileHandler implements RequestHandler
         }
 
         $content = file_get_contents($filePath);
-        $contentType = $this->getContentType($filePath);
+        $contentType = ContentType::getContentType($filePath);
         $contentLength = strlen($content);
 
         return new Response(
@@ -27,25 +29,5 @@ abstract class FileHandler implements RequestHandler
         );
     }
 
-    protected function getContentType($filePath)
-    {
-        $mimeType = mime_content_type($filePath);
-
-        if ($mimeType === 'text/plain' || $mimeType === 'application/octet-stream') {
-            $extension = pathinfo($filePath, PATHINFO_EXTENSION);
-            $extensionMap = [
-                'css' => 'text/css',
-                'js' => 'application/javascript',
-                'json' => 'application/json',
-                'html' => 'text/html',
-                'htm' => 'text/html',
-                'svg' => 'image/svg+xml',
-                'xml' => 'application/xml',
-            ];
-            if (isset($extensionMap[$extension])) {
-                return $extensionMap[$extension];
-            }
-        }
-        return $mimeType;
-    }
+    // Content type logic moved to Tent\Utils\ContentType
 }
