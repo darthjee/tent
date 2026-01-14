@@ -14,5 +14,6 @@
     </rule>
     <rule ref="Squiz.Commenting.FunctionComment">
         <exclude-pattern>dev/api/*</exclude-pattern>
+        <exclude-pattern>docker_volumes/*</exclude-pattern>
     </rule>
 </ruleset>
