@@ -1,25 +1,34 @@
-#!/usr/bin/env php
 <?php
+
+namespace ApiDev\Bin;
+
 require_once __DIR__ . '/../source/lib/mysql/Connection.php';
 require_once __DIR__ . '/../source/lib/mysql/Configuration.php';
 
-class DatabaseWaiter {
-    public static function getHost() {
+class DatabaseWaiter
+{
+    public static function getHost()
+    {
         return getenv('API_DEV_MYSQL_HOST') ?: 'localhost';
     }
-    public static function getUser() {
+    public static function getUser()
+    {
         return getenv('API_DEV_MYSQL_USER') ?: 'root';
     }
-    public static function getPassword() {
+    public static function getPassword()
+    {
         return getenv('API_DEV_MYSQL_PASSWORD') ?: '';
     }
-    public static function getPort() {
+    public static function getPort()
+    {
         return getenv('API_DEV_MYSQL_PORT') ?: 3306;
     }
-    public static function getDatabase() {
+    public static function getDatabase()
+    {
         return getenv('API_DEV_MYSQL_TEST_DATABASE') ?: 'test_db';
     }
-    public static function databaseFound() {
+    public static function databaseFound()
+    {
         $host = self::getHost();
         $user = self::getUser();
         $password = self::getPassword();
@@ -32,7 +41,8 @@ class DatabaseWaiter {
             return false;
         }
     }
-    public static function wait() {
+    public static function wait()
+    {
         $database = self::getDatabase();
         $maxTries = 10;
 

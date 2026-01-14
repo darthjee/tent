@@ -112,7 +112,7 @@ jobs:
           command: composer install
       - run:
           name: Wait for DB
-          command: ./bin/wait_for_database.php
+          command: php ./bin/wait_for_database.php
       - run:
           name: Ensure database exists
           command: php ./bin/create_databases.php

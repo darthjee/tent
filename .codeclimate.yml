@@ -1,0 +1,18 @@
+version: '2'
+plugins:
+  phpmd:
+    enabled: true
+    config:
+      rulesets:
+        - cleancode
+        - codesize
+        - controversial
+        - design
+        - naming
+        - unusedcode
+      exclude_patterns:
+        - 'StaticAccess'
+  phpcs:
+    enabled: true
+    config:
+      standard: phpcs.xml

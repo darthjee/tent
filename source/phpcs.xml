@@ -4,6 +4,9 @@
     
     <!-- Use PSR12 as base -->
     <rule ref="PSR12"/>
+    <!-- Detect unused variables -->
+    <rule ref="SlevomatCodingStandard.Variables.UnusedVariable"/>
+    <rule ref="SlevomatCodingStandard.Variables.UselessVariable"/>
     
     <!-- Exclude side effects rule for tests directory -->
     <rule ref="PSR1.Files.SideEffects.FoundWithSymbols">
@@ -15,11 +18,12 @@
     <rule ref="PSR1.Classes.ClassDeclaration.MissingNamespace">
         <exclude-pattern>source/index.php</exclude-pattern>
     </rule>
-    
+
     <!-- Include source files -->
     <file>source</file>
     <file>tests</file>
     
     <!-- Exclude static directory -->
     <exclude-pattern>source/static/*</exclude-pattern>
+    <exclude-pattern>vendor/*</exclude-pattern>
 </ruleset>
