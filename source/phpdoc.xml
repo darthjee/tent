@@ -2,6 +2,5 @@
 <phpdoc>
   <files>
     <directory>./source/</directory>
-    <exclude>vendor/</exclude>
   </files>
 </phpdoc>
