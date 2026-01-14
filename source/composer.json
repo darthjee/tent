@@ -17,6 +17,7 @@
         "tests:unit": "vendor/bin/phpunit --coverage-html coverage/ tests/unit",
         "tests:integration": "vendor/bin/phpunit --coverage-html coverage/ tests/integration",
         "lint": "phpcs --standard=phpcs.xml",
-        "lint:fix": "phpcbf --standard=phpcs.xml"
+        "lint:fix": "phpcbf --standard=phpcs.xml",
+        "docs": "vendor/bin/phpdoc"
     }
 }
