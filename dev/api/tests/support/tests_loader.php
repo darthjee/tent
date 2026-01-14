@@ -2,6 +2,8 @@
 
 // tests_loader.php
 
+require_once __DIR__ . '/../../source/lib/api_dev/models/Response.php';
+require_once __DIR__ . '/../../source/lib/api_dev/models/MissingResponse.php';
 require_once __DIR__ . '/../../source/lib/api_dev/Endpoint.php';
 require_once __DIR__ . '/../../source/lib/api_dev/endpoints/HealthCheckEndpoint.php';
 require_once __DIR__ . '/../../source/lib/api_dev/RouteConfiguration.php';
