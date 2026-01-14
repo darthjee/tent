@@ -19,6 +19,10 @@
         <exclude-pattern>source/index.php</exclude-pattern>
     </rule>
 
+    <!-- Require code documentation (PHPDoc) -->
+    <rule ref="Squiz.Commenting.FileComment"/>
+    <rule ref="Squiz.Commenting.FunctionComment"/>
+
     <!-- Include source files -->
     <file>source</file>
     <file>tests</file>
