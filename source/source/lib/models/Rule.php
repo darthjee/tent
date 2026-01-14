@@ -23,7 +23,7 @@ class Rule
     /**
      * Constructs a Rule.
      *
-     * @param RequestHandler $handler The handler to process requests that match this rule.
+     * @param RequestHandler   $handler  The handler to process requests that match this rule.
      * @param RequestMatcher[] $matchers Array of matchers to validate requests.
      */
     public function __construct($handler, $matchers = [])
@@ -46,7 +46,7 @@ class Rule
      * Checks if the given request matches any of the rule's matchers.
      *
      * @param Request $request The incoming HTTP request.
-     * @return bool True if any matcher applies to the request.
+     * @return boolean True if any matcher applies to the request.
      */
     public function match($request)
     {

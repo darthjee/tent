@@ -14,8 +14,8 @@ interface HttpClientInterface
     /**
      * Sends an HTTP request to the given URL with the provided headers.
      *
-     * @param string $url The target URL for the request.
-     * @param array $headers Associative array of headers to send.
+     * @param string $url     The target URL for the request.
+     * @param array  $headers Associative array of headers to send.
      * @return array Response data (format depends on implementation).
      */
     public function request($url, $headers);

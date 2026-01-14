@@ -11,13 +11,20 @@ namespace Tent;
  */
 class ProxyRequestHandler implements RequestHandler
 {
+    /**
+     * @var Server The target server to which requests are proxied.
+     */
     private $server;
+
+    /**
+     * @var HttpClientInterface The HTTP client used to make requests to the target server.
+     */
     private $httpClient;
 
     /**
      * Constructs a ProxyRequestHandler.
      *
-     * @param Server $server The target server to which requests will be proxied.
+     * @param Server                   $server     The target server to which requests will be proxied.
      * @param HttpClientInterface|null $httpClient Optional HTTP client to use for requests. Defaults to CurlHttpClient.
      */
     public function __construct($server, $httpClient = null)

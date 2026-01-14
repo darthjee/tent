@@ -29,8 +29,8 @@ class CurlHttpClient implements HttpClientInterface
      *   // $result['httpCode'] contains the status code
      *   // $result['headers'] contains the response headers
      *
-     * @param string $url The target URL for the GET request (may include query parameters).
-     * @param array $headers Associative array of headers to send (e.g., ['User-Agent' => 'Test']).
+     * @param string $url     The target URL for the GET request (may include query parameters).
+     * @param array  $headers Associative array of headers to send (e.g., ['User-Agent' => 'Test']).
      * @return array{
      *   body: string,
      *   httpCode: int,

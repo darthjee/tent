@@ -27,9 +27,9 @@ class Response
     /**
      * Constructs a Response object.
      *
-     * @param string $body The response body content.
-     * @param int $httpCode The HTTP status code.
-     * @param array $headerLines List of HTTP header lines.
+     * @param string  $body        The response body content.
+     * @param integer $httpCode    The HTTP status code.
+     * @param array   $headerLines List of HTTP header lines.
      */
     public function __construct($body, $httpCode, $headerLines)
     {

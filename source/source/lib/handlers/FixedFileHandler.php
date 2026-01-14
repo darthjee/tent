@@ -10,6 +10,9 @@ namespace Tent;
  */
 class FixedFileHandler extends FileHandler
 {
+    /**
+     * @var string The path to the file to be served for all requests.
+     */
     private $filePath;
 
     /**
