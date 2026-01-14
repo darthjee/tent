@@ -12,6 +12,7 @@
     <rule ref="Squiz.Commenting.FileComment">
         <exclude-pattern>dev/api/*</exclude-pattern>
         <exclude-pattern>source/*</exclude-pattern>
+        <exclude-pattern>docker_volumes/*</exclude-pattern>
     </rule>
     <!-- Exclude AvoidStaticAccess rule -->
     <rule ref="SlevomatCodingStandard.Classes.StaticAccess">
