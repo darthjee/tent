@@ -13,4 +13,8 @@
         <exclude-pattern>dev/api/*</exclude-pattern>
         <exclude-pattern>source/*</exclude-pattern>
     </rule>
+    <!-- Exclude AvoidStaticAccess rule -->
+    <rule ref="SlevomatCodingStandard.Classes.StaticAccess">
+        <exclude-pattern>*</exclude-pattern>
+    </rule>
 </ruleset>

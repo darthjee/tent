@@ -4,3 +4,6 @@
 exclude:
   - source/composer.lock
   - dev/api/composer.lock
+
+exclude_rules:
+  - AvoidStaticAccess
