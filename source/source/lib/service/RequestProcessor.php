@@ -5,7 +5,8 @@ namespace Tent;
 /**
  * Main engine for processing incoming HTTP requests.
  *
- * RequestProcessor receives a Request, iterates through all Rules, and delegates the request to the appropriate handler.
+ * RequestProcessor receives a Request, iterates through all Rules,
+ *   and delegates the request to the appropriate handler.
  * If no handler is found, MissingRequestHandler is used to handle the request.
  */
 class RequestProcessor
