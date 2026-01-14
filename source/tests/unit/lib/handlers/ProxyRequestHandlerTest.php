@@ -8,12 +8,7 @@ use Tent\Request;
 use Tent\Response;
 use Tent\Server;
 
-require_once __DIR__ . '/../../../../source/lib/handlers/RequestHandler.php';
-require_once __DIR__ . '/../../../../source/lib/handlers/ProxyRequestHandler.php';
-require_once __DIR__ . '/../../../../source/lib/models/Request.php';
-require_once __DIR__ . '/../../../../source/lib/models/Response.php';
-require_once __DIR__ . '/../../../../source/lib/models/Server.php';
-require_once __DIR__ . '/../../../../source/lib/http/HttpClientInterface.php';
+require_once __DIR__ . '/../../../support/tests_loader.php';
 
 class ProxyRequestHandlerTest extends TestCase
 {
