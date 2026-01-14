@@ -11,7 +11,6 @@ class ModelConnectionListTest extends TestCase
 {
     private $connection;
     private $model;
-    private $database;
 
     protected function setUp(): void
     {

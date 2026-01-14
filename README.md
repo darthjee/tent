@@ -29,6 +29,7 @@ Tent is available as a Docker image: `darthjee/tent` *(coming soon)*
 ## Current Status
 
 Tent is in active development. Currently implemented:
+
 - ✅ Basic proxy functionality
 - ✅ Request routing and matching
 - ✅ Header forwarding

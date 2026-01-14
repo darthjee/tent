@@ -41,20 +41,21 @@ class CurlHttpClient implements HttpClientInterface
     {
         $headerLines = CurlUtils::buildHeaderLines($headers);
 
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HEADER, true);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headerLines);
 
-        $response = curl_exec($ch);
-        $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curl = curl_init($url);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_HEADER, true);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headerLines);
+
+        $response = curl_exec($curl);
+        $headerSize = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+        $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
         $headers = substr($response, 0, $headerSize);
         $body = substr($response, $headerSize);
 
-        curl_close($ch);
+        curl_close($curl);
 
         $headerLines = CurlUtils::parseResponseHeaders($headers);
 
