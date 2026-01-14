@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<ruleset name="Project Rules">
+    <rule ref="PSR2" />
+    <!-- Exclude function doc comment rule for test files only -->
+    <rule ref="Squiz.Commenting.FunctionComment">
+        <exclude-pattern>source/tests/*</exclude-pattern>
+        <exclude-pattern>dev/api/tests/*</exclude-pattern>
+    </rule>
+</ruleset>

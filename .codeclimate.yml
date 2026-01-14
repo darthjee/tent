@@ -12,3 +12,7 @@ plugins:
         - unusedcode
       exclude_patterns:
         - 'StaticAccess'
+  phpcs:
+    enabled: true
+    config:
+      standard: phpcs.xml
