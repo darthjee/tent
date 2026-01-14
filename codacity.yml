@@ -1,0 +1,6 @@
+# Codacity configuration file
+# Exclude composer.lock files from analysis
+
+exclude:
+  - source/composer.lock
+  - dev/api/composer.lock
