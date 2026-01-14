@@ -21,7 +21,7 @@ class RequestMatcher
      *            - 'exact': the request URI must be exactly equal to $requestUri.
      *            - 'begins_with': the request URI must start with $requestUri (prefix match).
      */
-    public function __construct($requestMethod = null, $requestUri = null, $matchType = 'exact')
+    public function __construct(?string $requestMethod = null, ?string $requestUri = null, string $matchType = 'exact')
     {
         $this->requestMethod = $requestMethod;
         $this->requestUri = $requestUri;
@@ -34,7 +34,7 @@ class RequestMatcher
      * @param Request $request The incoming HTTP request.
      * @return boolean True if the request matches method and URI criteria.
      */
-    public function matches($request)
+    public function matches(Request $request)
     {
         return $this->matchRequestMethod($request) && $this->matchRequestUri($request);
     }
@@ -42,10 +42,10 @@ class RequestMatcher
     /**
      * Checks if the request method matches.
      *
-     * @param Request $request
-     * @return boolean
+     * @param Request $request The incoming HTTP request.
+     * @return boolean True if the request matches http method criteria.
      */
-    private function matchRequestMethod($request)
+    private function matchRequestMethod(Request $request)
     {
         return $this->requestMethod == null || $request->requestMethod() == $this->requestMethod;
     }
@@ -57,10 +57,10 @@ class RequestMatcher
      *   - 'exact': requires the request URI to be exactly equal to $requestUri.
      *   - 'begins_with': requires the request URI to start with $requestUri (prefix match).
      *
-     * @param Request $request
-     * @return boolean
+     * @param Request $request The incoming HTTP request.
+     * @return boolean True if the request matches URI criteria.
      */
-    private function matchRequestUri($request)
+    private function matchRequestUri(Request $request)
     {
         if ($this->requestUri == null) {
             return true;

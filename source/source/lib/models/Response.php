@@ -31,7 +31,7 @@ class Response
      * @param integer $httpCode    The HTTP status code.
      * @param array   $headerLines List of HTTP header lines.
      */
-    public function __construct($body, $httpCode, $headerLines)
+    public function __construct(string $body, int $httpCode, array $headerLines)
     {
         $this->body = $body;
         $this->httpCode = $httpCode;

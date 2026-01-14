@@ -14,7 +14,7 @@ class FolderLocation
     /**
      * @param string $basePath The base directory path for static files.
      */
-    public function __construct($basePath)
+    public function __construct(string $basePath)
     {
         $this->basePath = $basePath;
     }

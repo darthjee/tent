@@ -20,7 +20,7 @@ class Server
      *
      * @param string $targetHost The base address for proxy requests.
      */
-    public function __construct($targetHost)
+    public function __construct(string $targetHost)
     {
         $this->targetHost = $targetHost;
     }

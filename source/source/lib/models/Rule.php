@@ -26,7 +26,7 @@ class Rule
      * @param RequestHandler   $handler  The handler to process requests that match this rule.
      * @param RequestMatcher[] $matchers Array of matchers to validate requests.
      */
-    public function __construct($handler, $matchers = [])
+    public function __construct(RequestHandler $handler, array $matchers = [])
     {
         $this->handler = $handler;
         $this->matchers = $matchers;
@@ -48,7 +48,7 @@ class Rule
      * @param Request $request The incoming HTTP request.
      * @return boolean True if any matcher applies to the request.
      */
-    public function match($request)
+    public function match(Request $request)
     {
         foreach ($this->matchers as $matcher) {
             if ($matcher->matches($request)) {
