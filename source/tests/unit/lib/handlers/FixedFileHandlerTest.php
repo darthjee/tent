@@ -47,10 +47,22 @@ class FixedFileHandlerTest extends \PHPUnit\Framework\TestCase
 
     public function testReturnsMissingResponseWhenFileNotFound()
     {
-        $handler = new FixedFileHandler(__DIR__ . '/../fixtures/nonexistent.txt');
+        $handler = new FixedFileHandler('./tests/fixtures/nonexistent.txt');
         $request = $this->createMock(\Tent\Request::class);
         $response = $handler->handleRequest($request);
 
         $this->assertInstanceOf(\Tent\MissingResponse::class, $response);
+    }
+
+    public function testReturnsCssFileContent()
+    {
+        $handler = new \Tent\FixedFileHandler('./tests/fixtures/style.css');
+        $request = $this->createMock(\Tent\Request::class);
+        $response = $handler->handleRequest($request);
+
+        $this->assertInstanceOf(\Tent\Response::class, $response);
+        $this->assertEquals(200, $response->httpCode);
+        $this->assertStringContainsString('background: #fff', $response->body);
+        $this->assertContains('Content-Type: text/css', $response->headerLines);
     }
 }
