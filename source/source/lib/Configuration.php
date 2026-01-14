@@ -6,7 +6,7 @@ class Configuration
 {
     private static $rules = [];
 
-    public static function addRule($rule)
+    public static function addRule(Rule $rule)
     {
         self::$rules[] = $rule;
     }
