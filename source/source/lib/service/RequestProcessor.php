@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent;
+namespace Tent\Service;
 
 use Tent\Handlers\MissingRequestHandler;
 use Tent\Models\Request;
