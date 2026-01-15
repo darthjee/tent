@@ -7,6 +7,8 @@ use Tent\Models\Request;
 use Tent\Models\Response;
 use Tent\Models\MissingResponse;
 
+require_once __DIR__ . '/../../../support/tests_loader.php';
+
 class FixedFileHandlerTest extends \PHPUnit\Framework\TestCase
 {
     public function testReturnsHtmlFileContent()

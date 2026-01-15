@@ -8,8 +8,6 @@ use Tent\Models\FolderLocation;
 use Tent\Models\Request;
 use Tent\Models\MissingResponse;
 
-require_once __DIR__ . '/../../../support/tests_loader.php';
-
 class StaticFileHandlerTest extends TestCase
 {
     private $testDir;

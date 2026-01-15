@@ -10,8 +10,6 @@ use Tent\Models\Server;
 use Tent\Http\HttpClientInterface;
 use Tent\Models\ForbiddenResponse;
 
-require_once __DIR__ . '/../../../support/tests_loader.php';
-
 class ProxyRequestHandlerTest extends TestCase
 {
     public function testHandleRequestReturnsForbiddenResponseForPathTraversal()

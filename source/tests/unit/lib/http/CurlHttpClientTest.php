@@ -5,8 +5,6 @@ namespace Tent\Tests;
 use PHPUnit\Framework\TestCase;
 use Tent\Http\CurlHttpClient;
 
-require_once __DIR__ . '/../../../support/tests_loader.php';
-
 class CurlHttpClientTest extends TestCase
 {
     private $baseUrl = 'http://httpbin';
