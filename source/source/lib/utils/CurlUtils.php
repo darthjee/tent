@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent;
+namespace Tent\Utils;
 
 /**
  * Utility class for handling HTTP headers in cURL requests and responses.
