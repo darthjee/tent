@@ -3,16 +3,16 @@
 namespace Tent\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Tent\RequestProcessor;
+use Tent\Service\RequestProcessor;
 use Tent\Configuration;
-use Tent\Rule;
-use Tent\ProxyRequestHandler;
-use Tent\StaticFileHandler;
-use Tent\FolderLocation;
-use Tent\Request;
-use Tent\Response;
-use Tent\RequestMatcher;
-use Tent\Server;
+use Tent\Models\Rule;
+use Tent\Handlers\ProxyRequestHandler;
+use Tent\Handlers\StaticFileHandler;
+use Tent\Models\FolderLocation;
+use Tent\Models\Request;
+use Tent\Models\Response;
+use Tent\Models\RequestMatcher;
+use Tent\Models\Server;
 
 class RequestProcessorTest extends TestCase
 {
@@ -60,7 +60,7 @@ class RequestProcessorTest extends TestCase
         $response = RequestProcessor::handleRequest($request);
 
         $expectedContent = file_get_contents($this->staticPath . '/index.html');
-        $this->assertInstanceOf(\Tent\Response::class, $response);
+        $this->assertInstanceOf(Response::class, $response);
         $this->assertEquals(200, $response->httpCode);
         $this->assertEquals($expectedContent, $response->body);
         $this->assertStringContainsString('Content-Type: text/html', implode("\n", $response->headerLines));
@@ -89,13 +89,13 @@ class RequestProcessorTest extends TestCase
     public function testReturnsMissingResponseForUnmatchedRoute()
     {
         // No rules added, so fallback handler should be used
-        $request = new \Tent\Request([
+        $request = new Request([
             'requestUrl' => '/other',
             'requestMethod' => 'GET'
         ]);
-        $response = \Tent\RequestProcessor::handleRequest($request);
+        $response = RequestProcessor::handleRequest($request);
 
-        $this->assertInstanceOf(\Tent\Response::class, $response);
+        $this->assertInstanceOf(Response::class, $response);
         $this->assertEquals(404, $response->httpCode);
         $this->assertStringContainsString('Not Found', $response->body);
     }

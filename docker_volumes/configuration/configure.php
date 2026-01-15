@@ -1,13 +1,13 @@
 <?php
 
 use Tent\Configuration;
-use Tent\Rule;
-use Tent\FixedFileHandler;
-use Tent\ProxyRequestHandler;
-use Tent\StaticFileHandler;
-use Tent\Server;
-use Tent\FolderLocation;
-use Tent\RequestMatcher;
+use Tent\Models\Rule;
+use Tent\Handlers\FixedFileHandler;
+use Tent\Handlers\ProxyRequestHandler;
+use Tent\Handlers\StaticFileHandler;
+use Tent\Models\Server;
+use Tent\Models\FolderLocation;
+use Tent\Models\RequestMatcher;
 
 if (getenv('FRONTEND_DEV_MODE') === 'true') {
     Configuration::addRule(

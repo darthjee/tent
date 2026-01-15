@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent;
+namespace Tent\Utils;
 
 /**
  * Utility class for determining the content type (MIME type) of files.

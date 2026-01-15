@@ -1,6 +1,10 @@
 <?php
 
-namespace Tent;
+namespace Tent\Service;
+
+use Tent\Handlers\MissingRequestHandler;
+use Tent\Models\Request;
+use Tent\Configuration;
 
 /**
  * Main engine for processing incoming HTTP requests.

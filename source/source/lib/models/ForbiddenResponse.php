@@ -1,8 +1,8 @@
 <?php
 
-namespace Tent;
+namespace Tent\Models;
 
-use Tent\Response;
+use Tent\Models\Response;
 
 /**
  * Response representing a 403 Forbidden error.

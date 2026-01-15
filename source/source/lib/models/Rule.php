@@ -1,6 +1,8 @@
 <?php
 
-namespace Tent;
+namespace Tent\Models;
+
+use Tent\Handlers\RequestHandler;
 
 /**
  * Represents a routing rule for processing HTTP requests.

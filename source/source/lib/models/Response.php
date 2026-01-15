@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent;
+namespace Tent\Models;
 
 /**
  * Represents an HTTP response returned by a RequestHandler or the application.

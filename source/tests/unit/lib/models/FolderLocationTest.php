@@ -3,9 +3,7 @@
 namespace Tent\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Tent\FolderLocation;
-
-require_once __DIR__ . '/../../../support/tests_loader.php';
+use Tent\Models\FolderLocation;
 
 class FolderLocationTest extends TestCase
 {

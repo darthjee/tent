@@ -3,9 +3,7 @@
 namespace Tent\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Tent\CurlHttpClient;
-
-require_once __DIR__ . '/../../../support/tests_loader.php';
+use Tent\Http\CurlHttpClient;
 
 class CurlHttpClientTest extends TestCase
 {

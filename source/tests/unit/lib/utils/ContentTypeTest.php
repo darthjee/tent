@@ -3,7 +3,7 @@
 namespace Tent\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Tent\ContentType;
+use Tent\Utils\ContentType;
 
 class ContentTypeTest extends TestCase
 {

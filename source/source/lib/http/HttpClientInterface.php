@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent;
+namespace Tent\Http;
 
 /**
  * Interface for HTTP client implementations used in proxying requests.

@@ -2,9 +2,12 @@
 
 namespace Tent\Tests;
 
-use Tent\FixedFileHandler;
-use Tent\Request;
-use Tent\Response;
+use Tent\Handlers\FixedFileHandler;
+use Tent\Models\Request;
+use Tent\Models\Response;
+use Tent\Models\MissingResponse;
+
+require_once __DIR__ . '/../../../../source/loader.php';
 
 class FixedFileHandlerTest extends \PHPUnit\Framework\TestCase
 {
@@ -48,19 +51,19 @@ class FixedFileHandlerTest extends \PHPUnit\Framework\TestCase
     public function testReturnsMissingResponseWhenFileNotFound()
     {
         $handler = new FixedFileHandler('./tests/fixtures/nonexistent.txt');
-        $request = $this->createMock(\Tent\Request::class);
+        $request = $this->createMock(Request::class);
         $response = $handler->handleRequest($request);
 
-        $this->assertInstanceOf(\Tent\MissingResponse::class, $response);
+        $this->assertInstanceOf(MissingResponse::class, $response);
     }
 
     public function testReturnsCssFileContent()
     {
-        $handler = new \Tent\FixedFileHandler('./tests/fixtures/style.css');
-        $request = $this->createMock(\Tent\Request::class);
+        $handler = new FixedFileHandler('./tests/fixtures/style.css');
+        $request = $this->createMock(Request::class);
         $response = $handler->handleRequest($request);
 
-        $this->assertInstanceOf(\Tent\Response::class, $response);
+        $this->assertInstanceOf(Response::class, $response);
         $this->assertEquals(200, $response->httpCode);
         $this->assertStringContainsString('background: #fff', $response->body);
         $this->assertContains('Content-Type: text/css', $response->headerLines);

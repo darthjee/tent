@@ -3,7 +3,7 @@
 namespace Tent\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Tent\CurlUtils;
+use Tent\Utils\CurlUtils;
 
 class CurlUtilsTest extends TestCase
 {

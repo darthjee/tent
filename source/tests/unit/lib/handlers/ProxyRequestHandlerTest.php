@@ -3,12 +3,12 @@
 namespace Tent\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Tent\ProxyRequestHandler;
-use Tent\Request;
-use Tent\Response;
-use Tent\Server;
-
-require_once __DIR__ . '/../../../support/tests_loader.php';
+use Tent\Handlers\ProxyRequestHandler;
+use Tent\Models\Request;
+use Tent\Models\Response;
+use Tent\Models\Server;
+use Tent\Http\HttpClientInterface;
+use Tent\Models\ForbiddenResponse;
 
 class ProxyRequestHandlerTest extends TestCase
 {
@@ -24,7 +24,7 @@ class ProxyRequestHandlerTest extends TestCase
         $handler = new ProxyRequestHandler($server);
         $response = $handler->handleRequest($request);
 
-        $this->assertInstanceOf(\Tent\ForbiddenResponse::class, $response);
+        $this->assertInstanceOf(ForbiddenResponse::class, $response);
         $this->assertSame(403, $response->httpCode);
         $this->assertSame('Forbidden', $response->body);
     }
@@ -152,7 +152,7 @@ class ProxyRequestHandlerTest extends TestCase
 
     private function createMockHttpClient($expectedUrl, $expectedHeaders, $returnValue)
     {
-        $httpClient = $this->createMock(\Tent\HttpClientInterface::class);
+        $httpClient = $this->createMock(HttpClientInterface::class);
 
         $httpClient->expects($this->once())
             ->method('request')

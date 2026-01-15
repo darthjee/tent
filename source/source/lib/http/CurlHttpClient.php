@@ -1,8 +1,9 @@
 <?php
 
-namespace Tent;
+namespace Tent\Http;
 
-use Tent\HttpClientInterface;
+use Tent\Http\HttpClientInterface;
+use Tent\Utils\CurlUtils;
 
 /**
  * HTTP client for proxying requests using cURL.

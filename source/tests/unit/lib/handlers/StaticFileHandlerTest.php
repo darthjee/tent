@@ -3,12 +3,10 @@
 namespace Tent\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Tent\StaticFileHandler;
-use Tent\FolderLocation;
-use Tent\Request;
-use Tent\MissingResponse;
-
-require_once __DIR__ . '/../../../support/tests_loader.php';
+use Tent\Handlers\StaticFileHandler;
+use Tent\Models\FolderLocation;
+use Tent\Models\Request;
+use Tent\Models\MissingResponse;
 
 class StaticFileHandlerTest extends TestCase
 {

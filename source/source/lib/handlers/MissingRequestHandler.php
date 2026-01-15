@@ -1,8 +1,10 @@
 <?php
 
-namespace Tent;
+namespace Tent\Handlers;
 
-use Tent\RequestHandler;
+use Tent\Handlers\RequestHandler;
+use Tent\Models\Request;
+use Tent\Models\MissingResponse;
 
 /**
  * RequestHandler that always returns a 404 response.

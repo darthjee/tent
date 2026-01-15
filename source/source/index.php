@@ -1,30 +1,10 @@
 <?php
 
-use Tent\Request;
-use Tent\RequestProcessor;
+use Tent\Models\Request;
+use Tent\Models\Response;
+use Tent\Service\RequestProcessor;
 
-require_once __DIR__ . '/lib/handlers/RequestHandler.php';
-require_once __DIR__ . '/lib/http/HttpClientInterface.php';
-require_once __DIR__ . '/lib/models/Response.php';
-
-require_once __DIR__ . '/lib/Configuration.php';
-require_once __DIR__ . '/lib/handlers/FileHandler.php';
-require_once __DIR__ . '/lib/handlers/FixedFileHandler.php';
-require_once __DIR__ . '/lib/handlers/MissingRequestHandler.php';
-require_once __DIR__ . '/lib/handlers/ProxyRequestHandler.php';
-require_once __DIR__ . '/lib/handlers/RequestPathValidator.php';
-require_once __DIR__ . '/lib/handlers/StaticFileHandler.php';
-require_once __DIR__ . '/lib/http/CurlHttpClient.php';
-require_once __DIR__ . '/lib/models/FolderLocation.php';
-require_once __DIR__ . '/lib/models/ForbiddenResponse.php';
-require_once __DIR__ . '/lib/models/MissingResponse.php';
-require_once __DIR__ . '/lib/models/Request.php';
-require_once __DIR__ . '/lib/models/RequestMatcher.php';
-require_once __DIR__ . '/lib/models/Rule.php';
-require_once __DIR__ . '/lib/models/Server.php';
-require_once __DIR__ . '/lib/service/RequestProcessor.php';
-require_once __DIR__ . '/lib/utils/CurlUtils.php';
-require_once __DIR__ . '/lib/utils/ContentType.php';
+require_once __DIR__ . '/loader.php';
 
 $configFile = __DIR__ . '/configuration/configure.php';
 if (file_exists($configFile)) {
@@ -34,10 +14,10 @@ if (file_exists($configFile)) {
 /**
  * Sends the HTTP response to the client.
  *
- * @param Tent\Response $response The response to send.
+ * @param Tent\Models\Response $response The response to send.
  * @return void
  */
-function send_response(Tent\Response $response)
+function send_response(Response $response)
 {
     http_response_code($response->httpCode);
     foreach ($response->headerLines as $header) {

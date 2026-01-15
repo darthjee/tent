@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent;
+namespace Tent\Models;
 
 /**
  * Represents an HTTP request, extracting values from $_SERVER or provided options.

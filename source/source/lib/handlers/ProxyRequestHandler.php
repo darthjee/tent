@@ -1,6 +1,13 @@
 <?php
 
-namespace Tent;
+namespace Tent\Handlers;
+
+use Tent\Models\Server;
+use Tent\Models\Request;
+use Tent\Models\Response;
+use Tent\Http\HttpClientInterface;
+use Tent\Http\CurlHttpClient;
+use Tent\Models\ForbiddenResponse;
 
 /**
  * Handles HTTP requests by proxying them to a target server.

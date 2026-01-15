@@ -1,6 +1,9 @@
 <?php
 
-namespace Tent;
+namespace Tent\Handlers;
+
+use Tent\Models\FolderLocation;
+use Tent\Models\Request;
 
 /**
  * FileHandler that serves static files based on the request URL and a base directory.
