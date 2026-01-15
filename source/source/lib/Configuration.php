@@ -2,6 +2,8 @@
 
 namespace Tent;
 
+use Tent\Handlers\MissingRequestHandler;
+
 /**
  * Configuration class for setting up server routing rules.
  *
@@ -35,7 +37,7 @@ class Configuration
     {
         return array_merge(
             self::$rules,
-            [new Rule(new \Tent\Handlers\MissingRequestHandler())]
+            [new Rule(new MissingRequestHandler())]
         );
     }
 
