@@ -7,7 +7,6 @@ use Tent\Request;
 use Tent\Response;
 use Tent\HttpClientInterface;
 use Tent\CurlHttpClient;
-
 use Tent\ForbiddenResponse;
 
 /**
