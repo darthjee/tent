@@ -26,7 +26,6 @@ Tent uses Apache with PHP to process all incoming requests through a centralized
 
 Tent is available as a Docker image: `darthjee/tent` *(coming soon)*
 
-
 ## Current Status
 
 Tent is in active development. Currently implemented:
@@ -95,6 +94,7 @@ phpMyAdmin   (Vite dev server)   (Served by Tent)
 ```
 
 Depending on FRONTEND_DEV_MODE:
+
 - If true: frontend requests → Vite dev server (hot reload)
 - If false: frontend requests → static files from build
 
