@@ -3,8 +3,8 @@
 namespace Tent\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Tent\RequestMatcher;
-use Tent\Request;
+use Tent\Models\RequestMatcher;
+use Tent\Models\Request;
 
 class RequestMatcherTest extends TestCase
 {

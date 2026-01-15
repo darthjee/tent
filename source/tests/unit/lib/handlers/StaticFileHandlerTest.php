@@ -4,9 +4,9 @@ namespace Tent\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Tent\Handlers\StaticFileHandler;
-use Tent\FolderLocation;
-use Tent\Request;
-use Tent\MissingResponse;
+use Tent\Models\FolderLocation;
+use Tent\Models\Request;
+use Tent\Models\MissingResponse;
 
 require_once __DIR__ . '/../../../support/tests_loader.php';
 

@@ -1,6 +1,6 @@
 <?php
 
-use Tent\Request;
+use Tent\Models\Request;
 use Tent\RequestProcessor;
 
 require_once __DIR__ . '/lib/handlers/RequestHandler.php';
@@ -34,10 +34,10 @@ if (file_exists($configFile)) {
 /**
  * Sends the HTTP response to the client.
  *
- * @param Tent\Response $response The response to send.
+ * @param Tent\Models\Response $response The response to send.
  * @return void
  */
-function send_response(Tent\Response $response)
+function send_response(Tent\Models\Response $response)
 {
     http_response_code($response->httpCode);
     foreach ($response->headerLines as $header) {

@@ -3,7 +3,7 @@
 namespace Tent\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Tent\MissingResponse;
+use Tent\Models\MissingResponse;
 
 class MissingResponseTest extends TestCase
 {
@@ -32,6 +32,6 @@ class MissingResponseTest extends TestCase
     {
         $response = new MissingResponse();
 
-        $this->assertInstanceOf(\Tent\Response::class, $response);
+        $this->assertInstanceOf(\Tent\Models\Response::class, $response);
     }
 }

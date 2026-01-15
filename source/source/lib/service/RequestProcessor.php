@@ -3,6 +3,7 @@
 namespace Tent;
 
 use Tent\Handlers\MissingRequestHandler;
+use Tent\Models\Request;
 
 /**
  * Main engine for processing incoming HTTP requests.

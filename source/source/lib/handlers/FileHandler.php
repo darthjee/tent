@@ -3,9 +3,9 @@
 namespace Tent\Handlers;
 
 use Tent\ContentType;
-use Tent\Request;
-use Tent\Response;
-use Tent\MissingResponse;
+use Tent\Models\Request;
+use Tent\Models\Response;
+use Tent\Models\MissingResponse;
 
 /**
  * Abstract RequestHandler for serving file contents as HTTP responses.

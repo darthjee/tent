@@ -2,7 +2,7 @@
 
 namespace Tent\Handlers;
 
-use Tent\Request;
+use Tent\Models\Request;
 
 /**
  * Validates the request path to prevent path traversal and other invalid patterns.

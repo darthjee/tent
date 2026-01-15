@@ -3,7 +3,7 @@
 namespace Tent\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Tent\ForbiddenResponse;
+use Tent\Models\ForbiddenResponse;
 
 class ForbiddenResponseTest extends TestCase
 {

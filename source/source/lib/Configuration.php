@@ -3,6 +3,7 @@
 namespace Tent;
 
 use Tent\Handlers\MissingRequestHandler;
+use Tent\Models\Rule;
 
 /**
  * Configuration class for setting up server routing rules.

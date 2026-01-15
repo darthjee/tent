@@ -3,9 +3,9 @@
 namespace Tent\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Tent\Rule;
-use Tent\RequestMatcher;
-use Tent\Request;
+use Tent\Models\Rule;
+use Tent\Models\RequestMatcher;
+use Tent\Models\Request;
 use Tent\Handlers\RequestHandler;
 
 class RuleTest extends TestCase

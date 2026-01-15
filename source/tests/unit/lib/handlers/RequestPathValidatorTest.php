@@ -4,7 +4,7 @@ namespace Tent\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Tent\Handlers\RequestPathValidator;
-use Tent\Request;
+use Tent\Models\Request;
 
 class RequestPathValidatorTest extends TestCase
 {
