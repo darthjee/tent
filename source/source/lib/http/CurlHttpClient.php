@@ -3,7 +3,7 @@
 namespace Tent\Http;
 
 use Tent\Http\HttpClientInterface;
-use Tent\CurlUtils;
+use Tent\Utils\CurlUtils;
 
 /**
  * HTTP client for proxying requests using cURL.
