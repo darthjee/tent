@@ -3,6 +3,8 @@
 namespace Tent\Handlers;
 
 use Tent\Handlers\RequestHandler;
+use Tent\Request;
+use Tent\MissingResponse;
 
 /**
  * RequestHandler that always returns a 404 response.

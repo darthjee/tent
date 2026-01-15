@@ -15,7 +15,7 @@ class RuleTest extends TestCase
         $request->method('requestMethod')->willReturn('GET');
         $request->method('requestUrl')->willReturn('/test');
 
-        $handler = $this->createMock(\Tent\RequestHandler::class);
+        $handler = $this->createMock(\Tent\Handlers\RequestHandler::class);
 
         $matcher1 = new RequestMatcher('POST', '/test', 'exact');
         $matcher2 = new RequestMatcher('GET', '/test', 'exact');
@@ -31,7 +31,7 @@ class RuleTest extends TestCase
         $request->method('requestMethod')->willReturn('GET');
         $request->method('requestUrl')->willReturn('/test');
 
-        $handler = $this->createMock(\Tent\RequestHandler::class);
+        $handler = $this->createMock(\Tent\Handlers\RequestHandler::class);
 
         $matcher1 = new RequestMatcher('POST', '/test', 'exact');
         $matcher2 = new RequestMatcher('PUT', '/test', 'exact');
@@ -44,7 +44,7 @@ class RuleTest extends TestCase
     public function testMatchReturnsFalseWhenNoMatchers()
     {
         $request = $this->createMock(Request::class);
-        $handler = $this->createMock(\Tent\RequestHandler::class);
+        $handler = $this->createMock(\Tent\Handlers\RequestHandler::class);
 
         $rule = new Rule($handler, []);
 
@@ -54,7 +54,7 @@ class RuleTest extends TestCase
     public function testMatchReturnsFalseWhenMatchersNotProvided()
     {
         $request = $this->createMock(Request::class);
-        $handler = $this->createMock(\Tent\RequestHandler::class);
+        $handler = $this->createMock(\Tent\Handlers\RequestHandler::class);
 
         $rule = new Rule($handler);
 
@@ -67,7 +67,7 @@ class RuleTest extends TestCase
         $request->method('requestMethod')->willReturn('GET');
         $request->method('requestUrl')->willReturn('/test');
 
-        $handler = $this->createMock(\Tent\RequestHandler::class);
+        $handler = $this->createMock(\Tent\Handlers\RequestHandler::class);
 
         $matcher1 = new RequestMatcher('GET', '/test', 'exact');
         $matcher2 = new RequestMatcher('GET', '/other', 'exact');
@@ -79,7 +79,7 @@ class RuleTest extends TestCase
 
     public function testHandlerReturnsTheHandler()
     {
-        $handler = $this->createMock(\Tent\RequestHandler::class);
+        $handler = $this->createMock(\Tent\Handlers\RequestHandler::class);
 
         $rule = new Rule($handler);
 

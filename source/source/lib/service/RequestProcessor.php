@@ -2,6 +2,8 @@
 
 namespace Tent;
 
+use Tent\Handlers\MissingRequestHandler;
+
 /**
  * Main engine for processing incoming HTTP requests.
  *

@@ -2,6 +2,8 @@
 
 namespace Tent\Handlers;
 
+use Tent\Request;
+
 /**
  * FileHandler that always returns the contents of a fixed file.
  *

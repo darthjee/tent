@@ -2,6 +2,8 @@
 
 namespace Tent\Handlers;
 
+use Tent\Request;
+
 /**
  * Interface for handling HTTP requests and producing responses.
  *

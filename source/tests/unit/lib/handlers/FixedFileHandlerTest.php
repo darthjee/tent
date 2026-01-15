@@ -2,7 +2,7 @@
 
 namespace Tent\Tests;
 
-use Tent\FixedFileHandler;
+use Tent\Handlers\FixedFileHandler;
 use Tent\Request;
 use Tent\Response;
 
@@ -56,11 +56,11 @@ class FixedFileHandlerTest extends \PHPUnit\Framework\TestCase
 
     public function testReturnsCssFileContent()
     {
-        $handler = new \Tent\FixedFileHandler('./tests/fixtures/style.css');
-        $request = $this->createMock(\Tent\Request::class);
+        $handler = new FixedFileHandler('./tests/fixtures/style.css');
+        $request = $this->createMock(Request::class);
         $response = $handler->handleRequest($request);
 
-        $this->assertInstanceOf(\Tent\Response::class, $response);
+        $this->assertInstanceOf(Response::class, $response);
         $this->assertEquals(200, $response->httpCode);
         $this->assertStringContainsString('background: #fff', $response->body);
         $this->assertContains('Content-Type: text/css', $response->headerLines);

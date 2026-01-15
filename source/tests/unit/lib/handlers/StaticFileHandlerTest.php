@@ -3,7 +3,7 @@
 namespace Tent\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Tent\StaticFileHandler;
+use Tent\Handlers\StaticFileHandler;
 use Tent\FolderLocation;
 use Tent\Request;
 use Tent\MissingResponse;

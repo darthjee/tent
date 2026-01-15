@@ -2,6 +2,9 @@
 
 namespace Tent\Handlers;
 
+use Tent\FolderLocation;
+use Tent\Request;
+
 /**
  * FileHandler that serves static files based on the request URL and a base directory.
  *

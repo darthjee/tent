@@ -2,6 +2,8 @@
 
 namespace Tent;
 
+use Tent\Handlers\RequestHandler;
+
 /**
  * Represents a routing rule for processing HTTP requests.
  *
