@@ -2,7 +2,7 @@
 
 use Tent\Models\Request;
 use Tent\Models\Response;
-use Tent\RequestProcessor;
+use Tent\Service\RequestProcessor;
 
 require_once __DIR__ . '/lib/handlers/RequestHandler.php';
 require_once __DIR__ . '/lib/http/HttpClientInterface.php';

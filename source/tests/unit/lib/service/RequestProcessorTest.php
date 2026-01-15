@@ -3,7 +3,7 @@
 namespace Tent\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Tent\RequestProcessor;
+use Tent\Service\RequestProcessor;
 use Tent\Configuration;
 use Tent\Models\Rule;
 use Tent\Handlers\ProxyRequestHandler;
