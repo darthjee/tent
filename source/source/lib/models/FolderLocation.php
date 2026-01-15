@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent;
+namespace Tent\Models;
 
 /**
  * Represents a base directory location for serving static files.

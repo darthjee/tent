@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent;
+namespace Tent\Models;
 
 /**
  * Matches an incoming Request against method and URI criteria.

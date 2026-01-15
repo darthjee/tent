@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent;
+namespace Tent\Models;
 
 use Tent\Handlers\RequestHandler;
 
