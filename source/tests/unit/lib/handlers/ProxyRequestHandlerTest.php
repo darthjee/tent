@@ -7,6 +7,7 @@ use Tent\Handlers\ProxyRequestHandler;
 use Tent\Request;
 use Tent\Response;
 use Tent\Server;
+use Tent\Http\HttpClientInterface;
 
 require_once __DIR__ . '/../../../support/tests_loader.php';
 
@@ -152,7 +153,7 @@ class ProxyRequestHandlerTest extends TestCase
 
     private function createMockHttpClient($expectedUrl, $expectedHeaders, $returnValue)
     {
-        $httpClient = $this->createMock(\Tent\HttpClientInterface::class);
+        $httpClient = $this->createMock(HttpClientInterface::class);
 
         $httpClient->expects($this->once())
             ->method('request')
