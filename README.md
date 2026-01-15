@@ -62,7 +62,6 @@ Handler   Handler   Handler        Handler      Handler
                                       404 Not Found   403 Forbidden
 ```
 
-
 ## Development
 
 To develop Tent, you will run the main Tent application (in the source/source directory) along with three auxiliary services:
