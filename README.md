@@ -45,6 +45,7 @@ Currently, 404 (Not Found) and 403 (Forbidden) responses return a simple default
 
 ## Architecture
 
+
 ```
 Client Request
       ↓
@@ -54,10 +55,13 @@ Client Request
       ↓
 RequestProcessor
       ↓
-   ┌──────────┬──────────┬──────────┐
-   ↓          ↓          ↓          ↓
-Proxy     Cache     Static     404
-Handler   Handler   Handler   Handler
+ ┌────────────┬──────────┬──────────────┬───────────┬──────────┐
+ ↓            ↓          ↓              ↓           ↓
+Proxy     Cache     StaticFile     SingleFile   Error
+Handler   Handler   Handler        Handler      Handler
+                                            ┌─────────────┐
+                                            ↓             ↓
+                                      404 Not Found   403 Forbidden
 ```
 
 ## Contributing
