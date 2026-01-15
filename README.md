@@ -44,7 +44,6 @@ Currently, 404 (Not Found) and 403 (Forbidden) responses return a simple default
 
 ## Architecture
 
-
 ```
 Client Request
       ↓
