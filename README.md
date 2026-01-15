@@ -26,6 +26,7 @@ Tent uses Apache with PHP to process all incoming requests through a centralized
 
 Tent is available as a Docker image: `darthjee/tent` *(coming soon)*
 
+
 ## Current Status
 
 Tent is in active development. Currently implemented:
@@ -33,9 +34,14 @@ Tent is in active development. Currently implemented:
 - ✅ Basic proxy functionality
 - ✅ Request routing and matching
 - ✅ Header forwarding
+- ✅ Static file serving (serves files from a directory)
+- ✅ Single file serving (always serves the same file)
 - ⏳ Configuration system (in progress)
 - ⏳ Response caching (planned)
-- ⏳ Static file serving (planned)
+
+### Error Responses (403/404)
+
+Currently, 404 (Not Found) and 403 (Forbidden) responses return a simple default body. In the future, Tent will support custom bodies or templates for these responses, allowing more complex or branded error pages.
 
 ## Architecture
 
