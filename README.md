@@ -80,10 +80,40 @@ Tent is configured so that backend requests are proxied to the backend service. 
 - If `FRONTEND_DEV_MODE=true`, frontend requests are proxied to the Vite development server (hot reload, etc).
 - If `FRONTEND_DEV_MODE=false`, the frontend is served statically from the built files (as in production).
 
+```
+Browser
+   ↓
+Tent (index.php)
+   ↓
+ ┌───────────────┬────────────────────┐
+ │               │                    │
+Backend       Frontend (React)   Static Files
+ (api_dev)    (frontend_dev)     (frontend/dist)
+   ↑               ↑                    ↑
+   │               │                    │
+phpMyAdmin   (Vite dev server)   (Served by Tent)
+```
+
+Depending on FRONTEND_DEV_MODE:
+- If true: frontend requests → Vite dev server (hot reload)
+- If false: frontend requests → static files from build
+
 ### Docker Volumes
 
 - **Static files:** The static files are mounted from `frontend/dist` into the Tent container, so the built frontend is served in production mode.
 - **Configuration:** The `docker_volumes/configuration` directory is mounted into the Tent app for configuration. The shipped code does not include a configuration; users are expected to provide their own to define proxy rules.
+
+```
+Host Directory                →   Container Path
+----------------------------------------------------------
+./source                      →   /home/app/app
+./dev/frontend/dist           →   /home/app/app/source/static
+./docker_volumes/vendor       →   /home/app/app/vendor
+./docker_volumes/configuration→   /home/app/app/source/configuration
+./dev/api                     →   /home/app/app (for api_dev)
+./docker_volumes/mysql_data   →   /var/lib/mysql (for api_dev_mysql)
+./docker_volumes/node_modules →   /home/node/app/node_modules (for frontend_dev)
+```
 
 See `docker-compose.yml` for details on service setup and volume mounts.
 
