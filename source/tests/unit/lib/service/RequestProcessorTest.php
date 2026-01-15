@@ -60,7 +60,7 @@ class RequestProcessorTest extends TestCase
         $response = RequestProcessor::handleRequest($request);
 
         $expectedContent = file_get_contents($this->staticPath . '/index.html');
-        $this->assertInstanceOf(\Tent\Models\Response::class, $response);
+        $this->assertInstanceOf(Response::class, $response);
         $this->assertEquals(200, $response->httpCode);
         $this->assertEquals($expectedContent, $response->body);
         $this->assertStringContainsString('Content-Type: text/html', implode("\n", $response->headerLines));
@@ -89,13 +89,13 @@ class RequestProcessorTest extends TestCase
     public function testReturnsMissingResponseForUnmatchedRoute()
     {
         // No rules added, so fallback handler should be used
-        $request = new \Tent\Models\Request([
+        $request = new Request([
             'requestUrl' => '/other',
             'requestMethod' => 'GET'
         ]);
-        $response = \Tent\RequestProcessor::handleRequest($request);
+        $response = RequestProcessor::handleRequest($request);
 
-        $this->assertInstanceOf(\Tent\Models\Response::class, $response);
+        $this->assertInstanceOf(Response::class, $response);
         $this->assertEquals(404, $response->httpCode);
         $this->assertStringContainsString('Not Found', $response->body);
     }

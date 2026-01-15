@@ -5,6 +5,7 @@ namespace Tent\Tests;
 use Tent\Handlers\FixedFileHandler;
 use Tent\Models\Request;
 use Tent\Models\Response;
+use Tent\Models\MissingResponse;
 
 class FixedFileHandlerTest extends \PHPUnit\Framework\TestCase
 {
@@ -48,10 +49,10 @@ class FixedFileHandlerTest extends \PHPUnit\Framework\TestCase
     public function testReturnsMissingResponseWhenFileNotFound()
     {
         $handler = new FixedFileHandler('./tests/fixtures/nonexistent.txt');
-        $request = $this->createMock(\Tent\Models\Request::class);
+        $request = $this->createMock(Request::class);
         $response = $handler->handleRequest($request);
 
-        $this->assertInstanceOf(\Tent\Models\MissingResponse::class, $response);
+        $this->assertInstanceOf(MissingResponse::class, $response);
     }
 
     public function testReturnsCssFileContent()

@@ -8,6 +8,7 @@ use Tent\Models\Request;
 use Tent\Models\Response;
 use Tent\Models\Server;
 use Tent\Http\HttpClientInterface;
+use Tent\Models\ForbiddenResponse;
 
 require_once __DIR__ . '/../../../support/tests_loader.php';
 
@@ -25,7 +26,7 @@ class ProxyRequestHandlerTest extends TestCase
         $handler = new ProxyRequestHandler($server);
         $response = $handler->handleRequest($request);
 
-        $this->assertInstanceOf(\Tent\Models\ForbiddenResponse::class, $response);
+        $this->assertInstanceOf(ForbiddenResponse::class, $response);
         $this->assertSame(403, $response->httpCode);
         $this->assertSame('Forbidden', $response->body);
     }
