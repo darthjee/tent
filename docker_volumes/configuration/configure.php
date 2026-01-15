@@ -2,9 +2,9 @@
 
 use Tent\Configuration;
 use Tent\Rule;
-use Tent\FixedFileHandler;
-use Tent\ProxyRequestHandler;
-use Tent\StaticFileHandler;
+use Tent\Handlers\FixedFileHandler;
+use Tent\Handlers\ProxyRequestHandler;
+use Tent\Handlers\StaticFileHandler;
 use Tent\Server;
 use Tent\FolderLocation;
 use Tent\RequestMatcher;

@@ -35,7 +35,7 @@ class Configuration
     {
         return array_merge(
             self::$rules,
-            [new Rule(new MissingRequestHandler())]
+            [new Rule(new \Tent\Handlers\MissingRequestHandler())]
         );
     }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent;
+namespace Tent\Handlers;
 
 /**
  * FileHandler that always returns the contents of a fixed file.

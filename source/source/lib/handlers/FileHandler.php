@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent;
+namespace Tent\Handlers;
 
 use Tent\ContentType;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent;
+namespace Tent\Handlers;
 
 /**
  * Validates the request path to prevent path traversal and other invalid patterns.

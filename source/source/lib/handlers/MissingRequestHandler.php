@@ -1,8 +1,8 @@
 <?php
 
-namespace Tent;
+namespace Tent\Handlers;
 
-use Tent\RequestHandler;
+use Tent\Handlers\RequestHandler;
 
 /**
  * RequestHandler that always returns a 404 response.

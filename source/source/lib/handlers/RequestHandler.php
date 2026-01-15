@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent;
+namespace Tent\Handlers;
 
 /**
  * Interface for handling HTTP requests and producing responses.

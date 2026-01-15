@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent;
+namespace Tent\Handlers;
 
 /**
  * Handles HTTP requests by proxying them to a target server.
