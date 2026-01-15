@@ -64,6 +64,29 @@ Handler   Handler   Handler        Handler      Handler
                                       404 Not Found   403 Forbidden
 ```
 
+
+## Development
+
+To develop Tent, you will run the main Tent application (in the source/source directory) along with three auxiliary services:
+
+- **Backend (api_dev):** A simple PHP backend with endpoints (currently /persons).
+- **Frontend (frontend_dev):** A React frontend, served by Vite in development mode.
+- **phpMyAdmin (api_dev_phpmyadmin):** For managing and inserting data into the backend database.
+
+### How requests are routed
+
+Tent is configured so that backend requests are proxied to the backend service. Frontend requests depend on the `FRONTEND_DEV_MODE` environment variable:
+
+- If `FRONTEND_DEV_MODE=true`, frontend requests are proxied to the Vite development server (hot reload, etc).
+- If `FRONTEND_DEV_MODE=false`, the frontend is served statically from the built files (as in production).
+
+### Docker Volumes
+
+- **Static files:** The static files are mounted from `frontend/dist` into the Tent container, so the built frontend is served in production mode.
+- **Configuration:** The `docker_volumes/configuration` directory is mounted into the Tent app for configuration. The shipped code does not include a configuration; users are expected to provide their own to define proxy rules.
+
+See `docker-compose.yml` for details on service setup and volume mounts.
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit pull requests or open issues.
