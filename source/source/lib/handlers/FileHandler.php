@@ -64,8 +64,9 @@ abstract class FileHandler implements RequestHandler
      * Validates the file path for traversal attacks.
      * Throws InvalidFilePathException if path is invalid.
      *
-     * @param string $path
-     * @throws InvalidFilePathException
+     * @param string $path File path to validate.
+     * @throws InvalidFilePathException If the file path is invalid.
+     * @return void
      */
     protected function validateFilePath(string $path): void
     {
@@ -78,8 +79,9 @@ abstract class FileHandler implements RequestHandler
     /**
      * Checks if the file exists and is a regular file. Throws FileNotFoundException if not.
      *
-     * @param string $filePath
-     * @throws FileNotFoundException
+     * @param string $filePath File path to be checked.
+     * @throws FileNotFoundException If the file does not exist or is not a regular file.
+     * @return void
      */
     protected function checkFileExistance(string $filePath): void
     {
@@ -87,12 +89,12 @@ abstract class FileHandler implements RequestHandler
             throw new FileNotFoundException("File not found: $filePath");
         }
     }
-    
+
     /**
      * Reads the file and returns a Response with its contents and headers.
      *
-     * @param string $filePath
-     * @return Response
+     * @param string $filePath File path to be read.
+     * @return Response The HTTP response containing the file contents.
      */
     protected function readAndReturnFile(string $filePath): Response
     {

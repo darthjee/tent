@@ -2,4 +2,6 @@
 
 namespace Tent\Exceptions;
 
-class InvalidFilePathException extends \Exception {}
+class InvalidFilePathException extends \Exception
+{
+}

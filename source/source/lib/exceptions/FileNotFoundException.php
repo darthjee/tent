@@ -2,4 +2,6 @@
 
 namespace Tent\Exceptions;
 
-class FileNotFoundException extends \Exception {}
+class FileNotFoundException extends \Exception
+{
+}
