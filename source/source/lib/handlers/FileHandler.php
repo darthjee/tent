@@ -52,24 +52,14 @@ abstract class FileHandler implements RequestHandler
             $filePath = $this->getFilePath($request);
             $this->checkFileExistance($filePath);
 
-            $content = file_get_contents($filePath);
-            $contentType = ContentType::getContentType($filePath);
-            $contentLength = strlen($content);
-
-            return new Response(
-                $content,
-                200,
-                [
-                    "Content-Type: $contentType",
-                    "Content-Length: $contentLength"
-                ]
-            );
+            return $this->readAndReturnFile($filePath);
         } catch (InvalidFilePathException $e) {
             return new ForbiddenResponse();
         } catch (FileNotFoundException $e) {
             return new MissingResponse();
         }
     }
+
     /**
      * Validates the file path for traversal attacks.
      * Throws InvalidFilePathException if path is invalid.
@@ -96,5 +86,27 @@ abstract class FileHandler implements RequestHandler
         if (!file_exists($filePath) || !is_file($filePath)) {
             throw new FileNotFoundException("File not found: $filePath");
         }
+    }
+    
+    /**
+     * Reads the file and returns a Response with its contents and headers.
+     *
+     * @param string $filePath
+     * @return Response
+     */
+    protected function readAndReturnFile(string $filePath): Response
+    {
+        $content = file_get_contents($filePath);
+        $contentType = ContentType::getContentType($filePath);
+        $contentLength = strlen($content);
+
+        return new Response(
+            $content,
+            200,
+            [
+                "Content-Type: $contentType",
+                "Content-Length: $contentLength"
+            ]
+        );
     }
 }
