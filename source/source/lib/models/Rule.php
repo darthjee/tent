@@ -3,6 +3,9 @@
 namespace Tent\Models;
 
 use Tent\Handlers\RequestHandler;
+use Tent\Models\RequestMatcher;
+use Tent\Models\Server;
+use Tent\Handlers\ProxyRequestHandler;
 
 /**
  * Represents a routing rule for processing HTTP requests.
@@ -32,6 +35,33 @@ class Rule
     {
         $this->handler = $handler;
         $this->matchers = $matchers;
+    }
+
+    /**
+     * Builds a Rule using named parameters for handler and matchers.
+     *
+     * Example:
+     *   Rule::build([
+     *     'handler' => ['type' => 'proxy', 'host' => 'http://api.com'],
+     *     'matchers' => [
+     *         ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact']
+     *     ]
+     *   ])
+     *
+     * @param array $params Associative array with keys:
+     *   - 'handler': array, parameters for RequestHandler::build.
+     *   - 'matchers': array of associative arrays, each with keys 'method', 'uri', 'type'.
+     * @return Rule
+     */
+    public static function build(array $params): self
+    {
+        $handler = RequestHandler::build($params['handler'] ?? []);
+
+        $matchers = $params['matchers'] ?? [];
+        $matcherObjs = array_map(function ($matcher) {
+            return RequestMatcher::build($matcher);
+        }, $matchers);
+        return new self($handler, $matcherObjs);
     }
 
     /**

@@ -29,6 +29,24 @@ class RequestMatcher
     }
 
     /**
+     * Builds a RequestMatcher from an associative array.
+     *
+     * Example:
+     *   RequestMatcher::build(['method' => 'GET', 'uri' => '/users', 'type' => 'exact'])
+     *
+     * @param array $params Associative array with keys 'method', 'uri', 'type'.
+     * @return RequestMatcher
+     */
+    public static function build(array $params): self
+    {
+        return new self(
+            $params['method'] ?? null,
+            $params['uri'] ?? null,
+            $params['type'] ?? 'exact'
+        );
+    }
+
+    /**
      * Checks if the given Request matches this matcher.
      *
      * @param Request $request The incoming HTTP request.

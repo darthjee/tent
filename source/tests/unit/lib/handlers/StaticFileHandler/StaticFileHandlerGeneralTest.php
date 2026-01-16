@@ -9,7 +9,7 @@ use Tent\Models\Request;
 use Tent\Models\MissingResponse;
 use Tent\Models\ForbiddenResponse;
 
-class StaticFileHandlerTest extends TestCase
+class StaticFileHandlerGeneralTest extends TestCase
 {
     private $testDir;
 
@@ -139,7 +139,7 @@ class StaticFileHandlerTest extends TestCase
 
     public function testHandleRequestReturnsCorrectContentTypeForPng()
     {
-        copy(__DIR__ . '/../../../fixtures/test_image.png', $this->testDir . '/image.png');
+        copy(__DIR__ . '/../../../../fixtures/test_image.png', $this->testDir . '/image.png');
 
         $location = new FolderLocation($this->testDir);
         $handler = new StaticFileHandler($location);
@@ -156,7 +156,7 @@ class StaticFileHandlerTest extends TestCase
 
     public function testHandleRequestReturnsCorrectContentTypeForJpg()
     {
-        copy(__DIR__ . '/../../../fixtures/test_image.jpg', $this->testDir . '/image.jpg');
+        copy(__DIR__ . '/../../../../fixtures/test_image.jpg', $this->testDir . '/image.jpg');
 
         $location = new FolderLocation($this->testDir);
         $handler = new StaticFileHandler($location);

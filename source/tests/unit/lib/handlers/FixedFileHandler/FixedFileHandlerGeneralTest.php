@@ -8,9 +8,9 @@ use Tent\Models\Response;
 use Tent\Models\MissingResponse;
 use Tent\Models\ForbiddenResponse;
 
-require_once __DIR__ . '/../../../../source/loader.php';
+require_once __DIR__ . '/../../../../../source/loader.php';
 
-class FixedFileHandlerTest extends \PHPUnit\Framework\TestCase
+class FixedFileHandlerGeneralTest extends \PHPUnit\Framework\TestCase
 {
     public function testReturnsHtmlFileContent()
     {

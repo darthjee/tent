@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Tent\Models\RequestMatcher;
 use Tent\Models\Request;
 
-class RequestMatcherTest extends TestCase
+class RequestMatcherGeneralTest extends TestCase
 {
     public function testMatchesWithExactMatch()
     {
