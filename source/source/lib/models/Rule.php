@@ -49,8 +49,8 @@ class Rule
      *   ])
      *
      * @param array $params Associative array with keys:
-     *   - 'handler': array, parameters for RequestHandler::build
-     *   - 'matchers': array of associative arrays, each with keys 'method', 'uri', 'type'
+     *   - 'handler': array, parameters for RequestHandler::build.
+     *   - 'matchers': array of associative arrays, each with keys 'method', 'uri', 'type'.
      * @return Rule
      */
     public static function build(array $params): self
@@ -58,7 +58,7 @@ class Rule
         $handler = RequestHandler::build($params['handler'] ?? []);
 
         $matchers = $params['matchers'] ?? [];
-        $matcherObjs = array_map(function($matcher) {
+        $matcherObjs = array_map(function ($matcher) {
             return new RequestMatcher(
                 $matcher['method'] ?? null,
                 $matcher['uri'] ?? null,
