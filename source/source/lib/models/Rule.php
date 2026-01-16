@@ -49,19 +49,19 @@ class Rule
      *   ])
      *
      * @param array $params Associative array with keys:
-     *   - 'host': string, the target host for the proxy handler
-     *   - 'rules': array of associative arrays, each with keys 'method', 'uri', 'type'
+     *   - 'host': string, the target host for the proxy handler.
+     *   - 'rules': array of associative arrays, each with keys 'method', 'uri', 'type'.
      * @return Rule
      */
     public static function build(array $params): self
     {
         $targetHost = $params['host'] ?? null;
         $matchers = $params['rules'] ?? [];
-        $matcherObjs = array_map(function($m) {
+        $matcherObjs = array_map(function ($matcher) {
             return new RequestMatcher(
-                $m['method'] ?? null,
-                $m['uri'] ?? null,
-                $m['type'] ?? 'exact'
+                $matcher['method'] ?? null,
+                $matcher['uri'] ?? null,
+                $matcher['type'] ?? 'exact'
             );
         }, $matchers);
         $handler = new ProxyRequestHandler(new Server($targetHost));
