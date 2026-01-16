@@ -4,6 +4,8 @@ namespace Tent\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Tent\Models\Rule;
+use Tent\Models\Request;
+use Tent\Handlers\ProxyRequestHandler;
 
 class RuleBuildTest extends TestCase
 {
@@ -19,13 +21,13 @@ class RuleBuildTest extends TestCase
 
         $this->assertInstanceOf(Rule::class, $rule);
         $handler = $rule->handler();
-        $this->assertInstanceOf(\Tent\Handlers\ProxyRequestHandler::class, $handler);
+        $this->assertInstanceOf(ProxyRequestHandler::class, $handler);
 
-        $requestGet = $this->createMock(\Tent\Models\Request::class);
+        $requestGet = $this->createMock(Request::class);
         $requestGet->method('requestMethod')->willReturn('GET');
         $requestGet->method('requestUrl')->willReturn('/index.html');
 
-        $requestPost = $this->createMock(\Tent\Models\Request::class);
+        $requestPost = $this->createMock(Request::class);
         $requestPost->method('requestMethod')->willReturn('POST');
         $requestPost->method('requestUrl')->willReturn('/submit/123');
 

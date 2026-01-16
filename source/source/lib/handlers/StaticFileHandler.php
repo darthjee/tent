@@ -35,7 +35,7 @@ class StaticFileHandler extends FileHandler
      */
     public static function build(array $params): self
     {
-        $folderLocation = new \Tent\Models\FolderLocation($params['location'] ?? '');
+        $folderLocation = new FolderLocation($params['location'] ?? '');
         return new self($folderLocation);
     }
 
