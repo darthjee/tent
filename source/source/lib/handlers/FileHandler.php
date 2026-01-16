@@ -6,6 +6,7 @@ use Tent\Utils\ContentType;
 use Tent\Models\Request;
 use Tent\Models\Response;
 use Tent\Models\MissingResponse;
+use Tent\Models\ForbiddenResponse;
 
 /**
  * Abstract RequestHandler for serving file contents as HTTP responses.

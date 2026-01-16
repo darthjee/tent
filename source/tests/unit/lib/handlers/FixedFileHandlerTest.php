@@ -6,6 +6,7 @@ use Tent\Handlers\FixedFileHandler;
 use Tent\Models\Request;
 use Tent\Models\Response;
 use Tent\Models\MissingResponse;
+use Tent\Models\ForbiddenResponse;
 
 require_once __DIR__ . '/../../../../source/loader.php';
 
@@ -67,5 +68,16 @@ class FixedFileHandlerTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(200, $response->httpCode);
         $this->assertStringContainsString('background: #fff', $response->body);
         $this->assertContains('Content-Type: text/css', $response->headerLines);
+    }
+
+    public function testReturnsForbiddenResponseForPathTraversal()
+    {
+        $handler = new FixedFileHandler('./tests/fixtures/content.html');
+        $request = $this->createMock(Request::class);
+        $request = new Request(['requestUrl' => '../etc/passwd']);
+
+        $response = $handler->handleRequest($request);
+        $this->assertInstanceOf(ForbiddenResponse::class, $response);
+        $this->assertEquals(403, $response->httpCode);
     }
 }
