@@ -5,7 +5,7 @@ namespace Tent\Tests;
 use PHPUnit\Framework\TestCase;
 use Tent\Models\Rule;
 
-class BuildTest extends TestCase
+class RuleBuildTest extends TestCase
 {
     public function testBuildCreatesRuleWithNamedParameters()
     {
