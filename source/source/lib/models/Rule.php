@@ -40,17 +40,21 @@ class Rule
     /**
      * Builds a Rule for proxying to a target host with simplified matcher definitions.
      *
-     * Example:
-     *   Rule::build('http://api.com', [['GET', '/index.html', 'exact']])
-     *
-     * @param string $targetHost The target host for the proxy handler.
-     * @param array $matchers Array of arrays, each with [method, uri, matchType].
-     * @return Rule
+    * Example:
+    *   Rule::build('http://api.com', [['method' => 'GET', 'uri' => '/index.html', 'type' => 'exact']])
+    *
+    * @param string $targetHost The target host for the proxy handler.
+    * @param array $matchers Array of associative arrays, each with keys 'method', 'uri', 'type'.
+    * @return Rule
      */
     public static function build(string $targetHost, array $matchers): self
     {
         $matcherObjs = array_map(function($m) {
-            return new RequestMatcher($m[0] ?? null, $m[1] ?? null, $m[2] ?? 'exact');
+            return new RequestMatcher(
+                $m['method'] ?? null,
+                $m['uri'] ?? null,
+                $m['type'] ?? 'exact'
+            );
         }, $matchers);
         $handler = new ProxyRequestHandler(new Server($targetHost));
         return new self($handler, $matcherObjs);
