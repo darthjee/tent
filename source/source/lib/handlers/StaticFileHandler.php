@@ -25,6 +25,21 @@ class StaticFileHandler extends FileHandler
     }
 
     /**
+     * Builds a StaticFileHandler using named parameters.
+     *
+     * Example:
+     *   StaticFileHandler::build(['location' => './some_folder'])
+     *
+     * @param array $params Associative array with key 'location' (string)
+     * @return StaticFileHandler
+     */
+    public static function build(array $params): self
+    {
+        $folderLocation = new \Tent\Models\FolderLocation($params['location'] ?? '');
+        return new self($folderLocation);
+    }
+
+    /**
      * Returns the file path for the static file to be served, based on the request URL.
      *
      * @param Request $request The incoming HTTP request.
