@@ -41,6 +41,21 @@ class ProxyRequestHandler implements RequestHandler
     }
 
     /**
+     * Builds a ProxyRequestHandler using named parameters.
+     *
+     * Example:
+     *   ProxyRequestHandler::build(['host' => 'http://api.com'])
+     *
+     * @param array $params Associative array with key 'host' (string)
+     * @return ProxyRequestHandler
+     */
+    public static function build(array $params): self
+    {
+        $server = new Server($params['host'] ?? '');
+        return new self($server);
+    }
+
+    /**
      * Proxies the incoming request to the target server and returns the response.
      *
      * @param Request $request The incoming HTTP request to be proxied.
