@@ -8,6 +8,7 @@ require_once __DIR__ . '/lib/models/Response.php';
 
 require_once __DIR__ . '/lib/Configuration.php';
 require_once __DIR__ . '/lib/exceptions/FileNotFoundException.php';
+require_once __DIR__ . '/lib/exceptions/InvalidFilePathException.php';
 require_once __DIR__ . '/lib/handlers/FileHandler.php';
 require_once __DIR__ . '/lib/handlers/FixedFileHandler.php';
 require_once __DIR__ . '/lib/handlers/MissingRequestHandler.php';

@@ -8,6 +8,7 @@ use Tent\Models\Response;
 use Tent\Models\MissingResponse;
 use Tent\Models\ForbiddenResponse;
 use Tent\Exceptions\FileNotFoundException;
+use Tent\Exceptions\InvalidFilePathException;
 
 /**
  * Abstract RequestHandler for serving file contents as HTTP responses.
@@ -47,12 +48,7 @@ abstract class FileHandler implements RequestHandler
     public function handleRequest(Request $request)
     {
         try {
-            // Validate request path for traversal attacks
-            $validator = new RequestPathValidator($request->requestUrl());
-            if (!$validator->isValid()) {
-                return new ForbiddenResponse();
-            }
-
+            $this->validateFilePath($request->requestUrl());
             $filePath = $this->getFilePath($request);
             $this->checkFileExistance($filePath);
 
@@ -68,8 +64,24 @@ abstract class FileHandler implements RequestHandler
                     "Content-Length: $contentLength"
                 ]
             );
+        } catch (InvalidFilePathException $e) {
+            return new ForbiddenResponse();
         } catch (FileNotFoundException $e) {
             return new MissingResponse();
+        }
+    }
+    /**
+     * Validates the file path for traversal attacks.
+     * Throws InvalidFilePathException if path is invalid.
+     *
+     * @param string $path
+     * @throws InvalidFilePathException
+     */
+    protected function validateFilePath(string $path): void
+    {
+        $validator = new RequestPathValidator($path);
+        if (!$validator->isValid()) {
+            throw new InvalidFilePathException("Invalid file path: $path");
         }
     }
 
