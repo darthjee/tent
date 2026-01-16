@@ -12,10 +12,10 @@ use Tent\Models\RequestMatcher;
 require_once __DIR__ . '/rules/frontend.php';
 
 Configuration::addRule(
-    new Rule(
-        new ProxyRequestHandler(new Server('http://api:80')),
-        [
-            new RequestMatcher('GET', '/persons', 'exact')
+    Rule::build([
+        'host' => 'http://api:80',
+        'rules' => [
+            ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact']
         ]
-    )
+    ])
 );
