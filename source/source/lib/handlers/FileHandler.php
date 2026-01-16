@@ -7,6 +7,7 @@ use Tent\Models\Request;
 use Tent\Models\Response;
 use Tent\Models\MissingResponse;
 use Tent\Models\ForbiddenResponse;
+use Tent\Exceptions\FileNotFoundException;
 
 /**
  * Abstract RequestHandler for serving file contents as HTTP responses.
@@ -45,28 +46,43 @@ abstract class FileHandler implements RequestHandler
      */
     public function handleRequest(Request $request)
     {
-        // Validate request path for traversal attacks
-        $validator = new RequestPathValidator($request->requestUrl());
-        if (!$validator->isValid()) {
-            return new ForbiddenResponse();
-        }
+        try {
+            // Validate request path for traversal attacks
+            $validator = new RequestPathValidator($request->requestUrl());
+            if (!$validator->isValid()) {
+                return new ForbiddenResponse();
+            }
 
-        $filePath = $this->getFilePath($request);
-        if (!file_exists($filePath) || !is_file($filePath)) {
+            $filePath = $this->getFilePath($request);
+            $this->checkFileExistance($filePath);
+
+            $content = file_get_contents($filePath);
+            $contentType = ContentType::getContentType($filePath);
+            $contentLength = strlen($content);
+
+            return new Response(
+                $content,
+                200,
+                [
+                    "Content-Type: $contentType",
+                    "Content-Length: $contentLength"
+                ]
+            );
+        } catch (FileNotFoundException $e) {
             return new MissingResponse();
         }
+    }
 
-        $content = file_get_contents($filePath);
-        $contentType = ContentType::getContentType($filePath);
-        $contentLength = strlen($content);
-
-        return new Response(
-            $content,
-            200,
-            [
-                "Content-Type: $contentType",
-                "Content-Length: $contentLength"
-            ]
-        );
+    /**
+     * Checks if the file exists and is a regular file. Throws FileNotFoundException if not.
+     *
+     * @param string $filePath
+     * @throws FileNotFoundException
+     */
+    protected function checkFileExistance(string $filePath): void
+    {
+        if (!file_exists($filePath) || !is_file($filePath)) {
+            throw new FileNotFoundException("File not found: $filePath");
+        }
     }
 }
