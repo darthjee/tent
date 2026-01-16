@@ -46,7 +46,7 @@ abstract class FileHandler implements RequestHandler
     public function handleRequest(Request $request)
     {
         // Validate request path for traversal attacks
-        $validator = new RequestPathValidator($request);
+        $validator = new RequestPathValidator($request->requestUrl());
         if (!$validator->isValid()) {
             return new ForbiddenResponse();
         }

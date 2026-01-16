@@ -19,11 +19,7 @@ class RequestPathValidatorTest extends TestCase
             '/node_modules/react.js',
         ];
         foreach ($validPaths as $path) {
-            $request = new Request([
-                'requestUrl' => $path
-            ]);
-
-            $validator = new RequestPathValidator($request);
+            $validator = new RequestPathValidator($path);
             $this->assertTrue($validator->isValid(), "Path '$path' should be valid");
         }
     }
@@ -40,11 +36,7 @@ class RequestPathValidatorTest extends TestCase
             '/api/..//persons',
         ];
         foreach ($invalidPaths as $path) {
-            $request = new Request([
-                'requestUrl' => $path
-            ]);
-
-            $validator = new RequestPathValidator($request);
+            $validator = new RequestPathValidator($path);
             $this->assertFalse($validator->isValid(), "Path '$path' should be invalid");
         }
     }
