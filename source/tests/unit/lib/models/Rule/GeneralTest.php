@@ -8,7 +8,7 @@ use Tent\Models\RequestMatcher;
 use Tent\Models\Request;
 use Tent\Handlers\RequestHandler;
 
-class RuleTest extends TestCase
+class GeneralTest extends TestCase
 {
     public function testMatchReturnsTrueWhenAMatcherMatches()
     {
