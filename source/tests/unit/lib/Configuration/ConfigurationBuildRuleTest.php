@@ -10,6 +10,12 @@ use Tent\Models\Request;
 
 class ConfigurationBuildRuleTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        // Reset rules before each test
+        Configuration::reset();
+    }
+
     public function testBuildRuleCreatesRuleWithProxyHandler()
     {
         $rule = Configuration::buildRule([
