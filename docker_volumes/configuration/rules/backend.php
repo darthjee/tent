@@ -6,14 +6,12 @@ use Tent\Handlers\ProxyRequestHandler;
 use Tent\Models\Server;
 use Tent\Models\RequestMatcher;
 
-Configuration::addRule(
-    Rule::build([
-        'handler' => [
-            'type' => 'proxy',
-            'host' => 'http://api:80'
-        ],
-        'matchers' => [
-            ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact']
-        ]
-    ])
-);
+Configuration::buildRule([
+    'handler' => [
+        'type' => 'proxy',
+        'host' => 'http://api:80'
+    ],
+    'matchers' => [
+        ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact']
+    ]
+]);
