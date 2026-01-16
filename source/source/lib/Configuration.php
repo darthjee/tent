@@ -22,11 +22,23 @@ class Configuration
      * Adds a Rule to the configuration.
      *
      * @param Rule $rule The rule to add.
-     * @return void
+     * @return Rule
      */
     public static function addRule(Rule $rule)
     {
         self::$rules[] = $rule;
+        return $rule;
+    }
+
+    /**
+     * Builds a Rule from an array of parameters (proxy for Rule::build).
+     *
+     * @param array $params Array of parameters for Rule::build
+     * @return Rule
+     */
+    public static function buildRule(array $params): Rule
+    {
+        return self::addRule(Rule::build($params));
     }
 
     /**
