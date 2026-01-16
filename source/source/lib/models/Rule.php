@@ -38,33 +38,33 @@ class Rule
     }
 
     /**
-     * Builds a Rule for proxying to a target host with simplified matcher definitions using named parameters.
+     * Builds a Rule using named parameters for handler and matchers.
      *
      * Example:
      *   Rule::build([
-     *     'host' => 'http://api.com',
-     *     'rules' => [
-     *         ['method' => 'GET', 'uri' => '/index.html', 'type' => 'exact']
+     *     'handler' => ['type' => 'proxy', 'host' => 'http://api.com'],
+     *     'matchers' => [
+     *         ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact']
      *     ]
      *   ])
      *
      * @param array $params Associative array with keys:
-     *   - 'host': string, the target host for the proxy handler.
-     *   - 'rules': array of associative arrays, each with keys 'method', 'uri', 'type'.
+     *   - 'handler': array, parameters for RequestHandler::build
+     *   - 'matchers': array of associative arrays, each with keys 'method', 'uri', 'type'
      * @return Rule
      */
     public static function build(array $params): self
     {
-        $targetHost = $params['host'] ?? null;
-        $matchers = $params['rules'] ?? [];
-        $matcherObjs = array_map(function ($matcher) {
+        $handler = RequestHandler::build($params['handler'] ?? []);
+
+        $matchers = $params['matchers'] ?? [];
+        $matcherObjs = array_map(function($matcher) {
             return new RequestMatcher(
                 $matcher['method'] ?? null,
                 $matcher['uri'] ?? null,
                 $matcher['type'] ?? 'exact'
             );
         }, $matchers);
-        $handler = new ProxyRequestHandler(new Server($targetHost));
         return new self($handler, $matcherObjs);
     }
 
