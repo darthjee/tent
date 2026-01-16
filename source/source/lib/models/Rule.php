@@ -59,11 +59,7 @@ class Rule
 
         $matchers = $params['matchers'] ?? [];
         $matcherObjs = array_map(function ($matcher) {
-            return new RequestMatcher(
-                $matcher['method'] ?? null,
-                $matcher['uri'] ?? null,
-                $matcher['type'] ?? 'exact'
-            );
+            return RequestMatcher::build($matcher);
         }, $matchers);
         return new self($handler, $matcherObjs);
     }
