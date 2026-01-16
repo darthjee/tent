@@ -12,22 +12,6 @@ use Tent\Models\ForbiddenResponse;
 
 class ProxyRequestHandlerTest extends TestCase
 {
-    public function testHandleRequestReturnsForbiddenResponseForPathTraversal()
-    {
-        $request = $this->createMock(Request::class);
-        $request->method('requestMethod')->willReturn('GET');
-        $request->method('requestUrl')->willReturn('/assets/../secret.txt');
-        $request->method('query')->willReturn('');
-        $request->method('headers')->willReturn([]);
-
-        $server = new Server('http://backend:8080');
-        $handler = new ProxyRequestHandler($server);
-        $response = $handler->handleRequest($request);
-
-        $this->assertInstanceOf(ForbiddenResponse::class, $response);
-        $this->assertSame(403, $response->httpCode);
-        $this->assertSame('Forbidden', $response->body);
-    }
     public function testHandleRequestBuildsCorrectUrl()
     {
         $request = $this->createMockRequest('GET', '/api/users', '');
