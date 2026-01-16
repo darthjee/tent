@@ -192,7 +192,7 @@ class StaticFileHandlerTest extends TestCase
         $location = new FolderLocation($this->testDir);
         $handler = new StaticFileHandler($location);
         $request = new Request(['requestUrl' => '../etc/passwd']);
-        
+
         $response = $handler->handleRequest($request);
         $this->assertInstanceOf(ForbiddenResponse::class, $response);
         $this->assertEquals(403, $response->httpCode);

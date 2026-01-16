@@ -16,7 +16,7 @@ class FixedFileHandlerTest extends \PHPUnit\Framework\TestCase
     {
         $handler = new FixedFileHandler('./tests/fixtures/content.html');
 
-        $request = $this->createMock(Request::class);
+        $request = new Request(['requestUrl' => '/some-url']);
         $response = $handler->handleRequest($request);
 
         $this->assertInstanceOf(Response::class, $response);
@@ -28,7 +28,8 @@ class FixedFileHandlerTest extends \PHPUnit\Framework\TestCase
     public function testReturnsJsonFileContent()
     {
         $handler = new FixedFileHandler('./tests/fixtures/data.json');
-        $request = $this->createMock(Request::class);
+
+        $request = new Request(['requestUrl' => '/some-url.json']);
         $response = $handler->handleRequest($request);
 
         $this->assertInstanceOf(Response::class, $response);
@@ -40,7 +41,8 @@ class FixedFileHandlerTest extends \PHPUnit\Framework\TestCase
     public function testReturnsImageFileContent()
     {
         $handler = new FixedFileHandler('./tests/fixtures/image.gif');
-        $request = $this->createMock(Request::class);
+
+        $request = new Request(['requestUrl' => '/some-url.gif']);
         $response = $handler->handleRequest($request);
 
         $this->assertInstanceOf(Response::class, $response);
@@ -52,7 +54,8 @@ class FixedFileHandlerTest extends \PHPUnit\Framework\TestCase
     public function testReturnsMissingResponseWhenFileNotFound()
     {
         $handler = new FixedFileHandler('./tests/fixtures/nonexistent.txt');
-        $request = $this->createMock(Request::class);
+
+        $request = new Request(['requestUrl' => '/some-url.txt']);
         $response = $handler->handleRequest($request);
 
         $this->assertInstanceOf(MissingResponse::class, $response);
@@ -61,7 +64,8 @@ class FixedFileHandlerTest extends \PHPUnit\Framework\TestCase
     public function testReturnsCssFileContent()
     {
         $handler = new FixedFileHandler('./tests/fixtures/style.css');
-        $request = $this->createMock(Request::class);
+
+        $request = new Request(['requestUrl' => '/some-url.css']);
         $response = $handler->handleRequest($request);
 
         $this->assertInstanceOf(Response::class, $response);
@@ -73,7 +77,8 @@ class FixedFileHandlerTest extends \PHPUnit\Framework\TestCase
     public function testReturnsForbiddenResponseForPathTraversal()
     {
         $handler = new FixedFileHandler('./tests/fixtures/content.html');
-        $request = $this->createMock(Request::class);
+
+        $request = new Request(['requestUrl' => '/some-url.html']);
         $request = new Request(['requestUrl' => '../etc/passwd']);
 
         $response = $handler->handleRequest($request);
