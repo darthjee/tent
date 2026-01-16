@@ -8,8 +8,11 @@ use Tent\Models\RequestMatcher;
 
 Configuration::addRule(
     Rule::build([
-        'host' => 'http://api:80',
-        'rules' => [
+        'handler' => [
+            'type' => 'proxy',
+            'host' => 'http://api:80'
+        ],
+        'matchers' => [
             ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact']
         ]
     ])
