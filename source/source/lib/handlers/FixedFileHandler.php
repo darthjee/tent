@@ -26,6 +26,20 @@ class FixedFileHandler extends FileHandler
     }
 
     /**
+     * Builds a FixedFileHandler using named parameters.
+     *
+     * Example:
+     *   FixedFileHandler::build(['file' => './some/path/file.txt'])
+     *
+     * @param array $params Associative array with key 'file' (string)
+     * @return FixedFileHandler
+     */
+    public static function build(array $params): self
+    {
+        return new self($params['file'] ?? '');
+    }
+
+    /**
      * Returns the fixed file path, ignoring the request.
      *
      * @param Request $request The incoming HTTP request (ignored).
