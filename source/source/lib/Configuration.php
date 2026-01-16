@@ -33,7 +33,7 @@ class Configuration
     /**
      * Builds a Rule from an array of parameters (proxy for Rule::build).
      *
-     * @param array $params Array of parameters for Rule::build
+     * @param array $params Array of parameters for Rule::build.
      * @return Rule
      */
     public static function buildRule(array $params): Rule

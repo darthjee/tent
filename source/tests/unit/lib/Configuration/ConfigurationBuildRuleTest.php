@@ -45,5 +45,10 @@ class ConfigurationBuildRuleTest extends TestCase
 
         $this->assertTrue($rule->match($requestGet));
         $this->assertTrue($rule->match($requestPost));
+        // Verifica se Configuration::getRules() retorna a nova Rule
+        $rules = Configuration::getRules();
+        $this->assertNotEmpty($rules);
+        $this->assertInstanceOf(Rule::class, $rules[0]);
+        $this->assertInstanceOf(ProxyRequestHandler::class, $rules[0]->handler());
     }
 }
