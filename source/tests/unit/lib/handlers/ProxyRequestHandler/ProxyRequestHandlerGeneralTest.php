@@ -10,7 +10,7 @@ use Tent\Models\Server;
 use Tent\Http\HttpClientInterface;
 use Tent\Models\ForbiddenResponse;
 
-class ProxyRequestHandlerTest extends TestCase
+class ProxyRequestHandlerGeneralTest extends TestCase
 {
     public function testHandleRequestBuildsCorrectUrl()
     {
