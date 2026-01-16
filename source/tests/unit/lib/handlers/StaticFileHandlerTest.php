@@ -7,6 +7,7 @@ use Tent\Handlers\StaticFileHandler;
 use Tent\Models\FolderLocation;
 use Tent\Models\Request;
 use Tent\Models\MissingResponse;
+use Tent\Models\ForbiddenResponse;
 
 class StaticFileHandlerTest extends TestCase
 {
@@ -184,5 +185,16 @@ class StaticFileHandlerTest extends TestCase
 
         $this->assertInstanceOf(MissingResponse::class, $response);
         $this->assertEquals(404, $response->httpCode);
+    }
+
+    public function testHandleRequestReturnsForbiddenResponseForPathTraversal()
+    {
+        $location = new FolderLocation($this->testDir);
+        $handler = new StaticFileHandler($location);
+        $request = new Request(['requestUrl' => '../etc/passwd']);
+
+        $response = $handler->handleRequest($request);
+        $this->assertInstanceOf(ForbiddenResponse::class, $response);
+        $this->assertEquals(403, $response->httpCode);
     }
 }

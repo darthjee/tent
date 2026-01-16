@@ -5,27 +5,27 @@ namespace Tent\Handlers;
 use Tent\Models\Request;
 
 /**
- * Validates the request path to prevent path traversal and other invalid patterns.
+ * Validates a request path string to prevent path traversal and other invalid patterns.
  *
  * Usage:
- *   $validator = new RequestPathValidator($request);
+ *   $validator = new RequestPathValidator($path);
  *   if ($validator->isValid()) { ... }
  */
 class RequestPathValidator
 {
     /**
-     * @var Request The request to validate.
+     * @var string The request path to validate.
      */
-    private $request;
+    private $path;
 
     /**
-     * Constructs a RequestPathValidator for the given request.
+     * Constructs a RequestPathValidator for the given path.
      *
-     * @param Request $request The HTTP request to validate.
+     * @param string $path The request path to validate.
      */
-    public function __construct(Request $request)
+    public function __construct(string $path)
     {
-        $this->request = $request;
+        $this->path = $path;
     }
 
     /**
@@ -35,9 +35,8 @@ class RequestPathValidator
      */
     public function isValid(): bool
     {
-        $path = $this->request->requestUrl();
         // Reject any path containing ".." or backslash
-        if (strpos($path, '..') !== false || strpos($path, '\\') !== false) {
+        if (strpos($this->path, '..') !== false || strpos($this->path, '\\') !== false) {
             return false;
         }
         // Paths starting with '/' are valid (e.g., /assets/file.js)
