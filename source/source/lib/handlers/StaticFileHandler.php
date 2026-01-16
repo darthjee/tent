@@ -30,7 +30,7 @@ class StaticFileHandler extends FileHandler
      * Example:
      *   StaticFileHandler::build(['location' => './some_folder'])
      *
-     * @param array $params Associative array with key 'location' (string)
+     * @param array $params Associative array with key 'location' (string).
      * @return StaticFileHandler
      */
     public static function build(array $params): self

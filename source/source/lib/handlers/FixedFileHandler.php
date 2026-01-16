@@ -31,7 +31,7 @@ class FixedFileHandler extends FileHandler
      * Example:
      *   FixedFileHandler::build(['file' => './some/path/file.txt'])
      *
-     * @param array $params Associative array with key 'file' (string)
+     * @param array $params Associative array with key 'file' (string).
      * @return FixedFileHandler
      */
     public static function build(array $params): self
