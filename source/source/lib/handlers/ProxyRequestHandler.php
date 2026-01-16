@@ -16,7 +16,7 @@ use Tent\Models\ForbiddenResponse;
  * to the configured target server using an HTTP client. The response from the target
  * server is then returned as a Response object.
  */
-class ProxyRequestHandler implements RequestHandler
+class ProxyRequestHandler extends RequestHandler
 {
     /**
      * @var Server The target server to which requests are proxied.

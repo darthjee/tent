@@ -17,7 +17,7 @@ use Tent\Exceptions\InvalidFilePathException;
  * as HTTP responses. It is intended to be extended by concrete handlers such as
  * StaticFileHandler (serving files from a directory) and FixedFileHandler (serving a fixed file).
  */
-abstract class FileHandler implements RequestHandler
+abstract class FileHandler extends RequestHandler
 {
     /**
      * Returns the file path to be used as the response body for the given request.

@@ -12,7 +12,7 @@ use Tent\Models\MissingResponse;
  * This handler is used when no other handler matches the request. It always returns
  * a MissingResponse, representing a 404 Not Found.
  */
-class MissingRequestHandler implements RequestHandler
+class MissingRequestHandler extends RequestHandler
 {
     /**
      * Returns a MissingResponse (404 Not Found) for any request.
