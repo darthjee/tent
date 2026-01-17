@@ -3,16 +3,25 @@
 namespace Tent\Models;
 
 /**
+ * Class Request
+ *
  * Represents an HTTP request, extracting values from $_SERVER or provided options.
+ *
+ * This class implements {@see RequestInterface} and provides access to HTTP request
+ * data such as method, body, headers, URL, and query string.
  *
  * For production, values are extracted from PHP's $_SERVER and related globals. For testing,
  * you can initialize with an array of options to override any value (method, body, headers, etc).
+ *
+ * @implements RequestInterface
  */
-class Request
+class Request implements RequestInterface
 {
     private $options;
 
     /**
+     * Request constructor.
+     *
      * @param array $options Optional overrides for request properties (used in tests).
      */
     public function __construct(array $options = [])
@@ -23,7 +32,9 @@ class Request
     /**
      * Returns the HTTP request method (e.g., GET, POST).
      *
-     * @return string
+     * @return string HTTP method (e.g., GET, POST, PUT, DELETE)
+     *
+     * @see RequestInterface::requestMethod()
      */
     public function requestMethod()
     {
@@ -36,7 +47,9 @@ class Request
     /**
      * Returns the request body.
      *
-     * @return string
+     * @return string The raw request body as a string
+     *
+     * @see RequestInterface::body()
      */
     public function body()
     {
@@ -49,7 +62,9 @@ class Request
     /**
      * Returns the request headers as an associative array.
      *
-     * @return array
+     * @return array Associative array of request headers
+     *
+     * @see RequestInterface::headers()
      */
     public function headers()
     {
@@ -62,7 +77,9 @@ class Request
     /**
      * Returns the request URL path (e.g., /index.html).
      *
-     * @return string
+     * @return string The path portion of the request URL
+     *
+     * @see RequestInterface::requestUrl()
      */
     public function requestUrl()
     {
@@ -77,7 +94,9 @@ class Request
     /**
      * Returns the query string from the request URL.
      *
-     * @return string
+     * @return string The query string, or an empty string if none is present
+     *
+     * @see RequestInterface::query()
      */
     public function query()
     {

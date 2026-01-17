@@ -3,7 +3,7 @@
 namespace Tent\Handlers;
 
 use Tent\Models\FolderLocation;
-use Tent\Models\Request;
+use Tent\Models\RequestInterface;
 
 /**
  * FileHandler that serves static files based on the request URL and a base directory.
@@ -42,10 +42,10 @@ class StaticFileHandler extends FileHandler
     /**
      * Returns the file path for the static file to be served, based on the request URL.
      *
-     * @param Request $request The incoming HTTP request.
+     * @param RequestInterface $request The incoming HTTP request.
      * @return string The full file path to the static asset.
      */
-    protected function getFilePath(Request $request)
+    protected function getFilePath(RequestInterface $request)
     {
         return $this->folderLocation->basePath() . $request->requestUrl();
     }

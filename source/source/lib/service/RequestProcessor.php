@@ -3,8 +3,10 @@
 namespace Tent\Service;
 
 use Tent\Handlers\MissingRequestHandler;
-use Tent\Models\Request;
+use Tent\Models\RequestInterface;
 use Tent\Configuration;
+use Tent\Models\Request;
+use Tent\Models\ProcessingRequest;
 
 /**
  * Main engine for processing incoming HTTP requests.
@@ -16,7 +18,7 @@ use Tent\Configuration;
 class RequestProcessor
 {
     /**
-     * @var Request The incoming HTTP request to be processed.
+     * @var ProcessingRequest The incoming HTTP request to be processed.
      */
     private $request;
 
@@ -27,7 +29,7 @@ class RequestProcessor
      */
     public function __construct(Request $request)
     {
-        $this->request = $request;
+        $this->request = new ProcessingRequest(['request' => $request]);
     }
 
     /**
