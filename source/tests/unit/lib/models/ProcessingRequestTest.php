@@ -10,77 +10,86 @@ class ProcessingRequestTest extends TestCase
 {
     public function testRequestMethodReturnsGetMethod()
     {
-        $request = $this->createMock(Request::class);
-        $request->method('requestMethod')->willReturn('GET');
-        $pr = new ProcessingRequest(['request' => $request]);
-        $this->assertEquals('GET', $pr->requestMethod());
+        $request = new Request([
+            'requestMethod' => 'GET'
+        ]);
+
+        $processingRequest = new ProcessingRequest(['request' => $request]);
+        $this->assertEquals('GET', $processingRequest->requestMethod());
     }
 
     public function testRequestMethodReturnsPostMethod()
     {
-        $request = $this->createMock(Request::class);
-        $request->method('requestMethod')->willReturn('POST');
-        $pr = new ProcessingRequest(['request' => $request]);
-        $this->assertEquals('POST', $pr->requestMethod());
+        $request = new Request([
+            'requestMethod' => 'POST'
+        ]);
+        $processingRequest = new ProcessingRequest(['request' => $request]);
+        $this->assertEquals('POST', $processingRequest->requestMethod());
     }
 
     public function testRequestUrlReturnsPath()
     {
-        $request = $this->createMock(Request::class);
-        $request->method('requestUrl')->willReturn('/api/users');
-        $pr = new ProcessingRequest(['request' => $request]);
-        $this->assertEquals('/api/users', $pr->requestUrl());
+        $request = new Request([
+            'requestUrl' => '/api/users'
+        ]);
+        $processingRequest = new ProcessingRequest(['request' => $request]);
+        $this->assertEquals('/api/users', $processingRequest->requestUrl());
     }
 
     public function testRequestUrlReturnsPathWithoutQueryString()
     {
-        $request = $this->createMock(Request::class);
-        $request->method('requestUrl')->willReturn('/api/users');
-        $pr = new ProcessingRequest(['request' => $request]);
-        $this->assertEquals('/api/users', $pr->requestUrl());
+        $request = new Request([
+            'requestUrl' => '/api/users'
+        ]);
+        $processingRequest = new ProcessingRequest(['request' => $request]);
+        $this->assertEquals('/api/users', $processingRequest->requestUrl());
     }
 
     public function testRequestUrlReturnsRootWhenEmpty()
     {
-        $request = $this->createMock(Request::class);
-        $request->method('requestUrl')->willReturn('/');
-        $pr = new ProcessingRequest(['request' => $request]);
-        $this->assertEquals('/', $pr->requestUrl());
+        $request = new Request([
+            'requestUrl' => '/'
+        ]);
+        $processingRequest = new ProcessingRequest(['request' => $request]);
+        $this->assertEquals('/', $processingRequest->requestUrl());
     }
 
     public function testQueryReturnsQueryString()
     {
-        $request = $this->createMock(Request::class);
-        $request->method('query')->willReturn('page=1&limit=10');
-        $pr = new ProcessingRequest(['request' => $request]);
-        $this->assertEquals('page=1&limit=10', $pr->query());
+        $request = new Request([
+            'query' => 'page=1&limit=10'
+        ]);
+        $processingRequest = new ProcessingRequest(['request' => $request]);
+        $this->assertEquals('page=1&limit=10', $processingRequest->query());
     }
 
     public function testQueryReturnsEmptyStringWhenNoQuery()
     {
-        $request = $this->createMock(Request::class);
-        $request->method('query')->willReturn('');
-        $pr = new ProcessingRequest(['request' => $request]);
-        $this->assertEquals('', $pr->query());
+        $request = new Request([
+            'query' => ''
+        ]);
+        $processingRequest = new ProcessingRequest(['request' => $request]);
+        $this->assertEquals('', $processingRequest->query());
     }
 
     public function testRequestUrlWithComplexPath()
     {
-        $request = $this->createMock(Request::class);
-        $request->method('requestUrl')->willReturn('/api/v1/users/123/posts');
-        $request->method('query')->willReturn('filter=active');
-        $pr = new ProcessingRequest(['request' => $request]);
-        $this->assertEquals('/api/v1/users/123/posts', $pr->requestUrl());
-        $this->assertEquals('filter=active', $pr->query());
+        $request = new Request([
+            'requestUrl' => '/api/v1/users/123/posts',
+            'query' => 'filter=active'
+        ]);
+        $processingRequest = new ProcessingRequest(['request' => $request]);
+        $this->assertEquals('/api/v1/users/123/posts', $processingRequest->requestUrl());
+        $this->assertEquals('filter=active', $processingRequest->query());
     }
 
     public function testReturnsNullIfNoRequestProvided()
     {
-        $pr = new ProcessingRequest([]);
-        $this->assertNull($pr->requestMethod());
-        $this->assertNull($pr->body());
-        $this->assertNull($pr->headers());
-        $this->assertNull($pr->requestUrl());
-        $this->assertNull($pr->query());
+        $processingRequest = new ProcessingRequest([]);
+        $this->assertNull($processingRequest->requestMethod());
+        $this->assertNull($processingRequest->body());
+        $this->assertNull($processingRequest->headers());
+        $this->assertNull($processingRequest->requestUrl());
+        $this->assertNull($processingRequest->query());
     }
 }
