@@ -42,6 +42,11 @@ class ProcessingRequest implements RequestInterface
     public function __construct(array $params = [])
     {
         $this->request = $params['request'] ?? null;
+        $this->requestMethod = $params['requestMethod'] ?? null;
+        $this->body = $params['body'] ?? null;
+        $this->headers = $params['headers'] ?? null;
+        $this->requestUrl = $params['requestUrl'] ?? null;
+        $this->query = $params['query'] ?? null;
     }
 
     /**

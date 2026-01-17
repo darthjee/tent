@@ -83,6 +83,30 @@ class ProcessingRequestTest extends TestCase
         $this->assertEquals('filter=active', $processingRequest->query());
     }
 
+    public function testOverride()
+    {
+        $request = new Request([
+            'requestMethod' => 'PUT',
+            'body' => '{"name":"test"}',
+            'headers' => ['Content-Type' => 'application/json'],
+            'requestUrl' => '/api/v1/users/123/posts',
+            'query' => 'filter=active'
+        ]);
+        $processingRequest = new ProcessingRequest([
+            'request' => $request,
+            'requestMethod' => 'GET',
+            'body' => '',
+            'requestUrl' => '/api/v1/user',
+            'headers' => ['Content-Type' => 'text/html'],
+            'query' => 'filter=disabled'
+        ]);
+        $this->assertEquals('GET', $processingRequest->requestMethod());
+        $this->assertEquals('', $processingRequest->body());
+        $this->assertEquals('/api/v1/user', $processingRequest->requestUrl());
+        $this->assertEquals(['Content-Type' => 'text/html'], $processingRequest->headers());
+        $this->assertEquals('filter=disabled', $processingRequest->query());
+    }
+
     public function testReturnsNullIfNoRequestProvided()
     {
         $processingRequest = new ProcessingRequest([]);
