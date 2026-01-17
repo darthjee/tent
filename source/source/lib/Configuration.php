@@ -42,6 +42,22 @@ class Configuration
     }
 
     /**
+     * Returns the first Rule with the given name, or null if not found.
+     *
+     * @param string $name The name of the rule to find.
+     * @return Rule|null
+     */
+    public static function getRule(string $name): ?Rule
+    {
+        foreach (self::getRules() as $rule) {
+            if (method_exists($rule, 'name') && $rule->name() === $name) {
+                return $rule;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Returns all configured rules, always including a fallback rule with MissingRequestHandler.
      *
      * @return Rule[] Array of rules for request processing.
