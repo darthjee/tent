@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent\Handlers;
+namespace Tent\Validators;
 
 use Tent\Models\Request;
 
