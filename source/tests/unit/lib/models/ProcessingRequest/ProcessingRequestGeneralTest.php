@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Tent\Models\ProcessingRequest;
 use Tent\Models\Request;
 
-class ProcessingRequestTest extends TestCase
+class ProcessingRequestGeneralTest extends TestCase
 {
     public function testRequestMethodReturnsGetMethod()
     {

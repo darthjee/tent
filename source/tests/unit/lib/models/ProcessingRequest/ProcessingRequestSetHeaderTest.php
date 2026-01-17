@@ -4,7 +4,7 @@ use PHPUnit\Framework\TestCase;
 use Tent\Models\ProcessingRequest;
 use Tent\Models\Request;
 
-class SetHeaderTest extends TestCase
+class ProcessingRequestSetHeaderTest extends TestCase
 {
     public function testSetHeaderSetsValueInCachedHeaders()
     {
