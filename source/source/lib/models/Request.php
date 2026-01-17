@@ -8,7 +8,7 @@ namespace Tent\Models;
  * For production, values are extracted from PHP's $_SERVER and related globals. For testing,
  * you can initialize with an array of options to override any value (method, body, headers, etc).
  */
-class Request
+class Request implements RequestInterface
 {
     private $options;
 

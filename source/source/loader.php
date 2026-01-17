@@ -5,6 +5,7 @@
 require_once __DIR__ . '/lib/handlers/RequestHandler.php';
 require_once __DIR__ . '/lib/http/HttpClientInterface.php';
 require_once __DIR__ . '/lib/models/Response.php';
+require_once __DIR__ . '/lib/models/RequestInterface.php';
 
 require_once __DIR__ . '/lib/Configuration.php';
 require_once __DIR__ . '/lib/exceptions/FileNotFoundException.php';

@@ -11,7 +11,7 @@ namespace Tent\Models;
  *   $pr->body();
  *   ...
  */
-class ProcessingRequest
+class ProcessingRequest implements RequestInterface
 {
     /**
      * @var Request
