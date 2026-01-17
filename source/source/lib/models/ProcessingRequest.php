@@ -35,18 +35,29 @@ class ProcessingRequest implements RequestInterface
     private $query;
 
     /**
+     * List of attributes that can be set via constructor params.
+     */
+    private const ATTRIBUTES = [
+        'request',
+        'requestMethod',
+        'body',
+        'headers',
+        'requestUrl',
+        'query',
+    ];
+
+    /**
      * ProcessingRequest constructor.
      *
      * @param array $params Must include 'request' => Request instance to wrap.
      */
     public function __construct(array $params = [])
     {
-        $this->request = $params['request'] ?? null;
-        $this->requestMethod = $params['requestMethod'] ?? null;
-        $this->body = $params['body'] ?? null;
-        $this->headers = $params['headers'] ?? null;
-        $this->requestUrl = $params['requestUrl'] ?? null;
-        $this->query = $params['query'] ?? null;
+        foreach (self::ATTRIBUTES as $attr) {
+            if (array_key_exists($attr, $params)) {
+                $this->$attr = $params[$attr];
+            }
+        }
     }
 
     /**
