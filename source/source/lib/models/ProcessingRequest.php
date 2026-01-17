@@ -49,7 +49,25 @@ class ProcessingRequest implements RequestInterface
     /**
      * ProcessingRequest constructor.
      *
-     * @param array $params Must include 'request' => Request instance to wrap.
+     * Initializes the instance with optional parameters for each attribute.
+     *
+     * Example usage:
+     * <code>
+     * $processingRequest = new ProcessingRequest([
+     *     'request' => $request, // Instance of Request
+     *     'requestMethod' => 'POST',
+     *     'body' => '{"foo":"bar"}',
+     *     'headers' => ['X-Test' => 'ok'],
+     *     'requestUrl' => '/api/test',
+     *     'query' => 'a=1&b=2',
+     * ]);
+     * </code>
+     *
+     * Any omitted parameter will be initialized as null and may be filled
+     * on demand via delegation to the Request object.
+     *
+     * @param array $params Optional parameters to initialize the processed
+     *   request attributes.
      */
     public function __construct(array $params = [])
     {
