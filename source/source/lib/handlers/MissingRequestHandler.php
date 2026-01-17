@@ -17,7 +17,7 @@ class MissingRequestHandler extends RequestHandler
     /**
      * Returns a MissingResponse (404 Not Found) for any request.
      *
-     * @param Request $request The incoming HTTP request.
+     * @param RequestInterface $request The incoming HTTP request.
      * @return MissingResponse The 404 response.
      */
     public function handleRequest(RequestInterface $request)

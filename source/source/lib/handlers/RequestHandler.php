@@ -24,7 +24,7 @@ abstract class RequestHandler
      * Future implementations may include a CachedProxyRequestHandler, which can
      * serve responses from cache or proxy as needed.
      *
-     * @param Request $request The incoming request to process.
+     * @param RequestInterface $request The incoming request to process.
      * @return Response The response to be sent back.
      */
     abstract public function handleRequest(RequestInterface $request);

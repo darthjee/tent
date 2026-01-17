@@ -42,7 +42,7 @@ class FixedFileHandler extends FileHandler
     /**
      * Returns the fixed file path, ignoring the request.
      *
-     * @param Request $request The incoming HTTP request (ignored).
+     * @param RequestInterface $request The incoming HTTP request (ignored).
      * @return string The file path to be served.
      */
     protected function getFilePath(RequestInterface $request)

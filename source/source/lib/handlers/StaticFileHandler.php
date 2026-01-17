@@ -42,7 +42,7 @@ class StaticFileHandler extends FileHandler
     /**
      * Returns the file path for the static file to be served, based on the request URL.
      *
-     * @param Request $request The incoming HTTP request.
+     * @param RequestInterface $request The incoming HTTP request.
      * @return string The full file path to the static asset.
      */
     protected function getFilePath(RequestInterface $request)
