@@ -9,6 +9,7 @@ use Tent\Models\MissingResponse;
 use Tent\Models\ForbiddenResponse;
 use Tent\Exceptions\FileNotFoundException;
 use Tent\Exceptions\InvalidFilePathException;
+use Tent\Validators\RequestPathValidator;
 
 /**
  * Abstract RequestHandler for serving file contents as HTTP responses.
