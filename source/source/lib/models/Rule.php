@@ -96,10 +96,10 @@ class Rule
     /**
      * Checks if the given request matches any of the rule's matchers.
      *
-     * @param Request $request The incoming HTTP request.
+     * @param RequestInterface $request The incoming HTTP request.
      * @return boolean True if any matcher applies to the request.
      */
-    public function match(Request $request)
+    public function match(RequestInterface $request)
     {
         foreach ($this->matchers as $matcher) {
             if ($matcher->matches($request)) {

@@ -5,6 +5,8 @@ namespace Tent\Service;
 use Tent\Handlers\MissingRequestHandler;
 use Tent\Models\RequestInterface;
 use Tent\Configuration;
+use Tent\Models\Request;
+use Tent\Models\ProcessingRequest;
 
 /**
  * Main engine for processing incoming HTTP requests.
@@ -16,27 +18,27 @@ use Tent\Configuration;
 class RequestProcessor
 {
     /**
-     * @var RequestInterface The incoming HTTP request to be processed.
+     * @var ProcessingRequest The incoming HTTP request to be processed.
      */
     private $request;
 
     /**
      * Constructs a RequestProcessor.
      *
-     * @param RequestInterface $request The incoming HTTP request.
+     * @param Request $request The incoming HTTP request.
      */
-    public function __construct(RequestInterface $request)
+    public function __construct(Request $request)
     {
-        $this->request = $request;
+        $this->request = new ProcessingRequest(['request' => $request]);
     }
 
     /**
      * Static entry point to process a request.
      *
-     * @param RequestInterface $request The incoming HTTP request.
+     * @param Request $request The incoming HTTP request.
      * @return Response The processed response.
      */
-    public static function handleRequest(RequestInterface $request)
+    public static function handleRequest(Request $request)
     {
         return (new RequestProcessor($request))->handle();
     }
