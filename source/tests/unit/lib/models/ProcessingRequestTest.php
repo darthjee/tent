@@ -1,5 +1,7 @@
 <?php
 
+namespace Tent\Tests;
+
 use PHPUnit\Framework\TestCase;
 use Tent\Models\ProcessingRequest;
 use Tent\Models\Request;
