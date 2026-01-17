@@ -15,7 +15,7 @@ class ConfigurationGetRuleTest extends TestCase
 
     public function testGetRuleReturnsRuleByName()
     {
-        $rule1 = Configuration::buildRule([
+        Configuration::buildRule([
             'name' => 'api-index',
             'handler' => [
                 'type' => 'proxy',
@@ -25,7 +25,7 @@ class ConfigurationGetRuleTest extends TestCase
                 ['method' => 'GET', 'uri' => '/index.html', 'type' => 'exact']
             ]
         ]);
-        $rule2 = Configuration::buildRule([
+        Configuration::buildRule([
             'name' => 'api-users',
             'handler' => [
                 'type' => 'proxy',
