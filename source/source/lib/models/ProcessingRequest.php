@@ -50,6 +50,21 @@ class ProcessingRequest implements RequestInterface
     }
 
     /**
+     * Sets a header value in the cached headers array.
+     *
+     * @param string $name  The header name.
+     * @param string $value The header value.
+     *
+     * @return string The set header value.
+     */
+    public function setHeader(string $name, string $value)
+    {
+        $this->headers();
+
+        return $this->headers[$name] = $value;
+    }
+
+    /**
      * Returns the HTTP request method (e.g., GET, POST), caching the result after first access.
      *
      * @return string|null HTTP method or null if no request is set
