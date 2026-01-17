@@ -26,15 +26,22 @@ class Rule
     private $matchers;
 
     /**
+     * @var string|null Optional name for the rule.
+     */
+    private $name;
+
+    /**
      * Constructs a Rule.
      *
      * @param RequestHandler   $handler  The handler to process requests that match this rule.
      * @param RequestMatcher[] $matchers Array of matchers to validate requests.
+     * @param string|null      $name     Optional name for the rule.
      */
-    public function __construct(RequestHandler $handler, array $matchers = [])
+    public function __construct(RequestHandler $handler, array $matchers = [], ?string $name = null)
     {
         $this->handler = $handler;
         $this->matchers = $matchers;
+        $this->name = $name;
     }
 
     /**
@@ -51,17 +58,29 @@ class Rule
      * @param array $params Associative array with keys:
      *   - 'handler': array, parameters for RequestHandler::build.
      *   - 'matchers': array of associative arrays, each with keys 'method', 'uri', 'type'.
+     *   - 'name': string|null, optional name for the rule.
      * @return Rule
      */
     public static function build(array $params): self
     {
         $handler = RequestHandler::build($params['handler'] ?? []);
+        $name = $params['name'] ?? null;
 
         $matchers = $params['matchers'] ?? [];
         $matcherObjs = array_map(function ($matcher) {
             return RequestMatcher::build($matcher);
         }, $matchers);
-        return new self($handler, $matcherObjs);
+
+        return new self($handler, $matcherObjs, $name);
+    }
+    /**
+     * Returns the name of the rule, or null if not set.
+     *
+     * @return string|null
+     */
+    public function name(): ?string
+    {
+        return $this->name;
     }
 
     /**
