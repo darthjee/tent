@@ -18,6 +18,7 @@ require_once __DIR__ . '/lib/http/CurlHttpClient.php';
 require_once __DIR__ . '/lib/models/FolderLocation.php';
 require_once __DIR__ . '/lib/models/ForbiddenResponse.php';
 require_once __DIR__ . '/lib/models/MissingResponse.php';
+require_once __DIR__ . '/lib/models/ProcessingRequest.php';
 require_once __DIR__ . '/lib/models/Request.php';
 require_once __DIR__ . '/lib/models/RequestMatcher.php';
 require_once __DIR__ . '/lib/models/Rule.php';
