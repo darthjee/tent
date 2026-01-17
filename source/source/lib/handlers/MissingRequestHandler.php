@@ -3,7 +3,7 @@
 namespace Tent\Handlers;
 
 use Tent\Handlers\RequestHandler;
-use Tent\Models\Request;
+use Tent\Models\RequestInterface;
 use Tent\Models\MissingResponse;
 
 /**
@@ -20,7 +20,7 @@ class MissingRequestHandler extends RequestHandler
      * @param Request $request The incoming HTTP request.
      * @return MissingResponse The 404 response.
      */
-    public function handleRequest(Request $request)
+    public function handleRequest(RequestInterface $request)
     {
         return new MissingResponse();
     }

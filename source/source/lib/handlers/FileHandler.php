@@ -3,7 +3,7 @@
 namespace Tent\Handlers;
 
 use Tent\Utils\ContentType;
-use Tent\Models\Request;
+use Tent\Models\RequestInterface;
 use Tent\Models\Response;
 use Tent\Models\MissingResponse;
 use Tent\Models\ForbiddenResponse;
@@ -33,7 +33,7 @@ abstract class FileHandler extends RequestHandler
      * @see StaticFileHandler
      * @see FixedFileHandler
      */
-    abstract protected function getFilePath(Request $request);
+    abstract protected function getFilePath(RequestInterface $request);
 
     /**
      * Reads the file defined by getFilePath and returns its contents as a Response.
@@ -46,7 +46,7 @@ abstract class FileHandler extends RequestHandler
      * @return Response The HTTP response containing the file contents, or MissingResponse if not found.
      * @see ContentType::getContentType()
      */
-    public function handleRequest(Request $request)
+    public function handleRequest(RequestInterface $request)
     {
         try {
             $this->validateFilePath($request->requestUrl());

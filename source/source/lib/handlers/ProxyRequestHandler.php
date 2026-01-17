@@ -3,7 +3,7 @@
 namespace Tent\Handlers;
 
 use Tent\Models\Server;
-use Tent\Models\Request;
+use Tent\Models\RequestInterface;
 use Tent\Models\Response;
 use Tent\Http\HttpClientInterface;
 use Tent\Http\CurlHttpClient;
@@ -58,10 +58,10 @@ class ProxyRequestHandler extends RequestHandler
     /**
      * Proxies the incoming request to the target server and returns the response.
      *
-     * @param Request $request The incoming HTTP request to be proxied.
+     * @param RequestInterface $request The incoming HTTP request to be proxied.
      * @return Response The response from the target server.
      */
-    public function handleRequest(Request $request)
+    public function handleRequest(RequestInterface $request)
     {
         // Build full URL from target host and request path
         $url = $this->server->targetHost() . $request->requestUrl();

@@ -2,7 +2,7 @@
 
 namespace Tent\Handlers;
 
-use Tent\Models\Request;
+use Tent\Models\RequestInterface;
 
 /**
  * Abstract class for handling HTTP requests and producing responses.
@@ -27,7 +27,7 @@ abstract class RequestHandler
      * @param Request $request The incoming request to process.
      * @return Response The response to be sent back.
      */
-    abstract public function handleRequest(Request $request);
+    abstract public function handleRequest(RequestInterface $request);
 
     /**
      * Factory method to build a RequestHandler based on type and parameters.
