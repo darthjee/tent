@@ -20,9 +20,9 @@ class FixedFileHandlerGeneralTest extends \PHPUnit\Framework\TestCase
         $response = $handler->handleRequest($request);
 
         $this->assertInstanceOf(Response::class, $response);
-        $this->assertEquals(200, $response->httpCode);
-        $this->assertStringContainsString('Hello, FixedFileHandler!', $response->body);
-        $this->assertContains('Content-Type: text/html', $response->headerLines);
+        $this->assertEquals(200, $response->httpCode());
+        $this->assertStringContainsString('Hello, FixedFileHandler!', $response->body());
+        $this->assertContains('Content-Type: text/html', $response->headerLines());
     }
 
     public function testReturnsJsonFileContent()
@@ -33,9 +33,9 @@ class FixedFileHandlerGeneralTest extends \PHPUnit\Framework\TestCase
         $response = $handler->handleRequest($request);
 
         $this->assertInstanceOf(Response::class, $response);
-        $this->assertEquals(200, $response->httpCode);
-        $this->assertStringContainsString('Hello, JSON!', $response->body);
-        $this->assertContains('Content-Type: application/json', $response->headerLines);
+        $this->assertEquals(200, $response->httpCode());
+        $this->assertStringContainsString('Hello, JSON!', $response->body());
+        $this->assertContains('Content-Type: application/json', $response->headerLines());
     }
 
     public function testReturnsImageFileContent()
@@ -46,9 +46,9 @@ class FixedFileHandlerGeneralTest extends \PHPUnit\Framework\TestCase
         $response = $handler->handleRequest($request);
 
         $this->assertInstanceOf(Response::class, $response);
-        $this->assertEquals(200, $response->httpCode);
-        $this->assertNotEmpty($response->body);
-        $this->assertContains('Content-Type: image/gif', $response->headerLines);
+        $this->assertEquals(200, $response->httpCode());
+        $this->assertNotEmpty($response->body());
+        $this->assertContains('Content-Type: image/gif', $response->headerLines());
     }
 
     public function testReturnsMissingResponseWhenFileNotFound()
@@ -69,9 +69,9 @@ class FixedFileHandlerGeneralTest extends \PHPUnit\Framework\TestCase
         $response = $handler->handleRequest($request);
 
         $this->assertInstanceOf(Response::class, $response);
-        $this->assertEquals(200, $response->httpCode);
-        $this->assertStringContainsString('background: #fff', $response->body);
-        $this->assertContains('Content-Type: text/css', $response->headerLines);
+        $this->assertEquals(200, $response->httpCode());
+        $this->assertStringContainsString('background: #fff', $response->body());
+        $this->assertContains('Content-Type: text/css', $response->headerLines());
     }
 
     public function testReturnsForbiddenResponseForPathTraversal()
@@ -83,6 +83,6 @@ class FixedFileHandlerGeneralTest extends \PHPUnit\Framework\TestCase
 
         $response = $handler->handleRequest($request);
         $this->assertInstanceOf(ForbiddenResponse::class, $response);
-        $this->assertEquals(403, $response->httpCode);
+        $this->assertEquals(403, $response->httpCode());
     }
 }

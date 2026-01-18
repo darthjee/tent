@@ -61,9 +61,9 @@ class RequestProcessorTest extends TestCase
 
         $expectedContent = file_get_contents($this->staticPath . '/index.html');
         $this->assertInstanceOf(Response::class, $response);
-        $this->assertEquals(200, $response->httpCode);
-        $this->assertEquals($expectedContent, $response->body);
-        $this->assertStringContainsString('Content-Type: text/html', implode("\n", $response->headerLines));
+        $this->assertEquals(200, $response->httpCode());
+        $this->assertEquals($expectedContent, $response->body());
+        $this->assertStringContainsString('Content-Type: text/html', implode("\n", $response->headerLines()));
     }
 
     public function testProxyRequestHandlerForwardsToHttpbin()
@@ -77,10 +77,10 @@ class RequestProcessorTest extends TestCase
         $response = RequestProcessor::handleRequest($request);
 
         $this->assertInstanceOf(Response::class, $response);
-        $this->assertEquals(200, $response->httpCode);
-        $this->assertNotEmpty($response->body);
+        $this->assertEquals(200, $response->httpCode());
+        $this->assertNotEmpty($response->body());
         // httpbin returns JSON for /anything and /get endpoints, so we check for JSON
-        $json = json_decode($response->body, true);
+        $json = json_decode($response->body(), true);
         $this->assertIsArray($json);
         $this->assertArrayHasKey('url', $json);
         $this->assertStringContainsString('/get', $json['url']);
@@ -96,7 +96,7 @@ class RequestProcessorTest extends TestCase
         $response = RequestProcessor::handleRequest($request);
 
         $this->assertInstanceOf(Response::class, $response);
-        $this->assertEquals(404, $response->httpCode);
-        $this->assertStringContainsString('Not Found', $response->body);
+        $this->assertEquals(404, $response->httpCode());
+        $this->assertStringContainsString('Not Found', $response->body());
     }
 }
