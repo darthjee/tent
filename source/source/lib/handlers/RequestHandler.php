@@ -3,6 +3,7 @@
 namespace Tent\Handlers;
 
 use Tent\Models\RequestInterface;
+use Tent\Middlewares\RequestMiddleware;
 
 /**
  * Abstract class for handling HTTP requests and producing responses.
@@ -14,6 +15,10 @@ use Tent\Models\RequestInterface;
  */
 abstract class RequestHandler
 {
+    /**
+     * @var array Middlewares to be applied to this handler
+     */
+    protected $middlewares = [];
     /**
      * Processes an incoming Request and returns a Response.
      *
@@ -28,6 +33,18 @@ abstract class RequestHandler
      * @return Response The response to be sent back.
      */
     abstract public function handleRequest(RequestInterface $request);
+
+    /**
+     * Adds a middleware to the list of middlewares.
+     *
+     * @param RequestMiddleware $middleware The middleware to
+     *   add which will be applied in a request.
+     * @return RequestMiddleware The added middleware.
+     */
+    public function addMiddleware(RequestMiddleware $middleware): RequestMiddleware
+    {
+        return $this->middlewares[] = $middleware;
+    }
 
     /**
      * Factory method to build a RequestHandler based on type and parameters.
