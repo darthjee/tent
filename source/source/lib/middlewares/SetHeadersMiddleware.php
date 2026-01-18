@@ -24,6 +24,20 @@ class SetHeadersMiddleware extends RequestMiddleware
     }
 
     /**
+     * Builds a SetHeadersMiddleware using named parameters.
+     *
+     * Example:
+     *   SetHeadersMiddleware::build(['headers' => ['Host' => 'some_host']])
+     *
+     * @param array $attributes Associative array with key 'headers' (array).
+     * @return SetHeadersMiddleware
+     */
+    public static function build($attributes): SetHeadersMiddleware
+    {
+        return new self($attributes['headers'] ?? []);
+    }
+
+    /**
      * Sets or overrides headers in the ProcessingRequest.
      *
      * @param ProcessingRequest $request The request to process.
