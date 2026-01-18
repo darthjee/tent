@@ -51,7 +51,7 @@ class Response
     /**
      * Returns the HTTP status code.
      *
-     * @return int
+     * @return integer
      */
     public function httpCode(): int
     {
