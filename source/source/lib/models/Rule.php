@@ -43,7 +43,7 @@ class Rule
         $this->matchers = $matchers;
         $this->name = $name;
     }
-    
+
     /**
      * Returns the name of the rule, or null if not set.
      *
