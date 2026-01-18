@@ -16,10 +16,6 @@ use Tent\Middlewares\RequestMiddleware;
 abstract class RequestHandler
 {
     /**
-     * @var array Middlewares to be applied to this handler
-     */
-    protected $middlewares = [];
-    /**
      * Processes an incoming Request and returns a Response.
      *
      * The request object represents the received HTTP request. The implementation
@@ -32,7 +28,23 @@ abstract class RequestHandler
      * @param RequestInterface $request The incoming request to process.
      * @return Response The response to be sent back.
      */
-    abstract public function handleRequest(RequestInterface $request);
+    abstract protected function processsRequest(RequestInterface $request);
+
+    /**
+     * @var array Middlewares to be applied to this handler
+     */
+    protected $middlewares = [];
+
+    /**
+     * Handles an incoming Request and returns a Response.
+     * 
+     * @param RequestInterface $request The incoming HTTP request.
+     * @return Response The response to be sent back.
+     */
+    public function handleRequest(RequestInterface $request)
+    {
+        return $this->processsRequest($request);
+    }
 
     /**
      * Adds a middleware to the list of middlewares.
