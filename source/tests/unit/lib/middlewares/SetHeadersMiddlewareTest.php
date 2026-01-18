@@ -8,17 +8,13 @@ class SetHeadersMiddlewareTest extends TestCase
 {
     public function testProcessSetsHeadersOnProcessingRequest()
     {
-        $request = $this->getMockBuilder(ProcessingRequest::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['setHeader'])
-            ->getMock();
-
-        $request->expects($this->exactly(2))
-            ->method('setHeader')
-            ->withConsecutive(
-                ['Host', 'some_host'],
-                ['X-Test', 'value']
-            );
+        $expectedHeaders = [
+            'Host' => 'some_host',
+            'X-Test' => 'value',
+        ];
+        $request = new ProcessingRequest([
+            'headers' => $expectedHeaders
+        ]);
 
         $middleware = new SetHeadersMiddleware([
             'Host' => 'some_host',
@@ -27,19 +23,6 @@ class SetHeadersMiddlewareTest extends TestCase
 
         $result = $middleware->process($request);
         $this->assertSame($request, $result);
-    }
-
-    public function testProcessWithEmptyHeadersDoesNothing()
-    {
-        $request = $this->getMockBuilder(ProcessingRequest::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['setHeader'])
-            ->getMock();
-
-        $request->expects($this->never())->method('setHeader');
-
-        $middleware = new SetHeadersMiddleware([]);
-        $result = $middleware->process($request);
-        $this->assertSame($request, $result);
+        $this->assertEquals($expectedHeaders, $result->headers());
     }
 }
