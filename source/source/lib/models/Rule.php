@@ -43,6 +43,26 @@ class Rule
         $this->matchers = $matchers;
         $this->name = $name;
     }
+    
+    /**
+     * Returns the name of the rule, or null if not set.
+     *
+     * @return string|null
+     */
+    public function name(): ?string
+    {
+        return $this->name;
+    }
+
+    /**
+     * Returns the RequestHandler for this rule.
+     *
+     * @return RequestHandler
+     */
+    public function handler()
+    {
+        return $this->handler;
+    }
 
     /**
      * Builds a Rule using named parameters for handler and matchers.
@@ -66,31 +86,30 @@ class Rule
         $handler = RequestHandler::build($params['handler'] ?? []);
         $name = $params['name'] ?? null;
 
+        $rule = new self($handler, [], $name);
+
         $matchers = $params['matchers'] ?? [];
-        $matcherObjs = array_map(function ($matcher) {
-            return RequestMatcher::build($matcher);
-        }, $matchers);
+        $rule->buildMatchers($matchers);
 
-        return new self($handler, $matcherObjs, $name);
+        return $rule;
     }
-    /**
-     * Returns the name of the rule, or null if not set.
-     *
-     * @return string|null
-     */
-    public function name(): ?string
+
+    public function buildMatchers(array $matchersAttributes)
     {
-        return $this->name;
+        foreach ($matchersAttributes as $attributes) {
+            $this->buildMatcher($attributes);
+        }
     }
 
     /**
-     * Returns the RequestHandler for this rule.
+     * Adds a RequestMatcher to the rule.
      *
-     * @return RequestHandler
+     * @param array $matcherAttributes Associative array with keys 'method', 'uri', 'type'.
+     * @return RequestMatcher The added RequestMatcher.
      */
-    public function handler()
+    public function buildMatcher(array $matcherAttributes): RequestMatcher
     {
-        return $this->handler;
+        return $this->matchers[] = RequestMatcher::build($matcherAttributes);
     }
 
     /**
