@@ -23,5 +23,6 @@ class RequestHandlerMiddlewareTest extends TestCase
         $request = new ProcessingRequest(['headers' => []]);
 
         $response = $handler->handleRequest($request);
+        $this->assertEquals("", $response->body());
     }
 }
