@@ -20,7 +20,7 @@ class RequestProcessor
     /**
      * @var ProcessingRequest The incoming HTTP request to be processed.
      */
-    private $request;
+    private ProcessingRequest $request;
 
     /**
      * Constructs a RequestProcessor.
