@@ -18,7 +18,7 @@ class RequestToBodyHandler extends RequestHandler
      * @param RequestInterface $request
      * @return Response
      */
-    public function processRequest(RequestInterface $request)
+    protected function processsRequest(RequestInterface $request)
     {
         $body = json_encode([
             'uri' => $request->requestUrl(),
