@@ -87,4 +87,13 @@ abstract class RequestHandler
                 throw new \InvalidArgumentException('Unknown handler type: ' . $params['type']);
         }
     }
+
+    private function applyMiddlewares(RequestInterface $request): RequestInterface
+    {
+        $modifiedRequest = $request;
+        foreach ($this->middlewares as $middleware) {
+            $modifiedRequest = $middleware->processRequest($modifiedRequest);
+        }
+        return $modifiedRequest;
+    }
 }
