@@ -12,21 +12,21 @@ class MissingResponseTest extends TestCase
     {
         $response = new MissingResponse();
 
-        $this->assertEquals(404, $response->httpCode);
+        $this->assertEquals(404, $response->httpCode());
     }
 
     public function testCreatesResponseWithNotFoundBody()
     {
         $response = new MissingResponse();
 
-        $this->assertEquals("Not Found", $response->body);
+        $this->assertEquals("Not Found", $response->body());
     }
 
     public function testCreatesResponseWithTextPlainContentType()
     {
         $response = new MissingResponse();
 
-        $this->assertEquals(['Content-Type: text/plain'], $response->headerLines);
+        $this->assertEquals(['Content-Type: text/plain'], $response->headerLines());
     }
 
     public function testExtendsResponse()
