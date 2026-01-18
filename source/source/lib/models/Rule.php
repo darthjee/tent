@@ -18,17 +18,17 @@ class Rule
     /**
      * @var RequestHandler The handler used to process matching requests.
      */
-    private $handler;
+    private RequestHandler $handler;
 
     /**
      * @var RequestMatcher[] List of matchers to validate if a request applies to this rule.
      */
-    private $matchers;
+    private array $matchers;
 
     /**
      * @var string|null Optional name for the rule.
      */
-    private $name;
+    private ?string $name;
 
     /**
      * Constructs a Rule.
@@ -59,7 +59,7 @@ class Rule
      *
      * @return RequestHandler
      */
-    public function handler()
+    public function handler(): RequestHandler
     {
         return $this->handler;
     }
@@ -94,11 +94,18 @@ class Rule
         return $rule;
     }
 
-    public function buildMatchers(array $matchersAttributes)
+    /**
+     * Builds and adds multiple RequestMatchers to the rule.
+     *
+     * @param array $matchersAttributes Array of associative arrays, each with keys 'method', 'uri', 'type'.
+     * @return array all RequestMatchers.
+     */
+    public function buildMatchers(array $matchersAttributes): array
     {
         foreach ($matchersAttributes as $attributes) {
             $this->buildMatcher($attributes);
         }
+        return $this->matchers;
     }
 
     /**
@@ -118,7 +125,7 @@ class Rule
      * @param RequestInterface $request The incoming HTTP request.
      * @return boolean True if any matcher applies to the request.
      */
-    public function match(RequestInterface $request)
+    public function match(RequestInterface $request): bool
     {
         foreach ($this->matchers as $matcher) {
             if ($matcher->matches($request)) {
