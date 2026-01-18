@@ -20,7 +20,7 @@ class RequestHandlerMiddlewareTest extends TestCase
     {
         $handler = new RequestToBodyHandler();
         $middleware = new DummyMiddleware();
-        $handler->addMiddleware($middleware);
+        $handler->addRequestMiddleware($middleware);
 
         $request = new ProcessingRequest([
             'requestMethod' => 'GET',

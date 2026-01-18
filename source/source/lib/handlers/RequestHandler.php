@@ -56,7 +56,7 @@ abstract class RequestHandler
      *   add which will be applied in a request.
      * @return RequestMiddleware The added middleware.
      */
-    public function addMiddleware(RequestMiddleware $middleware): RequestMiddleware
+    public function addRequestMiddleware(RequestMiddleware $middleware): RequestMiddleware
     {
         return $this->middlewares[] = $middleware;
     }
