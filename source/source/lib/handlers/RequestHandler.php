@@ -41,7 +41,7 @@ abstract class RequestHandler
      * @param RequestInterface $request The incoming HTTP request.
      * @return Response The response to be sent back.
      */
-    public function handleRequest(RequestInterface $request)
+    public final function handleRequest(RequestInterface $request)
     {
         return $this->processsRequest($request);
     }
