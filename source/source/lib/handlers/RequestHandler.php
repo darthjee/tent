@@ -44,6 +44,8 @@ abstract class RequestHandler
      */
     final public function handleRequest(ProcessingRequest $request)
     {
+        $request = $this->applyMiddlewares($request);
+
         return $this->processsRequest($request);
     }
 
@@ -99,7 +101,7 @@ abstract class RequestHandler
     {
         $modifiedRequest = $request;
         foreach ($this->middlewares as $middleware) {
-            $modifiedRequest = $middleware->processRequest($modifiedRequest);
+            $modifiedRequest = $middleware->process($modifiedRequest);
         }
         return $modifiedRequest;
     }

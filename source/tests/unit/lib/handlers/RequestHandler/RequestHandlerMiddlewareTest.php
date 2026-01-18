@@ -20,15 +20,24 @@ class RequestHandlerMiddlewareTest extends TestCase
         $middleware = new DummyMiddleware();
         $handler->addMiddleware($middleware);
 
-        $request = new ProcessingRequest(['headers' => []]);
+        $request = new ProcessingRequest([
+            'requestMethod' => 'GET',
+            'requestUrl' => '/test',
+            'headers' => [
+                'Accept' => 'application/json',
+            ]
+        ]);
 
         $response = $handler->handleRequest($request);
         $expected = [
-            'uri' => null,
+            'uri' => '/test',
             'query' => null,
-            'method' => null,
-            'headers' => [],
+            'method' => 'GET',
             'body' => null,
+            'headers' => [
+                'X-Test' => 'middleware',
+                'Accept' => 'application/json',
+            ],
         ];
         $actual = json_decode($response->body(), true);
         $this->assertEquals($expected, $actual);
