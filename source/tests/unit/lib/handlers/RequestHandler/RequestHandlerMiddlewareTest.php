@@ -12,8 +12,6 @@ use Tent\Middlewares\RequestMiddleware;
 use Tent\Tests\Support\Handlers\RequestToBodyHandler;
 use Tent\Tests\Support\Middlewares\DummyMiddleware;
 
-//require_once __DIR__ . '/../../../../../tests/support/middlewares/DummyMiddleware.php';
-
 class RequestHandlerMiddlewareTest extends TestCase
 {
     public function testAddMiddlewareAndApplyMiddlewares()
