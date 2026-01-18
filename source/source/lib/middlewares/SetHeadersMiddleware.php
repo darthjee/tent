@@ -7,7 +7,7 @@ use Tent\Models\ProcessingRequest;
 /**
  * Middleware to set or override headers in a ProcessingRequest.
  */
-class SetHeadersMiddleware implements RequestMiddleware
+class SetHeadersMiddleware extends RequestMiddleware
 {
     /**
      * @var array<string, string> Headers to set
