@@ -26,7 +26,7 @@ abstract class RequestMiddleware
     public static function build($attributes): RequestMiddleware
     {
         $class = $attributes['class'];
-        unset($attributes['class']);
-        return new $class(...array_values($attributes));
+
+        return $class::build($attributes);
     }
 }
