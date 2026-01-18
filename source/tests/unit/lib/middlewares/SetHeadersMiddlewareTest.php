@@ -1,5 +1,7 @@
 <?php
 
+namespace Tent\Tests;
+
 use PHPUnit\Framework\TestCase;
 use Tent\Middlewares\SetHeadersMiddleware;
 use Tent\Models\ProcessingRequest;

@@ -15,7 +15,8 @@ class SetHeadersMiddleware implements RequestMiddleware
     private $headers;
 
     /**
-     * @param array<string, string> $headers Associative array of headers to set (e.g., ['Host' => 'some_host'])
+     * @param array<string, string> $headers Associative array of headers
+     *   to set (e.g., ['Host' => 'some_host']).
      */
     public function __construct(array $headers)
     {
@@ -25,7 +26,7 @@ class SetHeadersMiddleware implements RequestMiddleware
     /**
      * Sets or overrides headers in the ProcessingRequest.
      *
-     * @param ProcessingRequest $request
+     * @param ProcessingRequest $request The request to process.
      * @return ProcessingRequest The modified request
      */
     public function process(ProcessingRequest $request): ProcessingRequest
