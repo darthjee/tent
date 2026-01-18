@@ -12,17 +12,17 @@ class Response
     /**
      * @var string Response body content
      */
-    public $body;
+    private string $body;
 
     /**
      * @var int HTTP status code (e.g., 200, 404)
      */
-    public $httpCode;
+    private int $httpCode;
 
     /**
      * @var array List of HTTP header lines (e.g., ['Content-Type: text/html'])
      */
-    public $headerLines;
+    private array $headerLines;
 
     /**
      * Constructs a Response object.
@@ -36,5 +36,35 @@ class Response
         $this->body = $body;
         $this->httpCode = $httpCode;
         $this->headerLines = $headerLines;
+    }
+
+    /**
+     * Returns the response body content.
+     *
+     * @return string
+     */
+    public function body(): string
+    {
+        return $this->body;
+    }
+
+    /**
+     * Returns the HTTP status code.
+     *
+     * @return integer
+     */
+    public function httpCode(): int
+    {
+        return $this->httpCode;
+    }
+
+    /**
+     * Returns the list of HTTP header lines.
+     *
+     * @return array
+     */
+    public function headerLines(): array
+    {
+        return $this->headerLines;
     }
 }

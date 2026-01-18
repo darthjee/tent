@@ -86,9 +86,9 @@ class ProxyRequestHandlerGeneralTest extends TestCase
         $handler = new ProxyRequestHandler($server, $httpClient);
         $response = $handler->handleRequest($request);
 
-        $this->assertEquals('{"users": []}', $response->body);
-        $this->assertEquals(200, $response->httpCode);
-        $this->assertEquals(['Content-Type: application/json'], $response->headerLines);
+        $this->assertEquals('{"users": []}', $response->body());
+        $this->assertEquals(200, $response->httpCode());
+        $this->assertEquals(['Content-Type: application/json'], $response->headerLines());
     }
 
     public function testHandleRequestWithNoQueryString()
