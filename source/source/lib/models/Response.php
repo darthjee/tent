@@ -12,17 +12,17 @@ class Response
     /**
      * @var string Response body content
      */
-    private $body;
+    private string $body;
 
     /**
      * @var int HTTP status code (e.g., 200, 404)
      */
-    private $httpCode;
+    private int $httpCode;
 
     /**
      * @var array List of HTTP header lines (e.g., ['Content-Type: text/html'])
      */
-    private $headerLines;
+    private array $headerLines;
 
     /**
      * Constructs a Response object.
