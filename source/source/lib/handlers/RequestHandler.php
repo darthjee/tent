@@ -38,11 +38,11 @@ abstract class RequestHandler
 
     /**
      * Handles an incoming Request and returns a Response.
-     * 
+     *
      * @param RequestInterface $request The incoming HTTP request.
      * @return Response The response to be sent back.
      */
-    public final function handleRequest(ProcessingRequest $request)
+    final public function handleRequest(ProcessingRequest $request)
     {
         return $this->processsRequest($request);
     }

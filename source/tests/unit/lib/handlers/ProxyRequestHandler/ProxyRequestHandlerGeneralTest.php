@@ -33,7 +33,7 @@ class ProxyRequestHandlerGeneralTest extends TestCase
 
         $this->assertInstanceOf(Response::class, $response);
     }
-    
+
     public function testHandleRequestAppendsQueryString()
     {
         $request = new ProcessingRequest([
