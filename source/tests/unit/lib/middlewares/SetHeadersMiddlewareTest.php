@@ -6,14 +6,20 @@ use Tent\Models\ProcessingRequest;
 
 class SetHeadersMiddlewareTest extends TestCase
 {
-    public function testProcessSetsHeadersOnProcessingRequest()
+    public function testOverridingHeaders()
     {
         $expectedHeaders = [
             'Host' => 'some_host',
             'X-Test' => 'value',
+            'User-Agent' => 'PHPUnit',
         ];
+        $requestHeaders = [
+            'Host' => 'original_host',
+            'User-Agent' => 'PHPUnit',
+        ];
+
         $request = new ProcessingRequest([
-            'headers' => $expectedHeaders
+            'headers' => $requestHeaders
         ]);
 
         $middleware = new SetHeadersMiddleware([
