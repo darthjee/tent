@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Tent\Handlers\ProxyRequestHandler;
 use Tent\Models\Request;
 use Tent\Models\Response;
+use Tent\Models\ProcessingRequest;
 use Tent\Models\Server;
 use Tent\Http\HttpClientInterface;
 use Tent\Models\ForbiddenResponse;
@@ -14,7 +15,12 @@ class ProxyRequestHandlerGeneralTest extends TestCase
 {
     public function testHandleRequestBuildsCorrectUrl()
     {
-        $request = $this->createMockRequest('GET', '/api/users', '');
+        $request = new ProcessingRequest([
+            'requestMethod' => 'GET',
+            'headers' => [],
+            'requestUrl' => '/api/users',
+            'query' => ''
+        ]);
         $httpClient = $this->createMockHttpClient(
             'http://backend:8080/api/users',
             [],
@@ -27,10 +33,15 @@ class ProxyRequestHandlerGeneralTest extends TestCase
 
         $this->assertInstanceOf(Response::class, $response);
     }
-
+    
     public function testHandleRequestAppendsQueryString()
     {
-        $request = $this->createMockRequest('GET', '/api/users', 'page=1&limit=10');
+        $request = new ProcessingRequest([
+            'requestMethod' => 'GET',
+            'requestUrl' => '/api/users',
+            'headers' => [],
+            'query' => 'page=1&limit=10'
+        ]);
         $httpClient = $this->createMockHttpClient(
             'http://backend:8080/api/users?page=1&limit=10',
             [],
@@ -46,9 +57,14 @@ class ProxyRequestHandlerGeneralTest extends TestCase
 
     public function testHandleRequestForwardsHeaders()
     {
-        $request = $this->createMockRequest('POST', '/api/users', '', [
-            'Content-Type' => 'application/json',
-            'Authorization' => 'Bearer token123'
+        $request = new ProcessingRequest([
+            'requestMethod' => 'POST',
+            'requestUrl' => '/api/users',
+            'query' => '',
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer token123'
+            ]
         ]);
 
         $expectedHeaders = [
@@ -71,7 +87,12 @@ class ProxyRequestHandlerGeneralTest extends TestCase
 
     public function testHandleRequestReturnsResponseWithCorrectData()
     {
-        $request = $this->createMockRequest('GET', '/api/users', '');
+        $request = new ProcessingRequest([
+            'requestMethod' => 'GET',
+            'requestUrl' => '/api/users',
+            'query' => '',
+            'headers' => []
+        ]);
         $httpClient = $this->createMockHttpClient(
             'http://backend:8080/api/users',
             [],
@@ -93,7 +114,12 @@ class ProxyRequestHandlerGeneralTest extends TestCase
 
     public function testHandleRequestWithNoQueryString()
     {
-        $request = $this->createMockRequest('GET', '/api/users', null);
+        $request = new ProcessingRequest([
+            'requestMethod' => 'GET',
+            'requestUrl' => '/api/users',
+            'query' => '',
+            'headers' => []
+        ]);
         $httpClient = $this->createMockHttpClient(
             'http://backend:8080/api/users',
             [],
@@ -109,7 +135,12 @@ class ProxyRequestHandlerGeneralTest extends TestCase
 
     public function testHandleRequestWithEmptyHeaders()
     {
-        $request = $this->createMockRequest('GET', '/api/users', '', []);
+        $request = new ProcessingRequest([
+            'requestMethod' => 'GET',
+            'requestUrl' => '/api/users',
+            'query' => '',
+            'headers' => []
+        ]);
         $httpClient = $this->createMockHttpClient(
             'http://backend:8080/api/users',
             [],
@@ -121,17 +152,6 @@ class ProxyRequestHandlerGeneralTest extends TestCase
         $response = $handler->handleRequest($request);
 
         $this->assertInstanceOf(Response::class, $response);
-    }
-
-    private function createMockRequest($method, $url, $query = '', $headers = [])
-    {
-        $request = $this->createMock(Request::class);
-        $request->method('requestMethod')->willReturn($method);
-        $request->method('requestUrl')->willReturn($url);
-        $request->method('query')->willReturn($query);
-        $request->method('headers')->willReturn($headers);
-
-        return $request;
     }
 
     private function createMockHttpClient($expectedUrl, $expectedHeaders, $returnValue)
