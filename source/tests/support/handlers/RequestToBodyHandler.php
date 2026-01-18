@@ -28,7 +28,9 @@ class RequestToBodyHandler extends RequestHandler
             'body' => $request->body(),
         ]);
         return new Response(
-            $body, 200, ['Content-Type: application/json']
+            $body,
+            200,
+            ['Content-Type: application/json']
         );
     }
 }
