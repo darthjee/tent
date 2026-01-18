@@ -39,7 +39,7 @@ abstract class RequestHandler
     /**
      * Handles an incoming Request and returns a Response.
      *
-     * @param RequestInterface $request The incoming HTTP request.
+     * @param ProcessingRequest $request The incoming HTTP request.
      * @return Response The response to be sent back.
      */
     final public function handleRequest(ProcessingRequest $request)
@@ -89,7 +89,13 @@ abstract class RequestHandler
         }
     }
 
-    private function applyMiddlewares(RequestInterface $request): RequestInterface
+    /**
+     * Applies all middlewares to the given request.
+     *
+     * @param ProcessingRequest $request The incoming HTTP request.
+     * @return ProcessingRequest The modified request after applying all middlewares.
+     */
+    private function applyMiddlewares(ProcessingRequest $request): ProcessingRequest
     {
         $modifiedRequest = $request;
         foreach ($this->middlewares as $middleware) {
