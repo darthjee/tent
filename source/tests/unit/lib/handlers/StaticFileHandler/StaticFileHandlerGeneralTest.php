@@ -8,6 +8,7 @@ use Tent\Models\FolderLocation;
 use Tent\Models\Request;
 use Tent\Models\MissingResponse;
 use Tent\Models\ForbiddenResponse;
+use Tent\Models\ProcessingRequest;
 
 class StaticFileHandlerGeneralTest extends TestCase
 {
@@ -47,8 +48,9 @@ class StaticFileHandlerGeneralTest extends TestCase
 
         $request = $this->createMock(Request::class);
         $request->method('requestUrl')->willReturn('/test.txt');
+        $processingRequest = new ProcessingRequest(['request' => $request]);
 
-        $response = $handler->handleRequest($request);
+        $response = $handler->handleRequest($processingRequest);
 
         $this->assertEquals(200, $response->httpCode());
         $this->assertEquals('Hello World', $response->body());
@@ -62,8 +64,9 @@ class StaticFileHandlerGeneralTest extends TestCase
 
         $request = $this->createMock(Request::class);
         $request->method('requestUrl')->willReturn('/nonexistent.txt');
+        $processingRequest = new ProcessingRequest(['request' => $request]);
 
-        $response = $handler->handleRequest($request);
+        $response = $handler->handleRequest($processingRequest);
 
         $this->assertInstanceOf(MissingResponse::class, $response);
         $this->assertEquals(404, $response->httpCode());
@@ -78,8 +81,9 @@ class StaticFileHandlerGeneralTest extends TestCase
 
         $request = $this->createMock(Request::class);
         $request->method('requestUrl')->willReturn('/index.html');
+        $processingRequest = new ProcessingRequest(['request' => $request]);
 
-        $response = $handler->handleRequest($request);
+        $response = $handler->handleRequest($processingRequest);
 
         $this->assertEquals(200, $response->httpCode());
         $this->assertCount(2, $response->headerLines());
@@ -95,8 +99,9 @@ class StaticFileHandlerGeneralTest extends TestCase
 
         $request = $this->createMock(Request::class);
         $request->method('requestUrl')->willReturn('/style.css');
+        $processingRequest = new ProcessingRequest(['request' => $request]);
 
-        $response = $handler->handleRequest($request);
+        $response = $handler->handleRequest($processingRequest);
 
         $this->assertEquals(200, $response->httpCode());
         $this->assertCount(2, $response->headerLines());
@@ -112,8 +117,9 @@ class StaticFileHandlerGeneralTest extends TestCase
 
         $request = $this->createMock(Request::class);
         $request->method('requestUrl')->willReturn('/script.js');
+        $processingRequest = new ProcessingRequest(['request' => $request]);
 
-        $response = $handler->handleRequest($request);
+        $response = $handler->handleRequest($processingRequest);
 
         $this->assertEquals(200, $response->httpCode());
         $this->assertCount(2, $response->headerLines());
@@ -129,8 +135,9 @@ class StaticFileHandlerGeneralTest extends TestCase
 
         $request = $this->createMock(Request::class);
         $request->method('requestUrl')->willReturn('/data.json');
+        $processingRequest = new ProcessingRequest(['request' => $request]);
 
-        $response = $handler->handleRequest($request);
+        $response = $handler->handleRequest($processingRequest);
 
         $this->assertEquals(200, $response->httpCode());
         $this->assertCount(2, $response->headerLines());
@@ -146,8 +153,9 @@ class StaticFileHandlerGeneralTest extends TestCase
 
         $request = $this->createMock(Request::class);
         $request->method('requestUrl')->willReturn('/image.png');
+        $processingRequest = new ProcessingRequest(['request' => $request]);
 
-        $response = $handler->handleRequest($request);
+        $response = $handler->handleRequest($processingRequest);
 
         $this->assertEquals(200, $response->httpCode());
         $this->assertCount(2, $response->headerLines());
@@ -163,8 +171,9 @@ class StaticFileHandlerGeneralTest extends TestCase
 
         $request = $this->createMock(Request::class);
         $request->method('requestUrl')->willReturn('/image.jpg');
+        $processingRequest = new ProcessingRequest(['request' => $request]);
 
-        $response = $handler->handleRequest($request);
+        $response = $handler->handleRequest($processingRequest);
 
         $this->assertEquals(200, $response->httpCode());
         $this->assertCount(2, $response->headerLines());
@@ -180,8 +189,9 @@ class StaticFileHandlerGeneralTest extends TestCase
 
         $request = $this->createMock(Request::class);
         $request->method('requestUrl')->willReturn('/subdir');
+        $processingRequest = new ProcessingRequest(['request' => $request]);
 
-        $response = $handler->handleRequest($request);
+        $response = $handler->handleRequest($processingRequest);
 
         $this->assertInstanceOf(MissingResponse::class, $response);
         $this->assertEquals(404, $response->httpCode());
@@ -192,8 +202,9 @@ class StaticFileHandlerGeneralTest extends TestCase
         $location = new FolderLocation($this->testDir);
         $handler = new StaticFileHandler($location);
         $request = new Request(['requestUrl' => '../etc/passwd']);
+        $processingRequest = new ProcessingRequest(['request' => $request]);
 
-        $response = $handler->handleRequest($request);
+        $response = $handler->handleRequest($processingRequest);
         $this->assertInstanceOf(ForbiddenResponse::class, $response);
         $this->assertEquals(403, $response->httpCode());
     }

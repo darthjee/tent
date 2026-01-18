@@ -20,7 +20,7 @@ class MissingRequestHandler extends RequestHandler
      * @param RequestInterface $request The incoming HTTP request.
      * @return MissingResponse The 404 response.
      */
-    public function handleRequest(RequestInterface $request)
+    protected function processsRequest(RequestInterface $request)
     {
         return new MissingResponse();
     }

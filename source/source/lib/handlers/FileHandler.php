@@ -46,7 +46,7 @@ abstract class FileHandler extends RequestHandler
      * @return Response The HTTP response containing the file contents, or MissingResponse if not found.
      * @see ContentType::getContentType()
      */
-    public function handleRequest(RequestInterface $request)
+    protected function processsRequest(RequestInterface $request)
     {
         try {
             $this->validateFilePath($request->requestUrl());
