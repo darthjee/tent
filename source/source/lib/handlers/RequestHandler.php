@@ -75,13 +75,13 @@ abstract class RequestHandler
     /**
      * Builds and adds multiple middlewares to the handler.
      *
-     * @param array $middlewaresAttributes Array of associative arrays,
+     * @param array $attributes Array of associative arrays,
      *   each with keys for RequestMiddleware::build.
      * @return array The list of middlewares.
      */
-    public function buildRequestMiddlewares(array $middlewaresAttributes): array
+    public function buildRequestMiddlewares(array $attributes): array
     {
-        foreach ($middlewaresAttributes as $attributes) {
+        foreach ($attributes as $attributes) {
             $this->addRequestMiddleware(RequestMiddleware::build($attributes));
         }
         return $this->middlewares;

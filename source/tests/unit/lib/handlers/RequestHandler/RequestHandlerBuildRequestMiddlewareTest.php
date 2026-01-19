@@ -38,7 +38,7 @@ class RequestHandlerBuildRequestMiddlewareTest extends TestCase
     public function testBuildRequestMiddlewaresAddsMultipleMiddlewares()
     {
         $handler = new RequestToBodyHandler();
-        $middlewaresAttributes = [
+        $attributes = [
             [
                 'class' => SetHeadersMiddleware::class,
                 'headers' => ['X-Test' => 'value'],
@@ -48,7 +48,7 @@ class RequestHandlerBuildRequestMiddlewareTest extends TestCase
                 'headers' => ['Host' => 'example.com'],
             ],
         ];
-        $middlewares = $handler->buildRequestMiddlewares($middlewaresAttributes);
+        $middlewares = $handler->buildRequestMiddlewares($attributes);
         $this->assertCount(2, $middlewares);
         foreach ($middlewares as $middleware) {
             $this->assertInstanceOf(SetHeadersMiddleware::class, $middleware);

@@ -98,23 +98,23 @@ class Rule
     /**
      * Builds and adds multiple RequestMiddlewares to the rule.
      *
-     * @param array $middlewaresAttributes Array of associative arrays, each with keys for RequestMiddleware::build.
+     * @param array $attributes Array of associative arrays, each with keys for RequestMiddleware::build.
      * @return array all RequestMiddlewares.
      */
-    protected function buildRequestMiddlewares(array $middlewaresAttributes): array
+    protected function buildRequestMiddlewares(array $attributes): array
     {
-        return $this->handler()->buildRequestMiddlewares($middlewaresAttributes);
+        return $this->handler()->buildRequestMiddlewares($attributes);
     }
 
     /**
      * Builds and adds multiple RequestMatchers to the rule.
      *
-     * @param array $matchersAttributes Array of associative arrays, each with keys 'method', 'uri', 'type'.
+     * @param array $attributes Array of associative arrays, each with keys 'method', 'uri', 'type'.
      * @return array all RequestMatchers.
      */
-    protected function buildMatchers(array $matchersAttributes): array
+    protected function buildMatchers(array $attributes): array
     {
-        foreach ($matchersAttributes as $attributes) {
+        foreach ($attributes as $attributes) {
             $this->buildMatcher($attributes);
         }
         return $this->matchers;
