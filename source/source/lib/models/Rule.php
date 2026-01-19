@@ -103,7 +103,7 @@ class Rule
      * @param array $middlewareAttributes Array of associative arrays, each with keys for RequestMiddleware::build.
      * @return array all RequestMiddlewares.
      */
-    public function buildRequestMiddlewares(array $middlewaresAttributes): array
+    protected function buildRequestMiddlewares(array $middlewaresAttributes): array
     {
         return $this->handler()->buildRequestMiddlewares($middlewaresAttributes);
     }
@@ -114,7 +114,7 @@ class Rule
      * @param array $matchersAttributes Array of associative arrays, each with keys 'method', 'uri', 'type'.
      * @return array all RequestMatchers.
      */
-    public function buildMatchers(array $matchersAttributes): array
+    protected function buildMatchers(array $matchersAttributes): array
     {
         foreach ($matchersAttributes as $attributes) {
             $this->buildMatcher($attributes);
@@ -128,7 +128,7 @@ class Rule
      * @param array $matcherAttributes Associative array with keys 'method', 'uri', 'type'.
      * @return RequestMatcher The added RequestMatcher.
      */
-    public function buildMatcher(array $matcherAttributes): RequestMatcher
+    protected function buildMatcher(array $matcherAttributes): RequestMatcher
     {
         return $this->matchers[] = RequestMatcher::build($matcherAttributes);
     }
