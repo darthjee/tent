@@ -70,4 +70,12 @@ class RequestHandlerBuildTest extends TestCase
             'type' => 'unknown',
         ]);
     }
+
+    public function testBuildWithMissingTypeThrowsException()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Missing handler type');
+
+        RequestHandler::build([]);
+    }
 }
