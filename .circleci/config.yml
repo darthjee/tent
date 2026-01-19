@@ -181,9 +181,22 @@ jobs:
           command: npm run lint
 
   build-and-release:
-    machine: true
+    docker:
+      - image: darthjee/docker:0.1.0
     steps:
       - checkout
       - run:
-          name: TO BE IMPLEMENTED
-          command: echo "Deploy here"
+          name: Debug
+          command: cat /usr/local/sbin/docker_hub.sh
+      - run:
+          name: Debug curl
+          command: curl --help
+      - run:
+          name: Debug docker
+          command: docker --help
+      - run:
+          name: Docker login
+          command: /bin/sh /usr/local/sbin/docker_hub.sh login
+      - run:
+          name: Docker build
+          command: make MOD="" build
