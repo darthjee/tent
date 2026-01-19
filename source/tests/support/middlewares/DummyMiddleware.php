@@ -19,7 +19,7 @@ class DummyMiddleware extends RequestMiddleware
      * @param array $attributes Associative array of attributes (not used here).
      * @return RequestMiddleware The constructed DummyMiddleware instance.
      */
-    public static function build($attributes): RequestMiddleware
+    public static function build($attributes): DummyMiddleware
     {
         return new self();
     }
