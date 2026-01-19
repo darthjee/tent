@@ -110,6 +110,10 @@ abstract class RequestHandler
 
     protected static function handlerClass($params)
     {
+        if ($params['class'] ?? false) {
+            return $params['class'];
+        }
+        
         switch ($params['type']) {
             case 'proxy':
                 return \Tent\Handlers\ProxyRequestHandler::class;
