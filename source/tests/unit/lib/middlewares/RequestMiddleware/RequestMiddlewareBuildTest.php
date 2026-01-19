@@ -31,10 +31,18 @@ class RequestMiddlewareBuildTest extends TestCase
         $attributes = [
             'class' => "Tent\Middlewares\SetHeadersMiddleware",
             'foo' => 'bar',
+            'headers' => [
+                'X-Custom-Header' => 'value',
+            ],
         ];
         $middleware = RequestMiddleware::build($attributes);
         $this->assertInstanceOf(
             \Tent\Middlewares\SetHeadersMiddleware::class, $middleware
+        );
+        $request = new \Tent\Models\ProcessingRequest([]);
+        $modifiedRequest = $middleware->process($request);
+        $this->assertEquals(
+            'value', $modifiedRequest->headers()['X-Custom-Header']
         );
     }
 }
