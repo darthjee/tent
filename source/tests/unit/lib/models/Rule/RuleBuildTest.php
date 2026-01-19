@@ -37,4 +37,20 @@ class RuleBuildTest extends TestCase
         $this->assertTrue($rule->match($requestGet));
         $this->assertTrue($rule->match($requestPost));
     }
+
+    public function testBuildCreatesRuleWithMiddleware()
+    {
+        $rule = Rule::build([
+            'handler' => [
+                'type' => 'proxy',
+                'host' => 'http://api.com'
+            ],
+            'middlewares' => [
+                [
+                    'class' => '\Tent\Tests\Support\Middlewares\DummyMiddleware',
+                ]
+            ]
+        ]);
+
+    }
 }
