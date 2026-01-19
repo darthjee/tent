@@ -101,7 +101,7 @@ abstract class RequestHandler
      */
     public static function build(array $params): self
     {
-        if (!isset($params['type'])) {
+        if (!isset($params['type']) && !isset($params['class'])) {
             throw new \InvalidArgumentException('Missing handler type');
         }
 
@@ -113,7 +113,7 @@ abstract class RequestHandler
         if ($params['class'] ?? false) {
             return $params['class'];
         }
-        
+
         switch ($params['type']) {
             case 'proxy':
                 return \Tent\Handlers\ProxyRequestHandler::class;

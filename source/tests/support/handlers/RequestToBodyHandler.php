@@ -33,4 +33,9 @@ class RequestToBodyHandler extends RequestHandler
             ['Content-Type: application/json']
         );
     }
+
+    public static function build(array $params): self
+    {
+        return new self();
+    }
 }
