@@ -4,7 +4,7 @@ namespace Tent\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Tent\Models\Rule;
-use Tent\Models\Request;
+use Tent\Models\ProcessingRequest;
 use Tent\Handlers\ProxyRequestHandler;
 
 class RuleBuildTest extends TestCase
@@ -26,15 +26,50 @@ class RuleBuildTest extends TestCase
         $handler = $rule->handler();
         $this->assertInstanceOf(ProxyRequestHandler::class, $handler);
 
-        $requestGet = $this->createMock(Request::class);
-        $requestGet->method('requestMethod')->willReturn('GET');
-        $requestGet->method('requestUrl')->willReturn('/index.html');
+        $requestGet = new ProcessingRequest([
+            'requestMethod' => 'GET',
+            'requestUrl' => '/index.html',
+        ]);
 
-        $requestPost = $this->createMock(Request::class);
-        $requestPost->method('requestMethod')->willReturn('POST');
-        $requestPost->method('requestUrl')->willReturn('/submit/123');
+        $requestPost = new ProcessingRequest([
+            'requestMethod' => 'POST',
+            'requestUrl' => '/submit/123',
+        ]);
 
         $this->assertTrue($rule->match($requestGet));
         $this->assertTrue($rule->match($requestPost));
+    }
+
+    public function testBuildCreatesRuleWithMiddleware()
+    {
+        $rule = Rule::build([
+            'handler' => [
+                'class' => '\Tent\Tests\Support\Handlers\RequestToBodyHandler',
+            ],
+            'middlewares' => [
+                [
+                    'class' => '\Tent\Tests\Support\Middlewares\DummyMiddleware',
+                ]
+            ]
+        ]);
+
+        $request = new ProcessingRequest([
+            'requestMethod' => 'GET',
+            'requestUrl' => '/index.html',
+        ]);
+
+        $handler = $rule->handler();
+
+        $response = $handler->handleRequest($request);
+
+        $expected = [
+            'uri' => '/index.html',
+            'query' => null,
+            'method' => 'GET',
+            'headers' => ['X-Test' => 'middleware'],
+            'body' => null,
+        ];
+        $actual = json_decode($response->body(), true);
+        $this->assertEquals($expected, $actual);
     }
 }

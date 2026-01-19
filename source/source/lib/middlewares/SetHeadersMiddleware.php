@@ -7,7 +7,7 @@ use Tent\Models\ProcessingRequest;
 /**
  * Middleware to set or override headers in a ProcessingRequest.
  */
-class SetHeadersMiddleware implements RequestMiddleware
+class SetHeadersMiddleware extends RequestMiddleware
 {
     /**
      * @var array<string, string> Headers to set
@@ -21,6 +21,20 @@ class SetHeadersMiddleware implements RequestMiddleware
     public function __construct(array $headers)
     {
         $this->headers = $headers;
+    }
+
+    /**
+     * Builds a SetHeadersMiddleware using named parameters.
+     *
+     * Example:
+     *   SetHeadersMiddleware::build(['headers' => ['Host' => 'some_host']])
+     *
+     * @param array $attributes Associative array with key 'headers' (array).
+     * @return SetHeadersMiddleware
+     */
+    public static function build(array $attributes): SetHeadersMiddleware
+    {
+        return new self($attributes['headers'] ?? []);
     }
 
     /**

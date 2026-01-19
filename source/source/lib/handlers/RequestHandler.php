@@ -62,6 +62,32 @@ abstract class RequestHandler
     }
 
     /**
+     * Builds and adds a middleware to the list of middlewares.
+     *
+     * @param array $middlewareAttributes Associative array with keys for RequestMiddleware::build.
+     * @return RequestMiddleware The added middleware.
+     */
+    public function buildRequestMiddleware(array $middlewareAttributes): RequestMiddleware
+    {
+        return $this->addRequestMiddleware(RequestMiddleware::build($middlewareAttributes));
+    }
+
+    /**
+     * Builds and adds multiple middlewares to the handler.
+     *
+     * @param array $attributes Array of associative arrays,
+     *   each with keys for RequestMiddleware::build.
+     * @return array The list of middlewares.
+     */
+    public function buildRequestMiddlewares(array $attributes): array
+    {
+        foreach ($attributes as $attributes) {
+            $this->addRequestMiddleware(RequestMiddleware::build($attributes));
+        }
+        return $this->middlewares;
+    }
+
+    /**
      * Factory method to build a RequestHandler based on type and parameters.
      *
      * Example:
@@ -75,17 +101,33 @@ abstract class RequestHandler
      */
     public static function build(array $params): self
     {
-        if (!isset($params['type'])) {
+        if (!isset($params['type']) && !isset($params['class'])) {
             throw new \InvalidArgumentException('Missing handler type');
+        }
+
+        return self::handlerClass($params)::build($params);
+    }
+
+    /**
+     * Determines the handler class based on parameters.
+     *
+     * @param array $params Associative array with keys 'type' or 'class'.
+     * @return string The fully qualified class name of the handler.
+     * @throws \InvalidArgumentException If type is unknown.
+     */
+    protected static function handlerClass(array $params): string
+    {
+        if ($params['class'] ?? false) {
+            return $params['class'];
         }
 
         switch ($params['type']) {
             case 'proxy':
-                return \Tent\Handlers\ProxyRequestHandler::build($params);
+                return \Tent\Handlers\ProxyRequestHandler::class;
             case 'fixed':
-                return \Tent\Handlers\FixedFileHandler::build($params);
+                return \Tent\Handlers\FixedFileHandler::class;
             case 'static':
-                return \Tent\Handlers\StaticFileHandler::build($params);
+                return \Tent\Handlers\StaticFileHandler::class;
             default:
                 throw new \InvalidArgumentException('Unknown handler type: ' . $params['type']);
         }
