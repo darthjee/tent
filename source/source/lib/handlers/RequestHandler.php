@@ -108,7 +108,14 @@ abstract class RequestHandler
         return self::handlerClass($params)::build($params);
     }
 
-    protected static function handlerClass($params)
+    /**
+     * Determines the handler class based on parameters.
+     *
+     * @param array $params Associative array with keys 'type' or 'class'.
+     * @return string The fully qualified class name of the handler.
+     * @throws \InvalidArgumentException If type is unknown.
+     */
+    protected static function handlerClass(array $params): string
     {
         if ($params['class'] ?? false) {
             return $params['class'];
