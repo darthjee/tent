@@ -13,5 +13,13 @@ Configuration::buildRule([
     ],
     'matchers' => [
         ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact']
+    ],
+    "middlewares" => [
+        [
+            'class' => 'Tent\Middlewares\SetHeadersMiddleware',
+            'headers' => [
+                'Host' => 'backend.local'
+            ]
+        ]
     ]
 ]);
