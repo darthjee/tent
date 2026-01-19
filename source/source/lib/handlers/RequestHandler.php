@@ -61,6 +61,19 @@ abstract class RequestHandler
         return $this->middlewares[] = $middleware;
     }
 
+    public function buildRequestMiddleware(array $middlewareAttributes): RequestMiddleware
+    {
+        return $this->addRequestMiddleware(RequestMiddleware::build($middlewareAttributes));
+    }
+
+    public function buildRequestMiddlewares(array $middlewaresAttributes): array
+    {
+        foreach ($middlewaresAttributes as $attributes) {
+            $this->addRequestMiddleware(RequestMiddleware::build($attributes));
+        }
+        return $this->middlewares;
+    }
+
     /**
      * Factory method to build a RequestHandler based on type and parameters.
      *
