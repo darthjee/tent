@@ -44,8 +44,7 @@ class RuleBuildTest extends TestCase
     {
         $rule = Rule::build([
             'handler' => [
-                'type' => 'proxy',
-                'host' => 'http://api.com'
+                'class' => '\Tent\Tests\Support\Handlers\RequestToBodyHandler',
             ],
             'middlewares' => [
                 [
@@ -54,5 +53,23 @@ class RuleBuildTest extends TestCase
             ]
         ]);
 
+        $request = new ProcessingRequest([
+            'requestMethod' => 'GET',
+            'requestUrl' => '/index.html',
+        ]);
+
+        $handler = $rule->handler();
+
+        $response = $handler->handleRequest($request);
+
+        $expected = [
+            'uri' => '/index.html',
+            'query' => null,
+            'method' => 'GET',
+            'headers' => ['X-Test' => 'middleware'],
+            'body' => null,
+        ];
+        $actual = json_decode($response->body(), true);
+        $this->assertEquals($expected, $actual);
     }
 }
