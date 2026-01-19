@@ -19,10 +19,22 @@ class RequestMiddlewareBuildTest extends TestCase
     public function testBuildCreatesMiddlewareInstanceFromStringClassName()
     {
         $attributes = [
-            'class' => 'Tent\\Tests\\Support\\Middlewares\\DummyMiddleware',
+            'class' => 'Tent\Tests\Support\Middlewares\DummyMiddleware',
             'foo' => 'bar',
         ];
         $middleware = RequestMiddleware::build($attributes);
         $this->assertInstanceOf(DummyMiddleware::class, $middleware);
+    }
+
+    public function testBuildCreatesMiddlewareInstanceFromOtherStringClassName()
+    {
+        $attributes = [
+            'class' => "Tent\Middlewares\SetHeadersMiddleware",
+            'foo' => 'bar',
+        ];
+        $middleware = RequestMiddleware::build($attributes);
+        $this->assertInstanceOf(
+            \Tent\Middlewares\SetHeadersMiddleware::class, $middleware
+        );
     }
 }
