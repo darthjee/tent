@@ -29,4 +29,45 @@ class RequestHandlerBuildTest extends TestCase
 
         $this->assertInstanceOf(\Tent\Tests\Support\Handlers\RequestToBodyHandler::class, $handler);
     }
+
+    public function testBuildWithTypeProxy()
+    {
+        $handler = RequestHandler::build([
+            'type' => 'proxy',
+            'host' => 'http://api.com'
+        ]);
+
+        $this->assertInstanceOf(\Tent\Handlers\ProxyRequestHandler::class, $handler);
+    }
+
+    public function testBuildWithTypeFixed()
+    {
+        $handler = RequestHandler::build([
+            'type' => 'fixed',
+            'statusCode' => 200,
+            'body' => 'OK',
+        ]);
+
+        $this->assertInstanceOf(\Tent\Handlers\FixedFileHandler::class, $handler);
+    }
+
+    public function testBuildWithTypeStatic()
+    {
+        $handler = RequestHandler::build([
+            'type' => 'static',
+            'filePath' => '/path/to/file.txt',
+        ]);
+
+        $this->assertInstanceOf(\Tent\Handlers\StaticFileHandler::class, $handler);
+    }
+
+    public function testBuildWithUnknownTypeThrowsException()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Unknown handler type: unknown');
+
+        RequestHandler::build([
+            'type' => 'unknown',
+        ]);
+    }
 }
