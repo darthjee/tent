@@ -23,7 +23,7 @@ abstract class RequestMiddleware
      * @param array $attributes Associative array of attributes, must include 'class' key.
      * @return RequestMiddleware The constructed middleware instance.
      */
-    public static function build($attributes): RequestMiddleware
+    public static function build(array $attributes): RequestMiddleware
     {
         $class = $attributes['class'];
 

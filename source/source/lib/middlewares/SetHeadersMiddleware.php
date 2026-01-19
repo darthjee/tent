@@ -32,7 +32,7 @@ class SetHeadersMiddleware extends RequestMiddleware
      * @param array $attributes Associative array with key 'headers' (array).
      * @return SetHeadersMiddleware
      */
-    public static function build($attributes): SetHeadersMiddleware
+    public static function build(array $attributes): SetHeadersMiddleware
     {
         return new self($attributes['headers'] ?? []);
     }

@@ -1,5 +1,7 @@
 <?php
 
+namespace Tent\Tests\Middlewares\RequestMiddleware;
+
 use PHPUnit\Framework\TestCase;
 use Tent\Middlewares\RequestMiddleware;
 use Tent\Tests\Support\Middlewares\DummyMiddleware;
