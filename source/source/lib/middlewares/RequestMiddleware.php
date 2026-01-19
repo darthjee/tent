@@ -15,7 +15,7 @@ abstract class RequestMiddleware
      * @param ProcessingRequest $request The request to process.
      * @return ProcessingRequest The (possibly modified) request.
      */
-    public abstract function process(ProcessingRequest $request): ProcessingRequest;
+    abstract public function process(ProcessingRequest $request): ProcessingRequest;
 
     /**
      * Builds a RequestMiddleware instance from given attributes.
