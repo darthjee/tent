@@ -105,13 +105,18 @@ abstract class RequestHandler
             throw new \InvalidArgumentException('Missing handler type');
         }
 
+        return self::handlerClass($params)::build($params);
+    }
+
+    protected static function handlerClass($params)
+    {
         switch ($params['type']) {
             case 'proxy':
-                return \Tent\Handlers\ProxyRequestHandler::build($params);
+                return \Tent\Handlers\ProxyRequestHandler::class;
             case 'fixed':
-                return \Tent\Handlers\FixedFileHandler::build($params);
+                return \Tent\Handlers\FixedFileHandler::class;
             case 'static':
-                return \Tent\Handlers\StaticFileHandler::build($params);
+                return \Tent\Handlers\StaticFileHandler::class;
             default:
                 throw new \InvalidArgumentException('Unknown handler type: ' . $params['type']);
         }
