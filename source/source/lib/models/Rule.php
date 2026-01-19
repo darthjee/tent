@@ -6,6 +6,7 @@ use Tent\Handlers\RequestHandler;
 use Tent\Models\RequestMatcher;
 use Tent\Models\Server;
 use Tent\Handlers\ProxyRequestHandler;
+use Tent\Middlewares\RequestMiddleware;
 
 /**
  * Represents a routing rule for processing HTTP requests.
@@ -18,17 +19,17 @@ class Rule
     /**
      * @var RequestHandler The handler used to process matching requests.
      */
-    private $handler;
+    private RequestHandler $handler;
 
     /**
      * @var RequestMatcher[] List of matchers to validate if a request applies to this rule.
      */
-    private $matchers;
+    private array $matchers;
 
     /**
      * @var string|null Optional name for the rule.
      */
-    private $name;
+    private ?string $name;
 
     /**
      * Constructs a Rule.
@@ -42,6 +43,26 @@ class Rule
         $this->handler = $handler;
         $this->matchers = $matchers;
         $this->name = $name;
+    }
+
+    /**
+     * Returns the name of the rule, or null if not set.
+     *
+     * @return string|null
+     */
+    public function name(): ?string
+    {
+        return $this->name;
+    }
+
+    /**
+     * Returns the RequestHandler for this rule.
+     *
+     * @return RequestHandler
+     */
+    public function handler(): RequestHandler
+    {
+        return $this->handler;
     }
 
     /**
@@ -66,31 +87,50 @@ class Rule
         $handler = RequestHandler::build($params['handler'] ?? []);
         $name = $params['name'] ?? null;
 
+        $rule = new self($handler, [], $name);
+
         $matchers = $params['matchers'] ?? [];
-        $matcherObjs = array_map(function ($matcher) {
-            return RequestMatcher::build($matcher);
-        }, $matchers);
+        $rule->buildMatchers($matchers);
+        $middlewaresAttributes = $params['middlewares'] ?? [];
+        $rule->buildRequestMiddlewares($middlewaresAttributes);
 
-        return new self($handler, $matcherObjs, $name);
-    }
-    /**
-     * Returns the name of the rule, or null if not set.
-     *
-     * @return string|null
-     */
-    public function name(): ?string
-    {
-        return $this->name;
+        return $rule;
     }
 
     /**
-     * Returns the RequestHandler for this rule.
+     * Builds and adds multiple RequestMiddlewares to the rule.
      *
-     * @return RequestHandler
+     * @param array $middlewareAttributes Array of associative arrays, each with keys for RequestMiddleware::build.
+     * @return array all RequestMiddlewares.
      */
-    public function handler()
+    public function buildRequestMiddlewares(array $middlewaresAttributes): array
     {
-        return $this->handler;
+        return $this->handler()->buildRequestMiddlewares($middlewaresAttributes);
+    }
+
+    /**
+     * Builds and adds multiple RequestMatchers to the rule.
+     *
+     * @param array $matchersAttributes Array of associative arrays, each with keys 'method', 'uri', 'type'.
+     * @return array all RequestMatchers.
+     */
+    public function buildMatchers(array $matchersAttributes): array
+    {
+        foreach ($matchersAttributes as $attributes) {
+            $this->buildMatcher($attributes);
+        }
+        return $this->matchers;
+    }
+
+    /**
+     * Adds a RequestMatcher to the rule.
+     *
+     * @param array $matcherAttributes Associative array with keys 'method', 'uri', 'type'.
+     * @return RequestMatcher The added RequestMatcher.
+     */
+    public function buildMatcher(array $matcherAttributes): RequestMatcher
+    {
+        return $this->matchers[] = RequestMatcher::build($matcherAttributes);
     }
 
     /**
@@ -99,7 +139,7 @@ class Rule
      * @param RequestInterface $request The incoming HTTP request.
      * @return boolean True if any matcher applies to the request.
      */
-    public function match(RequestInterface $request)
+    public function match(RequestInterface $request): bool
     {
         foreach ($this->matchers as $matcher) {
             if ($matcher->matches($request)) {

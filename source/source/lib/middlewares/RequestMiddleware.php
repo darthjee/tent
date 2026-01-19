@@ -7,7 +7,7 @@ use Tent\Models\ProcessingRequest;
 /**
  * Interface for request middlewares that can process or modify a ProcessingRequest.
  */
-interface RequestMiddleware
+abstract class RequestMiddleware
 {
     /**
      * Processes or modifies the given ProcessingRequest.
@@ -15,5 +15,18 @@ interface RequestMiddleware
      * @param ProcessingRequest $request The request to process.
      * @return ProcessingRequest The (possibly modified) request.
      */
-    public function process(ProcessingRequest $request): ProcessingRequest;
+    abstract public function process(ProcessingRequest $request): ProcessingRequest;
+
+    /**
+     * Builds a RequestMiddleware instance from given attributes.
+     *
+     * @param array $attributes Associative array of attributes, must include 'class' key.
+     * @return RequestMiddleware The constructed middleware instance.
+     */
+    public static function build(array $attributes): RequestMiddleware
+    {
+        $class = $attributes['class'];
+
+        return $class::build($attributes);
+    }
 }
