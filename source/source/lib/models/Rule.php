@@ -98,7 +98,7 @@ class Rule
     /**
      * Builds and adds multiple RequestMiddlewares to the rule.
      *
-     * @param array $middlewareAttributes Array of associative arrays, each with keys for RequestMiddleware::build.
+     * @param array $middlewaresAttributes Array of associative arrays, each with keys for RequestMiddleware::build.
      * @return array all RequestMiddlewares.
      */
     protected function buildRequestMiddlewares(array $middlewaresAttributes): array
