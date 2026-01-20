@@ -28,9 +28,13 @@ workflows:
             tags:
               only: /.*/
       - build-and-release:
+          requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks]
           filters:
             tags:
               only: /.*/
+            branches:
+              only:
+                - master
       - update-description:
           requires: [build-and-release]
           filters:
