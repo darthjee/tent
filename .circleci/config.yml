@@ -28,13 +28,14 @@ workflows:
             tags:
               only: /.*/
       - build-and-release:
-          requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks]
           filters:
             tags:
               only: /.*/
-            branches:
-              only:
-                - master
+      - update-description:
+          requires: [build-and-release]
+          filters:
+            tags:
+              only: /.*/
 jobs:
   unit_test:
     docker:
@@ -181,22 +182,29 @@ jobs:
           command: npm run lint
 
   build-and-release:
-    docker:
-      - image: darthjee/docker:0.1.0
+    machine: true
     steps:
       - checkout
       - run:
-          name: Debug
-          command: cat /usr/local/sbin/docker_hub.sh
-      - run:
-          name: Debug curl
-          command: curl --help
-      - run:
-          name: Debug docker
-          command: docker --help
-      - run:
-          name: Docker login
-          command: /bin/sh /usr/local/sbin/docker_hub.sh login
-      - run:
           name: Docker build
           command: docker build --platform linux/amd64 -f dockerfiles/Dockerfile.tent . -t darthjee/tent:latest -t darthjee/tent:0.0.1
+      - run:
+          name: Docker login
+          command: echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
+      - run:
+          name: Docker push
+          command: docker push darthjee/tent:0.0.1
+      - run:
+          name: Docker release
+          command: docker push darthjee/tent:latest
+  update-description:
+    docker:
+      - image: darthjee/scripts:0.6.0
+    steps:
+      - checkout
+      - run:
+          name: Docker login
+          command: /bin/sh /home/scripts/ login
+      - run:
+          name: Docker push description
+          command: /bin/sh /home/scripts/ push_description darthjee/tent README.md
