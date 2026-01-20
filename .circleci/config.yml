@@ -204,7 +204,7 @@ jobs:
       - checkout
       - run:
           name: Docker login
-          command: /bin/sh /home/scripts/ login
+          command: source /bin/sh /home/scripts/ login
       - run:
           name: Docker push description
           command: /bin/sh /home/scripts/sbin/docker_hub.sh push_description darthjee/tent README.md
