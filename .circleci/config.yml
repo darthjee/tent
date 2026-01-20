@@ -199,4 +199,4 @@ jobs:
           command: /bin/sh /usr/local/sbin/docker_hub.sh login
       - run:
           name: Docker build
-          command: make MOD="" build
+          command: docker build --platform linux/amd64 -f dockerfiles/Dockerfile.tent . -t darthjee/tent:latest -t darthjee/tent:0.0.1
