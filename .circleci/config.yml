@@ -191,13 +191,17 @@ jobs:
       - checkout
       - run:
           name: Docker build
-          command: docker build --platform linux/amd64 -f dockerfiles/Dockerfile.tent . -t darthjee/tent:latest -t darthjee/tent:0.0.1
+          command: |
+            TAG=${CIRCLE_TAG:-latest}
+            docker build --platform linux/amd64 -f dockerfiles/Dockerfile.tent . -t darthjee/tent:$TAG -t darthjee/tent:latest
       - run:
           name: Docker login
           command: echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
       - run:
           name: Docker push
-          command: docker push darthjee/tent:0.0.1
+          command: |
+            TAG=${CIRCLE_TAG:-latest}
+            docker push darthjee/tent:$TAG
       - run:
           name: Docker release
           command: docker push darthjee/tent:latest
