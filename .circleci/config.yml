@@ -203,8 +203,5 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Docker login
-          command: source /home/scripts/sbin/docker_hub.sh login
-      - run:
           name: Docker push description
-          command: /bin/sh /home/scripts/sbin/docker_hub.sh push_description darthjee/tent README.md
+          command: source /home/scripts/sbin/docker_hub.sh login; /bin/sh /home/scripts/sbin/docker_hub.sh push_description darthjee/tent README.md
