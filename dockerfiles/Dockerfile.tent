@@ -1,0 +1,27 @@
+FROM php:8.4-apache as base
+
+# Create app user and directory structure
+RUN useradd -u 1000 app; \
+    chown app:app -R /var/www/html
+
+# Install necessary dependencies for Composer and PHP extensions
+RUN apt-get update && apt-get install -y \
+    unzip \
+    git \
+    curl \
+    libzip-dev \
+    telnet \
+    $PHPIZE_DEPS \
+    && docker-php-ext-install zip pdo pdo_mysql \
+    && pecl install pcov \
+    && docker-php-ext-enable pcov; \
+    a2enmod rewrite; \
+    rm -rf /var/lib/apt/lists/*
+
+USER app
+
+WORKDIR /var/www/html
+
+COPY source/source/ /var/www/html/
+
+CMD ["apache2-foreground"]

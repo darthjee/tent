@@ -35,6 +35,7 @@ Tent is in active development. Currently implemented:
 - ✅ Header forwarding
 - ✅ Static file serving (serves files from a directory)
 - ✅ Single file serving (always serves the same file)
+- ✅ Middleware system (ready)
 - ⏳ Configuration system (in progress)
 - ⏳ Response caching (planned)
 
@@ -52,6 +53,8 @@ Client Request
    index.php
       ↓
 RequestProcessor
+      ↓
+Middleware (chain)
       ↓
  ┌────────────┬──────────┬──────────────┬───────────┬──────────┐
  ↓            ↓          ↓              ↓           ↓
