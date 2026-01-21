@@ -18,7 +18,7 @@ class ProxyRequestHandlerGeneralTest extends TestCase
         $request = new ProcessingRequest([
             'requestMethod' => 'GET',
             'headers' => [],
-            'requestUrl' => '/api/users',
+            'requestPath' => '/api/users',
             'query' => ''
         ]);
         $httpClient = $this->createMockHttpClient(
@@ -38,7 +38,7 @@ class ProxyRequestHandlerGeneralTest extends TestCase
     {
         $request = new ProcessingRequest([
             'requestMethod' => 'GET',
-            'requestUrl' => '/api/users',
+            'requestPath' => '/api/users',
             'headers' => [],
             'query' => 'page=1&limit=10'
         ]);
@@ -59,7 +59,7 @@ class ProxyRequestHandlerGeneralTest extends TestCase
     {
         $request = new ProcessingRequest([
             'requestMethod' => 'POST',
-            'requestUrl' => '/api/users',
+            'requestPath' => '/api/users',
             'query' => '',
             'headers' => [
                 'Content-Type' => 'application/json',
@@ -89,7 +89,7 @@ class ProxyRequestHandlerGeneralTest extends TestCase
     {
         $request = new ProcessingRequest([
             'requestMethod' => 'GET',
-            'requestUrl' => '/api/users',
+            'requestPath' => '/api/users',
             'query' => '',
             'headers' => []
         ]);
@@ -116,7 +116,7 @@ class ProxyRequestHandlerGeneralTest extends TestCase
     {
         $request = new ProcessingRequest([
             'requestMethod' => 'GET',
-            'requestUrl' => '/api/users',
+            'requestPath' => '/api/users',
             'query' => '',
             'headers' => []
         ]);
@@ -137,7 +137,7 @@ class ProxyRequestHandlerGeneralTest extends TestCase
     {
         $request = new ProcessingRequest([
             'requestMethod' => 'GET',
-            'requestUrl' => '/api/users',
+            'requestPath' => '/api/users',
             'query' => '',
             'headers' => []
         ]);

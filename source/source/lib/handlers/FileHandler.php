@@ -49,7 +49,7 @@ abstract class FileHandler extends RequestHandler
     protected function processsRequest(RequestInterface $request)
     {
         try {
-            $this->validateFilePath($request->requestUrl());
+            $this->validateFilePath($request->requestPath());
             $filePath = $this->getFilePath($request);
             $this->checkFileExistance($filePath);
 

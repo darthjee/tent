@@ -132,7 +132,7 @@ class RequestMatcherGeneralTest extends TestCase
     {
         $mock = $this->createMock(Request::class);
         $mock->method('requestMethod')->willReturn($method);
-        $mock->method('requestUrl')->willReturn($url);
+        $mock->method('requestPath')->willReturn($url);
         return $mock;
     }
 }

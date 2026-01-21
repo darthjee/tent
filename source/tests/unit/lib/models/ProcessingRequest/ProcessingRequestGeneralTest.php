@@ -27,31 +27,31 @@ class ProcessingRequestGeneralTest extends TestCase
         $this->assertEquals('POST', $processingRequest->requestMethod());
     }
 
-    public function testRequestUrlReturnsPath()
+    public function testRequestPathReturnsPath()
     {
         $request = new Request([
-            'requestUrl' => '/api/users'
+            'requestPath' => '/api/users'
         ]);
         $processingRequest = new ProcessingRequest(['request' => $request]);
-        $this->assertEquals('/api/users', $processingRequest->requestUrl());
+        $this->assertEquals('/api/users', $processingRequest->requestPath());
     }
 
-    public function testRequestUrlReturnsPathWithoutQueryString()
+    public function testRequestPathReturnsPathWithoutQueryString()
     {
         $request = new Request([
-            'requestUrl' => '/api/users'
+            'requestPath' => '/api/users'
         ]);
         $processingRequest = new ProcessingRequest(['request' => $request]);
-        $this->assertEquals('/api/users', $processingRequest->requestUrl());
+        $this->assertEquals('/api/users', $processingRequest->requestPath());
     }
 
-    public function testRequestUrlReturnsRootWhenEmpty()
+    public function testRequestPathReturnsRootWhenEmpty()
     {
         $request = new Request([
-            'requestUrl' => '/'
+            'requestPath' => '/'
         ]);
         $processingRequest = new ProcessingRequest(['request' => $request]);
-        $this->assertEquals('/', $processingRequest->requestUrl());
+        $this->assertEquals('/', $processingRequest->requestPath());
     }
 
     public function testQueryReturnsQueryString()
@@ -72,14 +72,14 @@ class ProcessingRequestGeneralTest extends TestCase
         $this->assertEquals('', $processingRequest->query());
     }
 
-    public function testRequestUrlWithComplexPath()
+    public function testRequestPathWithComplexPath()
     {
         $request = new Request([
-            'requestUrl' => '/api/v1/users/123/posts',
+            'requestPath' => '/api/v1/users/123/posts',
             'query' => 'filter=active'
         ]);
         $processingRequest = new ProcessingRequest(['request' => $request]);
-        $this->assertEquals('/api/v1/users/123/posts', $processingRequest->requestUrl());
+        $this->assertEquals('/api/v1/users/123/posts', $processingRequest->requestPath());
         $this->assertEquals('filter=active', $processingRequest->query());
     }
 
@@ -89,20 +89,20 @@ class ProcessingRequestGeneralTest extends TestCase
             'requestMethod' => 'PUT',
             'body' => '{"name":"test"}',
             'headers' => ['Content-Type' => 'application/json'],
-            'requestUrl' => '/api/v1/users/123/posts',
+            'requestPath' => '/api/v1/users/123/posts',
             'query' => 'filter=active'
         ]);
         $processingRequest = new ProcessingRequest([
             'request' => $request,
             'requestMethod' => 'GET',
             'body' => '',
-            'requestUrl' => '/api/v1/user',
+            'requestPath' => '/api/v1/user',
             'headers' => ['Content-Type' => 'text/html'],
             'query' => 'filter=disabled'
         ]);
         $this->assertEquals('GET', $processingRequest->requestMethod());
         $this->assertEquals('', $processingRequest->body());
-        $this->assertEquals('/api/v1/user', $processingRequest->requestUrl());
+        $this->assertEquals('/api/v1/user', $processingRequest->requestPath());
         $this->assertEquals(['Content-Type' => 'text/html'], $processingRequest->headers());
         $this->assertEquals('filter=disabled', $processingRequest->query());
     }
@@ -113,7 +113,7 @@ class ProcessingRequestGeneralTest extends TestCase
         $this->assertNull($processingRequest->requestMethod());
         $this->assertNull($processingRequest->body());
         $this->assertNull($processingRequest->headers());
-        $this->assertNull($processingRequest->requestUrl());
+        $this->assertNull($processingRequest->requestPath());
         $this->assertNull($processingRequest->query());
     }
 }

@@ -31,7 +31,7 @@ class ProcessingRequest implements RequestInterface
     private $requestMethod;
     private $body;
     private $headers;
-    private $requestUrl;
+    private $requestPath;
     private $query;
 
     /**
@@ -42,7 +42,7 @@ class ProcessingRequest implements RequestInterface
         'requestMethod',
         'body',
         'headers',
-        'requestUrl',
+        'requestPath',
         'query',
     ];
 
@@ -58,7 +58,7 @@ class ProcessingRequest implements RequestInterface
      *     'requestMethod' => 'POST',
      *     'body' => '{"foo":"bar"}',
      *     'headers' => ['X-Test' => 'ok'],
-     *     'requestUrl' => '/api/test',
+     *     'requestPath' => '/api/test',
      *     'query' => 'a=1&b=2',
      * ]);
      * </code>
@@ -143,14 +143,14 @@ class ProcessingRequest implements RequestInterface
      *
      * @return string|null The path portion of the request URL or null if no request is set
      *
-     * @see RequestInterface::requestUrl()
+     * @see RequestInterface::requestPath()
      */
-    public function requestUrl()
+    public function requestPath()
     {
-        if ($this->requestUrl === null && $this->request) {
-            $this->requestUrl = $this->request->requestUrl();
+        if ($this->requestPath === null && $this->request) {
+            $this->requestPath = $this->request->requestPath();
         }
-        return $this->requestUrl;
+        return $this->requestPath;
     }
 
     /**

@@ -14,7 +14,7 @@ class RuleGeneralTest extends TestCase
     {
         $request = $this->createMock(Request::class);
         $request->method('requestMethod')->willReturn('GET');
-        $request->method('requestUrl')->willReturn('/test');
+        $request->method('requestPath')->willReturn('/test');
 
         $handler = $this->createMock(RequestHandler::class);
 
@@ -30,7 +30,7 @@ class RuleGeneralTest extends TestCase
     {
         $request = $this->createMock(Request::class);
         $request->method('requestMethod')->willReturn('GET');
-        $request->method('requestUrl')->willReturn('/test');
+        $request->method('requestPath')->willReturn('/test');
 
         $handler = $this->createMock(RequestHandler::class);
 
@@ -66,7 +66,7 @@ class RuleGeneralTest extends TestCase
     {
         $request = $this->createMock(Request::class);
         $request->method('requestMethod')->willReturn('GET');
-        $request->method('requestUrl')->willReturn('/test');
+        $request->method('requestPath')->willReturn('/test');
 
         $handler = $this->createMock(RequestHandler::class);
 

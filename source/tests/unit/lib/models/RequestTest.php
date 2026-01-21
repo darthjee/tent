@@ -39,31 +39,31 @@ class RequestTest extends TestCase
         $this->assertEquals('POST', $request->requestMethod());
     }
 
-    public function testRequestUrlReturnsPath()
+    public function testRequestPathReturnsPath()
     {
         $_SERVER['REQUEST_URI'] = '/api/users';
 
         $request = new Request();
 
-        $this->assertEquals('/api/users', $request->requestUrl());
+        $this->assertEquals('/api/users', $request->requestPath());
     }
 
-    public function testRequestUrlReturnsPathWithoutQueryString()
+    public function testRequestPathReturnsPathWithoutQueryString()
     {
         $_SERVER['REQUEST_URI'] = '/api/users?page=1&limit=10';
 
         $request = new Request();
 
-        $this->assertEquals('/api/users', $request->requestUrl());
+        $this->assertEquals('/api/users', $request->requestPath());
     }
 
-    public function testRequestUrlReturnsRootWhenEmpty()
+    public function testRequestPathReturnsRootWhenEmpty()
     {
         $_SERVER['REQUEST_URI'] = '/';
 
         $request = new Request();
 
-        $this->assertEquals('/', $request->requestUrl());
+        $this->assertEquals('/', $request->requestPath());
     }
 
     public function testQueryReturnsQueryString()
@@ -84,13 +84,13 @@ class RequestTest extends TestCase
         $this->assertEquals('', $request->query());
     }
 
-    public function testRequestUrlWithComplexPath()
+    public function testRequestPathWithComplexPath()
     {
         $_SERVER['REQUEST_URI'] = '/api/v1/users/123/posts?filter=active';
 
         $request = new Request();
 
-        $this->assertEquals('/api/v1/users/123/posts', $request->requestUrl());
+        $this->assertEquals('/api/v1/users/123/posts', $request->requestPath());
         $this->assertEquals('filter=active', $request->query());
     }
 }

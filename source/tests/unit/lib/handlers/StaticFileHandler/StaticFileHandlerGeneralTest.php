@@ -47,7 +47,7 @@ class StaticFileHandlerGeneralTest extends TestCase
         $handler = new StaticFileHandler($location);
 
         $request = $this->createMock(Request::class);
-        $request->method('requestUrl')->willReturn('/test.txt');
+        $request->method('requestPath')->willReturn('/test.txt');
         $processingRequest = new ProcessingRequest(['request' => $request]);
 
         $response = $handler->handleRequest($processingRequest);
@@ -63,7 +63,7 @@ class StaticFileHandlerGeneralTest extends TestCase
         $handler = new StaticFileHandler($location);
 
         $request = $this->createMock(Request::class);
-        $request->method('requestUrl')->willReturn('/nonexistent.txt');
+        $request->method('requestPath')->willReturn('/nonexistent.txt');
         $processingRequest = new ProcessingRequest(['request' => $request]);
 
         $response = $handler->handleRequest($processingRequest);
@@ -80,7 +80,7 @@ class StaticFileHandlerGeneralTest extends TestCase
         $handler = new StaticFileHandler($location);
 
         $request = $this->createMock(Request::class);
-        $request->method('requestUrl')->willReturn('/index.html');
+        $request->method('requestPath')->willReturn('/index.html');
         $processingRequest = new ProcessingRequest(['request' => $request]);
 
         $response = $handler->handleRequest($processingRequest);
@@ -98,7 +98,7 @@ class StaticFileHandlerGeneralTest extends TestCase
         $handler = new StaticFileHandler($location);
 
         $request = $this->createMock(Request::class);
-        $request->method('requestUrl')->willReturn('/style.css');
+        $request->method('requestPath')->willReturn('/style.css');
         $processingRequest = new ProcessingRequest(['request' => $request]);
 
         $response = $handler->handleRequest($processingRequest);
@@ -116,7 +116,7 @@ class StaticFileHandlerGeneralTest extends TestCase
         $handler = new StaticFileHandler($location);
 
         $request = $this->createMock(Request::class);
-        $request->method('requestUrl')->willReturn('/script.js');
+        $request->method('requestPath')->willReturn('/script.js');
         $processingRequest = new ProcessingRequest(['request' => $request]);
 
         $response = $handler->handleRequest($processingRequest);
@@ -134,7 +134,7 @@ class StaticFileHandlerGeneralTest extends TestCase
         $handler = new StaticFileHandler($location);
 
         $request = $this->createMock(Request::class);
-        $request->method('requestUrl')->willReturn('/data.json');
+        $request->method('requestPath')->willReturn('/data.json');
         $processingRequest = new ProcessingRequest(['request' => $request]);
 
         $response = $handler->handleRequest($processingRequest);
@@ -152,7 +152,7 @@ class StaticFileHandlerGeneralTest extends TestCase
         $handler = new StaticFileHandler($location);
 
         $request = $this->createMock(Request::class);
-        $request->method('requestUrl')->willReturn('/image.png');
+        $request->method('requestPath')->willReturn('/image.png');
         $processingRequest = new ProcessingRequest(['request' => $request]);
 
         $response = $handler->handleRequest($processingRequest);
@@ -170,7 +170,7 @@ class StaticFileHandlerGeneralTest extends TestCase
         $handler = new StaticFileHandler($location);
 
         $request = $this->createMock(Request::class);
-        $request->method('requestUrl')->willReturn('/image.jpg');
+        $request->method('requestPath')->willReturn('/image.jpg');
         $processingRequest = new ProcessingRequest(['request' => $request]);
 
         $response = $handler->handleRequest($processingRequest);
@@ -188,7 +188,7 @@ class StaticFileHandlerGeneralTest extends TestCase
         $handler = new StaticFileHandler($location);
 
         $request = $this->createMock(Request::class);
-        $request->method('requestUrl')->willReturn('/subdir');
+        $request->method('requestPath')->willReturn('/subdir');
         $processingRequest = new ProcessingRequest(['request' => $request]);
 
         $response = $handler->handleRequest($processingRequest);
@@ -201,7 +201,7 @@ class StaticFileHandlerGeneralTest extends TestCase
     {
         $location = new FolderLocation($this->testDir);
         $handler = new StaticFileHandler($location);
-        $request = new Request(['requestUrl' => '../etc/passwd']);
+        $request = new Request(['requestPath' => '../etc/passwd']);
         $processingRequest = new ProcessingRequest(['request' => $request]);
 
         $response = $handler->handleRequest($processingRequest);

@@ -54,7 +54,7 @@ class RequestProcessorTest extends TestCase
 
         // Create a request to /index.html using named parameters
         $request = new Request([
-            'requestUrl' => '/index.html',
+            'requestPath' => '/index.html',
             'requestMethod' => 'GET'
         ]);
         $response = RequestProcessor::handleRequest($request);
@@ -69,7 +69,7 @@ class RequestProcessorTest extends TestCase
     public function testProxyRequestHandlerForwardsToHttpbin()
     {
         $request = new Request([
-            'requestUrl' => '/get',
+            'requestPath' => '/get',
             'requestMethod' => 'GET',
             'query' => '',
             'headers' => []
@@ -90,7 +90,7 @@ class RequestProcessorTest extends TestCase
     {
         // No rules added, so fallback handler should be used
         $request = new Request([
-            'requestUrl' => '/other',
+            'requestPath' => '/other',
             'requestMethod' => 'GET'
         ]);
         $response = RequestProcessor::handleRequest($request);
