@@ -139,6 +139,20 @@ class ProcessingRequest implements RequestInterface
     }
 
     /**
+     * Sets the request path value.
+     *
+     * This method allows you to override or set the path portion of the request URL
+     * (e.g., /index.html) for this ProcessingRequest instance.
+     *
+     * @param string $uri The path to set (should start with '/').
+     * @return string The set path value.
+     */
+    public function setRequestPath(string $uri): string
+    {
+        return $this->requestPath = $uri;
+    }
+
+    /**
      * Returns the request URL path (e.g., /index.html), caching the result after first access.
      *
      * @return string|null The path portion of the request URL or null if no request is set
