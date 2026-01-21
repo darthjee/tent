@@ -34,7 +34,6 @@ Tent is in active development. Currently implemented:
 - ✅ Request routing and matching
 - ✅ Header forwarding
 - ✅ Static file serving (serves files from a directory)
-- ✅ Single file serving (always serves the same file)
 - ✅ Middleware system (ready)
 - ⏳ Configuration system (in progress)
 - ⏳ Response caching (planned)
@@ -56,13 +55,13 @@ RequestProcessor
       ↓
 Middleware (chain)
       ↓
- ┌────────────┬──────────┬──────────────┬───────────┬──────────┐
- ↓            ↓          ↓              ↓           ↓
-Proxy     Cache     StaticFile     SingleFile   Error
-Handler   Handler   Handler        Handler      Handler
-                                            ┌─────────────┐
-                                            ↓             ↓
-                                      404 Not Found   403 Forbidden
+ ┌────────────┬──────────┬───────────┬───────────┐
+ ↓            ↓          ↓           ↓
+Proxy     Cache     StaticFile     Error
+Handler   Handler   Handler        Handler
+                                 ┌─────────────┐
+                                 ↓             ↓
+                           404 Not Found   403 Forbidden
 ```
 
 ## Development
