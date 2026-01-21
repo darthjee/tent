@@ -79,12 +79,12 @@ class Request implements RequestInterface
      *
      * @return string The path portion of the request URL
      *
-     * @see RequestInterface::requestUrl()
+     * @see RequestInterface::requestPath()
      */
-    public function requestUrl()
+    public function requestPath()
     {
-        if (isset($this->options['requestUrl'])) {
-            return $this->options['requestUrl'];
+        if (isset($this->options['requestPath'])) {
+            return $this->options['requestPath'];
         }
         $uri = $_SERVER['REQUEST_URI'];
         $parts = parse_url($uri);

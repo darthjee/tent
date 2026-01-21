@@ -19,7 +19,7 @@ class RequestMatcherBuildTest extends TestCase
 
         $request = $this->createMock(Request::class);
         $request->method('requestMethod')->willReturn('GET');
-        $request->method('requestUrl')->willReturn('/users');
+        $request->method('requestPath')->willReturn('/users');
         $this->assertTrue($matcher->matches($request));
     }
 
@@ -33,7 +33,7 @@ class RequestMatcherBuildTest extends TestCase
 
         $request = $this->createMock(Request::class);
         $request->method('requestMethod')->willReturn('POST');
-        $request->method('requestUrl')->willReturn('/api');
+        $request->method('requestPath')->willReturn('/api');
         $this->assertTrue($matcher->matches($request));
     }
 }

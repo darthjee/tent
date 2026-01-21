@@ -84,12 +84,12 @@ class RequestMatcher
             return true;
         }
 
-        $requestUrl = $request->requestUrl();
+        $requestPath = $request->requestPath();
 
         if ($this->matchType === 'exact') {
-            return $requestUrl === $this->requestUri;
+            return $requestPath === $this->requestUri;
         } elseif ($this->matchType === 'begins_with') {
-            return strpos($requestUrl, $this->requestUri) === 0;
+            return strpos($requestPath, $this->requestUri) === 0;
         }
 
         return false;

@@ -17,7 +17,7 @@ class FixedFileHandlerGeneralTest extends \PHPUnit\Framework\TestCase
     {
         $handler = new FixedFileHandler('./tests/fixtures/content.html');
 
-        $request = new ProcessingRequest(['requestUrl' => '/some-url']);
+        $request = new ProcessingRequest(['requestPath' => '/some-url']);
         $response = $handler->handleRequest($request);
 
         $this->assertInstanceOf(Response::class, $response);
@@ -30,7 +30,7 @@ class FixedFileHandlerGeneralTest extends \PHPUnit\Framework\TestCase
     {
         $handler = new FixedFileHandler('./tests/fixtures/data.json');
 
-        $request = new ProcessingRequest(['requestUrl' => '/some-url.json']);
+        $request = new ProcessingRequest(['requestPath' => '/some-url.json']);
         $response = $handler->handleRequest($request);
 
         $this->assertInstanceOf(Response::class, $response);
@@ -43,7 +43,7 @@ class FixedFileHandlerGeneralTest extends \PHPUnit\Framework\TestCase
     {
         $handler = new FixedFileHandler('./tests/fixtures/image.gif');
 
-        $request = new ProcessingRequest(['requestUrl' => '/some-url.gif']);
+        $request = new ProcessingRequest(['requestPath' => '/some-url.gif']);
         $response = $handler->handleRequest($request);
 
         $this->assertInstanceOf(Response::class, $response);
@@ -56,7 +56,7 @@ class FixedFileHandlerGeneralTest extends \PHPUnit\Framework\TestCase
     {
         $handler = new FixedFileHandler('./tests/fixtures/nonexistent.txt');
 
-        $request = new ProcessingRequest(['requestUrl' => '/some-url.txt']);
+        $request = new ProcessingRequest(['requestPath' => '/some-url.txt']);
         $response = $handler->handleRequest($request);
 
         $this->assertInstanceOf(MissingResponse::class, $response);
@@ -66,7 +66,7 @@ class FixedFileHandlerGeneralTest extends \PHPUnit\Framework\TestCase
     {
         $handler = new FixedFileHandler('./tests/fixtures/style.css');
 
-        $request = new ProcessingRequest(['requestUrl' => '/some-url.css']);
+        $request = new ProcessingRequest(['requestPath' => '/some-url.css']);
         $response = $handler->handleRequest($request);
 
         $this->assertInstanceOf(Response::class, $response);
@@ -79,8 +79,8 @@ class FixedFileHandlerGeneralTest extends \PHPUnit\Framework\TestCase
     {
         $handler = new FixedFileHandler('./tests/fixtures/content.html');
 
-        $request = new ProcessingRequest(['requestUrl' => '/some-url.html']);
-        $request = new ProcessingRequest(['requestUrl' => '../etc/passwd']);
+        $request = new ProcessingRequest(['requestPath' => '/some-url.html']);
+        $request = new ProcessingRequest(['requestPath' => '../etc/passwd']);
 
         $response = $handler->handleRequest($request);
         $this->assertInstanceOf(ForbiddenResponse::class, $response);

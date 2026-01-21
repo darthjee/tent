@@ -35,12 +35,12 @@ class ConfigurationBuildRuleTest extends TestCase
 
         $requestGet = new Request([
             'requestMethod' => 'GET',
-            'requestUrl' => '/index.html',
+            'requestPath' => '/index.html',
         ]);
 
         $requestPost = new Request([
             'requestMethod' => 'POST',
-            'requestUrl' => '/submit/123',
+            'requestPath' => '/submit/123',
         ]);
 
         $this->assertTrue($rule->match($requestGet));
