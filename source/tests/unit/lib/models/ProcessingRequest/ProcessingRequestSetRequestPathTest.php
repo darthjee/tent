@@ -20,7 +20,7 @@ class ProcessingRequestSetRequestPathTest extends TestCase
     public function testSetRequestPathOverridesPreviousValue()
     {
         $processingRequest = new ProcessingRequest(['requestPath' => '/initial/path']);
-        
+
         $processingRequest->setRequestPath('/new/path');
         $this->assertEquals('/new/path', $processingRequest->requestPath());
     }
@@ -29,7 +29,7 @@ class ProcessingRequestSetRequestPathTest extends TestCase
     {
         $request = new Request(['requestPath' => '/initial/path']);
         $processingRequest = new ProcessingRequest(['request' => $request]);
-        
+
         $processingRequest->setRequestPath('/new/path');
         $this->assertEquals('/new/path', $processingRequest->requestPath());
     }
