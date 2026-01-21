@@ -9,15 +9,15 @@ To run a proxy server using this image:
 
 ```yaml
 services:
-      tent:
-            image: darthjee/tent:latest
-            ports:
-                  - "8080:80"
-            volumes:
-                  - ./your-config:/var/www/html/configuration/           # REQUIRED: your PHP configuration files
-                  - ./your-static:/var/www/html/static/                  # OPTIONAL: static files (if your config uses static/fixed handlers)
-            env_file:
-                  - .env                                                # OPTIONAL: environment variables
+  tent:
+    image: darthjee/tent:latest
+    ports:
+      - "8080:80"
+    volumes:
+      - ./your-config:/var/www/html/configuration/           # REQUIRED: your PHP configuration files
+      - ./your-static:/var/www/html/static/                  # OPTIONAL: static files (if your config uses static/fixed handlers)
+    env_file:
+      - .env                                                # OPTIONAL: environment variables
 ```
 
 - **/var/www/html/configuration/** (required): Mount your PHP configuration files here. These files define proxy rules, static file handling, and middleware. See below for configuration examples.
@@ -45,13 +45,13 @@ require_once __DIR__ . '/rules/backend.php';
 <?php
 use Tent\Configuration;
 Configuration::buildRule([
-            'handler' => [
-                        'type' => 'proxy',
-                        'host' => 'http://api:80'
-            ],
-            'matchers' => [
-                        ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact']
-            ]
+  'handler' => [
+    'type' => 'proxy',
+    'host' => 'http://api:80'
+  ],
+  'matchers' => [
+    ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact']
+  ]
 ]);
 ```
 
@@ -61,27 +61,27 @@ Configuration::buildRule([
 <?php
 use Tent\Configuration;
 if (getenv('FRONTEND_DEV_MODE') === 'true') {
-            Configuration::buildRule([
-                        'handler' => [
-                                    'type' => 'proxy',
-                                    'host' => 'http://frontend:8080'
-                        ],
-                        'matchers' => [
-                                    ['method' => 'GET', 'uri' => '/', 'type' => 'exact'],
-                                    // ...
-                        ]
-            ]);
+  Configuration::buildRule([
+    'handler' => [
+      'type' => 'proxy',
+      'host' => 'http://frontend:8080'
+    ],
+    'matchers' => [
+      ['method' => 'GET', 'uri' => '/', 'type' => 'exact'],
+      // ...
+    ]
+  ]);
 } else {
-            Configuration::buildRule([
-                        'handler' => [
-                                    'type' => 'static',
-                                    'location' => '/var/www/html/static'
-                        ],
-                        'matchers' => [
-                                    ['method' => 'GET', 'uri' => '/index.html', 'type' => 'exact'],
-                                    // ...
-                        ]
-            ]);
+  Configuration::buildRule([
+    'handler' => [
+    'type' => 'static',
+    'location' => '/var/www/html/static'
+  ],
+  'matchers' => [
+      ['method' => 'GET', 'uri' => '/index.html', 'type' => 'exact'],
+      // ...
+    ]
+  ]);
 }
 ```
 
@@ -100,15 +100,15 @@ if (getenv('FRONTEND_DEV_MODE') === 'true') {
 
 ```yaml
 services:
-      tent:
-            image: darthjee/tent:latest
-            ports:
-                  - "8080:80"
-            volumes:
-                  - ./docker_volumes/configuration:/var/www/html/configuration/
-                  - ./dev/frontend/dist:/var/www/html/static/
-            env_file:
-                  - .env
+  tent:
+    image: darthjee/tent:latest
+    ports:
+      - "8080:80"
+    volumes:
+      - ./docker_volumes/configuration:/var/www/html/configuration/
+      - ./dev/frontend/dist:/var/www/html/static/
+    env_file:
+      - .env
 ```
 
 ## More Information
