@@ -5,6 +5,7 @@ namespace Tent\Handlers;
 use Tent\Models\RequestInterface;
 
 /**
+ * @deprecated Use StaticFileHandler with SetPathMiddleware instead.
  * FileHandler that always returns the contents of a fixed file.
  *
  * The file path is defined in the constructor and the same file is served for every request,

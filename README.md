@@ -34,7 +34,6 @@ Tent is in active development. Currently implemented:
 - ✅ Request routing and matching
 - ✅ Header forwarding
 - ✅ Static file serving (serves files from a directory)
-- ✅ Single file serving (always serves the same file)
 - ✅ Middleware system (ready)
 - ⏳ Configuration system (in progress)
 - ⏳ Response caching (planned)
@@ -44,7 +43,6 @@ Tent is in active development. Currently implemented:
 Currently, 404 (Not Found) and 403 (Forbidden) responses return a simple default body. In the future, Tent will support custom bodies or templates for these responses, allowing more complex or branded error pages.
 
 ## Architecture
-
 ```
 Client Request
       ↓
@@ -56,14 +54,57 @@ RequestProcessor
       ↓
 Middleware (chain)
       ↓
- ┌────────────┬──────────┬──────────────┬───────────┬──────────┐
- ↓            ↓          ↓              ↓           ↓
-Proxy     Cache     StaticFile     SingleFile   Error
-Handler   Handler   Handler        Handler      Handler
-                                            ┌─────────────┐
-                                            ↓             ↓
-                                      404 Not Found   403 Forbidden
+ ┌────────────┬──────────┬───────────┬───────────┐
+ ↓            ↓          ↓           ↓
+Proxy     Cache     StaticFile     Error
+Handler   Handler   Handler        Handler
+                                 ┌─────────────┐
+                                 ↓             ↓
+                           404 Not Found   403 Forbidden
 ```
+
+## Middleware System
+
+Tent supports a flexible middleware system that allows you to intercept, modify, or enrich requests before they reach the final handler. Middlewares are defined in the configuration and are executed in the order they appear, forming a processing chain.
+
+### How to Use
+
+Middlewares are specified in the `middlewares` array of a rule in your configuration. Each middleware can modify aspects of the request, such as headers or path, or perform custom logic.
+
+**Example:**
+
+```php
+Configuration::buildRule([
+   'handler' => [
+      'type' => 'static',
+      'location' => '/var/www/html/static/'
+   ],
+   'matchers' => [
+      ['method' => 'GET', 'uri' => '/', 'type' => 'exact'],
+   ],
+   'middlewares' => [
+      [
+         'class' => 'Tent\\Middlewares\\SetPathMiddleware',
+         'path' => '/index.html'
+      ],
+      [
+         'class' => 'Tent\\Middlewares\\SetHeadersMiddleware',
+         'headers' => [
+            'Host' => 'frontend.local'
+         ]
+      ]
+   ]
+]);
+```
+
+### Built-in Middlewares
+
+- **SetHeadersMiddleware**: Sets or overrides request headers (e.g., Host, X-Test).
+- **SetPathMiddleware**: Changes the request path, useful for serving a fixed file with StaticFileHandler.
+
+You can also implement your own middlewares by extending `RequestMiddleware`.
+
+Middlewares make Tent highly customizable, enabling advanced routing, header manipulation, authentication, and more.
 
 ## Development
 
