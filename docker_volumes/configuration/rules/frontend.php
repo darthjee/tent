@@ -37,11 +37,17 @@ if (getenv('FRONTEND_DEV_MODE') === 'true') {
     ]);
     Configuration::buildRule([
         'handler' => [
-            'type' => 'fixed',
-            'file' => '/var/www/html/static/index.html'
+            'type' => 'static',
+            'location' => '/var/www/html/static/'
         ],
         'matchers' => [
             ['method' => 'GET', 'uri' => '/', 'type' => 'exact'],
+        ],
+        "middlewares" => [
+            [
+                'class' => 'Tent\Middlewares\SetPathMiddleware',
+                'path' => '/index.html'
+            ]
         ]
     ]);
 }
