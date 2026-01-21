@@ -28,12 +28,12 @@ class RuleBuildTest extends TestCase
 
         $requestGet = new ProcessingRequest([
             'requestMethod' => 'GET',
-            'requestUrl' => '/index.html',
+            'requestPath' => '/index.html',
         ]);
 
         $requestPost = new ProcessingRequest([
             'requestMethod' => 'POST',
-            'requestUrl' => '/submit/123',
+            'requestPath' => '/submit/123',
         ]);
 
         $this->assertTrue($rule->match($requestGet));
@@ -55,7 +55,7 @@ class RuleBuildTest extends TestCase
 
         $request = new ProcessingRequest([
             'requestMethod' => 'GET',
-            'requestUrl' => '/index.html',
+            'requestPath' => '/index.html',
         ]);
 
         $handler = $rule->handler();

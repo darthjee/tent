@@ -64,7 +64,7 @@ class ProxyRequestHandler extends RequestHandler
     protected function processsRequest(RequestInterface $request)
     {
         // Build full URL from target host and request path
-        $url = $this->server->targetHost() . $request->requestUrl();
+        $url = $this->server->targetHost() . $request->requestPath();
         if ($request->query()) {
             $url .= '?' . $request->query();
         }

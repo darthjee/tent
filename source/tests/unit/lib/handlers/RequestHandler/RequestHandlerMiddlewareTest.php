@@ -22,7 +22,7 @@ class RequestHandlerMiddlewareTest extends TestCase
 
         $request = new ProcessingRequest([
             'requestMethod' => 'GET',
-            'requestUrl' => '/test',
+            'requestPath' => '/test',
             'headers' => [
                 'Accept' => 'application/json',
             ]

@@ -26,7 +26,7 @@ interface RequestInterface
      * Returns the request URL path (e.g., /index.html).
      * @return string
      */
-    public function requestUrl();
+    public function requestPath();
 
     /**
      * Returns the query string from the request URL.
