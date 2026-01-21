@@ -1,0 +1,155 @@
+
+# darthjee/tent Docker Image
+
+[![Build Status](https://circleci.com/gh/darthjee/tent.svg?style=shield)](https://circleci.com/gh/darthjee/tent)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/c8849c295a394af4ba34adaf979f811d)](https://app.codacy.com/gh/darthjee/tent/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+
+![tent](https://raw.githubusercontent.com/darthjee/tent/master/tent.png)
+
+An intelligent PHP-based proxy server for routing, static file serving, and middleware—fully configurable via PHP files.
+
+## Quick Start
+
+To run a proxy server using this image:
+
+```yaml
+services:
+  tent:
+    image: darthjee/tent:latest
+    ports:
+      - "8080:80"
+    volumes:
+      - ./your-config:/var/www/html/configuration/           # REQUIRED: your PHP configuration files
+      - ./your-static:/var/www/html/static/                  # OPTIONAL: static files (if your config uses static/fixed handlers)
+    env_file:
+      - .env                                                # OPTIONAL: environment variables
+```
+
+- **/var/www/html/configuration/** (required): Mount your PHP configuration files here. These files define proxy rules, static file handling, and middleware. See below for configuration examples.
+- **/var/www/html/static/** (optional): Mount static files here if your configuration serves static content.
+
+## Configuration
+
+Configuration is done via PHP files placed in `/var/www/html/configuration/`. Each file can define one or more rules using the `Tent\\Configuration::buildRule` method. Example files:
+
+- `configure.php`: Main entry, includes other rule files.
+- `rules/frontend.php`: Rules for frontend/static/proxy handling.
+- `rules/backend.php`: Rules for backend proxying.
+
+**Example: Minimal configure.php**
+
+```php
+<?php
+require_once __DIR__ . '/rules/frontend.php';
+require_once __DIR__ . '/rules/backend.php';
+```
+
+**Example: Proxy rule (backend.php)**
+
+```php
+<?php
+use Tent\Configuration;
+Configuration::buildRule([
+  'handler' => [
+    'type' => 'proxy',
+    'host' => 'http://api:80'
+  ],
+  'matchers' => [
+    ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact']
+  ]
+]);
+```
+
+**Example: Frontend rule (frontend.php)**
+
+```php
+<?php
+use Tent\Configuration;
+if (getenv('FRONTEND_DEV_MODE') === 'true') {
+  Configuration::buildRule([
+    'handler' => [
+      'type' => 'proxy',
+      'host' => 'http://frontend:8080'
+    ],
+    'matchers' => [
+      ['method' => 'GET', 'uri' => '/', 'type' => 'exact'],
+      // ...
+    ]
+  ]);
+} else {
+  Configuration::buildRule([
+    'handler' => [
+    'type' => 'static',
+    'location' => '/var/www/html/static'
+  ],
+  'matchers' => [
+      ['method' => 'GET', 'uri' => '/index.html', 'type' => 'exact'],
+      // ...
+    ]
+  ]);
+}
+```
+
+## Exposed Port
+
+- **80**: The HTTP server listens on port 80 inside the container. Map this to your desired host port (e.g., `8080:80`).
+
+## Typical Use Cases
+
+- Reverse proxy for backend APIs
+- Serving static frontend files
+- Middleware for custom request/response handling
+- Flexible routing based on PHP configuration
+
+## Example Compose Service
+
+```yaml
+services:
+  tent:
+    image: darthjee/tent:latest
+    ports:
+      - "8080:80"
+    volumes:
+      - ./docker_volumes/configuration:/var/www/html/configuration/
+      - ./dev/frontend/dist:/var/www/html/static/
+    env_file:
+      - .env
+```
+
+## More Information
+
+- See the [README](https://github.com/darthjee/tent) for development instructions and advanced configuration.
+- Issues and contributions are welcome!
+
+
+## How It Works
+
+Tent uses Apache with PHP to process all incoming requests through a centralized entry point:
+
+1. **Request Routing**: Apache's `.htaccess` rewrites all requests to `index.php`
+2. **Request Processing**: The PHP application analyzes the request and configuration
+3. **Action Selection**: Based on configuration, Tent will:
+   - **Proxy Mode**: Forward requests to configured backend servers
+   - **Cache Mode**: Serve cached responses (future feature)
+   - **Static Mode**: Serve static files directly (future feature)
+
+## Architecture
+
+```
+Client Request
+      ↓
+   Apache (.htaccess rewrite)
+      ↓
+   index.php
+      ↓
+RequestProcessor
+      ↓
+Middleware (chain)
+      ↓
+ ┌────────────┬──────────┬──────────────┬───────────┬──────────┐
+ ↓            ↓          ↓              ↓           ↓
+Proxy     Cache     StaticFile     SingleFile   Error
+Handler   Handler   Handler        Handler      Handler
+                                            ┌─────────────┐
+                                            ↓             ↓
+                                      404 Not Found   403 Forbidden
