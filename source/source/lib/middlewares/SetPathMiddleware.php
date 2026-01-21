@@ -33,6 +33,7 @@ class SetPathMiddleware extends RequestMiddleware
 
     public function process(ProcessingRequest $request): ProcessingRequest
     {
+        $request->setRequestPath($this->uri);
         return $request;
     }
 }
