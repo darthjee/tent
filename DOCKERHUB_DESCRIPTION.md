@@ -1,6 +1,11 @@
 
 # darthjee/tent Docker Image
 
+[![Build Status](https://circleci.com/gh/darthjee/tent.svg?style=shield)](https://circleci.com/gh/darthjee/tent)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/c8849c295a394af4ba34adaf979f811d)](https://app.codacy.com/gh/darthjee/tent/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+
+![tent](https://raw.githubusercontent.com/darthjee/tent/master/tent.png)
+
 An intelligent PHP-based proxy server for routing, static file serving, and middleware—fully configurable via PHP files.
 
 ## Quick Start
