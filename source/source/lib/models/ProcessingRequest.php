@@ -138,6 +138,11 @@ class ProcessingRequest implements RequestInterface
         return $this->headers;
     }
 
+    function setRequestUrl(string $uri): string
+    {
+        return $this->requestUrl = $uri;
+    }
+
     /**
      * Returns the request URL path (e.g., /index.html), caching the result after first access.
      *
