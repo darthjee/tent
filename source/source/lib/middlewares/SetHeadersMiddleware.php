@@ -6,6 +6,38 @@ use Tent\Models\ProcessingRequest;
 
 /**
  * Middleware to set or override headers in a ProcessingRequest.
+ *
+ * ## Usage Example (in configuration)
+ *
+ * ```php
+ * use Tent\Configuration;
+ *
+ * Configuration::buildRule([
+ *     'handler' => [
+ *         'type' => 'proxy',
+ *         'host' => 'http://api:80'
+ *     ],
+ *     'matchers' => [
+ *         ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact']
+ *     ],
+ *     'middlewares' => [
+ *         [
+ *             'class' => 'Tent\\Middlewares\\SetHeadersMiddleware',
+ *             'headers' => [
+ *                 'Host' => 'backend.local'
+ *             ]
+ *         ]
+ *     ]
+ * ]);
+ * ```
+ *
+ * The middleware can also be instantiated directly:
+ *
+ * ```php
+ * $middleware = SetHeadersMiddleware::build([
+ *     'headers' => ['Host' => 'backend.local']
+ * ]);
+ * ```
  */
 class SetHeadersMiddleware extends RequestMiddleware
 {
