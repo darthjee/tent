@@ -12,10 +12,11 @@ class SetPathMiddleware extends RequestMiddleware
     /**
      * @var array<string, string> Headers to set
      */
-    private $headers;
+    private $uri;
 
     public function __construct(string $uri)
     {
+        $this->uri = $uri;
     }
 
     /**
