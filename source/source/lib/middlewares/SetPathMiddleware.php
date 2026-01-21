@@ -5,36 +5,51 @@ namespace Tent\Middlewares;
 use Tent\Models\ProcessingRequest;
 
 /**
- * Middleware to set or override uri in a ProcessingRequest.
+ * Middleware to set or override the request path in a ProcessingRequest.
+ *
+ * This middleware allows you to change the path portion of the request URL
+ * (e.g., /index.html) before further processing.
  */
 class SetPathMiddleware extends RequestMiddleware
 {
     /**
-     * @var array<string, string> Headers to set
+     * @var string The path to set on the request (should start with '/').
      */
-    private $uri;
+    private $path;
 
-    public function __construct(string $uri)
+    /**
+     * Constructor.
+     *
+     * @param string $path The path to set (should start with '/').
+     */
+    public function __construct(string $path)
     {
-        $this->uri = $uri;
+        $this->path = $path;
     }
 
     /**
-     * Builds a SetHeadersMiddleware using named parameters.
+     * Builds a SetPathMiddleware using named parameters.
      *
      * Example:
-     *   SetPathMiddleware::build(['uri' => '/index.html'])
+     *   SetPathMiddleware::build(['path' => '/new/path'])
      *
+     * @param array $attributes Associative array with key 'path' (string).
      * @return SetPathMiddleware
      */
-    public static function build(array $attributes): SetPathMiddleware
+    public static function build(array $attributes): self
     {
-        return new self($attributes['uri'] ?? []);
+        return new self($attributes['path'] ?? '/');
     }
 
+    /**
+     * Sets or overrides the request path in the ProcessingRequest.
+     *
+     * @param ProcessingRequest $request The request to process.
+     * @return ProcessingRequest The modified request
+     */
     public function process(ProcessingRequest $request): ProcessingRequest
     {
-        $request->setRequestPath($this->uri);
+        $request->setRequestPath($this->path);
         return $request;
     }
 }
