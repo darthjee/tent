@@ -9,6 +9,34 @@ use Tent\Models\ProcessingRequest;
  *
  * This middleware allows you to change the path portion of the request URL
  * (e.g., /index.html) before further processing.
+ *
+ * ## Usage Example (in configuration)
+ *
+ * ```php
+ * use Tent\Configuration;
+ *
+ * Configuration::buildRule([
+ *     'handler' => [
+ *         'type' => 'static',
+ *         'location' => '/var/www/html/static/'
+ *     ],
+ *     'matchers' => [
+ *         ['method' => 'GET', 'uri' => '/', 'type' => 'exact'],
+ *     ],
+ *     'middlewares' => [
+ *         [
+ *             'class' => 'Tent\\Middlewares\\SetPathMiddleware',
+ *             'path' => '/index.html'
+ *         ]
+ *     ]
+ * ]);
+ * ```
+ *
+ * The middleware can also be instantiated directly:
+ *
+ * ```php
+ * $middleware = SetPathMiddleware::build(['path' => '/index.html']);
+ * ```
  */
 class SetPathMiddleware extends RequestMiddleware
 {
