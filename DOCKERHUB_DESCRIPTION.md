@@ -146,10 +146,11 @@ RequestProcessor
       ↓
 Middleware (chain)
       ↓
- ┌────────────┬──────────┬──────────────┬───────────┬──────────┐
- ↓            ↓          ↓              ↓           ↓
-Proxy     Cache     StaticFile     SingleFile   Error
-Handler   Handler   Handler        Handler      Handler
-                                            ┌─────────────┐
-                                            ↓             ↓
-                                      404 Not Found   403 Forbidden
+ ┌────────────┬──────────┬───────────┬───────────┐
+ ↓            ↓          ↓           ↓
+Proxy     Cache     StaticFile     Error
+Handler   Handler   Handler        Handler
+                                 ┌─────────────┐
+                                 ↓             ↓
+                           404 Not Found   403 Forbidden
+```
