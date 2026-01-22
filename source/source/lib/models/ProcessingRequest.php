@@ -81,6 +81,26 @@ class ProcessingRequest implements RequestInterface
     }
 
     /**
+     * Returns the response associated with this processing request.
+     *
+     * @return Response The response object.
+     */
+    public function response(): Response
+    {
+        return $this->response;
+    }
+
+    /**
+     * Sets the response associated with this processing request.
+     *
+     * @param Response $response The response object to set.
+     */
+    public function setResponse(Response $response)
+    {
+        $this->response = $response;
+    }
+
+    /**
      * Sets a header value in the cached headers array.
      *
      * @param string $name  The header name.
