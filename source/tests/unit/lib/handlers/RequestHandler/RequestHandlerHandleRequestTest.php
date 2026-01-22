@@ -4,12 +4,14 @@ namespace Tent\Tests\Handlers\RequestHandler;
 
 require_once __DIR__ . '/../../../../support/handlers/RequestToBodyHandler.php';
 require_once __DIR__ . '/../../../../support/middlewares/QuickResponseMiddleware.php';
+require_once __DIR__ . '/../../../../support/middlewares/DummyResponseMiddleware.php';
 
 use PHPUnit\Framework\TestCase;
 use Tent\Models\ProcessingRequest;
 use Tent\Tests\Support\Handlers\RequestToBodyHandler;
 use Tent\Models\Response;
 use Tent\Tests\Support\Middlewares\QuickResponseMiddleware;
+use Tent\Tests\Support\Middlewares\DummyResponseMiddleware;
 
 class RequestHandlerHandleRequestTest extends TestCase
 {
@@ -38,7 +40,7 @@ class RequestHandlerHandleRequestTest extends TestCase
         $attributes = [
             'class' => QuickResponseMiddleware::class,
         ];
-        $middleware = $handler->buildRequestMiddleware($attributes);
+        $middleware = $handler->buildMiddleware($attributes);
         $this->assertInstanceOf(QuickResponseMiddleware::class, $middleware);
 
         $request = new ProcessingRequest();
@@ -47,5 +49,22 @@ class RequestHandlerHandleRequestTest extends TestCase
         $this->assertInstanceOf(Response::class, $response);
 
         $this->assertEquals('Quick Response', $response->body());
+    }
+
+    public function testResponseMiddleware()
+    {
+        $handler = new RequestToBodyHandler();
+        $attributes = [
+            'class' => DummyResponseMiddleware::class,
+        ];
+        $middleware = $handler->buildMiddleware($attributes);
+        $this->assertInstanceOf(DummyResponseMiddleware::class, $middleware);
+
+        $request = new ProcessingRequest();
+        $response = $handler->handleRequest($request);
+
+        $this->assertInstanceOf(Response::class, $response);
+
+        $this->assertEquals('Dummy response body', $response->body());
     }
 }

@@ -29,7 +29,7 @@ class SetHeadersMiddlewareTest extends TestCase
             'X-Test' => 'value',
         ]);
 
-        $result = $middleware->process($request);
+        $result = $middleware->processRequest($request);
         $this->assertSame($request, $result);
         $this->assertEquals($expectedHeaders, $result->headers());
     }

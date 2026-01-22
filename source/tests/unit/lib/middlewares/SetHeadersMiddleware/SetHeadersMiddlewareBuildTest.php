@@ -30,7 +30,7 @@ class SetHeadersMiddlewareBuildTest extends TestCase
         ];
         $middleware = SetHeadersMiddleware::build($attributes);
         $request = new ProcessingRequest([]);
-        $modifiedRequest = $middleware->process($request);
+        $modifiedRequest = $middleware->processRequest($request);
 
         $this->assertEquals('example.com', $modifiedRequest->headers()['Host']);
         $this->assertEquals('value', $modifiedRequest->headers()['X-Test']);

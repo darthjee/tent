@@ -38,7 +38,7 @@ use Tent\Models\ProcessingRequest;
  * $middleware = SetPathMiddleware::build(['path' => '/index.html']);
  * ```
  */
-class SetPathMiddleware extends RequestMiddleware
+class SetPathMiddleware extends Middleware
 {
     /**
      * @var string The path to set on the request (should start with '/').
@@ -75,7 +75,7 @@ class SetPathMiddleware extends RequestMiddleware
      * @param ProcessingRequest $request The request to process.
      * @return ProcessingRequest The modified request
      */
-    public function process(ProcessingRequest $request): ProcessingRequest
+    public function processRequest(ProcessingRequest $request): ProcessingRequest
     {
         $request->setRequestPath($this->path);
         return $request;

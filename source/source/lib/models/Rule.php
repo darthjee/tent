@@ -6,7 +6,7 @@ use Tent\Handlers\RequestHandler;
 use Tent\Models\RequestMatcher;
 use Tent\Models\Server;
 use Tent\Handlers\ProxyRequestHandler;
-use Tent\Middlewares\RequestMiddleware;
+use Tent\Middlewares\Middleware;
 
 /**
  * Represents a routing rule for processing HTTP requests.
@@ -90,20 +90,20 @@ class Rule
         $rule = new self($handler, [], $name);
 
         $rule->buildMatchers($params['matchers'] ?? []);
-        $rule->buildRequestMiddlewares($params['middlewares'] ?? []);
+        $rule->buildMiddlewares($params['middlewares'] ?? []);
 
         return $rule;
     }
 
     /**
-     * Builds and adds multiple RequestMiddlewares to the rule.
+     * Builds and adds multiple Middlewares to the rule.
      *
-     * @param array $attributes Array of associative arrays, each with keys for RequestMiddleware::build.
-     * @return array all RequestMiddlewares.
+     * @param array $attributes Array of associative arrays, each with keys for Middleware::build.
+     * @return array all Middlewares.
      */
-    protected function buildRequestMiddlewares(array $attributes): array
+    protected function buildMiddlewares(array $attributes): array
     {
-        return $this->handler()->buildRequestMiddlewares($attributes);
+        return $this->handler()->buildMiddlewares($attributes);
     }
 
     /**

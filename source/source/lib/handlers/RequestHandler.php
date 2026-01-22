@@ -3,7 +3,7 @@
 namespace Tent\Handlers;
 
 use Tent\Models\RequestInterface;
-use Tent\Middlewares\RequestMiddleware;
+use Tent\Middlewares\Middleware;
 use Tent\Models\ProcessingRequest;
 use Tent\Models\Response;
 
@@ -45,23 +45,23 @@ abstract class RequestHandler
      */
     final public function handleRequest(ProcessingRequest $request): Response
     {
-        $request = $this->applyMiddlewares($request);
+        $request = $this->applyRequestMiddlewares($request);
 
-        if ($request->hasResponse()) {
-            return $request->response();
-        }
+        $response = $request->hasResponse() ?
+            $response = $request->response() :
+            $response = $this->processsRequest($request);
 
-        return $this->processsRequest($request);
+        return $this->applyResponseMiddlewares($response);
     }
 
     /**
      * Adds a middleware to the list of middlewares.
      *
-     * @param RequestMiddleware $middleware The middleware to
+     * @param Middleware $middleware The middleware to
      *   add which will be applied in a request.
-     * @return RequestMiddleware The added middleware.
+     * @return Middleware The added middleware.
      */
-    public function addRequestMiddleware(RequestMiddleware $middleware): RequestMiddleware
+    public function addMiddleware(Middleware $middleware): Middleware
     {
         return $this->middlewares[] = $middleware;
     }
@@ -69,25 +69,25 @@ abstract class RequestHandler
     /**
      * Builds and adds a middleware to the list of middlewares.
      *
-     * @param array $middlewareAttributes Associative array with keys for RequestMiddleware::build.
-     * @return RequestMiddleware The added middleware.
+     * @param array $middlewareAttributes Associative array with keys for Middleware::build.
+     * @return Middleware The added middleware.
      */
-    public function buildRequestMiddleware(array $middlewareAttributes): RequestMiddleware
+    public function buildMiddleware(array $middlewareAttributes): Middleware
     {
-        return $this->addRequestMiddleware(RequestMiddleware::build($middlewareAttributes));
+        return $this->addMiddleware(Middleware::build($middlewareAttributes));
     }
 
     /**
      * Builds and adds multiple middlewares to the handler.
      *
      * @param array $attributes Array of associative arrays,
-     *   each with keys for RequestMiddleware::build.
+     *   each with keys for Middleware::build.
      * @return array The list of middlewares.
      */
-    public function buildRequestMiddlewares(array $attributes): array
+    public function buildMiddlewares(array $attributes): array
     {
         foreach ($attributes as $attributes) {
-            $this->addRequestMiddleware(RequestMiddleware::build($attributes));
+            $this->addMiddleware(Middleware::build($attributes));
         }
         return $this->middlewares;
     }
@@ -143,16 +143,35 @@ abstract class RequestHandler
      *
      * @param ProcessingRequest $request The incoming HTTP request.
      * @return ProcessingRequest The modified request after applying all middlewares.
+     *
+     * @see Middleware::processRequest
      */
-    private function applyMiddlewares(ProcessingRequest $request): ProcessingRequest
+    private function applyRequestMiddlewares(ProcessingRequest $request): ProcessingRequest
     {
         $modifiedRequest = $request;
         foreach ($this->middlewares as $middleware) {
             if ($modifiedRequest->hasResponse()) {
                 return $modifiedRequest;
             }
-            $modifiedRequest = $middleware->process($modifiedRequest);
+            $modifiedRequest = $middleware->processRequest($modifiedRequest);
         }
         return $modifiedRequest;
+    }
+
+    /**
+     * Applies all middlewares to the given response.
+     *
+     * @param Response $response The response to be sent back.
+     * @return Response The modified response after applying all middlewares.
+     *
+     * @see Middleware::processResponse
+     */
+    private function applyResponseMiddlewares(Response $response): Response
+    {
+        $modifiedResponse = $response;
+        foreach ($this->middlewares as $middleware) {
+            $modifiedResponse = $middleware->processResponse($modifiedResponse);
+        }
+        return $modifiedResponse;
     }
 }

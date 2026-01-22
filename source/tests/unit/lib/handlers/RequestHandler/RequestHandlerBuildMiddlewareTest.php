@@ -5,20 +5,20 @@ namespace Tent\Tests\Handlers\RequestHandler;
 use PHPUnit\Framework\TestCase;
 use Tent\Handlers\RequestHandler;
 use Tent\Middlewares\SetHeadersMiddleware;
-use Tent\Middlewares\RequestMiddleware;
+use Tent\Middlewares\Middleware;
 use Tent\Tests\Support\Handlers\RequestToBodyHandler;
 use Tent\Models\ProcessingRequest;
 
-class RequestHandlerBuildRequestMiddlewareTest extends TestCase
+class RequestHandlerBuildMiddlewareTest extends TestCase
 {
-    public function testBuildRequestMiddlewareAddsMiddlewareToHandler()
+    public function testBuildMiddlewareAddsMiddlewareToHandler()
     {
         $handler = new RequestToBodyHandler();
         $attributes = [
             'class' => SetHeadersMiddleware::class,
             'headers' => ['X-Test' => 'value'],
         ];
-        $middleware = $handler->buildRequestMiddleware($attributes);
+        $middleware = $handler->buildMiddleware($attributes);
         $this->assertInstanceOf(SetHeadersMiddleware::class, $middleware);
 
         $request = new ProcessingRequest();
@@ -35,7 +35,7 @@ class RequestHandlerBuildRequestMiddlewareTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
-    public function testBuildRequestMiddlewaresAddsMultipleMiddlewares()
+    public function testBuildMiddlewaresAddsMultipleMiddlewares()
     {
         $handler = new RequestToBodyHandler();
         $attributes = [
@@ -48,7 +48,7 @@ class RequestHandlerBuildRequestMiddlewareTest extends TestCase
                 'headers' => ['Host' => 'example.com'],
             ],
         ];
-        $middlewares = $handler->buildRequestMiddlewares($attributes);
+        $middlewares = $handler->buildMiddlewares($attributes);
         $this->assertCount(2, $middlewares);
         foreach ($middlewares as $middleware) {
             $this->assertInstanceOf(SetHeadersMiddleware::class, $middleware);

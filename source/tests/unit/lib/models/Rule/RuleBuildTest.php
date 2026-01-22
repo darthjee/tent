@@ -48,7 +48,7 @@ class RuleBuildTest extends TestCase
             ],
             'middlewares' => [
                 [
-                    'class' => '\Tent\Tests\Support\Middlewares\DummyMiddleware',
+                    'class' => '\Tent\Tests\Support\Middlewares\DummyRequestMiddleware',
                 ]
             ]
         ]);
