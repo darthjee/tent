@@ -75,7 +75,7 @@ class SetPathMiddleware extends RequestMiddleware
      * @param ProcessingRequest $request The request to process.
      * @return ProcessingRequest The modified request
      */
-    public function process(ProcessingRequest $request): ProcessingRequest
+    public function processRequest(ProcessingRequest $request): ProcessingRequest
     {
         $request->setRequestPath($this->path);
         return $request;

@@ -7,7 +7,7 @@ use Tent\Models\ProcessingRequest;
 
 class DummyMiddleware extends RequestMiddleware
 {
-    public function process(ProcessingRequest $request): ProcessingRequest
+    public function processRequest(ProcessingRequest $request): ProcessingRequest
     {
         $request->setHeader('X-Test', 'middleware');
         return $request;

@@ -75,7 +75,7 @@ class SetHeadersMiddleware extends RequestMiddleware
      * @param ProcessingRequest $request The request to process.
      * @return ProcessingRequest The modified request
      */
-    public function process(ProcessingRequest $request): ProcessingRequest
+    public function processRequest(ProcessingRequest $request): ProcessingRequest
     {
         foreach ($this->headers as $name => $value) {
             $request->setHeader($name, $value);

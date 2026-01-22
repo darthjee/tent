@@ -13,7 +13,7 @@ class SetPathMiddlewareTest extends TestCase
         $request = new ProcessingRequest(['requestPath' => '/original/path']);
         $middleware = new SetPathMiddleware('/new/path');
 
-        $result = $middleware->process($request);
+        $result = $middleware->processRequest($request);
         $this->assertSame($request, $result);
         $this->assertEquals('/new/path', $result->requestPath());
     }
@@ -23,7 +23,7 @@ class SetPathMiddlewareTest extends TestCase
         $request = new ProcessingRequest(['requestPath' => '/old/path']);
         $middleware = new SetPathMiddleware('/overridden/path');
 
-        $middleware->process($request);
+        $middleware->processRequest($request);
         $this->assertEquals('/overridden/path', $request->requestPath());
     }
 
@@ -32,7 +32,7 @@ class SetPathMiddlewareTest extends TestCase
         $request = new ProcessingRequest();
         $middleware = new SetPathMiddleware('/set/path');
 
-        $middleware->process($request);
+        $middleware->processRequest($request);
         $this->assertEquals('/set/path', $request->requestPath());
     }
 }

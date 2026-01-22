@@ -24,7 +24,7 @@ class SetPathMiddlewareBuildTest extends TestCase
         ];
         $middleware = SetPathMiddleware::build($attributes);
         $request = new ProcessingRequest(['requestPath' => '/original/path']);
-        $modifiedRequest = $middleware->process($request);
+        $modifiedRequest = $middleware->processRequest($request);
 
         $this->assertEquals('/custom/path', $modifiedRequest->requestPath());
     }
@@ -33,7 +33,7 @@ class SetPathMiddlewareBuildTest extends TestCase
     {
         $middleware = SetPathMiddleware::build([]);
         $request = new ProcessingRequest(['requestPath' => '/something']);
-        $middleware->process($request);
+        $middleware->processRequest($request);
         $this->assertEquals('/', $request->requestPath());
     }
 }

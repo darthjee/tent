@@ -43,7 +43,7 @@ class RequestMiddlewareBuildTest extends TestCase
             $middleware
         );
         $request = new \Tent\Models\ProcessingRequest([]);
-        $modifiedRequest = $middleware->process($request);
+        $modifiedRequest = $middleware->processRequest($request);
         $this->assertEquals(
             'value',
             $modifiedRequest->headers()['X-Custom-Header']

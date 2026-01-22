@@ -8,7 +8,7 @@ use Tent\Models\Response;
 
 class QuickResponseMiddleware extends RequestMiddleware
 {
-    public function process(ProcessingRequest $request): ProcessingRequest
+    public function processRequest(ProcessingRequest $request): ProcessingRequest
     {
         $response = new Response('Quick Response', 200, ['Content-Type: text/plain']);
         $request->setResponse($response);

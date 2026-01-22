@@ -151,7 +151,7 @@ abstract class RequestHandler
             if ($modifiedRequest->hasResponse()) {
                 return $modifiedRequest;
             }
-            $modifiedRequest = $middleware->process($modifiedRequest);
+            $modifiedRequest = $middleware->processRequest($modifiedRequest);
         }
         return $modifiedRequest;
     }
