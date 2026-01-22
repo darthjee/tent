@@ -1,20 +1,22 @@
+FROM darthjee/scripts:0.6.0 as scripts
 FROM php:8.4-apache as base
 
 # Create app user and directory structure
 RUN useradd -u 1000 app; \
-    chown app:app -R /var/www/html
+    mkdir -p /home/app/; \
+    chown app:app -R /var/www/html /home/app
+
+COPY --from=scripts /home/scripts/sbin/deploy_frontend.sh /usr/sbin/
 
 # Install necessary dependencies for Composer and PHP extensions
 RUN apt-get update && apt-get install -y \
     unzip \
     git \
-    curl \
+    curl rsync \
     libzip-dev \
     telnet \
     $PHPIZE_DEPS \
-    && docker-php-ext-install zip pdo pdo_mysql \
-    && pecl install pcov \
-    && docker-php-ext-enable pcov; \
+    && docker-php-ext-install zip pdo pdo_mysql; \
     a2enmod rewrite; \
     rm -rf /var/lib/apt/lists/*
 
