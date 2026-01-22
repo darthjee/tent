@@ -2,7 +2,8 @@ FROM php:8.4-apache as base
 
 # Create app user and directory structure
 RUN useradd -u 1000 app; \
-    chown app:app -R /var/www/html
+    mkdir -p /home/app/; \
+    chown app:app -R /var/www/html /home/app
 
 # Install necessary dependencies for Composer and PHP extensions
 RUN apt-get update && apt-get install -y \
