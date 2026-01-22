@@ -9,7 +9,7 @@ class DummyResponseMiddleware extends Middleware
 {
     public function processResponse(Response $response): Response
     {
-        $response->setHeader('X-Test', 'middleware');
+        $response->setBody('Dummy response body');
         return $response;
     }
 
