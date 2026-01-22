@@ -9,6 +9,7 @@ use PHPUnit\Framework\TestCase;
 use Tent\Models\ProcessingRequest;
 use Tent\Tests\Support\Handlers\RequestToBodyHandler;
 use Tent\Models\Response;
+use Tent\Tests\Support\Middlewares\QuickResponseMiddleware;
 
 class RequestHandlerHandleRequestTest extends TestCase
 {

@@ -3,6 +3,7 @@
 namespace Tent\Handlers;
 
 use Tent\Models\RequestInterface;
+use Tent\Models\Response;
 
 /**
  * @deprecated Use StaticFileHandler with SetPathMiddleware instead.
@@ -46,7 +47,7 @@ class FixedFileHandler extends FileHandler
      * @param RequestInterface $request The incoming HTTP request (ignored).
      * @return string The file path to be served.
      */
-    protected function getFilePath(RequestInterface $request)
+    protected function getFilePath(RequestInterface $request): string
     {
         return $this->filePath;
     }
