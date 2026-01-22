@@ -101,6 +101,16 @@ class ProcessingRequest implements RequestInterface
     }
 
     /**
+     * Checks if a response has been set for this processing request.
+     *
+     * @return bool True if a response is set, false otherwise.
+     */
+    public function hasResponse(): bool
+    {
+        return $this->response !== null;
+    }
+
+    /**
      * Sets a header value in the cached headers array.
      *
      * @param string $name  The header name.
