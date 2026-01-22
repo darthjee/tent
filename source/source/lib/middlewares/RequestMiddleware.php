@@ -3,6 +3,7 @@
 namespace Tent\Middlewares;
 
 use Tent\Models\ProcessingRequest;
+use Tent\Models\Response;
 
 /**
  * Interface for request middlewares that can process or modify a ProcessingRequest.
@@ -11,11 +12,29 @@ abstract class RequestMiddleware
 {
     /**
      * Processes or modifies the given ProcessingRequest.
+     * 
+     * This should be overridden by subclasses to implement specific middleware logic.
      *
      * @param ProcessingRequest $request The request to process.
      * @return ProcessingRequest The (possibly modified) request.
      */
-    abstract public function processRequest(ProcessingRequest $request): ProcessingRequest;
+    public function processRequest(ProcessingRequest $request): ProcessingRequest
+    {
+        return $request;
+    }
+
+    /**
+     * Processes or modifies the given Response.
+     * 
+     * This should be overridden by subclasses to implement specific middleware logic.
+     *
+     * @param Response $response The response to process.
+     * @return Response The (possibly modified) response.
+     */
+    public function processResponse(Response $response): Response
+    {
+        return $response;
+    }
 
     /**
      * Builds a RequestMiddleware instance from given attributes.
