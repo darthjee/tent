@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<ruleset name="Custom PHP Mess Detector Ruleset"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.github.io/pmd-6.0.0/ruleset_xml_schema.xsd"
+         >
+    <description>
+        Custom ruleset for code quality and complexity analysis.
+    </description>
+
+    <rule ref="cleancode" />
+    <rule ref="codesize" />
+    <rule ref="design" />
+    <rule ref="unusedcode" />
+</ruleset>
