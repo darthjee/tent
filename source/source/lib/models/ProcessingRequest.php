@@ -94,16 +94,17 @@ class ProcessingRequest implements RequestInterface
      * Sets the response associated with this processing request.
      *
      * @param Response $response The response object to set.
+     * @return Response The response object to set.
      */
-    public function setResponse(Response $response)
+    public function setResponse(Response $response): Response
     {
-        $this->response = $response;
+        return $this->response = $response;
     }
 
     /**
      * Checks if a response has been set for this processing request.
      *
-     * @return bool True if a response is set, false otherwise.
+     * @return boolean True if a response is set, false otherwise.
      */
     public function hasResponse(): bool
     {
@@ -118,7 +119,7 @@ class ProcessingRequest implements RequestInterface
      *
      * @return string The set header value.
      */
-    public function setHeader(string $name, string $value)
+    public function setHeader(string $name, string $value): string
     {
         $this->headers();
 
