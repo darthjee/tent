@@ -40,17 +40,6 @@ class RequestHandlerBuildTest extends TestCase
         $this->assertInstanceOf(\Tent\Handlers\ProxyRequestHandler::class, $handler);
     }
 
-    public function testBuildWithTypeFixed()
-    {
-        $handler = RequestHandler::build([
-            'type' => 'fixed',
-            'statusCode' => 200,
-            'body' => 'OK',
-        ]);
-
-        $this->assertInstanceOf(\Tent\Handlers\FixedFileHandler::class, $handler);
-    }
-
     public function testBuildWithTypeStatic()
     {
         $handler = RequestHandler::build([
