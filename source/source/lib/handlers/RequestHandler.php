@@ -48,10 +48,12 @@ abstract class RequestHandler
         $request = $this->applyRequestMiddlewares($request);
 
         if ($request->hasResponse()) {
-            return $request->response();
+            $response = $request->response();
+        } else {
+            $response = $this->processsRequest($request);
         }
 
-        return $this->processsRequest($request);
+        return $this->applyResponseMiddlewares($response);
     }
 
     /**
@@ -154,5 +156,14 @@ abstract class RequestHandler
             $modifiedRequest = $middleware->processRequest($modifiedRequest);
         }
         return $modifiedRequest;
+    }
+
+    private function applyResponseMiddlewares(Response $response): Response
+    {
+        $modifiedResponse = $response;
+        foreach ($this->middlewares as $middleware) {
+            $modifiedResponse = $middleware->processResponse($modifiedResponse);
+        }
+        return $modifiedResponse;
     }
 }
