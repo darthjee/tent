@@ -21,7 +21,7 @@ class RequestHandlerBuildRequestMiddlewareTest extends TestCase
         $middleware = $handler->buildRequestMiddleware($attributes);
         $this->assertInstanceOf(SetHeadersMiddleware::class, $middleware);
 
-        $request = new ProcessingRequest([]);
+        $request = new ProcessingRequest();
         $response = $handler->handleRequest($request);
 
         $expected = [
@@ -54,7 +54,7 @@ class RequestHandlerBuildRequestMiddlewareTest extends TestCase
             $this->assertInstanceOf(SetHeadersMiddleware::class, $middleware);
         }
 
-        $request = new ProcessingRequest([]);
+        $request = new ProcessingRequest();
         $response = $handler->handleRequest($request);
 
         $expected = [

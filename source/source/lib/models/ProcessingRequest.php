@@ -27,6 +27,7 @@ class ProcessingRequest implements RequestInterface
      * @var Request|null
      */
     private $request;
+    private $response;
 
     private $requestMethod;
     private $body;
@@ -39,6 +40,7 @@ class ProcessingRequest implements RequestInterface
      */
     private const ATTRIBUTES = [
         'request',
+        'response',
         'requestMethod',
         'body',
         'headers',
@@ -79,6 +81,37 @@ class ProcessingRequest implements RequestInterface
     }
 
     /**
+     * Returns the response associated with this processing request.
+     *
+     * @return Response The response object.
+     */
+    public function response(): Response
+    {
+        return $this->response;
+    }
+
+    /**
+     * Sets the response associated with this processing request.
+     *
+     * @param Response $response The response object to set.
+     * @return Response The response object to set.
+     */
+    public function setResponse(Response $response): Response
+    {
+        return $this->response = $response;
+    }
+
+    /**
+     * Checks if a response has been set for this processing request.
+     *
+     * @return boolean True if a response is set, false otherwise.
+     */
+    public function hasResponse(): bool
+    {
+        return $this->response !== null;
+    }
+
+    /**
      * Sets a header value in the cached headers array.
      *
      * @param string $name  The header name.
@@ -86,7 +119,7 @@ class ProcessingRequest implements RequestInterface
      *
      * @return string The set header value.
      */
-    public function setHeader(string $name, string $value)
+    public function setHeader(string $name, string $value): string
     {
         $this->headers();
 

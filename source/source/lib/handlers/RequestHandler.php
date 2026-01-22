@@ -5,6 +5,7 @@ namespace Tent\Handlers;
 use Tent\Models\RequestInterface;
 use Tent\Middlewares\RequestMiddleware;
 use Tent\Models\ProcessingRequest;
+use Tent\Models\Response;
 
 /**
  * Abstract class for handling HTTP requests and producing responses.
@@ -29,7 +30,7 @@ abstract class RequestHandler
      * @param RequestInterface $request The incoming request to process.
      * @return Response The response to be sent back.
      */
-    abstract protected function processsRequest(RequestInterface $request);
+    abstract protected function processsRequest(RequestInterface $request): Response;
 
     /**
      * @var array Middlewares to be applied to this handler
@@ -42,9 +43,13 @@ abstract class RequestHandler
      * @param ProcessingRequest $request The incoming HTTP request.
      * @return Response The response to be sent back.
      */
-    final public function handleRequest(ProcessingRequest $request)
+    final public function handleRequest(ProcessingRequest $request): Response
     {
         $request = $this->applyMiddlewares($request);
+
+        if ($request->hasResponse()) {
+            return $request->response();
+        }
 
         return $this->processsRequest($request);
     }
@@ -143,6 +148,9 @@ abstract class RequestHandler
     {
         $modifiedRequest = $request;
         foreach ($this->middlewares as $middleware) {
+            if ($modifiedRequest->hasResponse()) {
+                return $modifiedRequest;
+            }
             $modifiedRequest = $middleware->process($modifiedRequest);
         }
         return $modifiedRequest;
