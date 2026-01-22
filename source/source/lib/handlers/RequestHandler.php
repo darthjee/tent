@@ -47,11 +47,9 @@ abstract class RequestHandler
     {
         $request = $this->applyRequestMiddlewares($request);
 
-        if ($request->hasResponse()) {
-            $response = $request->response();
-        } else {
+        $response = $request->hasResponse() ?
+            $response = $request->response() :
             $response = $this->processsRequest($request);
-        }
 
         return $this->applyResponseMiddlewares($response);
     }
