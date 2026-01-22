@@ -97,7 +97,6 @@ abstract class RequestHandler
      *
      * Example:
      *   RequestHandler::build(['type' => 'proxy', 'host' => 'http://api.com'])
-     *   RequestHandler::build(['type' => 'fixed', 'file' => './some/path/file.txt'])
      *   RequestHandler::build(['type' => 'static', 'location' => './some_folder'])
      *
      * @param array $params Associative array with at least the key 'type'.
@@ -129,8 +128,6 @@ abstract class RequestHandler
         switch ($params['type']) {
             case 'proxy':
                 return \Tent\Handlers\ProxyRequestHandler::class;
-            case 'fixed':
-                return \Tent\Handlers\FixedFileHandler::class;
             case 'static':
                 return \Tent\Handlers\StaticFileHandler::class;
             default:

@@ -2,7 +2,6 @@
 
 use Tent\Configuration;
 use Tent\Models\Rule;
-use Tent\Handlers\FixedFileHandler;
 use Tent\Handlers\ProxyRequestHandler;
 use Tent\Handlers\StaticFileHandler;
 use Tent\Models\Server;
