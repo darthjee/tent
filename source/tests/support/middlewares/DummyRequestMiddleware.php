@@ -5,7 +5,7 @@ namespace Tent\Tests\Support\Middlewares;
 use Tent\Middlewares\Middleware;
 use Tent\Models\ProcessingRequest;
 
-class DummyMiddleware extends Middleware
+class DummyRequestMiddleware extends Middleware
 {
     public function processRequest(ProcessingRequest $request): ProcessingRequest
     {
@@ -14,12 +14,12 @@ class DummyMiddleware extends Middleware
     }
 
     /**
-     * Builds a DummyMiddleware instance.
+     * Builds a DummyRequestMiddleware instance.
      *
      * @param array $attributes Associative array of attributes (not used here).
-     * @return Middleware The constructed DummyMiddleware instance.
+     * @return Middleware The constructed DummyRequestMiddleware instance.
      */
-    public static function build($attributes): DummyMiddleware
+    public static function build($attributes): DummyRequestMiddleware
     {
         return new self();
     }

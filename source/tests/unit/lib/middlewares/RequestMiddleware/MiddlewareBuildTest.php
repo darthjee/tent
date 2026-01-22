@@ -4,28 +4,28 @@ namespace Tent\Tests\Middlewares\Middleware;
 
 use PHPUnit\Framework\TestCase;
 use Tent\Middlewares\Middleware;
-use Tent\Tests\Support\Middlewares\DummyMiddleware;
+use Tent\Tests\Support\Middlewares\DummyRequestMiddleware;
 
 class MiddlewareBuildTest extends TestCase
 {
     public function testBuildCreatesMiddlewareInstanceFromClassAttribute()
     {
         $attributes = [
-            'class' => DummyMiddleware::class,
+            'class' => DummyRequestMiddleware::class,
             'foo' => 'bar',
         ];
         $middleware = Middleware::build($attributes);
-        $this->assertInstanceOf(DummyMiddleware::class, $middleware);
+        $this->assertInstanceOf(DummyRequestMiddleware::class, $middleware);
     }
 
     public function testBuildCreatesMiddlewareInstanceFromStringClassName()
     {
         $attributes = [
-            'class' => 'Tent\Tests\Support\Middlewares\DummyMiddleware',
+            'class' => 'Tent\Tests\Support\Middlewares\DummyRequestMiddleware',
             'foo' => 'bar',
         ];
         $middleware = Middleware::build($attributes);
-        $this->assertInstanceOf(DummyMiddleware::class, $middleware);
+        $this->assertInstanceOf(DummyRequestMiddleware::class, $middleware);
     }
 
     public function testBuildCreatesMiddlewareInstanceFromOtherStringClassName()
