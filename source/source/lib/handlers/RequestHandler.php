@@ -145,6 +145,8 @@ abstract class RequestHandler
      *
      * @param ProcessingRequest $request The incoming HTTP request.
      * @return ProcessingRequest The modified request after applying all middlewares.
+     *
+     * @see Middleware::processRequest
      */
     private function applyRequestMiddlewares(ProcessingRequest $request): ProcessingRequest
     {
@@ -158,6 +160,14 @@ abstract class RequestHandler
         return $modifiedRequest;
     }
 
+    /**
+     * Applies all middlewares to the given response.
+     *
+     * @param Response $response The response to be sent back.
+     * @return Response The modified response after applying all middlewares.
+     *
+     * @see Middleware::processResponse
+     */
     private function applyResponseMiddlewares(Response $response): Response
     {
         $modifiedResponse = $response;
