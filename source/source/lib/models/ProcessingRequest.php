@@ -27,6 +27,7 @@ class ProcessingRequest implements RequestInterface
      * @var Request|null
      */
     private $request;
+    private $response;
 
     private $requestMethod;
     private $body;
@@ -39,6 +40,7 @@ class ProcessingRequest implements RequestInterface
      */
     private const ATTRIBUTES = [
         'request',
+        'response',
         'requestMethod',
         'body',
         'headers',
