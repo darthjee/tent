@@ -12,7 +12,7 @@ abstract class Middleware
 {
     /**
      * Processes or modifies the given ProcessingRequest.
-     * 
+     *
      * This should be overridden by subclasses to implement specific middleware logic.
      *
      * @param ProcessingRequest $request The request to process.
@@ -25,7 +25,7 @@ abstract class Middleware
 
     /**
      * Processes or modifies the given Response.
-     * 
+     *
      * This should be overridden by subclasses to implement specific middleware logic.
      *
      * @param Response $response The response to process.
