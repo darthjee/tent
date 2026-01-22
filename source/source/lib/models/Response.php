@@ -67,4 +67,37 @@ class Response
     {
         return $this->headerLines;
     }
+
+    /**
+     * Sets the response body content.
+     *
+     * @param string $body
+     * @return string
+     */
+    public function setBody(string $body): string
+    {
+        return $this->body = $body;
+    }
+
+    /**
+     * Sets the HTTP status code.
+     *
+     * @param int $httpCode
+     * @return integer
+     */
+    public function setHttpCode(int $httpCode): int
+    {
+        return $this->httpCode = $httpCode;
+    }
+
+    /**
+     * Sets the list of HTTP header lines.
+     *
+     * @param array $headerLines
+     * @return array
+     */
+    public function setHeaderLines(array $headerLines): array
+    {
+        return $this->headerLines = $headerLines;
+    }
 }
