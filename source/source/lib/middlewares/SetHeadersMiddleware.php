@@ -39,7 +39,7 @@ use Tent\Models\ProcessingRequest;
  * ]);
  * ```
  */
-class SetHeadersMiddleware extends RequestMiddleware
+class SetHeadersMiddleware extends Middleware
 {
     /**
      * @var array<string, string> Headers to set

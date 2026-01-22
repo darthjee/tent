@@ -8,7 +8,7 @@ require_once __DIR__ . '/../../../../support/middlewares/DummyMiddleware.php';
 use PHPUnit\Framework\TestCase;
 use Tent\Handlers\RequestHandler;
 use Tent\Models\ProcessingRequest;
-use Tent\Middlewares\RequestMiddleware;
+use Tent\Middlewares\Middleware;
 use Tent\Tests\Support\Handlers\RequestToBodyHandler;
 use Tent\Tests\Support\Middlewares\DummyMiddleware;
 
@@ -18,7 +18,7 @@ class RequestHandlerMiddlewareTest extends TestCase
     {
         $handler = new RequestToBodyHandler();
         $middleware = new DummyMiddleware();
-        $handler->addRequestMiddleware($middleware);
+        $handler->addMiddleware($middleware);
 
         $request = new ProcessingRequest([
             'requestMethod' => 'GET',

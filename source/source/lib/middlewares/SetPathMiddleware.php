@@ -38,7 +38,7 @@ use Tent\Models\ProcessingRequest;
  * $middleware = SetPathMiddleware::build(['path' => '/index.html']);
  * ```
  */
-class SetPathMiddleware extends RequestMiddleware
+class SetPathMiddleware extends Middleware
 {
     /**
      * @var string The path to set on the request (should start with '/').

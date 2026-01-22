@@ -1,12 +1,12 @@
 <?php
 
-namespace Tent\Tests\Middlewares\RequestMiddleware;
+namespace Tent\Tests\Middlewares\Middleware;
 
 use PHPUnit\Framework\TestCase;
-use Tent\Middlewares\RequestMiddleware;
+use Tent\Middlewares\Middleware;
 use Tent\Tests\Support\Middlewares\DummyMiddleware;
 
-class RequestMiddlewareBuildTest extends TestCase
+class MiddlewareBuildTest extends TestCase
 {
     public function testBuildCreatesMiddlewareInstanceFromClassAttribute()
     {
@@ -14,7 +14,7 @@ class RequestMiddlewareBuildTest extends TestCase
             'class' => DummyMiddleware::class,
             'foo' => 'bar',
         ];
-        $middleware = RequestMiddleware::build($attributes);
+        $middleware = Middleware::build($attributes);
         $this->assertInstanceOf(DummyMiddleware::class, $middleware);
     }
 
@@ -24,7 +24,7 @@ class RequestMiddlewareBuildTest extends TestCase
             'class' => 'Tent\Tests\Support\Middlewares\DummyMiddleware',
             'foo' => 'bar',
         ];
-        $middleware = RequestMiddleware::build($attributes);
+        $middleware = Middleware::build($attributes);
         $this->assertInstanceOf(DummyMiddleware::class, $middleware);
     }
 
@@ -37,7 +37,7 @@ class RequestMiddlewareBuildTest extends TestCase
                 'X-Custom-Header' => 'value',
             ],
         ];
-        $middleware = RequestMiddleware::build($attributes);
+        $middleware = Middleware::build($attributes);
         $this->assertInstanceOf(
             \Tent\Middlewares\SetHeadersMiddleware::class,
             $middleware

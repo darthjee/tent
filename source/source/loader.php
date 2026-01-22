@@ -16,7 +16,7 @@ require_once __DIR__ . '/lib/handlers/MissingRequestHandler.php';
 require_once __DIR__ . '/lib/handlers/ProxyRequestHandler.php';
 require_once __DIR__ . '/lib/handlers/StaticFileHandler.php';
 require_once __DIR__ . '/lib/http/CurlHttpClient.php';
-require_once __DIR__ . '/lib/middlewares/RequestMiddleware.php';
+require_once __DIR__ . '/lib/middlewares/Middleware.php';
 require_once __DIR__ . '/lib/middlewares/SetHeadersMiddleware.php';
 require_once __DIR__ . '/lib/middlewares/SetPathMiddleware.php';
 require_once __DIR__ . '/lib/models/FolderLocation.php';

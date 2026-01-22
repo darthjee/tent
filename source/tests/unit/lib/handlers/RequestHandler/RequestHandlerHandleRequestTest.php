@@ -38,7 +38,7 @@ class RequestHandlerHandleRequestTest extends TestCase
         $attributes = [
             'class' => QuickResponseMiddleware::class,
         ];
-        $middleware = $handler->buildRequestMiddleware($attributes);
+        $middleware = $handler->buildMiddleware($attributes);
         $this->assertInstanceOf(QuickResponseMiddleware::class, $middleware);
 
         $request = new ProcessingRequest();

@@ -8,7 +8,7 @@ use Tent\Models\Response;
 /**
  * Interface for request middlewares that can process or modify a ProcessingRequest.
  */
-abstract class RequestMiddleware
+abstract class Middleware
 {
     /**
      * Processes or modifies the given ProcessingRequest.
@@ -37,12 +37,12 @@ abstract class RequestMiddleware
     }
 
     /**
-     * Builds a RequestMiddleware instance from given attributes.
+     * Builds a Middleware instance from given attributes.
      *
      * @param array $attributes Associative array of attributes, must include 'class' key.
-     * @return RequestMiddleware The constructed middleware instance.
+     * @return Middleware The constructed middleware instance.
      */
-    public static function build(array $attributes): RequestMiddleware
+    public static function build(array $attributes): Middleware
     {
         $class = $attributes['class'];
 
