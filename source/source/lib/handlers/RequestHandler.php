@@ -47,6 +47,10 @@ abstract class RequestHandler
     {
         $request = $this->applyMiddlewares($request);
 
+        if ($request->hasResponse()) {
+            return $request->response();
+        }
+
         return $this->processsRequest($request);
     }
 

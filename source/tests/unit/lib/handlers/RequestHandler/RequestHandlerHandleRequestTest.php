@@ -35,6 +35,11 @@ class RequestHandlerHandleRequestTest extends TestCase
     public function testQuickResponseMiddleware()
     {
         $handler = new RequestToBodyHandler();
+        $attributes = [
+            'class' => QuickResponseMiddleware::class,
+        ];
+        $middleware = $handler->buildRequestMiddleware($attributes);
+        $this->assertInstanceOf(QuickResponseMiddleware::class, $middleware);
 
         $request = new ProcessingRequest();
         $response = $handler->handleRequest($request);

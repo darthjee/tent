@@ -12,7 +12,7 @@ class QuickResponseMiddleware extends RequestMiddleware
     {
         $response = new Response('Quick Response', 200, ['Content-Type: text/plain']);
         $request->setResponse($response);
-        
+
         return $request;
     }
 
