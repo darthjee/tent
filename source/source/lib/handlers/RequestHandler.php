@@ -45,7 +45,7 @@ abstract class RequestHandler
      */
     final public function handleRequest(ProcessingRequest $request): Response
     {
-        $request = $this->applyMiddlewares($request);
+        $request = $this->applyRequestMiddlewares($request);
 
         if ($request->hasResponse()) {
             return $request->response();
@@ -144,7 +144,7 @@ abstract class RequestHandler
      * @param ProcessingRequest $request The incoming HTTP request.
      * @return ProcessingRequest The modified request after applying all middlewares.
      */
-    private function applyMiddlewares(ProcessingRequest $request): ProcessingRequest
+    private function applyRequestMiddlewares(ProcessingRequest $request): ProcessingRequest
     {
         $modifiedRequest = $request;
         foreach ($this->middlewares as $middleware) {
