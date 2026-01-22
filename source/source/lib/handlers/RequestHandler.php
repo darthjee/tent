@@ -143,6 +143,9 @@ abstract class RequestHandler
     {
         $modifiedRequest = $request;
         foreach ($this->middlewares as $middleware) {
+            if ($modifiedRequest->hasResponse()) {
+                return $modifiedRequest;
+            }
             $modifiedRequest = $middleware->process($modifiedRequest);
         }
         return $modifiedRequest;
