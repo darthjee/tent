@@ -45,16 +45,16 @@ class StaticFileHandler extends RequestHandler
         $folderLocation = new FolderLocation($params['location'] ?? '');
         return new self($folderLocation);
     }
-    
+
     /**
      * Reads the file defined by the request path and returns its contents as a Response.
      *
      * The file path determined by combining the base directory and request path.
-     * 
+     *
      * The file path is validated to prevent directory traversal attacks.
-     * 
+     *
      * If the file does not exist or is not a regular file, a MissingResponse is returned.
-     * 
+     *
      * The Content-Type header is determined using the ContentType utility.
      *
      * @param RequestInterface $request The incoming HTTP request (implements RequestInterface).
