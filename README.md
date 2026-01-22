@@ -7,6 +7,10 @@ Tent is an intelligent PHP-based proxy server that can route requests to backend
 
 ![tent](https://raw.githubusercontent.com/darthjee/tent/master/tent.png)
 
+**Current Version:** [0.0.2](https://github.com/darthjee/tent/releases/tag/0.0.2)
+
+**Next Release:** [0.0.3](https://github.com/darthjee/tent/compare/0.0.2...main)
+
 ## Overview
 
 Tent is designed to sit in front of your services and intelligently handle incoming HTTP requests. It can act as a reverse proxy, cache layer, or static file server - making it ideal for optimizing resource usage and improving response times.
