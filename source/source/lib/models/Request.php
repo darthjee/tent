@@ -41,7 +41,7 @@ class Request implements RequestInterface
         if (isset($this->options['requestMethod'])) {
             return $this->options['requestMethod'];
         }
-        return $_SERVER['REQUEST_METHOD'];
+        return $this->get('request_method');
     }
 
     /**
@@ -86,7 +86,7 @@ class Request implements RequestInterface
         if (isset($this->options['requestPath'])) {
             return $this->options['requestPath'];
         }
-        $uri = $_SERVER['REQUEST_URI'];
+        $uri = $this->get('uri');
         $parts = parse_url($uri);
         return $parts['path'] ?? '/';
     }
@@ -103,8 +103,28 @@ class Request implements RequestInterface
         if (isset($this->options['query'])) {
             return $this->options['query'];
         }
-        $uri = $_SERVER['REQUEST_URI'];
+        $uri = $this->get('uri');
         $parts = parse_url($uri);
         return $parts['query'] ?? '';
+    }
+
+    /**
+     * Helper method to get values from $_SERVER superglobal.
+     * @param string $information The key to retrieve (e.g., 'uri', 'request_method').
+     * @return mixed The value from $_SERVER or null if not set.
+     */
+    private function get(string $information): mixed
+    {
+        switch ($information) {
+            case 'uri':
+                $key = 'REQUEST_URI';
+                break;
+            case 'request_method':
+                $key = 'REQUEST_METHOD';
+                break;
+            default:
+                throw new InvalidArgumentException('Invalid attribute access: ' . $information);
+        }
+        return $_SERVER[$key] ?? null;
     }
 }
