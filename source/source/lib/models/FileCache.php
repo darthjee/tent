@@ -34,6 +34,16 @@ class FileCache implements ResponseContent
         return "";
     }
 
+    public function headers(): array
+    {
+        return [];
+    }
+
+    public function exists(): bool
+    {
+        return false;
+    }
+
     public function fullPath(string $type): string
     {
         switch ($type) {
