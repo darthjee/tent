@@ -60,6 +60,14 @@ class File implements ResponseContent
         return $this->content;
     }
 
+    public function headers(): array
+    {
+        return [
+            "Content-Type: " . $this->contentType(),
+            "Content-Length: " . $this->contentLength()
+        ];
+    }
+
     /**
      * Returns the MIME content type of the file based on its extension.
      *
@@ -67,7 +75,7 @@ class File implements ResponseContent
      *
      * @return string The MIME content type.
      */
-    public function contentType(): string
+    private function contentType(): string
     {
         return ContentType::getContentType($this->fullPath());
     }
@@ -77,16 +85,8 @@ class File implements ResponseContent
      *
      * @return integer The content length in bytes.
      */
-    public function contentLength(): int
+    private function contentLength(): int
     {
         return strlen($this->content());
-    }
-
-    public function headers(): array
-    {
-        return [
-            "Content-Type: " . $this->contentType(),
-            "Content-Length: " . $this->contentLength()
-        ];
     }
 }

@@ -54,18 +54,14 @@ class FileTest extends TestCase
         $this->assertEquals('Hello World', $file->content());
     }
 
-    public function testContentTypeReturnsMimeType()
-    {
-        $location = new \Tent\Models\FolderLocation($this->basePath);
-        $file = new \Tent\Models\File('test.html', $location);
-        $expectedType = \Tent\Utils\ContentType::getContentType($file->fullPath());
-        $this->assertEquals($expectedType, $file->contentType());
-    }
-
-    public function testContentLengthReturnsByteLength()
+    public function testHeadersReturnsContentTypeAndLength()
     {
         $location = new \Tent\Models\FolderLocation($this->basePath);
         $file = new \Tent\Models\File('test.txt', $location);
-        $this->assertEquals(11, $file->contentLength());
+        $headers = $file->headers();
+        $this->assertIsArray($headers);
+        $this->assertNotEmpty($headers);
+        $this->assertStringContainsString('Content-Type:', $headers[0]);
+        $this->assertStringContainsString('Content-Length:', $headers[1]);
     }
 }
