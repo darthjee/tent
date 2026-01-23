@@ -22,6 +22,8 @@ class File
      */
     private FolderLocation $location;
 
+    private $content;
+
     /**
      * Constructs a File object.
      *
@@ -46,11 +48,19 @@ class File
 
     public function content(): string
     {
-        return file_get_contents($this->fullPath());
+        if ($this->content == null) {
+            $this->content = file_get_contents($this->fullPath());
+        }
+        return $this->content;
     }
 
     public function contentType(): string
     {
         return ContentType::getContentType($this->fullPath());
+    }
+
+    public function contentLength(): int
+    {
+        return strlen($this->content());
     }
 }

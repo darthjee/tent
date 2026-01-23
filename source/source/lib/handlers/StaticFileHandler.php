@@ -135,7 +135,7 @@ class StaticFileHandler extends RequestHandler
         
         $content = $file->content();
         $contentType = $file->contentType();
-        $contentLength = strlen($content);
+        $contentLength = $file->contentLength();
 
         return new Response(
             $content,
