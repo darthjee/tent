@@ -3,6 +3,7 @@
 namespace Tent\Models;
 
 use Tent\Models\FolderLocation;
+use Tent\Utils\ContentType;
 
 /**
  * Represents a file within a folder location.
@@ -41,5 +42,15 @@ class File
     public function fullPath(): string
     {
         return $this->location->basePath() . $this->path;
+    }
+
+    public function content(): string
+    {
+        return file_get_contents($this->fullPath());
+    }
+
+    public function contentType(): string
+    {
+        return ContentType::getContentType($this->fullPath());
     }
 }

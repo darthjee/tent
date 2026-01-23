@@ -70,7 +70,7 @@ class StaticFileHandler extends RequestHandler
             $filePath = $this->filePath($request);
             $this->checkFileExistance($filePath);
 
-            return $this->readAndReturnFile($filePath);
+            return $this->readAndReturnFile($filePath, $request);
         } catch (InvalidFilePathException $e) {
             return new ForbiddenResponse();
         } catch (FileNotFoundException $e) {
@@ -129,10 +129,12 @@ class StaticFileHandler extends RequestHandler
      * @param string $filePath File path to be read.
      * @return Response The HTTP response containing the file contents.
      */
-    protected function readAndReturnFile(string $filePath): Response
+    protected function readAndReturnFile(string $filePath, RequestInterface $request): Response
     {
-        $content = file_get_contents($filePath);
-        $contentType = ContentType::getContentType($filePath);
+        $file = new File($request->requestPath(), $this->folderLocation);
+        
+        $content = $file->content();
+        $contentType = $file->contentType();
         $contentLength = strlen($content);
 
         return new Response(
