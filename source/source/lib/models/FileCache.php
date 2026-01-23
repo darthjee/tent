@@ -5,6 +5,7 @@ namespace Tent\Models;
 use Tent\Models\FolderLocation;
 use Tent\Models\ResponseContent;
 use Tent\Utils\FileUtils;
+use InvalidArgumentException;
 
 class FileCache implements ResponseContent
 {
@@ -86,7 +87,7 @@ class FileCache implements ResponseContent
             case 'headers':
                 return $this->basePath() . '/cache.headers.json';
             default:
-                throw new \InvalidArgumentException("Invalid cache type: $type");
+                throw new InvalidArgumentException("Invalid cache type: $type");
         }
     }
 
