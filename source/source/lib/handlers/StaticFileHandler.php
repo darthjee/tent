@@ -11,6 +11,7 @@ use Tent\Validators\RequestPathValidator;
 use Tent\Utils\ContentType;
 use Tent\Models\MissingResponse;
 use Tent\Models\ForbiddenResponse;
+use Tent\Models\File;
 
 /**
  * FileHandler that serves static files based on the request URL and a base directory.
@@ -86,7 +87,8 @@ class StaticFileHandler extends RequestHandler
     protected function filePath(RequestInterface $request): string
     {
         if (!$this->filePath) {
-            $this->filePath = $this->folderLocation->basePath() . $request->requestPath();
+            $file = new File($request->requestPath(), $this->folderLocation);
+            $this->filePath = $file->fullPath();
         }
         return $this->filePath;
     }
