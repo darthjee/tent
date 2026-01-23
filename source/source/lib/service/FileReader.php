@@ -42,9 +42,6 @@ class FileReader
     {
         $this->validate();
 
-        $contentType = $this->file->contentType();
-        $contentLength = $this->file->contentLength();
-
         return new Response(
             $this->file->content(),
             200,
