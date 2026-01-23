@@ -17,6 +17,8 @@ class FileCache implements ResponseContent
      */
     private FolderLocation $location;
 
+    private $content;
+
     /**
      * Constructs a Cache object.
      *
@@ -31,7 +33,10 @@ class FileCache implements ResponseContent
 
     public function content(): string
     {
-        return "";
+        if ($this->content == null) {
+            $this->content = file_get_contents($this->fullPath('body'));
+        }
+        return $this->content;
     }
 
     public function headers(): array
@@ -44,7 +49,7 @@ class FileCache implements ResponseContent
         return false;
     }
 
-    public function fullPath(string $type): string
+    protected function fullPath(string $type): string
     {
         switch ($type) {
             case 'body':
@@ -56,7 +61,7 @@ class FileCache implements ResponseContent
         }
     }
 
-    public function basePath(): string
+    protected function basePath(): string
     {
         return FilePath::getFullPath($this->path, $this->location);
     }
