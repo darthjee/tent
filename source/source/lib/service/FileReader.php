@@ -17,7 +17,14 @@ use Tent\Models\ResponseContent;
  */
 class FileReader
 {
+    /**
+     * @var ResponseContent The file content wrapper.
+     */
     private ResponseContent $content;
+
+    /**
+     * @var string The file path to read.
+     */
     private string $path;
 
     /**
