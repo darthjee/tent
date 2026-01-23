@@ -8,6 +8,24 @@ use Tent\Models\FolderLocation;
 
 class FileTest extends TestCase
 {
+    private $basePath;
+
+    public function setUp(): void
+    {
+        $this->basePath = __DIR__ . '/fixtures/';
+        if (!is_dir($this->basePath)) {
+            mkdir($this->basePath, 0777, true);
+        }
+        file_put_contents($this->basePath . 'test.txt', 'Hello World');
+        file_put_contents($this->basePath . 'test.html', '<html></html>');
+    }
+
+    public function tearDown(): void
+    {
+        @unlink($this->basePath . 'test.txt');
+        @unlink($this->basePath . 'test.html');
+    }
+
     public function testFullPathConcatenatesBasePathAndFilePath()
     {
         $location = new FolderLocation('/var/www/');
@@ -27,5 +45,27 @@ class FileTest extends TestCase
         $location = new FolderLocation('/var/www');
         $file = new File('/assets/app.js', $location);
         $this->assertEquals('/var/www/assets/app.js', $file->fullPath());
+    }
+
+    public function testContentReturnsFileContent()
+    {
+        $location = new \Tent\Models\FolderLocation($this->basePath);
+        $file = new \Tent\Models\File('test.txt', $location);
+        $this->assertEquals('Hello World', $file->content());
+    }
+
+    public function testContentTypeReturnsMimeType()
+    {
+        $location = new \Tent\Models\FolderLocation($this->basePath);
+        $file = new \Tent\Models\File('test.html', $location);
+        $expectedType = \Tent\Utils\ContentType::getContentType($file->fullPath());
+        $this->assertEquals($expectedType, $file->contentType());
+    }
+
+    public function testContentLengthReturnsByteLength()
+    {
+        $location = new \Tent\Models\FolderLocation($this->basePath);
+        $file = new \Tent\Models\File('test.txt', $location);
+        $this->assertEquals(11, $file->contentLength());
     }
 }
