@@ -7,10 +7,9 @@ use Tent\Models\RequestInterface;
 use Tent\Models\Response;
 use Tent\Exceptions\FileNotFoundException;
 use Tent\Exceptions\InvalidFilePathException;
-use Tent\Validators\RequestPathValidator;
-use Tent\Utils\ContentType;
 use Tent\Models\MissingResponse;
 use Tent\Models\ForbiddenResponse;
+use Tent\Service\FileReader;
 
 /**
  * FileHandler that serves static files based on the request URL and a base directory.
@@ -21,8 +20,10 @@ use Tent\Models\ForbiddenResponse;
  */
 class StaticFileHandler extends RequestHandler
 {
-    private $folderLocation;
-    private $filePath;
+    /**
+     * @var FolderLocation The base directory for static files.
+     */
+    private FolderLocation $folderLocation;
 
     /**
      * @param FolderLocation $folderLocation The base directory for static files.
@@ -65,81 +66,13 @@ class StaticFileHandler extends RequestHandler
     protected function processsRequest(RequestInterface $request): Response
     {
         try {
-            $this->validateFilePath($request->requestPath());
-            $filePath = $this->getFilePath($request);
-            $this->checkFileExistance($filePath);
+            $fileReader = new FileReader($request->requestPath(), $this->folderLocation);
 
-            return $this->readAndReturnFile($filePath);
+            return $fileReader->getResponse();
         } catch (InvalidFilePathException $e) {
             return new ForbiddenResponse();
         } catch (FileNotFoundException $e) {
             return new MissingResponse();
         }
-    }
-
-    /**
-     * Returns the file path for the static file to be served, based on the request URL.
-     *
-     * @param RequestInterface $request The incoming HTTP request.
-     * @return string The full file path to the static asset.
-     */
-    protected function getFilePath(RequestInterface $request): string
-    {
-        if (!$this->filePath) {
-            $this->filePath = $this->folderLocation->basePath() . $request->requestPath();
-        }
-        return $this->filePath;
-    }
-
-    /**
-     * Validates the file path for traversal attacks.
-     * Throws InvalidFilePathException if path is invalid.
-     *
-     * @param string $path File path to validate.
-     * @throws InvalidFilePathException If the file path is invalid.
-     * @return void
-     */
-    protected function validateFilePath(string $path): void
-    {
-        $validator = new RequestPathValidator($path);
-        if (!$validator->isValid()) {
-            throw new InvalidFilePathException("Invalid file path: $path");
-        }
-    }
-
-    /**
-     * Checks if the file exists and is a regular file. Throws FileNotFoundException if not.
-     *
-     * @param string $filePath File path to be checked.
-     * @throws FileNotFoundException If the file does not exist or is not a regular file.
-     * @return void
-     */
-    protected function checkFileExistance(string $filePath): void
-    {
-        if (!file_exists($filePath) || !is_file($filePath)) {
-            throw new FileNotFoundException("File not found: $filePath");
-        }
-    }
-
-    /**
-     * Reads the file and returns a Response with its contents and headers.
-     *
-     * @param string $filePath File path to be read.
-     * @return Response The HTTP response containing the file contents.
-     */
-    protected function readAndReturnFile(string $filePath): Response
-    {
-        $content = file_get_contents($filePath);
-        $contentType = ContentType::getContentType($filePath);
-        $contentLength = strlen($content);
-
-        return new Response(
-            $content,
-            200,
-            [
-                "Content-Type: $contentType",
-                "Content-Length: $contentLength"
-            ]
-        );
     }
 }
