@@ -61,8 +61,8 @@ class FileCache implements ResponseContent
      * Checks if the cached response files exist.
      *
      * @see FileUtils::exists()
-     * 
-     * @return bool True if both body and headers cache files exist, false otherwise.
+     *
+     * @return boolean True if both body and headers cache files exist, false otherwise.
      */
     public function exists(): bool
     {

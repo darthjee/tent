@@ -46,7 +46,7 @@ class FileCacheTest extends TestCase
         $cache = new FileCache($this->path, $location);
         $this->assertEquals($this->headers, $cache->headers());
     }
-    
+
     public function testExistsReturnsTrueWhenBothFilesExist()
     {
         $location = new FolderLocation($this->basePath);
