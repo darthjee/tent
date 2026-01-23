@@ -4,6 +4,7 @@ namespace Tent\Models;
 
 use Tent\Models\FolderLocation;
 use Tent\Models\ResponseContent;
+use Tent\Utils\FilePath;
 
 class FileCache implements ResponseContent
 {
