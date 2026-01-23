@@ -3,6 +3,7 @@
 namespace Tent\Service;
 
 use Tent\Models\File;
+use Tent\Models\FolderLocation;
 use Tent\Models\Response;
 use Tent\Validators\RequestPathValidator;
 use Tent\Exceptions\FileNotFoundException;
@@ -12,9 +13,9 @@ class FileReader
 {
     private $file;
 
-    public function __construct(File $file)
+    public function __construct(string $path, FolderLocation $location)
     {
-        $this->file = $file;
+        $this->file = new File($path, $location);
     }
 
     public function readFileToResponse(): Response
