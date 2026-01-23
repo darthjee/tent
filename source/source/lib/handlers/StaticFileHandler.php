@@ -12,6 +12,7 @@ use Tent\Utils\ContentType;
 use Tent\Models\MissingResponse;
 use Tent\Models\ForbiddenResponse;
 use Tent\Models\File;
+use Tent\Service\FileReader;
 
 /**
  * FileHandler that serves static files based on the request URL and a base directory.
@@ -132,18 +133,6 @@ class StaticFileHandler extends RequestHandler
     protected function readAndReturnFile(string $filePath, RequestInterface $request): Response
     {
         $file = new File($request->requestPath(), $this->folderLocation);
-        
-        $content = $file->content();
-        $contentType = $file->contentType();
-        $contentLength = $file->contentLength();
-
-        return new Response(
-            $content,
-            200,
-            [
-                "Content-Type: $contentType",
-                "Content-Length: $contentLength"
-            ]
-        );
+        return new FileReader($file)->readFileToResponse();
     }
 }
