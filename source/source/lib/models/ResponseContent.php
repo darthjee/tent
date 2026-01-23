@@ -17,4 +17,11 @@ interface ResponseContent
      * @return array
      */
     public function headers(): array;
+
+    /**
+     * Checks if the content exists.
+     *
+     * @return bool
+     */
+    public function exists(): bool
 }
