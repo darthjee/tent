@@ -6,6 +6,9 @@ use Tent\Models\RequestInterface;
 use Tent\Middlewares\Middleware;
 use Tent\Models\ProcessingRequest;
 use Tent\Models\Response;
+use InvalidArgumentException;
+use Tent\Handlers\ProxyRequestHandler;
+use Tent\Handlers\StaticFileHandler;
 
 /**
  * Abstract class for handling HTTP requests and producing responses.
@@ -101,12 +104,12 @@ abstract class RequestHandler
      *
      * @param array $params Associative array with at least the key 'type'.
      * @return RequestHandler
-     * @throws \InvalidArgumentException If type is missing or unknown.
+     * @throws InvalidArgumentException If type is missing or unknown.
      */
     public static function build(array $params): self
     {
         if (!isset($params['type']) && !isset($params['class'])) {
-            throw new \InvalidArgumentException('Missing handler type');
+            throw new InvalidArgumentException('Missing handler type');
         }
 
         return self::handlerClass($params)::build($params);
@@ -117,7 +120,7 @@ abstract class RequestHandler
      *
      * @param array $params Associative array with keys 'type' or 'class'.
      * @return string The fully qualified class name of the handler.
-     * @throws \InvalidArgumentException If type is unknown.
+     * @throws InvalidArgumentException If type is unknown.
      */
     protected static function handlerClass(array $params): string
     {
@@ -127,11 +130,11 @@ abstract class RequestHandler
 
         switch ($params['type']) {
             case 'proxy':
-                return \Tent\Handlers\ProxyRequestHandler::class;
+                return ProxyRequestHandler::class;
             case 'static':
-                return \Tent\Handlers\StaticFileHandler::class;
+                return StaticFileHandler::class;
             default:
-                throw new \InvalidArgumentException('Unknown handler type: ' . $params['type']);
+                throw new InvalidArgumentException('Unknown handler type: ' . $params['type']);
         }
     }
 
