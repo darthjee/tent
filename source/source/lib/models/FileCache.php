@@ -42,7 +42,9 @@ class FileCache implements ResponseContent
 
     public function headers(): array
     {
-        return [];
+        $headersPath = $this->fullPath('headers');
+        $content = file_get_contents($headersPath);
+        return json_decode($content, true);
     }
 
     public function exists(): bool
