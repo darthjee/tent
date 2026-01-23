@@ -22,6 +22,7 @@ use Tent\Models\ForbiddenResponse;
 class StaticFileHandler extends RequestHandler
 {
     private $folderLocation;
+    private $filePath;
 
     /**
      * @param FolderLocation $folderLocation The base directory for static files.
@@ -84,7 +85,10 @@ class StaticFileHandler extends RequestHandler
      */
     protected function getFilePath(RequestInterface $request): string
     {
-        return $this->folderLocation->basePath() . $request->requestPath();
+        if (!$this->filePath) {
+            $this->filePath = $this->folderLocation->basePath() . $request->requestPath();
+        }
+        return $this->filePath;
     }
 
     /**
