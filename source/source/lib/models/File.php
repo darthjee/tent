@@ -74,7 +74,7 @@ class File
     /**
      * Returns the length of the file content in bytes.
      *
-     * @return int The content length in bytes.
+     * @return integer The content length in bytes.
      */
     public function contentLength(): int
     {

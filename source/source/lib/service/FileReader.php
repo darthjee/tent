@@ -41,7 +41,7 @@ class FileReader
     public function getResponse(): Response
     {
         $this->validate();
-        
+
         $contentType = $this->file->contentType();
         $contentLength = $this->file->contentLength();
 
