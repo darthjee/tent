@@ -8,6 +8,7 @@ use Tent\Models\Response;
 use Tent\Validators\RequestPathValidator;
 use Tent\Exceptions\FileNotFoundException;
 use Tent\Exceptions\InvalidFilePathException;
+use Tent\Models\ResponseContent;
 
 /**
  * Service class responsible for reading files and returning their contents as Responses.
@@ -16,7 +17,14 @@ use Tent\Exceptions\InvalidFilePathException;
  */
 class FileReader
 {
-    private File $file;
+    /**
+     * @var ResponseContent The file content wrapper.
+     */
+    private ResponseContent $content;
+
+    /**
+     * @var string The file path to read.
+     */
     private string $path;
 
     /**
@@ -28,7 +36,7 @@ class FileReader
     public function __construct(string $path, FolderLocation $location)
     {
         $this->path = $path;
-        $this->file = new File($path, $location);
+        $this->content = new File($path, $location);
     }
 
     /**
@@ -42,16 +50,10 @@ class FileReader
     {
         $this->validate();
 
-        $contentType = $this->file->contentType();
-        $contentLength = $this->file->contentLength();
-
         return new Response(
-            $this->file->content(),
+            $this->content->content(),
             200,
-            [
-                "Content-Type: $contentType",
-                "Content-Length: $contentLength"
-            ]
+            $this->content->headers()
         );
     }
 
@@ -91,9 +93,8 @@ class FileReader
      */
     protected function checkFileExistance(): void
     {
-        $filePath = $this->file->fullPath();
-        if (!file_exists($filePath) || !is_file($filePath)) {
-            throw new FileNotFoundException("File not found: $filePath");
+        if (!$this->content->exists()) {
+            throw new FileNotFoundException("File not found: " . $this->path);
         }
     }
 }
