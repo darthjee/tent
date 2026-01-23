@@ -8,8 +8,9 @@
         Custom ruleset for code quality and complexity analysis.
     </description>
 
-    <rule ref="cleancode" />
-    <rule ref="codesize" />
-    <rule ref="design" />
-    <rule ref="unusedcode" />
+    <rule ref="rulesets/unusedcode.xml" />
+    <rule ref="rulesets/cleancode.xml" />
+    <rule ref="rulesets/codesize.xml" />
+    <rule ref="rulesets/design.xml" />
+    <rule ref="rulesets/unusedcode.xml" />
 </ruleset>

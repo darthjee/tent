@@ -25,7 +25,7 @@
         "lint": "phpcs --standard=phpcs.xml",
         "lint:fix": "phpcbf --standard=phpcs.xml",
         "docs": "vendor/bin/phpdoc -d source",
-        "complexity": "vendor/bin/phpmd source html phpmd.xml"
+        "complexity": "vendor/bin/phpmd source html phpmd.xml > complexity.html"
     },
     "config": {
         "allow-plugins": {
