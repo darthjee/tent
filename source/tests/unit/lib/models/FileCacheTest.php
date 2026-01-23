@@ -10,20 +10,23 @@ class FileCacheTest extends TestCase
 {
     private $basePath;
     private $path;
+    private $fullPath;
 
     public function setUp(): void
     {
         $this->basePath = sys_get_temp_dir() . '/tent_cache_' . uniqid();
         $this->path = 'some_file.txt';
+        $this->fullPath = $this->basePath . '/' . $this->path;
 
-        mkdir($this->basePath);
-        file_put_contents($this->basePath . '/cache.body.txt', 'Cached body content');
+        mkdir($this->fullPath, 0777, true);
+
+        file_put_contents($this->fullPath . '/cache.body.txt', 'Cached body content');
     }
 
     public function tearDown(): void
     {
-        @unlink($this->basePath . '/cache.body.txt');
-        @unlink($this->basePath . '/cache.headers.json');
+        @unlink($this->fullPath . '/cache.body.txt');
+        @unlink($this->fullPath . '/cache.headers.json');
         @rmdir($this->basePath);
     }
 

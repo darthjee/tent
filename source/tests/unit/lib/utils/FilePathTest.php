@@ -25,7 +25,7 @@ class FilePathTest extends TestCase
         $location = new FolderLocation('/var/www');
         $this->assertEquals('/var/www/assets/app.js', FilePath::getFullPath('/assets/app.js', $location));
     }
-    
+
     public function testGetFullPathWithNoSlashInBasePathOrFilePath()
     {
         $location = new FolderLocation('/var/www');
