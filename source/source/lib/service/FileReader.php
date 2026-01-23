@@ -17,7 +17,7 @@ use Tent\Models\ResponseContent;
  */
 class FileReader
 {
-    private ResponseContent $file;
+    private ResponseContent $content;
     private string $path;
 
     /**
@@ -29,7 +29,7 @@ class FileReader
     public function __construct(string $path, FolderLocation $location)
     {
         $this->path = $path;
-        $this->file = new File($path, $location);
+        $this->content = new File($path, $location);
     }
 
     /**
@@ -44,9 +44,9 @@ class FileReader
         $this->validate();
 
         return new Response(
-            $this->file->content(),
+            $this->content->content(),
             200,
-            $this->file->headers()
+            $this->content->headers()
         );
     }
 
@@ -86,7 +86,7 @@ class FileReader
      */
     protected function checkFileExistance(): void
     {
-        if (!$this->file->exists()) {
+        if (!$this->content->exists()) {
             throw new FileNotFoundException("File not found: " . $this->path);
         }
     }
