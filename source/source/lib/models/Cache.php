@@ -27,4 +27,19 @@ class Cache
         $this->path = $path;
         $this->location = $location;
     }
+
+    public function fullPath(string $type): string
+    {
+        switch ($type) {
+            case 'body':
+                return $this->basePath() . '/cache.body';
+            default:
+                throw new \InvalidArgumentException("Invalid cache type: $type");
+        }
+    }
+
+    public function basePath(): string
+    {
+        return $this->location->basePath() . $this->path;
+    }
 }
