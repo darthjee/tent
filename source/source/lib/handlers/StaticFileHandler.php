@@ -7,11 +7,8 @@ use Tent\Models\RequestInterface;
 use Tent\Models\Response;
 use Tent\Exceptions\FileNotFoundException;
 use Tent\Exceptions\InvalidFilePathException;
-use Tent\Validators\RequestPathValidator;
-use Tent\Utils\ContentType;
 use Tent\Models\MissingResponse;
 use Tent\Models\ForbiddenResponse;
-use Tent\Models\File;
 use Tent\Service\FileReader;
 
 /**
@@ -23,8 +20,8 @@ use Tent\Service\FileReader;
  */
 class StaticFileHandler extends RequestHandler
 {
-    private $folderLocation;
-    private $filePath;
+    private FolderLocation $folderLocation;
+    private string $filePath;
 
     /**
      * @param FolderLocation $folderLocation The base directory for static files.
