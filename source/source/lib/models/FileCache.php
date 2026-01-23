@@ -32,6 +32,11 @@ class FileCache implements ResponseContent
         $this->location = $location;
     }
 
+    /**
+     * Returns the content of the cached response body.
+     *
+     * @return string The cached response body content.
+     */
     public function content(): string
     {
         if ($this->content == null) {
@@ -40,6 +45,11 @@ class FileCache implements ResponseContent
         return $this->content;
     }
 
+    /**
+     * Returns HTTP headers for the cached response.
+     *
+     * @return array Array of HTTP header strings.
+     */
     public function headers(): array
     {
         $headersPath = $this->fullPath('headers');
@@ -47,6 +57,13 @@ class FileCache implements ResponseContent
         return json_decode($content, true);
     }
 
+    /**
+     * Checks if the cached response files exist.
+     *
+     * @see FileUtils::exists()
+     * 
+     * @return bool True if both body and headers cache files exist, false otherwise.
+     */
     public function exists(): bool
     {
         $bodyPath = $this->fullPath('body');
