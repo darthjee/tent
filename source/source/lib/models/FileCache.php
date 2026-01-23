@@ -34,16 +34,6 @@ class FileCache implements ResponseContent
         return "";
     }
 
-    public function contentType(): string
-    {
-        return "text/plain";
-    }
-
-    public function contentLength(): int
-    {
-        return 0;
-    }
-
     public function fullPath(string $type): string
     {
         switch ($type) {
