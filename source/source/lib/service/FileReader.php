@@ -8,6 +8,7 @@ use Tent\Models\Response;
 use Tent\Validators\RequestPathValidator;
 use Tent\Exceptions\FileNotFoundException;
 use Tent\Exceptions\InvalidFilePathException;
+use Tent\Models\ResponseContent;
 
 /**
  * Service class responsible for reading files and returning their contents as Responses.
@@ -16,7 +17,7 @@ use Tent\Exceptions\InvalidFilePathException;
  */
 class FileReader
 {
-    private File $file;
+    private ResponseContent $file;
     private string $path;
 
     /**
