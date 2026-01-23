@@ -9,17 +9,35 @@ use Tent\Validators\RequestPathValidator;
 use Tent\Exceptions\FileNotFoundException;
 use Tent\Exceptions\InvalidFilePathException;
 
+/**
+ * Service class responsible for reading files and returning their contents as Responses.
+ *
+ * This class handles file path validation and existence checks before reading the file.
+ */
 class FileReader
 {
     private File $file;
     private string $path;
 
+    /**
+     * Constructs a FileReader for the given file path and folder location.
+     *
+     * @param string         $path     The file path to read.
+     * @param FolderLocation $location The base folder location.
+     */
     public function __construct(string $path, FolderLocation $location)
     {
         $this->path = $path;
         $this->file = new File($path, $location);
     }
 
+    /**
+     * Reads the file and returns its contents as a Response.
+     *
+     * @throws InvalidFilePathException If the file path is invalid.
+     * @throws FileNotFoundException If the file does not exist or is not a regular file.
+     * @return Response The HTTP response containing the file content.
+     */
     public function getResponse(): Response
     {
         $this->validate();
@@ -37,6 +55,13 @@ class FileReader
         );
     }
 
+    /**
+     * Validates the file path and existence.
+     *
+     * @throws InvalidFilePathException If the file path is invalid.
+     * @throws FileNotFoundException If the file does not exist or is not a regular file.
+     * @return void
+     */
     protected function validate(): void
     {
         $this->validateFilePath();
