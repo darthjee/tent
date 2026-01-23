@@ -5,6 +5,7 @@ namespace Tent\Models;
 use Tent\Models\FolderLocation;
 use Tent\Utils\ContentType;
 use Tent\Models\ResponseContent;
+use Tent\Utils\FileUtils;
 
 /**
  * Represents a file within a folder location.
@@ -35,16 +36,6 @@ class File implements ResponseContent
     {
         $this->path = $path;
         $this->location = $location;
-    }
-
-    /**
-     * Returns the full path to the file, combining the base folder and file path.
-     *
-     * @return string The full file path.
-     */
-    public function fullPath(): string
-    {
-        return $this->location->basePath() . $this->path;
     }
 
     /**
@@ -83,7 +74,17 @@ class File implements ResponseContent
      */
     public function exists(): bool
     {
-        return file_exists($this->fullPath()) && is_file($this->fullPath());
+        return FileUtils::exists($this->fullPath());
+    }
+
+    /**
+     * Returns the full path to the file, combining the base folder and file path.
+     *
+     * @return string The full file path.
+     */
+    private function fullPath(): string
+    {
+        return FileUtils::getFullPath($this->path, $this->location);
     }
 
     /**
