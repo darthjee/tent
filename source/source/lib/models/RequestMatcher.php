@@ -46,6 +46,15 @@ class RequestMatcher
         );
     }
 
+    public static function buildMatchers(array $attributes): array
+    {
+        $matchers = [];
+        foreach ($attributes as $attributes) {
+            $matchers[] = self::build($attributes);
+        }
+        return $matchers;
+    }
+
     /**
      * Checks if the given Request matches this matcher.
      *
