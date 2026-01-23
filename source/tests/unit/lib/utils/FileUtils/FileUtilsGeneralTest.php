@@ -7,7 +7,7 @@ use Tent\Utils\FilePath;
 use Tent\Utils\FileUtils;
 use Tent\Models\FolderLocation;
 
-class FilePathTest extends TestCase
+class FileUtilsGeneralTest extends TestCase
 {
     public function testGetFullPathConcatenatesBasePathAndFilePath()
     {
