@@ -61,13 +61,39 @@ class File implements ResponseContent
     }
 
     /**
+     * Returns HTTP headers for the file, including Content-Type and Content-Length.
+     *
+     * @see contentType()
+     * @see contentLength()
+     *
+     * @return array Array of HTTP header strings.
+     */
+    public function headers(): array
+    {
+        return [
+            "Content-Type: " . $this->contentType(),
+            "Content-Length: " . $this->contentLength()
+        ];
+    }
+
+    /**
+     * Checks if the file exists and is a regular file.
+     *
+     * @return boolean True if the file exists and is a regular file, false otherwise.
+     */
+    public function exists(): bool
+    {
+        return file_exists($this->fullPath()) && is_file($this->fullPath());
+    }
+
+    /**
      * Returns the MIME content type of the file based on its extension.
      *
      * @see ContentType::getContentType()
      *
      * @return string The MIME content type.
      */
-    public function contentType(): string
+    private function contentType(): string
     {
         return ContentType::getContentType($this->fullPath());
     }
@@ -77,7 +103,7 @@ class File implements ResponseContent
      *
      * @return integer The content length in bytes.
      */
-    public function contentLength(): int
+    private function contentLength(): int
     {
         return strlen($this->content());
     }
