@@ -4,7 +4,7 @@ namespace Tent\Utils;
 
 use Tent\Models\FolderLocation;
 
-class FilePath
+class FileUtils
 {
     public static function getFullPath(string $path, FolderLocation $location): string
     {

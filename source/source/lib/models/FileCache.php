@@ -4,7 +4,7 @@ namespace Tent\Models;
 
 use Tent\Models\FolderLocation;
 use Tent\Models\ResponseContent;
-use Tent\Utils\FilePath;
+use Tent\Utils\FileUtils;
 
 class FileCache implements ResponseContent
 {
@@ -69,6 +69,6 @@ class FileCache implements ResponseContent
 
     protected function basePath(): string
     {
-        return FilePath::getFullPath($this->path, $this->location);
+        return FileUtils::getFullPath($this->path, $this->location);
     }
 }
