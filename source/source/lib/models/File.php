@@ -76,6 +76,11 @@ class File implements ResponseContent
         ];
     }
 
+    /**
+     * Checks if the file exists and is a regular file.
+     *
+     * @return bool True if the file exists and is a regular file, false otherwise.
+     */
     public function exists(): bool
     {
         return file_exists($this->fullPath()) && is_file($this->fullPath());
