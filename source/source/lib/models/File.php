@@ -81,4 +81,12 @@ class File implements ResponseContent
     {
         return strlen($this->content());
     }
+
+    public function headers(): array
+    {
+        return [
+            "Content-Type: " . $this->contentType(),
+            "Content-Length: " . $this->contentLength()
+        ];
+    }
 }

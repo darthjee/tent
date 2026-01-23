@@ -48,10 +48,7 @@ class FileReader
         return new Response(
             $this->file->content(),
             200,
-            [
-                "Content-Type: $contentType",
-                "Content-Length: $contentLength"
-            ]
+            $this->file->headers()
         );
     }
 
