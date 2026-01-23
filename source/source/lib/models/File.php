@@ -36,11 +36,6 @@ class File
         $this->location = $location;
     }
 
-    public function path(): string
-    {
-        return $this->path;
-    }
-
     /**
      * Returns the full path to the file, combining the base folder and file path.
      *
@@ -51,6 +46,11 @@ class File
         return $this->location->basePath() . $this->path;
     }
 
+    /**
+     * Returns the content of the file.
+     *
+     * @return string The file content.
+     */
     public function content(): string
     {
         if ($this->content == null) {
@@ -59,11 +59,23 @@ class File
         return $this->content;
     }
 
+    /**
+     * Returns the MIME content type of the file based on its extension.
+     *
+     * @see ContentType::getContentType()
+     *
+     * @return string The MIME content type.
+     */
     public function contentType(): string
     {
         return ContentType::getContentType($this->fullPath());
     }
 
+    /**
+     * Returns the length of the file content in bytes.
+     *
+     * @return int The content length in bytes.
+     */
     public function contentLength(): int
     {
         return strlen($this->content());
