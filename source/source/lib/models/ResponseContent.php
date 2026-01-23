@@ -2,6 +2,7 @@
 
 namespace Tent\Models;
 
-class ResponseContent
+interface ResponseContent
 {
+    public function content(): string;
 }

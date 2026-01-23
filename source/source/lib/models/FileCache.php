@@ -3,8 +3,9 @@
 namespace Tent\Models;
 
 use Tent\Models\FolderLocation;
+use Tent\Models\ResponseContent;
 
-class FileCache
+class FileCache implements ResponseContent
 {
     /**
      * @var string Relative or absolute file path.
@@ -26,6 +27,11 @@ class FileCache
     {
         $this->path = $path;
         $this->location = $location;
+    }
+
+    public function content(): string
+    {
+        return "";
     }
 
     public function fullPath(string $type): string
