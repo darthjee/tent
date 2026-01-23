@@ -60,6 +60,14 @@ class File implements ResponseContent
         return $this->content;
     }
 
+    /**
+     * Returns HTTP headers for the file, including Content-Type and Content-Length.
+     *
+     * @see contentType()
+     * @see contentLength()
+     *
+     * @return array Array of HTTP header strings.
+     */
     public function headers(): array
     {
         return [
