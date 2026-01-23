@@ -26,11 +26,6 @@ class StaticFileHandler extends RequestHandler
     private FolderLocation $folderLocation;
 
     /**
-     * @var string The file path determined from the request.
-     */
-    private string $filePath;
-
-    /**
      * @param FolderLocation $folderLocation The base directory for static files.
      */
     public function __construct(FolderLocation $folderLocation)
