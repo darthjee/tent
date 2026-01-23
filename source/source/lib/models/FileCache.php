@@ -32,7 +32,9 @@ class FileCache
     {
         switch ($type) {
             case 'body':
-                return $this->basePath() . '/cache.body';
+                return $this->basePath() . '/cache.body.txt';
+            case 'headers':
+                return $this->basePath() . '/cache.headers.json';
             default:
                 throw new \InvalidArgumentException("Invalid cache type: $type");
         }
