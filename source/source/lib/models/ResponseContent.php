@@ -21,7 +21,7 @@ interface ResponseContent
     /**
      * Checks if the content exists.
      *
-     * @return bool
+     * @return boolean
      */
     public function exists(): bool;
 }

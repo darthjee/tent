@@ -79,7 +79,7 @@ class File implements ResponseContent
     /**
      * Checks if the file exists and is a regular file.
      *
-     * @return bool True if the file exists and is a regular file, false otherwise.
+     * @return boolean True if the file exists and is a regular file, false otherwise.
      */
     public function exists(): bool
     {
