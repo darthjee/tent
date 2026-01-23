@@ -110,31 +110,6 @@ class Rule
     }
 
     /**
-     * Builds and adds multiple RequestMatchers to the rule.
-     *
-     * @param array $attributes Array of associative arrays, each with keys 'method', 'uri', 'type'.
-     * @return array all RequestMatchers.
-     */
-    protected function buildMatchers(array $attributes): array
-    {
-        foreach ($attributes as $attributes) {
-            $this->buildMatcher($attributes);
-        }
-        return $this->matchers;
-    }
-
-    /**
-     * Adds a RequestMatcher to the rule.
-     *
-     * @param array $matcherAttributes Associative array with keys 'method', 'uri', 'type'.
-     * @return RequestMatcher The added RequestMatcher.
-     */
-    protected function buildMatcher(array $matcherAttributes): RequestMatcher
-    {
-        return $this->matchers[] = RequestMatcher::build($matcherAttributes);
-    }
-
-    /**
      * Checks if the given request matches any of the rule's matchers.
      *
      * @param RequestInterface $request The incoming HTTP request.

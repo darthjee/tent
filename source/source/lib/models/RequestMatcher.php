@@ -46,6 +46,13 @@ class RequestMatcher
         );
     }
 
+    /**
+     * Builds several RequestMatchers.
+     *
+     * @param array $attributes Array of associative arrays, each with keys 'method', 'uri', 'type'.
+     * @see RequestMatcher::build
+     * @return array all RequestMatchers.
+     */
     public static function buildMatchers(array $attributes): array
     {
         $matchers = [];
