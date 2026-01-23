@@ -66,7 +66,7 @@ class StaticFileHandler extends RequestHandler
     {
         try {
             $this->validateFilePath($request->requestPath());
-            $filePath = $this->getFilePath($request);
+            $filePath = $this->filePath($request);
             $this->checkFileExistance($filePath);
 
             return $this->readAndReturnFile($filePath);
@@ -83,7 +83,7 @@ class StaticFileHandler extends RequestHandler
      * @param RequestInterface $request The incoming HTTP request.
      * @return string The full file path to the static asset.
      */
-    protected function getFilePath(RequestInterface $request): string
+    protected function filePath(RequestInterface $request): string
     {
         if (!$this->filePath) {
             $this->filePath = $this->folderLocation->basePath() . $request->requestPath();
