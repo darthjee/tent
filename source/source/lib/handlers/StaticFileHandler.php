@@ -20,7 +20,14 @@ use Tent\Service\FileReader;
  */
 class StaticFileHandler extends RequestHandler
 {
+    /**
+     * @var FolderLocation The base directory for static files.
+     */
     private FolderLocation $folderLocation;
+
+    /**
+     * @var string The file path determined from the request.
+     */
     private string $filePath;
 
     /**
