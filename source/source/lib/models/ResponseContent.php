@@ -23,5 +23,5 @@ interface ResponseContent
      *
      * @return bool
      */
-    public function exists(): bool
+    public function exists(): bool;
 }
