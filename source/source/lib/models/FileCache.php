@@ -58,6 +58,6 @@ class FileCache implements ResponseContent
 
     public function basePath(): string
     {
-        return $this->location->basePath() . $this->path;
+        return FilePath::getFullPath($this->path, $this->location);
     }
 }
