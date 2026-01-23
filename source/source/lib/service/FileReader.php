@@ -20,7 +20,7 @@ class FileReader
         $this->file = new File($path, $location);
     }
 
-    public function readFileToResponse(): Response
+    public function getResponse(): Response
     {
         $this->validate();
         
