@@ -26,9 +26,10 @@ class FileCacheStoreTest extends TestCase
 
     public function testStoreBodyAndHeaders()
     {
-        $cache = new FileCache('', $this->location);
-        $bodyPath = $this->cacheDir . '/cache.body.txt';
-        $headersPath = $this->cacheDir . '/cache.headers.json';
+        $path = '/file.txt';
+        $cache = new FileCache($path, $this->location);
+        $bodyPath = $this->cacheDir . $path . '.body.txt';
+        $headersPath = $this->cacheDir . $path . '.headers.json';
 
         // Simulate storing
         file_put_contents($bodyPath, 'cached body');
@@ -41,7 +42,8 @@ class FileCacheStoreTest extends TestCase
 
     public function testStoreMissingFiles()
     {
-        $cache = new FileCache('', $this->location);
+        $path = '/file.txt';
+        $cache = new FileCache($path, $this->location);
         $this->assertFalse($cache->exists());
     }
 }
