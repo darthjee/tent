@@ -36,7 +36,7 @@ Configuration is done via PHP files placed in `/var/www/html/configuration/`. Ea
 - `rules/frontend.php`: Rules for frontend/static/proxy handling.
 - `rules/backend.php`: Rules for backend proxying.
 
-**Example: Minimal configure.php**
+### Example: Minimal configure.php
 
 ```php
 <?php
@@ -44,7 +44,7 @@ require_once __DIR__ . '/rules/frontend.php';
 require_once __DIR__ . '/rules/backend.php';
 ```
 
-**Example: Proxy rule (backend.php)**
+#### Example: Proxy rule (backend.php)
 
 ```php
 <?php
@@ -60,7 +60,7 @@ Configuration::buildRule([
 ]);
 ```
 
-**Example: Frontend rule (frontend.php)**
+#### Example: Frontend rule (frontend.php)
 
 ```php
 <?php
