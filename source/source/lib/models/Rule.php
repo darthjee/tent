@@ -87,9 +87,12 @@ class Rule
         $handler = RequestHandler::build($params['handler'] ?? []);
         $name = $params['name'] ?? null;
 
-        $rule = new self($handler, [], $name);
+        $rule = new self(
+            $handler,
+            RequestMatcher::buildMatchers($params['matchers'] ?? []),
+            $name
+        );
 
-        $rule->buildMatchers($params['matchers'] ?? []);
         $rule->buildMiddlewares($params['middlewares'] ?? []);
 
         return $rule;
@@ -104,31 +107,6 @@ class Rule
     protected function buildMiddlewares(array $attributes): array
     {
         return $this->handler()->buildMiddlewares($attributes);
-    }
-
-    /**
-     * Builds and adds multiple RequestMatchers to the rule.
-     *
-     * @param array $attributes Array of associative arrays, each with keys 'method', 'uri', 'type'.
-     * @return array all RequestMatchers.
-     */
-    protected function buildMatchers(array $attributes): array
-    {
-        foreach ($attributes as $attributes) {
-            $this->buildMatcher($attributes);
-        }
-        return $this->matchers;
-    }
-
-    /**
-     * Adds a RequestMatcher to the rule.
-     *
-     * @param array $matcherAttributes Associative array with keys 'method', 'uri', 'type'.
-     * @return RequestMatcher The added RequestMatcher.
-     */
-    protected function buildMatcher(array $matcherAttributes): RequestMatcher
-    {
-        return $this->matchers[] = RequestMatcher::build($matcherAttributes);
     }
 
     /**

@@ -15,7 +15,8 @@
         "phpunit/phpunit": "^9.0",
         "squizlabs/php_codesniffer": "^4.0.1",
         "phpdocumentor/phpdocumentor": "^3.9",
-        "slevomat/coding-standard": "^8.26"
+        "slevomat/coding-standard": "^8.26",
+        "phpmd/phpmd": "^2.15"
     },
     "scripts": {
         "tests": "vendor/bin/phpunit --coverage-html coverage/ tests",
@@ -23,7 +24,8 @@
         "tests:integration": "vendor/bin/phpunit --coverage-html coverage/ tests/integration",
         "lint": "phpcs --standard=phpcs.xml",
         "lint:fix": "phpcbf --standard=phpcs.xml",
-        "docs": "vendor/bin/phpdoc -d source"
+        "docs": "vendor/bin/phpdoc -d source",
+        "complexity": "vendor/bin/phpmd source html phpmd.xml > complexity.html"
     },
     "config": {
         "allow-plugins": {

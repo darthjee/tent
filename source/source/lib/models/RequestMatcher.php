@@ -47,6 +47,22 @@ class RequestMatcher
     }
 
     /**
+     * Builds several RequestMatchers.
+     *
+     * @param array $attributes Array of associative arrays, each with keys 'method', 'uri', 'type'.
+     * @see RequestMatcher::build
+     * @return array all RequestMatchers.
+     */
+    public static function buildMatchers(array $attributes): array
+    {
+        $matchers = [];
+        foreach ($attributes as $attributes) {
+            $matchers[] = self::build($attributes);
+        }
+        return $matchers;
+    }
+
+    /**
      * Checks if the given Request matches this matcher.
      *
      * @param RequestInterface $request The incoming HTTP request.
