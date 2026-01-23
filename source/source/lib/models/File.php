@@ -39,16 +39,6 @@ class File implements ResponseContent
     }
 
     /**
-     * Returns the full path to the file, combining the base folder and file path.
-     *
-     * @return string The full file path.
-     */
-    public function fullPath(): string
-    {
-        return FilePath::getFullPath($this->path, $this->location);
-    }
-
-    /**
      * Returns the content of the file.
      *
      * @return string The file content.
@@ -85,6 +75,16 @@ class File implements ResponseContent
     public function exists(): bool
     {
         return file_exists($this->fullPath()) && is_file($this->fullPath());
+    }
+
+    /**
+     * Returns the full path to the file, combining the base folder and file path.
+     *
+     * @return string The full file path.
+     */
+    private function fullPath(): string
+    {
+        return FilePath::getFullPath($this->path, $this->location);
     }
 
     /**

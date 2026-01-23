@@ -26,27 +26,6 @@ class FileTest extends TestCase
         @unlink($this->basePath . 'test.html');
     }
 
-    public function testFullPathConcatenatesBasePathAndFilePath()
-    {
-        $location = new FolderLocation('/var/www/');
-        $file = new File('index.html', $location);
-        $this->assertEquals('/var/www/index.html', $file->fullPath());
-    }
-
-    public function testFullPathWithTrailingSlashInBasePath()
-    {
-        $location = new FolderLocation('/var/www/');
-        $file = new File('assets/style.css', $location);
-        $this->assertEquals('/var/www/assets/style.css', $file->fullPath());
-    }
-
-    public function testFullPathWithNoTrailingSlashInBasePath()
-    {
-        $location = new FolderLocation('/var/www');
-        $file = new File('/assets/app.js', $location);
-        $this->assertEquals('/var/www/assets/app.js', $file->fullPath());
-    }
-
     public function testContentReturnsFileContent()
     {
         $location = new \Tent\Models\FolderLocation($this->basePath);
