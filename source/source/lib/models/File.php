@@ -76,6 +76,11 @@ class File implements ResponseContent
         ];
     }
 
+    public function exists(): bool
+    {
+        return file_exists($this->fullPath()) && is_file($this->fullPath());
+    }
+
     /**
      * Returns the MIME content type of the file based on its extension.
      *

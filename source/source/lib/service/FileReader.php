@@ -85,9 +85,8 @@ class FileReader
      */
     protected function checkFileExistance(): void
     {
-        $filePath = $this->file->fullPath();
-        if (!file_exists($filePath) || !is_file($filePath)) {
-            throw new FileNotFoundException("File not found: $filePath");
+        if (!$this->file->exists()) {
+            throw new FileNotFoundException("File not found: " . $this->path);
         }
     }
 }
