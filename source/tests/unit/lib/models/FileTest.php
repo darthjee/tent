@@ -64,4 +64,18 @@ class FileTest extends TestCase
         $this->assertStringContainsString('Content-Type:', $headers[0]);
         $this->assertStringContainsString('Content-Length:', $headers[1]);
     }
+    
+    public function testExistsReturnsTrueForExistingFile()
+    {
+        $location = new \Tent\Models\FolderLocation($this->basePath);
+        $file = new \Tent\Models\File('test.txt', $location);
+        $this->assertTrue($file->exists());
+    }
+
+    public function testExistsReturnsFalseForNonexistentFile()
+    {
+        $location = new \Tent\Models\FolderLocation($this->basePath);
+        $file = new \Tent\Models\File('notfound.txt', $location);
+        $this->assertFalse($file->exists());
+    }
 }
