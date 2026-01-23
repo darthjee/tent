@@ -47,6 +47,7 @@ Tent is in active development. Currently implemented:
 Currently, 404 (Not Found) and 403 (Forbidden) responses return a simple default body. In the future, Tent will support custom bodies or templates for these responses, allowing more complex or branded error pages.
 
 ## Architecture
+
 ```
 Client Request
       ↓
