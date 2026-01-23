@@ -4,7 +4,7 @@ namespace Tent\Models;
 
 use Tent\Models\FolderLocation;
 
-class Cache
+class FileCache
 {
     /**
      * @var string Relative or absolute file path.
