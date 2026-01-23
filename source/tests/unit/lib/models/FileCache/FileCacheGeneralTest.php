@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Tent\Models\FileCache;
 use Tent\Models\FolderLocation;
 
-class FileCacheTest extends TestCase
+class FileCacheGeneralTest extends TestCase
 {
     private $basePath;
     private $path;
