@@ -11,30 +11,36 @@ use Tent\Exceptions\InvalidFilePathException;
 
 class FileReader
 {
-    private $file;
+    private File $file;
+    private string $path;
 
     public function __construct(string $path, FolderLocation $location)
     {
+        $this->path = $path;
         $this->file = new File($path, $location);
     }
 
     public function readFileToResponse(): Response
     {
-        $this->validateFilePath();
-        $this->checkFileExistance();
+        $this->validate();
         
-        $content = $this->file->content();
         $contentType = $this->file->contentType();
         $contentLength = $this->file->contentLength();
 
         return new Response(
-            $content,
+            $this->file->content(),
             200,
             [
                 "Content-Type: $contentType",
                 "Content-Length: $contentLength"
             ]
         );
+    }
+
+    protected function validate(): void
+    {
+        $this->validateFilePath();
+        $this->checkFileExistance();
     }
 
     /**
@@ -46,10 +52,9 @@ class FileReader
      */
     protected function validateFilePath(): void
     {
-        $path = $this->file->path();
-        $validator = new RequestPathValidator($path);
+        $validator = new RequestPathValidator($this->path);
         if (!$validator->isValid()) {
-            throw new InvalidFilePathException("Invalid file path: $path");
+            throw new InvalidFilePathException("Invalid file path: $this->path");
         }
     }
 
