@@ -8,6 +8,8 @@ class FilePath
 {
     public static function getFullPath(string $path, FolderLocation $location): string
     {
-        return $location->basePath() . $path;
+        $base = rtrim($location->basePath(), '/');
+        $file = ltrim($path, '/');
+        return $base . '/' . $file;
     }
 }
