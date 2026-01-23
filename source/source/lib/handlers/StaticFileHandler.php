@@ -67,11 +67,10 @@ class StaticFileHandler extends RequestHandler
     protected function processsRequest(RequestInterface $request): Response
     {
         try {
-            $this->validateFilePath($request->requestPath());
-            $filePath = $this->filePath($request);
-            $this->checkFileExistance($filePath);
+            $file = new File($request->requestPath(), $this->folderLocation);
+            $fileReader = new FileReader($file);
 
-            return $this->readAndReturnFile($filePath, $request);
+            return $fileReader->readFileToResponse();
         } catch (InvalidFilePathException $e) {
             return new ForbiddenResponse();
         } catch (FileNotFoundException $e) {
@@ -122,17 +121,5 @@ class StaticFileHandler extends RequestHandler
         if (!file_exists($filePath) || !is_file($filePath)) {
             throw new FileNotFoundException("File not found: $filePath");
         }
-    }
-
-    /**
-     * Reads the file and returns a Response with its contents and headers.
-     *
-     * @param string $filePath File path to be read.
-     * @return Response The HTTP response containing the file contents.
-     */
-    protected function readAndReturnFile(string $filePath, RequestInterface $request): Response
-    {
-        $file = new File($request->requestPath(), $this->folderLocation);
-        return new FileReader($file)->readFileToResponse();
     }
 }

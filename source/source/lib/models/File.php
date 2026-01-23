@@ -36,6 +36,11 @@ class File
         $this->location = $location;
     }
 
+    public function path(): string
+    {
+        return $this->path;
+    }
+
     /**
      * Returns the full path to the file, combining the base folder and file path.
      *
