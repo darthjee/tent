@@ -12,4 +12,9 @@ class FileUtils
         $file = ltrim($path, '/');
         return $base . '/' . $file;
     }
+
+    public static function exists(string $path): bool
+    {
+        return file_exists($path) && is_file($path);
+    }
 }
