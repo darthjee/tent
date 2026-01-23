@@ -46,4 +46,27 @@ class FileCacheTest extends TestCase
         $cache = new FileCache($this->path, $location);
         $this->assertEquals($this->headers, $cache->headers());
     }
+    
+    public function testExistsReturnsTrueWhenBothFilesExist()
+    {
+        $location = new FolderLocation($this->basePath);
+        $cache = new FileCache($this->path, $location);
+        $this->assertTrue($cache->exists());
+    }
+
+    public function testExistsReturnsFalseWhenBodyFileIsMissing()
+    {
+        @unlink($this->fullPath . '/cache.body.txt');
+        $location = new FolderLocation($this->basePath);
+        $cache = new FileCache($this->path, $location);
+        $this->assertFalse($cache->exists());
+    }
+
+    public function testExistsReturnsFalseWhenHeadersFileIsMissing()
+    {
+        @unlink($this->fullPath . '/cache.headers.json');
+        $location = new FolderLocation($this->basePath);
+        $cache = new FileCache($this->path, $location);
+        $this->assertFalse($cache->exists());
+    }
 }

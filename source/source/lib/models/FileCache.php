@@ -49,7 +49,10 @@ class FileCache implements ResponseContent
 
     public function exists(): bool
     {
-        return false;
+        $bodyExists = file_exists($this->fullPath('body')) && is_file($this->fullPath('body'));
+        $headersExists = file_exists($this->fullPath('headers')) && is_file($this->fullPath('headers'));
+        
+        return $bodyExists && $headersExists;
     }
 
     protected function fullPath(string $type): string
