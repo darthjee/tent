@@ -72,6 +72,12 @@ class FileCache implements ResponseContent
         return FileUtils::exists($bodyPath) && FileUtils::exists($headersPath);
     }
 
+    /**
+     * Returns the full path for the specified cache type.
+     *
+     * @param string $type The cache type ('body' or 'headers').
+     * @return string The full path to the cache file.
+     */
     protected function fullPath(string $type): string
     {
         switch ($type) {
@@ -84,6 +90,11 @@ class FileCache implements ResponseContent
         }
     }
 
+    /**
+     * Returns the base path for the cache files.
+     *
+     * @return string The base path.
+     */
     protected function basePath(): string
     {
         return FileUtils::getFullPath($this->path, $this->location);
