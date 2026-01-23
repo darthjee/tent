@@ -1,9 +1,8 @@
 <?php
 
-
 namespace Tent\Models;
-use Tent\Models\FolderLocation;
 
+use Tent\Models\FolderLocation;
 
 /**
  * Represents a file within a folder location.
@@ -25,7 +24,7 @@ class File
     /**
      * Constructs a File object.
      *
-     * @param string $path Relative or absolute file path.
+     * @param string         $path     Relative or absolute file path.
      * @param FolderLocation $location The base folder location.
      */
     public function __construct(string $path, FolderLocation $location)
