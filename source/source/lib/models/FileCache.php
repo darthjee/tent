@@ -7,7 +7,7 @@ use Tent\Models\ResponseContent;
 use Tent\Utils\FileUtils;
 use InvalidArgumentException;
 
-class FileCache implements ResponseContent
+class FileCache implements Cache
 {
     /**
      * @var string Relative or absolute file path.

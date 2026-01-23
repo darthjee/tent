@@ -4,7 +4,6 @@ namespace Tent\Service;
 
 use Tent\Models\Response;
 use Tent\Models\FileCache;
-use Response;
 
 class CacheWritter
 {
