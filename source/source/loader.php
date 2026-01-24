@@ -29,7 +29,7 @@ require_once __DIR__ . '/lib/models/Request.php';
 require_once __DIR__ . '/lib/models/RequestMatcher.php';
 require_once __DIR__ . '/lib/models/Rule.php';
 require_once __DIR__ . '/lib/models/Server.php';
-require_once __DIR__ . '/lib/service/CacheWritter.php';
+require_once __DIR__ . '/lib/service/CacheWriter.php';
 require_once __DIR__ . '/lib/service/FileReader.php';
 require_once __DIR__ . '/lib/service/RequestProcessor.php';
 require_once __DIR__ . '/lib/utils/CurlUtils.php';

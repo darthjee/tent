@@ -5,7 +5,7 @@ namespace Tent\Service;
 use Tent\Models\Response;
 use Tent\Models\FileCache;
 
-class CacheWritter
+class CacheWriter
 {
     private Response $response;
     private FileCache $cache;
