@@ -29,10 +29,10 @@ class FileCacheMiddleware extends Middleware
     public function processResponse(Response $response): Response
     {
         if ($response) {
-            $path = $request->path();
+            $path = $response->request()->requestPath();
             $cache = new FileCache($path, $this->location);
             $cache->store($response);
         }
-        return $request;
+        return $response;
     }
 }

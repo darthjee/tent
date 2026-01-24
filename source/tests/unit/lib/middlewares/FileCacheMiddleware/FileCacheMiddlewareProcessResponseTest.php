@@ -32,8 +32,7 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
         $path = '/file.txt';
         $headers = ['Content-Type: text/plain', 'Content-Length: 11'];
         $response = new Response('cached body', 200, $headers);
-        $request = $this->createMock(ProcessingRequest::class);
-        $request->method('path')->willReturn($path);
+        $request = new ProcessingRequest(['requestPath' => $path]);
 
         $middleware = new FileCacheMiddleware($this->location);
         $middleware->processResponse($response);
