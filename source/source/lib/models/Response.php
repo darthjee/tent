@@ -44,13 +44,6 @@ class Response
      *   - httpCode: int (HTTP status code)
      *   - headers: array (list of HTTP header lines)
      *   - request: RequestInterface (the original request associated with this response).
-     *
-     * @phpstan-param array{
-     *   body?: string,
-     *   httpCode?: int,
-     *   headers?: array,
-     *   request?: mixed
-     * } $data
      */
     public function __construct(array $data)
     {
