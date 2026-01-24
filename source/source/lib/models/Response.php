@@ -6,6 +6,13 @@ namespace Tent\Models;
  * Represents an HTTP response returned by a RequestHandler or the application.
  *
  * Contains the response body, HTTP status code, and header lines.
+ *
+ * Usage:
+ *   $response = new Response([
+ *     'body' => 'some body',
+ *     'httpCode' => 200,
+ *     'headerLines' => ['Content-Type: text/html']
+ *   ]);
  */
 class Response
 {
@@ -25,24 +32,27 @@ class Response
     private array $headerLines;
 
     /**
-     * @var RequestInterface|null The associated Request object, if any.
+     * @var mixed|null The original request associated with this response (optional).
      */
-    private ?RequestInterface $request;
+    private $request;
 
     /**
      * Constructs a Response object.
      *
-     * @param string                $body        The response body content.
-     * @param integer               $httpCode    The HTTP status code.
-     * @param array                 $headerLines List of HTTP header lines.
-     * @param RequestInterface|null $request     The associated Request object, if any.
+     * @param array $data Associative array with keys: 'body', 'httpCode', 'headerLines', 'request'.
+     *                    Example: [
+     *                      'body' => 'some body',
+     *                      'httpCode' => 200,
+     *                      'headerLines' => ['Content-Type: text/html'],
+     *                      'request' => $request
+     *                    ]
      */
-    public function __construct(string $body, int $httpCode, array $headerLines, ?RequestInterface $request = null)
+    public function __construct(array $data)
     {
-        $this->body = $body;
-        $this->httpCode = $httpCode;
-        $this->headerLines = $headerLines;
-        $this->request = $request;
+        $this->body = $data['body'] ?? '';
+        $this->httpCode = $data['httpCode'] ?? 200;
+        $this->headerLines = $data['headerLines'] ?? [];
+        $this->request = $data['request'] ?? null;
     }
 
     /**
@@ -76,6 +86,16 @@ class Response
     }
 
     /**
+     * Returns the original request associated with this response, if any.
+     *
+     * @return mixed|null
+     */
+    public function request()
+    {
+        return $this->request;
+    }
+
+    /**
      * Sets the response body content.
      *
      * @param string $body The new resposne body content.
@@ -106,15 +126,5 @@ class Response
     public function setHeaderLines(array $headerLines): array
     {
         return $this->headerLines = $headerLines;
-    }
-
-    /**
-     * Returns the associated Request object, if any.
-     *
-     * @return RequestInterface|null
-     */
-    public function request(): ?RequestInterface
-    {
-        return $this->request;
     }
 }
