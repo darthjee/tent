@@ -4,6 +4,8 @@ namespace Tent\Middlewares;
 
 use Tent\Models\ProcessingRequest;
 use Tent\Models\FolderLocation;
+use Tent\Models\FileCache;
+use Tent\Models\Response;
 
 class FileCacheMiddleware extends Middleware
 {
@@ -24,8 +26,13 @@ class FileCacheMiddleware extends Middleware
         return $request;
     }
 
-    public function processResponse(ProcessingRequest $response): ProcessingRequest
+    public function processResponse(Response $response): ProcessingRequest
     {
-        return $response;
+        if ($response) {
+            $path = $request->path();
+            $cache = new FileCache($path, $this->location);
+            $cache->store($response);
+        }
+        return $request;
     }
 }
