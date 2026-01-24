@@ -6,8 +6,9 @@ use Tent\Models\FolderLocation;
 use Tent\Models\ResponseContent;
 use Tent\Utils\FileUtils;
 use InvalidArgumentException;
+use Tent\Models\Response;
 
-class FileCache implements ResponseContent
+class FileCache implements Cache
 {
     /**
      * @var string Relative or absolute file path.
@@ -71,6 +72,19 @@ class FileCache implements ResponseContent
         $headersPath = $this->fullPath('headers');
 
         return FileUtils::exists($bodyPath) && FileUtils::exists($headersPath);
+    }
+
+    /**
+     * Stores the response body and headers into cache files.
+     *
+     * @param Response $response The response to cache.
+     * @return void
+     */
+    public function store(Response $response): void
+    {
+        mkdir($this->basePath(), 0777, true);
+        file_put_contents($this->fullPath('body'), $response->body());
+        file_put_contents($this->fullPath('headers'), json_encode($response->headerLines()));
     }
 
     /**

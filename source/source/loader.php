@@ -19,6 +19,7 @@ require_once __DIR__ . '/lib/middlewares/SetHeadersMiddleware.php';
 require_once __DIR__ . '/lib/middlewares/SetPathMiddleware.php';
 require_once __DIR__ . '/lib/models/FolderLocation.php';
 require_once __DIR__ . '/lib/models/ResponseContent.php';
+require_once __DIR__ . '/lib/models/Cache.php';
 require_once __DIR__ . '/lib/models/File.php';
 require_once __DIR__ . '/lib/models/FileCache.php';
 require_once __DIR__ . '/lib/models/ForbiddenResponse.php';
