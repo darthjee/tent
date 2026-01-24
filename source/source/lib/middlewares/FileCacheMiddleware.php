@@ -32,7 +32,8 @@ class FileCacheMiddleware extends Middleware
      */
     public static function build(array $attributes): FileCacheMiddleware
     {
-        return new self($attributes['location'] ?? null);
+        $location = new FolderLocation($attributes['location'] ?? null);
+        return new self($location);
     }
 
     /**

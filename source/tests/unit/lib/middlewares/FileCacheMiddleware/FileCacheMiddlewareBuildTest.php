@@ -10,8 +10,7 @@ class FileCacheMiddlewareBuildTest extends TestCase
 {
     public function testBuildWithLocationAttribute()
     {
-        $location = new FolderLocation('/tmp/cache');
-        $middleware = FileCacheMiddleware::build(['location' => $location]);
+        $middleware = FileCacheMiddleware::build(['location' => '/tmp/cache']);
 
         $this->assertInstanceOf(FileCacheMiddleware::class, $middleware);
     }
