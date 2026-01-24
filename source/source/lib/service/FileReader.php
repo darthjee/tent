@@ -33,8 +33,8 @@ class FileReader
     /**
      * Constructs a FileReader for the given file path and folder location.
      *
-     * @param RequestInterface $request The HTTP request containing the file path.
-     * @param FolderLocation $location The base folder location.
+     * @param RequestInterface $request  The HTTP request containing the file path.
+     * @param FolderLocation   $location The base folder location.
      */
     public function __construct(RequestInterface $request, FolderLocation $location)
     {

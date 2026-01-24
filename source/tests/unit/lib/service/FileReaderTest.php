@@ -68,7 +68,7 @@ class FileReaderTest extends TestCase
         $location = new FolderLocation($this->testDir);
         $request = new Request(['requestPath' => '../etc/passwd']);
         $reader = new FileReader($request, $location);
-        
+
         $this->expectException(InvalidFilePathException::class);
         $reader->getResponse();
     }

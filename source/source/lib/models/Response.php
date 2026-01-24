@@ -24,16 +24,20 @@ class Response
      */
     private array $headerLines;
 
-    private ?Request $request;
+    /**
+     * @var RequestInterface|null The associated Request object, if any.
+     */
+    private ?RequestInterface $request;
 
     /**
      * Constructs a Response object.
      *
-     * @param string  $body        The response body content.
-     * @param integer $httpCode    The HTTP status code.
-     * @param array   $headerLines List of HTTP header lines.
+     * @param string                $body        The response body content.
+     * @param integer               $httpCode    The HTTP status code.
+     * @param array                 $headerLines List of HTTP header lines.
+     * @param RequestInterface|null $request     The associated Request object, if any.
      */
-    public function __construct(string $body, int $httpCode, array $headerLines, Request $request = null)
+    public function __construct(string $body, int $httpCode, array $headerLines, ?RequestInterface $request = null)
     {
         $this->body = $body;
         $this->httpCode = $httpCode;
@@ -104,7 +108,12 @@ class Response
         return $this->headerLines = $headerLines;
     }
 
-    public function request(): ?Request
+    /**
+     * Returns the associated Request object, if any.
+     *
+     * @return RequestInterface|null
+     */
+    public function request(): ?RequestInterface
     {
         return $this->request;
     }
