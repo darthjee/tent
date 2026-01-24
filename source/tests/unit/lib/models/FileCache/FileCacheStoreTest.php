@@ -22,14 +22,15 @@ class FileCacheStoreTest extends TestCase
 
     protected function tearDown(): void
     {
-        array_map('unlink', glob($this->cacheDir . '/*/*'));
+        array_map('unlink', glob($this->cacheDir . '/*/*/*'));
+        array_map('rmdir', glob($this->cacheDir . '/*/*'));
         array_map('rmdir', glob($this->cacheDir . '/*'));
         rmdir($this->cacheDir);
     }
 
     public function testStoreBodyAndHeaders()
     {
-        $path = '/file.txt';
+        $path = '/path/file.txt';
         $headers = ['Content-Type: text/plain', 'Content-Length: 11'];
         $request = new Request([]);
         $response = new Response([
@@ -47,7 +48,7 @@ class FileCacheStoreTest extends TestCase
 
     public function testStoreCreatesDirectories()
     {
-        $path = '/nested/dir/file.txt';
+        $path = '/nested_dir/file.txt';
         $request = new Request([]);
         $response = new Response([
             'body' => 'nested body', 'httpCode' => 200, 'headers' => [], 'request' => $request
@@ -57,7 +58,7 @@ class FileCacheStoreTest extends TestCase
 
         $cache->store($response);
 
-        $fullPath = $this->cacheDir . '/nested/dir/file.txt';
+        $fullPath = $this->cacheDir . '/nested_dir/file.txt';
         $this->assertTrue(is_dir($fullPath));
     }
 }
