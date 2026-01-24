@@ -39,20 +39,25 @@ class Response
     /**
      * Constructs a Response object.
      *
-     * @param array $data Associative array with keys: 'body', 'httpCode', 'headerLines', 'request'.
-     *                    Example: [
-     *                      'body' => 'some body',
-     *                      'httpCode' => 200,
-     *                      'headerLines' => ['Content-Type: text/html'],
-     *                      'request' => $request
-     *                    ]
+     * @param array $data Associative array with possible keys:
+     *   - body: string (response body content)
+     *   - httpCode: int (HTTP status code)
+     *   - headers: array (list of HTTP header lines)
+     *   - request: RequestInterface (the original request associated with this response).
+     *
+     * @phpstan-param array{
+     *   body?: string,
+     *   httpCode?: int,
+     *   headers?: array,
+     *   request?: mixed
+     * } $data
      */
     public function __construct(array $data)
     {
         $this->body = $data['body'] ?? '';
         $this->httpCode = $data['httpCode'] ?? 200;
         $this->headerLines = $data['headers'] ?? [];
-        $this->request = $data['request'];
+        $this->request = $data['request'] ?? null;
     }
 
     /**

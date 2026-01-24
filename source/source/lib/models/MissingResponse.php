@@ -15,6 +15,8 @@ class MissingResponse extends Response
 {
     /**
      * Constructs a MissingResponse with a 404 status and default body.
+     *
+     * @param RequestInterface $request The original request associated with this response.
      */
     public function __construct(RequestInterface $request)
     {

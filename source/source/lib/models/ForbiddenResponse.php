@@ -16,6 +16,8 @@ class ForbiddenResponse extends Response
 {
     /**
      * Constructs a ForbiddenResponse with a 403 status and default body.
+     *
+     * @param RequestInterface $request The original request associated with this response.
      */
     public function __construct(RequestInterface $request)
     {
