@@ -24,6 +24,8 @@ class Response
      */
     private array $headerLines;
 
+    private ?Request $request;
+
     /**
      * Constructs a Response object.
      *
@@ -31,11 +33,12 @@ class Response
      * @param integer $httpCode    The HTTP status code.
      * @param array   $headerLines List of HTTP header lines.
      */
-    public function __construct(string $body, int $httpCode, array $headerLines)
+    public function __construct(string $body, int $httpCode, array $headerLines, Request $request = null)
     {
         $this->body = $body;
         $this->httpCode = $httpCode;
         $this->headerLines = $headerLines;
+        $this->request = $request;
     }
 
     /**
