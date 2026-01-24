@@ -74,6 +74,12 @@ class FileCache implements Cache
         return FileUtils::exists($bodyPath) && FileUtils::exists($headersPath);
     }
 
+    /**
+     * Stores the response body and headers into cache files.
+     *
+     * @param Response $response The response to cache.
+     * @return void
+     */
     public function store(Response $response): void
     {
         mkdir($this->basePath(), 0777, true);
