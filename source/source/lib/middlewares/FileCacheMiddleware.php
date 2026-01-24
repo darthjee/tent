@@ -3,13 +3,13 @@
 namespace Tent\Middlewares;
 
 use Tent\Models\ProcessingRequest;
-use Tent\Models\Location;
+use Tent\Models\FolderLocation;
 
 class FileCacheMiddleware extends Middleware
 {
-    private Location $location;
+    private FolderLocation $location;
 
-    public function __construct(Location $location)
+    public function __construct(FolderLocation $location)
     {
         $this->location = $location;
     }
