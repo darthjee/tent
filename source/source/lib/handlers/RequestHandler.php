@@ -150,10 +150,10 @@ abstract class RequestHandler
     {
         $modifiedRequest = $request;
         foreach ($this->middlewares as $middleware) {
+            $modifiedRequest = $middleware->processRequest($modifiedRequest);
             if ($modifiedRequest->hasResponse()) {
                 return $modifiedRequest;
             }
-            $modifiedRequest = $middleware->processRequest($modifiedRequest);
         }
         return $modifiedRequest;
     }
