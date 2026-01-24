@@ -44,4 +44,20 @@ class FileCacheStoreTest extends TestCase
         $this->assertEquals('cached body', $cache->content());
         $this->assertEquals(['Content-Type: text/plain', 'Content-Length: 11'], $cache->headers());
     }
+
+    public function testStoreCreatesDirectories()
+    {
+        $path = '/nested/dir/file.txt';
+        $request = new Request([]);
+        $response = new Response([
+            'body' => 'nested body', 'httpCode' => 200, 'headers' => [], 'request' => $request
+        ]);
+
+        $cache = new FileCache($path, $this->location);
+
+        $cache->store($response);
+
+        $fullPath = $this->cacheDir . '/nested/dir/file.txt';
+        $this->assertTrue(is_dir($fullPath));
+    }
 }
