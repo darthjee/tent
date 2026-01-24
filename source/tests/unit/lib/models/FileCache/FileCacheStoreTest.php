@@ -31,10 +31,10 @@ class FileCacheStoreTest extends TestCase
         $path = '/file.txt';
         $bodyPath = $this->cacheDir . $path . '/body.txt';
         $headersPath = $this->cacheDir . $path . '/headers.json';
-        
+
         $headers = ['Content-Type: text/plain', 'Content-Length: 11'];
         $response = new Response('cached body', 200, $headers);
-    
+
         $cache = new FileCache($path, $this->location);
 
         $cache->store($response);
