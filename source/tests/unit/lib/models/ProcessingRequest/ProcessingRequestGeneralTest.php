@@ -5,6 +5,7 @@ namespace Tent\Tests;
 use PHPUnit\Framework\TestCase;
 use Tent\Models\ProcessingRequest;
 use Tent\Models\Request;
+use Tent\Models\Response;
 
 class ProcessingRequestGeneralTest extends TestCase
 {
@@ -122,7 +123,11 @@ class ProcessingRequestGeneralTest extends TestCase
         $processingRequest = new ProcessingRequest([]);
         $this->assertFalse($processingRequest->hasResponse(), 'Should be false when no response is set');
 
-        $response = new \Tent\Models\Response('body', 200, ['Content-Type: text/plain']);
+        $request = new Request([]);
+        $response = new Response([
+            'body' => 'body', 'httpCode' => 200, 'headers' => ['Content-Type: text/plain'],
+            'request' => $request
+        ]);
         $processingRequest->setResponse($response);
         $this->assertTrue($processingRequest->hasResponse(), 'Should be true when a response is set');
     }

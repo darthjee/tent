@@ -5,33 +5,38 @@ namespace Tent\Tests;
 use PHPUnit\Framework\TestCase;
 use Tent\Models\MissingResponse;
 use Tent\Models\Response;
+use Tent\Models\Request;
 
 class MissingResponseTest extends TestCase
 {
     public function testCreatesResponseWith404StatusCode()
     {
-        $response = new MissingResponse();
+        $request = new Request([]);
+        $response = new MissingResponse($request);
 
         $this->assertEquals(404, $response->httpCode());
     }
 
     public function testCreatesResponseWithNotFoundBody()
     {
-        $response = new MissingResponse();
+        $request = new Request([]);
+        $response = new MissingResponse($request);
 
         $this->assertEquals("Not Found", $response->body());
     }
 
     public function testCreatesResponseWithTextPlainContentType()
     {
-        $response = new MissingResponse();
+        $request = new Request([]);
+        $response = new MissingResponse($request);
 
         $this->assertEquals(['Content-Type: text/plain'], $response->headerLines());
     }
 
     public function testExtendsResponse()
     {
-        $response = new MissingResponse();
+        $request = new Request([]);
+        $response = new MissingResponse($request);
 
         $this->assertInstanceOf(Response::class, $response);
     }

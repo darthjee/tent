@@ -6,6 +6,13 @@ namespace Tent\Models;
  * Represents an HTTP response returned by a RequestHandler or the application.
  *
  * Contains the response body, HTTP status code, and header lines.
+ *
+ * Usage:
+ *   $response = new Response([
+ *     'body' => 'some body',
+ *     'httpCode' => 200,
+ *     'headerLines' => ['Content-Type: text/html']
+ *   ]);
  */
 class Response
 {
@@ -25,17 +32,25 @@ class Response
     private array $headerLines;
 
     /**
+     * @var RequestInterface The original request associated with this response (optional).
+     */
+    private RequestInterface $request;
+
+    /**
      * Constructs a Response object.
      *
-     * @param string  $body        The response body content.
-     * @param integer $httpCode    The HTTP status code.
-     * @param array   $headerLines List of HTTP header lines.
+     * @param array $data Associative array with possible keys:
+     *   - body: string (response body content)
+     *   - httpCode: int (HTTP status code)
+     *   - headers: array (list of HTTP header lines)
+     *   - request: RequestInterface (the original request associated with this response).
      */
-    public function __construct(string $body, int $httpCode, array $headerLines)
+    public function __construct(array $data)
     {
-        $this->body = $body;
-        $this->httpCode = $httpCode;
-        $this->headerLines = $headerLines;
+        $this->body = $data['body'];
+        $this->httpCode = $data['httpCode'];
+        $this->headerLines = $data['headers'];
+        $this->request = $data['request'];
     }
 
     /**
@@ -66,6 +81,16 @@ class Response
     public function headerLines(): array
     {
         return $this->headerLines;
+    }
+
+    /**
+     * Returns the original request associated with this response, if any.
+     *
+     * @return RequestInterface
+     */
+    public function request()
+    {
+        return $this->request;
     }
 
     /**
