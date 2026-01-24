@@ -66,7 +66,7 @@ class StaticFileHandler extends RequestHandler
     protected function processsRequest(RequestInterface $request): Response
     {
         try {
-            $fileReader = new FileReader($request->requestPath(), $this->folderLocation);
+            $fileReader = new FileReader($request, $this->folderLocation);
 
             return $fileReader->getResponse();
         } catch (InvalidFilePathException $e) {
