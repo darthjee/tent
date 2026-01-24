@@ -3,6 +3,7 @@
 namespace Tent\Models;
 
 use Tent\Models\Response;
+use Tent\Models\RequestInterface;
 
 /**
  * Response representing a 403 Forbidden error.
@@ -15,9 +16,15 @@ class ForbiddenResponse extends Response
 {
     /**
      * Constructs a ForbiddenResponse with a 403 status and default body.
+     *
+     * @param RequestInterface $request The original request associated with this response.
      */
-    public function __construct()
+    public function __construct(RequestInterface $request)
     {
-        parent::__construct("Forbidden", 403, ['Content-Type: text/plain']);
+        parent::__construct([
+            'body' => "Forbidden", 'httpCode' => 403,
+            'headers' => ['Content-Type: text/plain'],
+            'request' => $request
+        ]);
     }
 }

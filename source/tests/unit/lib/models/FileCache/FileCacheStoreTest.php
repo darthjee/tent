@@ -5,6 +5,7 @@ namespace Tent\Tests\Models\FileCache;
 use PHPUnit\Framework\TestCase;
 use Tent\Models\FileCache;
 use Tent\Models\Response;
+use Tent\Models\Request;
 use Tent\Models\FolderLocation;
 
 class FileCacheStoreTest extends TestCase
@@ -30,7 +31,10 @@ class FileCacheStoreTest extends TestCase
     {
         $path = '/file.txt';
         $headers = ['Content-Type: text/plain', 'Content-Length: 11'];
-        $response = new Response('cached body', 200, $headers);
+        $request = new Request([]);
+        $response = new Response([
+            'body' => 'cached body', 'httpCode' => 200, 'headers' => $headers, 'request' => $request
+        ]);
 
         $cache = new FileCache($path, $this->location);
 

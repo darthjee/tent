@@ -23,6 +23,6 @@ class MissingRequestHandler extends RequestHandler
      */
     protected function processsRequest(RequestInterface $request): Response
     {
-        return new MissingResponse();
+        return new MissingResponse($request);
     }
 }

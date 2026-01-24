@@ -4,6 +4,7 @@ namespace Tent\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Tent\Models\Response;
+use Tent\Models\Request;
 
 class ResponseTest extends TestCase
 {
@@ -12,31 +13,43 @@ class ResponseTest extends TestCase
         $body = 'Hello, world!';
         $httpCode = 200;
         $headerLines = ['Content-Type: text/plain'];
+        $request = new Request([]);
 
-        $response = new Response($body, $httpCode, $headerLines);
+        $response = new Response([
+            'body' => $body,
+            'httpCode' => $httpCode,
+            'headers' => $headerLines,
+            'request' => $request
+        ]);
 
         $this->assertEquals($body, $response->body());
         $this->assertEquals($httpCode, $response->httpCode());
         $this->assertEquals($headerLines, $response->headerLines());
+        $this->assertEquals($request, $response->request());
     }
 
     public function testSetBody()
     {
-        $response = new Response('foo', 200, []);
+        $request = new Request([]);
+        $response = new Response([
+            'body' => 'foo', 'httpCode' => 200, 'headers' => [], 'request' => $request
+        ]);
         $response->setBody('bar');
         $this->assertEquals('bar', $response->body());
     }
 
     public function testSetHttpCode()
     {
-        $response = new Response('foo', 200, []);
+        $request = new Request([]);
+        $response = new Response(['body' => 'foo', 'httpCode' => 200, 'headers' => [], 'request' => $request]);
         $response->setHttpCode(404);
         $this->assertEquals(404, $response->httpCode());
     }
 
     public function testSetHeaderLines()
     {
-        $response = new Response('foo', 200, []);
+        $request = new Request([]);
+        $response = new Response(['body' => 'foo', 'httpCode' => 200, 'headers' => [], 'request' => $request]);
         $headers = ['X-Test: ok', 'Content-Type: text/html'];
         $response->setHeaderLines($headers);
         $this->assertEquals($headers, $response->headerLines());
@@ -44,7 +57,8 @@ class ResponseTest extends TestCase
 
     public function testChainedSetters()
     {
-        $response = new Response('foo', 200, []);
+        $request = new Request([]);
+        $response = new Response(['body' => 'foo', 'httpCode' => 200, 'headers' => [], 'request' => $request]);
         $response->setBody('bar');
         $response->setHttpCode(201);
         $response->setHeaderLines(['A: B']);

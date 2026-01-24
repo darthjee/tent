@@ -9,6 +9,7 @@ use Tent\Validators\RequestPathValidator;
 use Tent\Exceptions\FileNotFoundException;
 use Tent\Exceptions\InvalidFilePathException;
 use Tent\Models\ResponseContent;
+use Tent\Models\RequestInterface;
 
 /**
  * Service class responsible for reading files and returning their contents as Responses.
@@ -27,16 +28,19 @@ class FileReader
      */
     private string $path;
 
+    private RequestInterface $request;
+
     /**
      * Constructs a FileReader for the given file path and folder location.
      *
-     * @param string         $path     The file path to read.
-     * @param FolderLocation $location The base folder location.
+     * @param RequestInterface $request  The HTTP request containing the file path.
+     * @param FolderLocation   $location The base folder location.
      */
-    public function __construct(string $path, FolderLocation $location)
+    public function __construct(RequestInterface $request, FolderLocation $location)
     {
-        $this->path = $path;
-        $this->content = new File($path, $location);
+        $this->path = $request->requestPath();
+        $this->request = $request;
+        $this->content = new File($this->path, $location);
     }
 
     /**
@@ -50,11 +54,12 @@ class FileReader
     {
         $this->validate();
 
-        return new Response(
-            $this->content->content(),
-            200,
-            $this->content->headers()
-        );
+        return new Response([
+            'body' => $this->content->content(),
+            'httpCode' => 200,
+            'headers' => $this->content->headers(),
+            'request' => $this->request
+        ]);
     }
 
     /**
