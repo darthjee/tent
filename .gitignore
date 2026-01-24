@@ -5,6 +5,7 @@ source/.phpdoc/
 source/source/static/
 source/source/configuration/configure.php
 source/complexity.html
+source/source/cache/
 
 dev/api/.phpunit.result.cache
 dev/api/coverage
