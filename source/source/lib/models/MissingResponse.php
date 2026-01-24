@@ -16,12 +16,13 @@ class MissingResponse extends Response
     /**
      * Constructs a MissingResponse with a 404 status and default body.
      */
-    public function __construct()
+    public function __construct(RequestInterface $request)
     {
         parent::__construct([
             'body' => 'Not Found',
             'httpCode' => 404,
-            'headers' => ['Content-Type: text/plain']
+            'headers' => ['Content-Type: text/plain'],
+            'request' => $request
         ]);
     }
 }

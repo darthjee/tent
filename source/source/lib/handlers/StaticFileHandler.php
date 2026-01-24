@@ -70,9 +70,9 @@ class StaticFileHandler extends RequestHandler
 
             return $fileReader->getResponse();
         } catch (InvalidFilePathException $e) {
-            return new ForbiddenResponse();
+            return new ForbiddenResponse($request);
         } catch (FileNotFoundException $e) {
-            return new MissingResponse();
+            return new MissingResponse($request);
         }
     }
 }
