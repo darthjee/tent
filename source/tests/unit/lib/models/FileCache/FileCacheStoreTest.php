@@ -29,9 +29,6 @@ class FileCacheStoreTest extends TestCase
     public function testStoreBodyAndHeaders()
     {
         $path = '/file.txt';
-        $bodyPath = $this->cacheDir . $path . '/body.txt';
-        $headersPath = $this->cacheDir . $path . '/headers.json';
-
         $headers = ['Content-Type: text/plain', 'Content-Length: 11'];
         $response = new Response('cached body', 200, $headers);
 
