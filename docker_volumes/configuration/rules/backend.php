@@ -16,6 +16,10 @@ Configuration::buildRule([
     ],
     "middlewares" => [
         [
+            'class' => 'Tent\Middlewares\FileCacheMiddleware',
+            'location' => "./cache",
+        ],
+        [
             'class' => 'Tent\Middlewares\SetHeadersMiddleware',
             'headers' => [
                 'Host' => 'backend.local'
