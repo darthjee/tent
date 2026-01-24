@@ -61,4 +61,25 @@ class FileCacheStoreTest extends TestCase
         $fullPath = $this->cacheDir . '/nested_dir/file.txt';
         $this->assertTrue(is_dir($fullPath));
     }
+
+    public function testStoreWithExistingDirectory()
+    {
+        $path = '/nested_dir/file.txt';
+        $fullPath = $this->cacheDir . '/nested_dir/file.txt';
+        mkdir($fullPath, 0777, true);
+
+        $request = new Request([]);
+        $response = new Response([
+            'body' => 'some body', 'httpCode' => 200, 'headers' => [], 'request' => $request
+        ]);
+
+        $cache = new FileCache($path, $this->location);
+
+        $cache->store($response);
+
+        $this->assertTrue(is_dir($fullPath));
+        $this->assertTrue($cache->exists());
+        $this->assertEquals('some body', $cache->content());
+        $this->assertEquals([], $cache->headers());
+    }
 }
