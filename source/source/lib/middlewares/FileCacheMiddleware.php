@@ -23,4 +23,9 @@ class FileCacheMiddleware extends Middleware
     {
         return $request;
     }
+
+    public function processResponse(ProcessingRequest $response): ProcessingRequest
+    {
+        return $response;
+    }
 }
