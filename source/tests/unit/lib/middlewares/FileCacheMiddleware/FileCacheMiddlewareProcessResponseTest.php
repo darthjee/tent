@@ -38,7 +38,6 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
             'body' => 'cached body', 'httpCode' => 200, 'headers' => $headers,
             'request' => $request
         ]);
-        $request = new ProcessingRequest(['requestPath' => $path]);
 
         $middleware = new FileCacheMiddleware($this->location);
         $middleware->processResponse($response);
