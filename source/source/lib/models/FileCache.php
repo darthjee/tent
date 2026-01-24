@@ -83,9 +83,7 @@ class FileCache implements Cache
     public function store(Response $response): void
     {
         $basePath = $this->basePath();
-        if (!is_dir($basePath)) {
-            mkdir($basePath, 0777, true);
-        }
+        $this->ensureCacheFolderExists($basePath);
         file_put_contents($this->fullPath('body'), $response->body());
         file_put_contents($this->fullPath('headers'), json_encode($response->headerLines()));
     }
@@ -116,5 +114,18 @@ class FileCache implements Cache
     protected function basePath(): string
     {
         return FileUtils::getFullPath($this->path, $this->location);
+    }
+
+    /**
+     * Ensures the cache folder exists, creating it if necessary.
+     *
+     * @param string $basePath The path to the cache folder.
+     * @return void
+     */
+    protected function ensureCacheFolderExists(string $basePath): void
+    {
+        if (!is_dir($basePath)) {
+            mkdir($basePath, 0777, true);
+        }
     }
 }
