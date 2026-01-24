@@ -26,7 +26,7 @@ class FileCacheMiddleware extends Middleware
         return $request;
     }
 
-    public function processResponse(Response $response): ProcessingRequest
+    public function processResponse(Response $response): Response
     {
         if ($response) {
             $path = $request->path();
