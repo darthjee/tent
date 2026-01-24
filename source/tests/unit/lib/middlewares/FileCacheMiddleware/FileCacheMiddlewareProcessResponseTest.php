@@ -23,7 +23,8 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
 
     protected function tearDown(): void
     {
-        array_map('unlink', glob($this->cacheDir . '/*'));
+        array_map('unlink', glob($this->cacheDir . '/*/*'));
+        array_map('rmdir', glob($this->cacheDir . '/*'));
         rmdir($this->cacheDir);
     }
 
@@ -31,7 +32,12 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
     {
         $path = '/file.txt';
         $headers = ['Content-Type: text/plain', 'Content-Length: 11'];
-        $response = new Response('cached body', 200, $headers);
+        $request = new ProcessingRequest(['requestPath' => $path]);
+
+        $response = new Response([
+            'body' => 'cached body', 'httpCode' => 200, 'headers' => $headers,
+            'request' => $request
+        ]);
         $request = new ProcessingRequest(['requestPath' => $path]);
 
         $middleware = new FileCacheMiddleware($this->location);
