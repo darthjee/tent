@@ -103,4 +103,9 @@ class Response
     {
         return $this->headerLines = $headerLines;
     }
+
+    public function request(): ?Request
+    {
+        return $this->request;
+    }
 }
