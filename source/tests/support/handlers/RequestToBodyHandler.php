@@ -27,11 +27,11 @@ class RequestToBodyHandler extends RequestHandler
             'headers' => $request->headers(),
             'body' => $request->body(),
         ]);
-        return new Response(
-            $body,
-            200,
-            ['Content-Type: application/json']
-        );
+        return new Response([
+            'body' => $body,
+            'httpCode' => 200,
+            'headers' => ['Content-Type: application/json']
+        ]);
     }
 
     public static function build(array $params): self

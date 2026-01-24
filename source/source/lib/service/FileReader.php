@@ -54,11 +54,11 @@ class FileReader
     {
         $this->validate();
 
-        return new Response(
-            $this->content->content(),
-            200,
-            $this->content->headers()
-        );
+        return new Response([
+            'body' => $this->content->content(),
+            'httpCode' => 200,
+            'headers' => $this->content->headers()
+        ]);
     }
 
     /**

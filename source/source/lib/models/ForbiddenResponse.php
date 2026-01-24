@@ -18,6 +18,8 @@ class ForbiddenResponse extends Response
      */
     public function __construct()
     {
-        parent::__construct("Forbidden", 403, ['Content-Type: text/plain']);
+        parent::__construct([
+            'body' => "Forbidden", 'httpCode' => 403, 'headers' => ['Content-Type: text/plain']
+        ]);
     }
 }

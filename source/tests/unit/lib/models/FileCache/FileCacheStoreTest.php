@@ -30,7 +30,7 @@ class FileCacheStoreTest extends TestCase
     {
         $path = '/file.txt';
         $headers = ['Content-Type: text/plain', 'Content-Length: 11'];
-        $response = new Response('cached body', 200, $headers);
+        $response = new Response(['body' => 'cached body', 'httpCode' => 200, 'headers' => $headers]);
 
         $cache = new FileCache($path, $this->location);
 

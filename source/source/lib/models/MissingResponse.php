@@ -18,6 +18,10 @@ class MissingResponse extends Response
      */
     public function __construct()
     {
-        parent::__construct("Not Found", 404, ['Content-Type: text/plain']);
+        parent::__construct([
+            'body' => 'Not Found',
+            'httpCode' => 404,
+            'headers' => ['Content-Type: text/plain']
+        ]);
     }
 }

@@ -51,7 +51,7 @@ class Response
     {
         $this->body = $data['body'] ?? '';
         $this->httpCode = $data['httpCode'] ?? 200;
-        $this->headerLines = $data['headerLines'] ?? [];
+        $this->headerLines = $data['headers'] ?? [];
         $this->request = $data['request'] ?? null;
     }
 

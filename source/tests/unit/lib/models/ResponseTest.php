@@ -13,7 +13,11 @@ class ResponseTest extends TestCase
         $httpCode = 200;
         $headerLines = ['Content-Type: text/plain'];
 
-        $response = new Response($body, $httpCode, $headerLines);
+        $response = new Response([
+            'body' => $body,
+            'httpCode' => $httpCode,
+            'headers' => $headerLines
+        ]);
 
         $this->assertEquals($body, $response->body());
         $this->assertEquals($httpCode, $response->httpCode());
@@ -22,21 +26,21 @@ class ResponseTest extends TestCase
 
     public function testSetBody()
     {
-        $response = new Response('foo', 200, []);
+        $response = new Response(['body' => 'foo', 'httpCode' => 200, 'headers' => []]);
         $response->setBody('bar');
         $this->assertEquals('bar', $response->body());
     }
 
     public function testSetHttpCode()
     {
-        $response = new Response('foo', 200, []);
+        $response = new Response(['body' => 'foo', 'httpCode' => 200, 'headers' => []]);
         $response->setHttpCode(404);
         $this->assertEquals(404, $response->httpCode());
     }
 
     public function testSetHeaderLines()
     {
-        $response = new Response('foo', 200, []);
+        $response = new Response(['body' => 'foo', 'httpCode' => 200, 'headers' => []]);
         $headers = ['X-Test: ok', 'Content-Type: text/html'];
         $response->setHeaderLines($headers);
         $this->assertEquals($headers, $response->headerLines());
@@ -44,7 +48,7 @@ class ResponseTest extends TestCase
 
     public function testChainedSetters()
     {
-        $response = new Response('foo', 200, []);
+        $response = new Response(['body' => 'foo', 'httpCode' => 200, 'headers' => []]);
         $response->setBody('bar');
         $response->setHttpCode(201);
         $response->setHeaderLines(['A: B']);
