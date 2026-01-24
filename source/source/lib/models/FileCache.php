@@ -82,7 +82,10 @@ class FileCache implements Cache
      */
     public function store(Response $response): void
     {
-        mkdir($this->basePath(), 0777, true);
+        $basePath = $this->basePath();
+        if (!is_dir($basePath)) {
+            mkdir($basePath, 0777, true);
+        }
         file_put_contents($this->fullPath('body'), $response->body());
         file_put_contents($this->fullPath('headers'), json_encode($response->headerLines()));
     }
