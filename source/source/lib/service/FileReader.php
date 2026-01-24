@@ -57,7 +57,8 @@ class FileReader
         return new Response([
             'body' => $this->content->content(),
             'httpCode' => 200,
-            'headers' => $this->content->headers()
+            'headers' => $this->content->headers(),
+            'request' => $this->request
         ]);
     }
 

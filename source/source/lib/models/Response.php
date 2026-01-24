@@ -32,9 +32,9 @@ class Response
     private array $headerLines;
 
     /**
-     * @var mixed|null The original request associated with this response (optional).
+     * @var RequestInterface The original request associated with this response (optional).
      */
-    private $request;
+    private RequestInterface $request;
 
     /**
      * Constructs a Response object.
@@ -52,7 +52,7 @@ class Response
         $this->body = $data['body'] ?? '';
         $this->httpCode = $data['httpCode'] ?? 200;
         $this->headerLines = $data['headers'] ?? [];
-        $this->request = $data['request'] ?? null;
+        $this->request = $data['request'];
     }
 
     /**
@@ -88,7 +88,7 @@ class Response
     /**
      * Returns the original request associated with this response, if any.
      *
-     * @return mixed|null
+     * @return RequestInterface
      */
     public function request()
     {

@@ -30,7 +30,8 @@ class RequestToBodyHandler extends RequestHandler
         return new Response([
             'body' => $body,
             'httpCode' => 200,
-            'headers' => ['Content-Type: application/json']
+            'headers' => ['Content-Type: application/json'],
+            'request' => $request
         ]);
     }
 

@@ -11,7 +11,8 @@ class QuickResponseMiddleware extends Middleware
     public function processRequest(ProcessingRequest $request): ProcessingRequest
     {
         $response = new Response([
-            'body' => 'Quick Response', 'httpCode' => 200, 'headers' => ['Content-Type: text/plain']
+            'body' => 'Quick Response', 'httpCode' => 200, 'headers' => ['Content-Type: text/plain'],
+            'request' => $request
         ]);
         $request->setResponse($response);
 
