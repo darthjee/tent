@@ -94,7 +94,7 @@ services:
       MYSQL_ROOT_PASSWORD: api_dev
       MYSQL_PASSWORD: api_dev
     ports:
-      - 127.0.0.1:3050:80
+      - 127.0.0.1:8050:80
 
   tent_httpbin:
     env_file: .env
