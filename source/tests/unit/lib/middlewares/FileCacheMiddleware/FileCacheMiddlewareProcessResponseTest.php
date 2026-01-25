@@ -45,6 +45,17 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
         $this->assertEquals($this->headers, $this->cache->headers());
     }
 
+    public function testProcessResponseWrongCode()
+    {
+        $response = $this->buildResponse(403);
+
+        $middleware = $this->buildMiddleware();
+        $middleware->processResponse($response);
+
+        $this->cache = new FileCache($this->path, $this->location);
+        $this->assertFalse($this->cache->exists());
+    }
+
     private function buildResponse(int $httpCode)
     {
         $this->path = '/file.txt';
@@ -52,7 +63,7 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
         $this->request = new ProcessingRequest(['requestPath' => $this->path]);
 
         return new Response([
-            'body' => 'cached body', 'httpCode' => 200, 'headers' => $this->headers,
+            'body' => 'cached body', 'httpCode' => $httpCode, 'headers' => $this->headers,
             'request' => $this->request
         ]);
     }
