@@ -3,7 +3,7 @@
 namespace Tent\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Tent\Service\FileReader;
+use Tent\Service\ResponseContentReader;
 use Tent\Models\File;
 use Tent\Models\Request;
 use Tent\Models\FolderLocation;
@@ -11,7 +11,7 @@ use Tent\Models\Response;
 use Tent\Exceptions\FileNotFoundException;
 use Tent\Exceptions\InvalidFilePathException;
 
-class FileReaderTest extends TestCase
+class ResponseContentReaderTest extends TestCase
 {
     private $testDir;
 
@@ -44,7 +44,8 @@ class FileReaderTest extends TestCase
         file_put_contents($this->testDir . '/test.txt', 'Hello World');
         $location = new FolderLocation($this->testDir);
         $request = new Request(['requestPath' => '/test.txt']);
-        $reader = new FileReader($request, $location);
+        $file = new File('/test.txt', $location);
+        $reader = new ResponseContentReader($request, $file);
 
         $response = $reader->getResponse();
         $this->assertInstanceOf(Response::class, $response);
@@ -57,7 +58,8 @@ class FileReaderTest extends TestCase
     {
         $location = new FolderLocation($this->testDir);
         $request = new Request(['requestPath' => '/nonexistent.txt']);
-        $reader = new FileReader($request, $location);
+        $file = new File('/nonexistent.txt', $location);
+        $reader = new ResponseContentReader($request, $file);
 
         $this->expectException(FileNotFoundException::class);
         $reader->getResponse();
@@ -67,7 +69,8 @@ class FileReaderTest extends TestCase
     {
         $location = new FolderLocation($this->testDir);
         $request = new Request(['requestPath' => '../etc/passwd']);
-        $reader = new FileReader($request, $location);
+        $file = new File('../etc/passwd', $location);
+        $reader = new ResponseContentReader($request, $file);
 
         $this->expectException(InvalidFilePathException::class);
         $reader->getResponse();
