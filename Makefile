@@ -6,8 +6,8 @@ VERSION?=0.0.2
 MOD?=dev_
 BASE_IMAGE?=$(DOCKER_ID_USER)/$(MOD)$(PROJECT)-base
 IMAGE?=$(DOCKER_ID_USER)/$(MOD)$(PROJECT)
-DOCKER_FILE_BASE?=dockerfiles/Dockerfile.$(MOD)$(PROJECT)-base
-DOCKER_FILE?=dockerfiles/Dockerfile.$(MOD)$(PROJECT)
+DOCKER_FILE_BASE?=dockerfiles/$(MOD)$(PROJECT)-base/Dockerfile
+DOCKER_FILE?=dockerfiles/$(MOD)$(PROJECT)/Dockerfile
 
 all:
 	@echo "Usage:"
