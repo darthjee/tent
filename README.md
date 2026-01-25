@@ -76,7 +76,7 @@ Tent supports a flexible middleware system that allows you to intercept, modify,
 
 Middlewares are specified in the `middlewares` array of a rule in your configuration. Each middleware can modify aspects of the request, such as headers or path, or perform custom logic.
 
-**Example:**
+**Example of static files serving:**
 
 ```php
 Configuration::buildRule([
@@ -99,6 +99,33 @@ Configuration::buildRule([
          ]
       ]
    ]
+]);
+```
+
+**Example of api proxing:**
+
+```php
+Configuration::buildRule([
+    'handler' => [
+        'type' => 'proxy',
+        'host' => 'http://api.com:80'
+    ],
+    'matchers' => [
+        ['method' => 'GET', 'uri' => '/api/', 'type' => 'begins_with']
+    ],
+    "middlewares" => [
+        [
+            'class' => 'Tent\Middlewares\FileCacheMiddleware',
+            'location' => "./cache",
+            'httpCodes' => ["2xx"]
+        ],
+        [
+            'class' => 'Tent\Middlewares\SetHeadersMiddleware',
+            'headers' => [
+                'Host' => 'api.com'
+            ]
+        ]
+    ]
 ]);
 ```
 
