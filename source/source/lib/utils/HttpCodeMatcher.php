@@ -16,9 +16,9 @@ class HttpCodeMatcher
     /**
      * Checks if the given HTTP code matches any in the provided list.
      *
-     * @param int   $httpCode  The HTTP status code to check.
-     * @param array $httpCodes The list of allowed HTTP status codes.
-     * @return bool True if the code matches, false otherwise.
+     * @param integer $httpCode  The HTTP status code to check.
+     * @param array   $httpCodes The list of allowed HTTP status codes.
+     * @return boolean True if the code matches, false otherwise.
      *
      * @example
      *   HttpCodeMatcher::matchAny(404, ['2xx', '404', '500']) // returns true
@@ -37,7 +37,7 @@ class HttpCodeMatcher
     /**
      * Constructs an HttpCodeMatcher with the given target code or pattern.
      *
-     * @param string|int $target The target HTTP status code or pattern.
+     * @param string|integer $target The target HTTP status code or pattern.
      */
     public function __construct($target)
     {
@@ -47,8 +47,8 @@ class HttpCodeMatcher
     /**
      * Checks if the given HTTP code matches the target code or pattern.
      *
-     * @param int $httpCode The HTTP status code to check.
-     * @return bool True if the code matches, false otherwise.
+     * @param integer $httpCode The HTTP status code to check.
+     * @return boolean True if the code matches, false otherwise.
      */
     public function match(int $httpCode): bool
     {
@@ -65,8 +65,8 @@ class HttpCodeMatcher
     /**
      * Checks if the HTTP code matches the target pattern using regular expressions.
      *
-     * @param int $httpCode The HTTP status code to check.
-     * @return bool True if the code matches the pattern, false otherwise.
+     * @param integer $httpCode The HTTP status code to check.
+     * @return boolean True if the code matches the pattern, false otherwise.
      */
     private function checkByRegExp(int $httpCode): bool
     {
