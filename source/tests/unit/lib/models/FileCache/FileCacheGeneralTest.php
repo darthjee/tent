@@ -30,6 +30,7 @@ class FileCacheGeneralTest extends TestCase
     {
         @unlink($this->fullPath . '/cache.body.txt');
         @unlink($this->fullPath . '/cache.headers.json');
+        @rmdir($this->fullPath);
         @rmdir($this->basePath);
     }
 
