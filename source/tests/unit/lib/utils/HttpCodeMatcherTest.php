@@ -56,4 +56,13 @@ class HttpCodeMatcherTest extends TestCase
         $this->assertFalse(HttpCodeMatcher::matchAny(500, ["4xx"]));
         $this->assertFalse(HttpCodeMatcher::matchAny(399, ["4xx"]));
     }
+
+    public function testMatchReturnsTrueForWildcard5XXUppercase()
+    {
+        $this->assertTrue(HttpCodeMatcher::matchAny(500, ["5XX"]));
+        $this->assertTrue(HttpCodeMatcher::matchAny(501, ["5XX"]));
+        $this->assertTrue(HttpCodeMatcher::matchAny(599, ["5XX"]));
+        $this->assertFalse(HttpCodeMatcher::matchAny(600, ["5XX"]));
+        $this->assertFalse(HttpCodeMatcher::matchAny(499, ["5XX"]));
+    }
 }
