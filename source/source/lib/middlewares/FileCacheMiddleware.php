@@ -86,7 +86,7 @@ class FileCacheMiddleware extends Middleware
      */
     public function processResponse(Response $response): Response
     {
-        if ($response && HttpCodeMatcher::match($response->httpCode(), $this->httpCodes)) {
+        if ($response && HttpCodeMatcher::matchAny($response->httpCode(), $this->httpCodes)) {
             $path = $response->request()->requestPath();
             $cache = new FileCache($path, $this->location);
             $cache->store($response);

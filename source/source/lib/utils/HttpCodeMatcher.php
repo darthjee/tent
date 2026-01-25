@@ -13,10 +13,10 @@ class HttpCodeMatcher
      * @param array $httpCodes The list of allowed HTTP status codes.
      * @return bool True if the code matches, false otherwise.
      */
-    public static function match(int $httpCode, array $httpCodes): bool
+    public static function matchAny(int $httpCode, array $httpCodes): bool
     {
         foreach ($httpCodes as $code) {
-            if (new self($code)->matches($httpCode)) {
+            if (new self($code)->match($httpCode)) {
                 return true;
             }
         }
@@ -28,7 +28,7 @@ class HttpCodeMatcher
         $this->target = $target;
     }
 
-    public function matches(int $httpCode): bool
+    public function match(int $httpCode): bool
     {
         return (string)$httpCode === (string)$this->target;
     }
