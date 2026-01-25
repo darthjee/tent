@@ -56,15 +56,30 @@ class HttpCodeMatcher
         $codeStr = (string)$httpCode;
 
         if (preg_match('/[xX]/', $target)) {
-            // Replace both 'x' and 'X' with '\d' for regex matching
-            $pattern = $this->regExp();
-            return preg_match($pattern, $codeStr) === 1;
+            return $this->checkByRegExp($httpCode);
         }
-        
+
         return $codeStr === $target;
     }
 
-    private function regExp()
+    /**
+     * Checks if the HTTP code matches the target pattern using regular expressions.
+     *
+     * @param int $httpCode The HTTP status code to check.
+     * @return bool True if the code matches the pattern, false otherwise.
+     */
+    private function checkByRegExp(int $httpCode): bool
+    {
+        $pattern = $this->regExp();
+        return preg_match($pattern, (string)$httpCode) === 1;
+    }
+
+    /**
+     * Builds the regular expression pattern from the target code or pattern.
+     *
+     * @return string The regular expression pattern.
+     */
+    private function regExp(): string
     {
         $target = (string)$this->target;
         return '/^' . str_replace(['x', 'X'], '\\d', preg_quote($target, '/')) . '$/';
