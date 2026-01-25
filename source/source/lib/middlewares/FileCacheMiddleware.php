@@ -25,7 +25,7 @@ class FileCacheMiddleware extends Middleware
      * @param array|null     $httpCodes      Array of HTTP status codes to cache. Defaults to [200].
      * @param array|null     $requestMethods Array of HTTP request methods to cache. Defaults to ['GET'].
      */
-    public function __construct(FolderLocation $location, array $httpCodes = null, array $requestMethods = null)
+    public function __construct(FolderLocation $location, ?array $httpCodes = null, ?array $requestMethods = null)
     {
         $this->location = $location;
         $this->httpCodes = $httpCodes ?? [200];
