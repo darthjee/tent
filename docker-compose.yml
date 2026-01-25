@@ -12,6 +12,7 @@ services:
     volumes:
       - ./docker_volumes/vendor:/home/app/app/vendor
       - ./docker_volumes/configuration:/home/app/app/source/configuration/
+      - ./docker_volumes/cache:/home/app/app/source/cache/
       - ./source:/home/app/app
       - ./dev/frontend/dist/:/home/app/app/source/static/
 
