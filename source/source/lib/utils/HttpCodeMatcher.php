@@ -2,8 +2,15 @@
 
 namespace Tent\Utils;
 
+/**
+ * Utility class for matching HTTP status codes against a list of allowed codes,
+ * including support for wildcards like '4xx' or '30x'.
+ */
 class HttpCodeMatcher
 {
+    /**
+     * @var string|int The target HTTP status code or pattern to match against.
+     */
     private $target;
 
     /**
@@ -23,11 +30,22 @@ class HttpCodeMatcher
         return false;
     }
 
+    /**
+     * Constructs an HttpCodeMatcher with the given target code or pattern.
+     *
+     * @param string|int $target The target HTTP status code or pattern.
+     */
     public function __construct($target)
     {
         $this->target = $target;
     }
 
+    /**
+     * Checks if the given HTTP code matches the target code or pattern.
+     *
+     * @param int $httpCode The HTTP status code to check.
+     * @return bool True if the code matches, false otherwise.
+     */
     public function match(int $httpCode): bool
     {
         $target = (string)$this->target;
