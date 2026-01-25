@@ -56,6 +56,17 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
         $this->assertFalse($this->cache->exists());
     }
 
+    public function testProcessResponseWithConfiguredHttpCode()
+    {
+        $response = $this->buildResponse(403);
+
+        $middleware = $this->buildMiddleware([403]);
+        $middleware->processResponse($response);
+
+        $this->cache = new FileCache($this->path, $this->location);
+        $this->assertTrue($this->cache->exists());
+    }
+
     private function buildResponse(int $httpCode)
     {
         $this->path = '/file.txt';
@@ -68,10 +79,11 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
         ]);
     }
 
-    private function buildMiddleware(): FileCacheMiddleware
+    private function buildMiddleware(array $httpCodes = [200]): FileCacheMiddleware
     {
         return FileCacheMiddleware::build([
             'location' => $this->cacheDir,
+            'httpCodes' => $httpCodes,
         ]);
     }
 }
