@@ -28,6 +28,6 @@ ENV PATH="$PATH://home/circleci/project/vendor/bin"
 
 COPY --chown=circleci:circleci ./source/composer.* /home/circleci/
 
-RUN cd /home/circleci || exit; \
-    composer install
+WORKDIR /home/circleci/
+RUN composer install
 WORKDIR /home/circleci/project
