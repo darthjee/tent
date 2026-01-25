@@ -26,10 +26,15 @@ class HttpCodeMatcher
     public function matches(int $httpCode): bool
     {
         foreach ($this->httpCodes as $code) {
-            if ((string)$httpCode === (string)$code) {
+            if ($this->matchHttpCode($httpCode, $code)) {
                 return true;
             }
         }
         return false;
+    }
+
+    protected function matchHttpCode(int $code, $target): bool
+    {
+        return (string)$code === (string)$target;
     }
 }
