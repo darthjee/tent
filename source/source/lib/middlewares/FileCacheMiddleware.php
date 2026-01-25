@@ -15,18 +15,18 @@ class FileCacheMiddleware extends Middleware
 {
     private FolderLocation $location;
     private array $httpCodes;
-    private array $httpMethods;
+    private array $requestMethods;
 
     /**
      * Constructs a FileCacheMiddleware instance.
      *
      * @param FolderLocation $location The base folder location for caching.
      */
-    public function __construct(FolderLocation $location, array $httpCodes = null, array $httpMethods = null)
+    public function __construct(FolderLocation $location, array $httpCodes = null, array $requestMethods = null)
     {
         $this->location = $location;
         $this->httpCodes = $httpCodes ?? [200];
-        $this->httpMethods = $httpMethods ?? ['GET'];
+        $this->requestMethods = $requestMethods ?? ['GET'];
     }
 
     /**
@@ -39,8 +39,8 @@ class FileCacheMiddleware extends Middleware
     {
         $location = new FolderLocation($attributes['location']);
         $httpCodes = $attributes['httpCodes'] ?? null;
-        $httpMethods = $attributes['httpMethods'] ?? null;
-        return new self($location, $httpCodes, $httpMethods);
+        $requestMethods = $attributes['requestMethods'] ?? null;
+        return new self($location, $httpCodes, $requestMethods);
     }
 
     /**
@@ -54,6 +54,10 @@ class FileCacheMiddleware extends Middleware
      */
     public function processRequest(ProcessingRequest $request): ProcessingRequest
     {
+        if (!in_array($request->requestMethod(), $this->requestMethods, true)) {
+            return $request;
+        }
+
         $path = $request->requestPath();
         $cache = new FileCache($path, $this->location);
 
