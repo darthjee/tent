@@ -62,6 +62,48 @@ class FileCacheMiddlewareProcessRequestTest extends TestCase
         $this->assertSame($request, $result);
     }
 
+    public function testProcessRequestReturnsRequestWhenMethodDoesNotMatch()
+    {
+        $path = '/file.txt';
+        $headers = ['Content-Type: text/plain', 'Content-Length: 11'];
+        $request = $this->buildRequest($path, 'POST');
+        $response = new Response([
+            'body' => 'cached body',
+            'httpCode' => 200,
+            'headers' => $headers,
+            'request' => $request
+        ]);
+        $cache = new FileCache($path, $this->location);
+        $cache->store($response);
+
+        $middleware = new FileCacheMiddleware($this->location);
+        $result = $middleware->processRequest($request);
+
+        $this->assertFalse($result->hasResponse());
+        $this->assertSame($request, $result);
+    }
+
+    public function testProcessRequestReturnsRequestWithCustomRequestMethod()
+    {
+        $path = '/file.txt';
+        $headers = ['Content-Type: text/plain', 'Content-Length: 11'];
+        $request = $this->buildRequest($path, 'POST');
+        $response = new Response([
+            'body' => 'cached body',
+            'httpCode' => 200,
+            'headers' => $headers,
+            'request' => $request
+        ]);
+        $cache = new FileCache($path, $this->location);
+        $cache->store($response);
+
+        $middleware = new FileCacheMiddleware($this->location, [], ['POST']);
+        $result = $middleware->processRequest($request);
+
+        $this->assertTrue($result->hasResponse());
+        $this->assertSame($request, $result);
+    }
+
     private function buildRequest(string $path, string $method): ProcessingRequest
     {
         $request = new ProcessingRequest([
