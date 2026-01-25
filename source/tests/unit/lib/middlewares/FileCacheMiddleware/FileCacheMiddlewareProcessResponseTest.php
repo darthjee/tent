@@ -13,6 +13,10 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
 {
     private $cacheDir;
     private $location;
+    private $headers;
+    private $cache;
+    private $request;
+    private $path;
 
     protected function setUp(): void
     {
@@ -30,21 +34,33 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
 
     public function testProcessResponseStoresCache()
     {
-        $path = '/file.txt';
-        $headers = ['Content-Type: text/plain', 'Content-Length: 11'];
-        $request = new ProcessingRequest(['requestPath' => $path]);
+        $response = $this->buildResponse(200);
 
-        $response = new Response([
-            'body' => 'cached body', 'httpCode' => 200, 'headers' => $headers,
-            'request' => $request
-        ]);
-
-        $middleware = new FileCacheMiddleware($this->location);
+        $middleware = $this->buildMiddleware();
         $middleware->processResponse($response);
 
-        $cache = new FileCache($path, $this->location);
-        $this->assertTrue($cache->exists());
-        $this->assertEquals('cached body', $cache->content());
-        $this->assertEquals($headers, $cache->headers());
+        $this->cache = new FileCache($this->path, $this->location);
+        $this->assertTrue($this->cache->exists());
+        $this->assertEquals('cached body', $this->cache->content());
+        $this->assertEquals($this->headers, $this->cache->headers());
+    }
+
+    private function buildResponse(int $httpCode)
+    {
+        $this->path = '/file.txt';
+        $this->headers = ['Content-Type: text/plain', 'Content-Length: 11'];
+        $this->request = new ProcessingRequest(['requestPath' => $this->path]);
+
+        return new Response([
+            'body' => 'cached body', 'httpCode' => 200, 'headers' => $this->headers,
+            'request' => $this->request
+        ]);
+    }
+
+    private function buildMiddleware(): FileCacheMiddleware
+    {
+        return FileCacheMiddleware::build([
+            'location' => $this->cacheDir,
+        ]);
     }
 }
