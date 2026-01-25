@@ -67,6 +67,17 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
         $this->assertTrue($this->cache->exists());
     }
 
+    public function testProcessResponseWithWildCardCodes()
+    {
+        $response = $this->buildResponse(403);
+
+        $middleware = $this->buildMiddleware(['4XX']);
+        $middleware->processResponse($response);
+
+        $this->cache = new FileCache($this->path, $this->location);
+        $this->assertTrue($this->cache->exists());
+    }
+
     private function buildResponse(int $httpCode)
     {
         $this->path = '/file.txt';
