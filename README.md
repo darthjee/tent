@@ -40,7 +40,7 @@ Tent is in active development. Currently implemented:
 - ✅ Static file serving (serves files from a directory)
 - ✅ Middleware system (ready)
 - ⏳ Configuration system (in progress)
-- ⏳ Response caching (planned)
+- ✅ Response caching (basic, for simple requests without query parameters)
 
 ### Error Responses (403/404)
 
