@@ -28,6 +28,9 @@ class FileReader
      */
     private string $path;
 
+    /**
+     * @var RequestInterface The HTTP request associated with the file read.
+     */
     private RequestInterface $request;
 
     /**
