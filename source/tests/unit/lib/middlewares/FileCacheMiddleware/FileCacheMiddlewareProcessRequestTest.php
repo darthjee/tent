@@ -13,6 +13,10 @@ class FileCacheMiddlewareProcessRequestTest extends TestCase
 {
     private $cacheDir;
     private $location;
+    private $request;
+    private $response;
+    private $path;
+    private $headers;
 
     protected function setUp(): void
     {
@@ -30,34 +34,83 @@ class FileCacheMiddlewareProcessRequestTest extends TestCase
 
     public function testProcessRequestReturnsCachedResponseWhenExists()
     {
-        $path = '/file.txt';
-        $headers = ['Content-Type: text/plain', 'Content-Length: 11'];
-        $request = new ProcessingRequest(['requestPath' => $path]);
-        $response = new Response([
-            'body' => 'cached body',
-            'httpCode' => 200,
-            'headers' => $headers,
-            'request' => $request
-        ]);
-        $cache = new FileCache($path, $this->location);
-        $cache->store($response);
+        $this->path = '/file.txt';
+        $this->request = $this->buildRequest($this->path, 'GET');
+        $this->buildCache();
 
-        $middleware = new FileCacheMiddleware($this->location);
-        $result = $middleware->processRequest($request);
+        $middleware = $this->buildMiddleware();
+        $result = $middleware->processRequest($this->request);
 
+        $this->assertTrue($result->hasResponse());
         $this->assertNotNull($result->response());
         $this->assertEquals('cached body', $result->response()->body());
-        $this->assertEquals($headers, $result->response()->headerLines());
+        $this->assertEquals($this->headers, $result->response()->headerLines());
     }
 
     public function testProcessRequestReturnsRequestWhenCacheDoesNotExist()
     {
-        $path = '/file.txt';
-        $request = new ProcessingRequest(['requestPath' => $path]);
-        $middleware = new FileCacheMiddleware($this->location);
-        $result = $middleware->processRequest($request);
+        $this->path = '/file.txt';
+        $this->request = $this->buildRequest($this->path, 'GET');
+        $middleware = $this->buildMiddleware();
+        $result = $middleware->processRequest($this->request);
 
         $this->assertFalse($result->hasResponse());
-        $this->assertSame($request, $result);
+        $this->assertSame($this->request, $result);
+    }
+
+    public function testProcessRequestReturnsRequestWhenMethodDoesNotMatch()
+    {
+        $this->path = '/file.txt';
+        $this->request = $this->buildRequest($this->path, 'POST');
+        $this->buildCache();
+
+        $middleware = $this->buildMiddleware();
+        $result = $middleware->processRequest($this->request);
+
+        $this->assertFalse($result->hasResponse());
+        $this->assertSame($this->request, $result);
+    }
+
+    public function testProcessRequestReturnsRequestWithCustomRequestMethod()
+    {
+        $this->path = '/file.txt';
+        $this->request = $this->buildRequest($this->path, 'POST');
+        $this->buildCache();
+
+        $middleware = $this->buildMiddleware([
+            'requestMethods' => ['POST']
+        ]);
+
+        $result = $middleware->processRequest($this->request);
+
+        $this->assertTrue($result->hasResponse());
+        $this->assertSame($this->request, $result);
+    }
+
+    private function buildRequest(string $path, string $method): ProcessingRequest
+    {
+        return new ProcessingRequest([
+            'requestPath' => $path,
+            'requestMethod' => $method
+        ]);
+    }
+
+    private function buildMiddleware(array $attributes = []): FileCacheMiddleware
+    {
+        $attributes['location'] = $this->cacheDir;
+        return FileCacheMiddleware::build($attributes);
+    }
+
+    private function buildCache(): void
+    {
+        $this->headers = ['Content-Type: text/plain', 'Content-Length: 11'];
+        $this->response = new Response([
+            'body' => 'cached body',
+            'httpCode' => 200,
+            'headers' => $this->headers,
+            'request' => $this->request
+        ]);
+        $cache = new FileCache($this->path, $this->location);
+        $cache->store($this->response);
     }
 }

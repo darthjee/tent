@@ -7,6 +7,7 @@ use Tent\Models\FolderLocation;
 use Tent\Models\FileCache;
 use Tent\Models\Response;
 use Tent\Service\ResponseContentReader;
+use Tent\Utils\HttpCodeMatcher;
 
 /**
  * Middleware for caching responses to files.
@@ -14,15 +15,21 @@ use Tent\Service\ResponseContentReader;
 class FileCacheMiddleware extends Middleware
 {
     private FolderLocation $location;
+    private array $httpCodes;
+    private array $requestMethods;
 
     /**
      * Constructs a FileCacheMiddleware instance.
      *
-     * @param FolderLocation $location The base folder location for caching.
+     * @param FolderLocation $location       The base folder location for caching.
+     * @param array|null     $httpCodes      Array of HTTP status codes to cache. Defaults to [200].
+     * @param array|null     $requestMethods Array of HTTP request methods to cache. Defaults to ['GET'].
      */
-    public function __construct(FolderLocation $location)
+    public function __construct(FolderLocation $location, array $httpCodes = null, array $requestMethods = null)
     {
         $this->location = $location;
+        $this->httpCodes = $httpCodes ?? [200];
+        $this->requestMethods = $requestMethods ?? ['GET'];
     }
 
     /**
@@ -33,21 +40,29 @@ class FileCacheMiddleware extends Middleware
      */
     public static function build(array $attributes): FileCacheMiddleware
     {
-        $location = new FolderLocation($attributes['location'] ?? null);
-        return new self($location);
+        $location = new FolderLocation($attributes['location']);
+        $httpCodes = $attributes['httpCodes'] ?? null;
+        $requestMethods = $attributes['requestMethods'] ?? null;
+        return new self($location, $httpCodes, $requestMethods);
     }
 
     /**
      * Processes the incoming request.
      *
-     * In the future, this method will check if a cached response exists for the incoming request
-     * and return it if available. Currently, it returns the request unmodified.
+     * Only attempts to read from cache if the request method is included in the configured
+     * requestMethods filter. If the method is not allowed, the request is returned unmodified.
+     *
+     * If a cached response exists for the request path, it is loaded and set on the request.
      *
      * @param ProcessingRequest $request The incoming processing request.
      * @return ProcessingRequest The (potentially cached) processing request.
      */
     public function processRequest(ProcessingRequest $request): ProcessingRequest
     {
+        if (!in_array($request->requestMethod(), $this->requestMethods, true)) {
+            return $request;
+        }
+
         $path = $request->requestPath();
         $cache = new FileCache($path, $this->location);
 
@@ -63,12 +78,15 @@ class FileCacheMiddleware extends Middleware
     /**
      * Caches the response to a file.
      *
+     * Only stores the response if its HTTP status code is included in the configured httpCodes filter.
+     * If the code is not allowed, the response is returned without caching.
+     *
      * @param Response $response The response to cache.
      * @return Response The original response.
      */
     public function processResponse(Response $response): Response
     {
-        if ($response) {
+        if ($response && HttpCodeMatcher::matchAny($response->httpCode(), $this->httpCodes)) {
             $path = $response->request()->requestPath();
             $cache = new FileCache($path, $this->location);
             $cache->store($response);
