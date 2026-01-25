@@ -4,8 +4,6 @@ namespace Tent\Utils;
 
 class HttpCodeMatcher
 {
-    private array $httpCodes;
-
     /**
      * Checks if the given HTTP code matches any in the provided list.
      *
@@ -15,17 +13,7 @@ class HttpCodeMatcher
      */
     public static function match(int $httpCode, array $httpCodes): bool
     {
-        return new self($httpCodes)->matches($httpCode);
-    }
-
-    public function __construct(array $httpCodes)
-    {
-        $this->httpCodes = $httpCodes;
-    }
-
-    public function matches(int $httpCode): bool
-    {
-        foreach ($this->httpCodes as $code) {
+        foreach ($httpCodes as $code) {
             if ((string)$httpCode === (string)$code) {
                 return true;
             }
