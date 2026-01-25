@@ -28,20 +28,26 @@ class ResponseContentReader
     private ResponseContent $responseContent;
 
     /**
-     * @var string The file path to read.
+     * @var string The request path to read.
      */
     private string $path;
 
     /**
-     * @var RequestInterface The HTTP request associated with the file read.
+     * @var RequestInterface The HTTP request associated with the request path.
      */
     private RequestInterface $request;
 
     /**
-     * Constructs a ResponseContentReader for the given file path and folder location.
+     * Constructs a ResponseContentReader for the given request path and folder location.
      *
-     * @param RequestInterface $request         The HTTP request containing the file path.
+     * @param RequestInterface $request         The HTTP request containing the request path.
      * @param ResponseContent  $responseContent The source for content to be read.
+     *
+     * The source `$responseContent` is typically a File or Cache object implementing ResponseContent.
+     *
+     * @see ResponseContent
+     * @see File
+     * @see Cache
      */
     public function __construct(RequestInterface $request, ResponseContent $responseContent)
     {
@@ -51,10 +57,10 @@ class ResponseContentReader
     }
 
     /**
-     * Reads the file and returns its contents as a Response.
+     * Reads the ResponseContent and returns its contents as a Response.
      *
-     * @throws InvalidFilePathException If the file path is invalid.
-     * @throws FileNotFoundException If the file does not exist or is not a regular file.
+     * @throws InvalidFilePathException If the request path is invalid.
+     * @throws FileNotFoundException If the ResponseContent does not exist correctly.
      * @return Response The HTTP response containing the file content.
      */
     public function getResponse(): Response
@@ -83,24 +89,24 @@ class ResponseContentReader
     }
 
     /**
-     * Validates the file path for traversal attacks.
+     * Validates the request path for traversal attacks.
      * Throws InvalidFilePathException if path is invalid.
      *
-     * @throws InvalidFilePathException If the file path is invalid.
+     * @throws InvalidFilePathException If the request path is invalid.
      * @return void
      */
     protected function validateFilePath(): void
     {
         $validator = new RequestPathValidator($this->path);
         if (!$validator->isValid()) {
-            throw new InvalidFilePathException("Invalid file path: $this->path");
+            throw new InvalidFilePathException("Invalid request path: $this->path");
         }
     }
 
     /**
-     * Checks if the file exists and is a regular file. Throws FileNotFoundException if not.
+     * Checks if the ResponseContent exists correctly. Throws FileNotFoundException if not.
      *
-     * @throws FileNotFoundException If the file does not exist or is not a regular file.
+     * @throws FileNotFoundException If the ResponseContent does not exist correctly.
      * @return void
      */
     protected function checkFileExistance(): void
