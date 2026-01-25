@@ -13,6 +13,11 @@ class HttpCodeMatcher
      */
     public static function match(int $httpCode, array $httpCodes): bool
     {
-        return in_array($httpCode, $httpCodes, true);
+        foreach ($httpCodes as $code) {
+            if ((string)$httpCode === (string)$code) {
+                return true;
+            }
+        }
+        return false;
     }
 }
