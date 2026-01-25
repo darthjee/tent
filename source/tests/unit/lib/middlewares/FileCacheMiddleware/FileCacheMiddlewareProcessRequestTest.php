@@ -32,10 +32,7 @@ class FileCacheMiddlewareProcessRequestTest extends TestCase
     {
         $path = '/file.txt';
         $headers = ['Content-Type: text/plain', 'Content-Length: 11'];
-        $request = new ProcessingRequest([
-            'requestPath' => $path,
-            'requestMethod' => 'GET'
-        ]);
+        $request = $this->buildRequest($path, 'GET');
         $response = new Response([
             'body' => 'cached body',
             'httpCode' => 200,
@@ -57,11 +54,20 @@ class FileCacheMiddlewareProcessRequestTest extends TestCase
     public function testProcessRequestReturnsRequestWhenCacheDoesNotExist()
     {
         $path = '/file.txt';
-        $request = new ProcessingRequest(['requestPath' => $path]);
+        $request = $this->buildRequest($path, 'GET');
         $middleware = new FileCacheMiddleware($this->location);
         $result = $middleware->processRequest($request);
 
         $this->assertFalse($result->hasResponse());
         $this->assertSame($request, $result);
+    }
+
+    private function buildRequest(string $path, string $method): ProcessingRequest
+    {
+        $request = new ProcessingRequest([
+            'requestPath' => $path,
+            'requestMethod' => $method
+        ]);
+        return $request;
     }
 }
