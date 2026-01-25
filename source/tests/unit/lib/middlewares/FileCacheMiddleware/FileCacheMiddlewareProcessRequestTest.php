@@ -42,7 +42,7 @@ class FileCacheMiddlewareProcessRequestTest extends TestCase
         $cache = new FileCache($path, $this->location);
         $cache->store($response);
 
-        $middleware = new FileCacheMiddleware($this->location);
+        $middleware = $this->buildMiddleware();
         $result = $middleware->processRequest($request);
 
         $this->assertTrue($result->hasResponse());
@@ -55,7 +55,7 @@ class FileCacheMiddlewareProcessRequestTest extends TestCase
     {
         $path = '/file.txt';
         $request = $this->buildRequest($path, 'GET');
-        $middleware = new FileCacheMiddleware($this->location);
+        $middleware = $this->buildMiddleware();
         $result = $middleware->processRequest($request);
 
         $this->assertFalse($result->hasResponse());
@@ -76,7 +76,7 @@ class FileCacheMiddlewareProcessRequestTest extends TestCase
         $cache = new FileCache($path, $this->location);
         $cache->store($response);
 
-        $middleware = new FileCacheMiddleware($this->location);
+        $middleware = $this->buildMiddleware();
         $result = $middleware->processRequest($request);
 
         $this->assertFalse($result->hasResponse());
@@ -97,7 +97,10 @@ class FileCacheMiddlewareProcessRequestTest extends TestCase
         $cache = new FileCache($path, $this->location);
         $cache->store($response);
 
-        $middleware = new FileCacheMiddleware($this->location, [], ['POST']);
+        $middleware = $this->buildMiddleware([
+            'requestMethods' => ['POST']
+        ]);
+        
         $result = $middleware->processRequest($request);
 
         $this->assertTrue($result->hasResponse());
@@ -110,5 +113,11 @@ class FileCacheMiddlewareProcessRequestTest extends TestCase
             'requestPath' => $path,
             'requestMethod' => $method
         ]);
+    }
+
+    private function buildMiddleware(array $attributes = []): FileCacheMiddleware
+    {
+        $attributes['location'] = $this->cacheDir;
+        return FileCacheMiddleware::build($attributes);
     }
 }
