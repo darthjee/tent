@@ -44,7 +44,8 @@ class ResponseContentReaderTest extends TestCase
         file_put_contents($this->testDir . '/test.txt', 'Hello World');
         $location = new FolderLocation($this->testDir);
         $request = new Request(['requestPath' => '/test.txt']);
-        $reader = new ResponseContentReader($request, $location);
+        $file = new File('/test.txt', $location);
+        $reader = new ResponseContentReader($request, $file);
 
         $response = $reader->getResponse();
         $this->assertInstanceOf(Response::class, $response);
@@ -57,7 +58,8 @@ class ResponseContentReaderTest extends TestCase
     {
         $location = new FolderLocation($this->testDir);
         $request = new Request(['requestPath' => '/nonexistent.txt']);
-        $reader = new ResponseContentReader($request, $location);
+        $file = new File('/nonexistent.txt', $location);
+        $reader = new ResponseContentReader($request, $file);
 
         $this->expectException(FileNotFoundException::class);
         $reader->getResponse();
@@ -67,7 +69,8 @@ class ResponseContentReaderTest extends TestCase
     {
         $location = new FolderLocation($this->testDir);
         $request = new Request(['requestPath' => '../etc/passwd']);
-        $reader = new ResponseContentReader($request, $location);
+        $file = new File('../etc/passwd', $location);
+        $reader = new ResponseContentReader($request, $file);
 
         $this->expectException(InvalidFilePathException::class);
         $reader->getResponse();

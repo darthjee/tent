@@ -3,7 +3,6 @@
 namespace Tent\Service;
 
 use Tent\Models\File;
-use Tent\Models\FolderLocation;
 use Tent\Models\Response;
 use Tent\Validators\RequestPathValidator;
 use Tent\Exceptions\FileNotFoundException;
@@ -37,13 +36,13 @@ class ResponseContentReader
      * Constructs a ResponseContentReader for the given file path and folder location.
      *
      * @param RequestInterface $request  The HTTP request containing the file path.
-     * @param FolderLocation   $location The base folder location.
+     * @param File   $file The file object representing the file to read.
      */
-    public function __construct(RequestInterface $request, FolderLocation $location)
+    public function __construct(RequestInterface $request, File $file)
     {
         $this->path = $request->requestPath();
         $this->request = $request;
-        $this->content = new File($this->path, $location);
+        $this->content = $file;
     }
 
     /**

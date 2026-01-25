@@ -5,6 +5,7 @@ namespace Tent\Handlers;
 use Tent\Models\FolderLocation;
 use Tent\Models\RequestInterface;
 use Tent\Models\Response;
+use Tent\Models\File;
 use Tent\Exceptions\FileNotFoundException;
 use Tent\Exceptions\InvalidFilePathException;
 use Tent\Models\MissingResponse;
@@ -66,7 +67,8 @@ class StaticFileHandler extends RequestHandler
     protected function processsRequest(RequestInterface $request): Response
     {
         try {
-            $fileReader = new ResponseContentReader($request, $this->folderLocation);
+            $file = new File($request->requestPath(), $this->folderLocation);
+            $fileReader = new ResponseContentReader($request, $file);
 
             return $fileReader->getResponse();
         } catch (InvalidFilePathException $e) {
