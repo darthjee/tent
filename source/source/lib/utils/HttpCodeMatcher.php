@@ -19,6 +19,10 @@ class HttpCodeMatcher
      * @param int   $httpCode  The HTTP status code to check.
      * @param array $httpCodes The list of allowed HTTP status codes.
      * @return bool True if the code matches, false otherwise.
+     *
+     * @example
+     *   HttpCodeMatcher::matchAny(404, ['2xx', '404', '500']) // returns true
+     *   HttpCodeMatcher::matchAny(201, ['4xx', '500'])        // returns false
      */
     public static function matchAny(int $httpCode, array $httpCodes): bool
     {
