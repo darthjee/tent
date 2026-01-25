@@ -54,11 +54,19 @@ class HttpCodeMatcher
     {
         $target = (string)$this->target;
         $codeStr = (string)$httpCode;
+
         if (preg_match('/[xX]/', $target)) {
             // Replace both 'x' and 'X' with '\d' for regex matching
-            $pattern = '/^' . str_replace(['x', 'X'], '\\d', preg_quote($target, '/')) . '$/';
+            $pattern = $this->regExp();
             return preg_match($pattern, $codeStr) === 1;
         }
+        
         return $codeStr === $target;
+    }
+
+    private function regExp()
+    {
+        $target = (string)$this->target;
+        return '/^' . str_replace(['x', 'X'], '\\d', preg_quote($target, '/')) . '$/';
     }
 }
