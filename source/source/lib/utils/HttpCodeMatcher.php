@@ -30,6 +30,13 @@ class HttpCodeMatcher
 
     public function match(int $httpCode): bool
     {
-        return (string)$httpCode === (string)$this->target;
+        $target = (string)$this->target;
+        $codeStr = (string)$httpCode;
+        if (strpos($target, 'x') !== false) {
+            // Replace 'x' with '\d' for regex matching
+            $pattern = '/^' . str_replace('x', '\\d', preg_quote($target, '/')) . '$/';
+            return preg_match($pattern, $codeStr) === 1;
+        }
+        return $codeStr === $target;
     }
 }
