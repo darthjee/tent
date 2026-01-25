@@ -32,7 +32,10 @@ class FileCacheMiddlewareProcessRequestTest extends TestCase
     {
         $path = '/file.txt';
         $headers = ['Content-Type: text/plain', 'Content-Length: 11'];
-        $request = new ProcessingRequest(['requestPath' => $path]);
+        $request = new ProcessingRequest([
+            'requestPath' => $path,
+            'requestMethod' => 'GET'
+        ]);
         $response = new Response([
             'body' => 'cached body',
             'httpCode' => 200,
@@ -45,6 +48,7 @@ class FileCacheMiddlewareProcessRequestTest extends TestCase
         $middleware = new FileCacheMiddleware($this->location);
         $result = $middleware->processRequest($request);
 
+        $this->assertTrue($result->hasResponse());
         $this->assertNotNull($result->response());
         $this->assertEquals('cached body', $result->response()->body());
         $this->assertEquals($headers, $result->response()->headerLines());
