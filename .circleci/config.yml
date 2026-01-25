@@ -196,7 +196,7 @@ jobs:
           name: Docker build
           command: |
             TAG=${CIRCLE_TAG:-latest}
-            docker build --platform linux/amd64 -f dockerfiles/Dockerfile.tent . -t darthjee/tent:$TAG -t darthjee/tent:latest
+            docker build --platform linux/amd64 -f dockerfiles/tent/Dockerfile . -t darthjee/tent:$TAG -t darthjee/tent:latest
       - run:
           name: Docker login
           command: echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin

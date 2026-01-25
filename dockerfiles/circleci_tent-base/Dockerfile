@@ -11,7 +11,8 @@ RUN apt-get update && apt-get install -y \
     $PHPIZE_DEPS \
     && docker-php-ext-install zip \
     && pecl install pcov \
-    && docker-php-ext-enable pcov;
+    && docker-php-ext-enable pcov; \
+    rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /home/circleci/project; \
     chown circleci.circleci -R /home/circleci
@@ -27,6 +28,6 @@ ENV PATH="$PATH://home/circleci/project/vendor/bin"
 
 COPY --chown=circleci:circleci ./source/composer.* /home/circleci/
 
-RUN cd /home/circleci; \
-    composer install
+WORKDIR /home/circleci/
+RUN composer install
 WORKDIR /home/circleci/project
