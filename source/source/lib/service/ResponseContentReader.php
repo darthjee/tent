@@ -16,7 +16,7 @@ use Tent\Models\RequestInterface;
  *
  * This class handles file path validation and existence checks before reading the file.
  */
-class FileReader
+class ResponseContentReader
 {
     /**
      * @var ResponseContent The file content wrapper.
@@ -34,7 +34,7 @@ class FileReader
     private RequestInterface $request;
 
     /**
-     * Constructs a FileReader for the given file path and folder location.
+     * Constructs a ResponseContentReader for the given file path and folder location.
      *
      * @param RequestInterface $request  The HTTP request containing the file path.
      * @param FolderLocation   $location The base folder location.
