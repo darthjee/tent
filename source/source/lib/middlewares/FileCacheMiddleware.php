@@ -6,6 +6,7 @@ use Tent\Models\ProcessingRequest;
 use Tent\Models\FolderLocation;
 use Tent\Models\FileCache;
 use Tent\Models\Response;
+use Tent\Service\ResponseContentReader;
 
 /**
  * Middleware for caching responses to files.
@@ -47,6 +48,15 @@ class FileCacheMiddleware extends Middleware
      */
     public function processRequest(ProcessingRequest $request): ProcessingRequest
     {
+        $path = $request->requestPath();
+        $cache = new FileCache($path, $this->location);
+
+        if ($cache->exists()) {
+            $reader = new ResponseContentReader($request, $cache);
+            $response = $reader->getResponse();
+            $request->setResponse($response);
+        }
+
         return $request;
     }
 
