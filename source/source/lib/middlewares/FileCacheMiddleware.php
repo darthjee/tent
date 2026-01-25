@@ -48,8 +48,10 @@ class FileCacheMiddleware extends Middleware
     /**
      * Processes the incoming request.
      *
-     * In the future, this method will check if a cached response exists for the incoming request
-     * and return it if available. Currently, it returns the request unmodified.
+     * Only attempts to read from cache if the request method is included in the configured
+     * requestMethods filter. If the method is not allowed, the request is returned unmodified.
+     *
+     * If a cached response exists for the request path, it is loaded and set on the request.
      *
      * @param ProcessingRequest $request The incoming processing request.
      * @return ProcessingRequest The (potentially cached) processing request.
@@ -74,6 +76,9 @@ class FileCacheMiddleware extends Middleware
 
     /**
      * Caches the response to a file.
+     *
+     * Only stores the response if its HTTP status code is included in the configured httpCodes filter.
+     * If the code is not allowed, the response is returned without caching.
      *
      * @param Response $response The response to cache.
      * @return Response The original response.
