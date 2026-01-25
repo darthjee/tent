@@ -14,15 +14,17 @@ use Tent\Service\ResponseContentReader;
 class FileCacheMiddleware extends Middleware
 {
     private FolderLocation $location;
+    private array $httpCodes;
 
     /**
      * Constructs a FileCacheMiddleware instance.
      *
      * @param FolderLocation $location The base folder location for caching.
      */
-    public function __construct(FolderLocation $location)
+    public function __construct(FolderLocation $location, array $httpCodes = null)
     {
         $this->location = $location;
+        $this->httpCodes = $httpCodes ?? [200];
     }
 
     /**
@@ -33,8 +35,9 @@ class FileCacheMiddleware extends Middleware
      */
     public static function build(array $attributes): FileCacheMiddleware
     {
-        $location = new FolderLocation($attributes['location'] ?? null);
-        return new self($location);
+        $location = new FolderLocation($attributes['location']);
+        $httpCodes = $attributes['httpCodes'] ?? null;
+        return new self($location, $httpCodes);
     }
 
     /**
