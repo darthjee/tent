@@ -42,7 +42,18 @@ class HttpCodeMatcherTest extends TestCase
         $this->assertTrue(HttpCodeMatcher::matchAny(300, ["30x"]));
         $this->assertTrue(HttpCodeMatcher::matchAny(301, ["30x"]));
         $this->assertTrue(HttpCodeMatcher::matchAny(309, ["30x"]));
+
         $this->assertFalse(HttpCodeMatcher::matchAny(310, ["30x"]));
         $this->assertFalse(HttpCodeMatcher::matchAny(299, ["30x"]));
+    }
+
+    public function testMatchReturnsTrueForWildcard4xx()
+    {
+        $this->assertTrue(HttpCodeMatcher::matchAny(400, ["4xx"]));
+        $this->assertTrue(HttpCodeMatcher::matchAny(401, ["4xx"]));
+        $this->assertTrue(HttpCodeMatcher::matchAny(499, ["4xx"]));
+
+        $this->assertFalse(HttpCodeMatcher::matchAny(500, ["4xx"]));
+        $this->assertFalse(HttpCodeMatcher::matchAny(399, ["4xx"]));
     }
 }
