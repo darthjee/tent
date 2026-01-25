@@ -106,10 +106,9 @@ class FileCacheMiddlewareProcessRequestTest extends TestCase
 
     private function buildRequest(string $path, string $method): ProcessingRequest
     {
-        $request = new ProcessingRequest([
+        return new ProcessingRequest([
             'requestPath' => $path,
             'requestMethod' => $method
         ]);
-        return $request;
     }
 }
