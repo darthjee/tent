@@ -17,7 +17,13 @@ use Tent\Models\RequestInterface;
 class ResponseContentReader
 {
     /**
-     * @var ResponseContent The file content wrapper.
+     * @var ResponseContent The source for content to be read.
+     *
+     * This is typically a File or Cache object implementing ResponseContent.
+     *
+     * @see ResponseContent
+     * @see File
+     * @see Cache
      */
     private ResponseContent $responseContent;
 
@@ -34,8 +40,8 @@ class ResponseContentReader
     /**
      * Constructs a ResponseContentReader for the given file path and folder location.
      *
-     * @param RequestInterface $request  The HTTP request containing the file path.
-     * @param ResponseContent  $responseContent The file content wrapper representing the file to read.
+     * @param RequestInterface $request         The HTTP request containing the file path.
+     * @param ResponseContent  $responseContent The source for content to be read.
      */
     public function __construct(RequestInterface $request, ResponseContent $responseContent)
     {
