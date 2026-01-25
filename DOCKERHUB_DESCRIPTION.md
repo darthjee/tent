@@ -143,7 +143,6 @@ Tent uses Apache with PHP to process all incoming requests through a centralized
 2. **Request Processing**: The PHP application analyzes the request and configuration
 3. **Action Selection**: Based on configuration, Tent will:
    - **Proxy Mode**: Forward requests to configured backend servers
-   - **Cache Mode**: Serve cached responses (future feature)
    - **Static Mode**: Serve static files directly (future feature)
 
 ## Architecture
