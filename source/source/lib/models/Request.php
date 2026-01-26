@@ -118,7 +118,7 @@ class Request implements RequestInterface
         if (isset($this->options['requestUri'])) {
             return $this->options['requestUri'];
         }
-        return $this->get('uri');
+        return $this->get('uri') ?? '/';
     }
 
     /**
