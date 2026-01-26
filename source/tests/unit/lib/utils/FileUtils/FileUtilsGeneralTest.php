@@ -28,4 +28,25 @@ class FileUtilsGeneralTest extends TestCase
     {
         $this->assertEquals('/var/www/app.js', FileUtils::getFullPath(['/var/www', 'app.js']));
     }
+
+    public function testGetFullPathWithThreeElementsBasic()
+    {
+        $this->assertEquals('/a/b/c', FileUtils::getFullPath(['/a/', '/b/', '/c']));
+    }
+
+    public function testGetFullPathWithThreeElementsTrailingSlashes()
+    {
+        $this->assertEquals('/a/b/c/', FileUtils::getFullPath(['/a/', '/b/', '/c/']));
+    }
+
+    public function testGetFullPathWithThreeElementsNoSlashes()
+    {
+        $this->assertEquals('a/b/c', FileUtils::getFullPath(['a', 'b', 'c']));
+    }
+
+    public function testGetFullPathWithThreeElementsMixedSlashes()
+    {
+        $this->assertEquals('/a/b/c', FileUtils::getFullPath(['/a/', 'b/', '/c']));
+        $this->assertEquals('a/b/c/', FileUtils::getFullPath(['a/', '/b/', 'c/']));
+    }
 }
