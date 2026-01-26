@@ -133,7 +133,7 @@ class ProcessingRequest implements RequestInterface
      *
      * @see RequestInterface::requestMethod()
      */
-    public function requestMethod() : string
+    public function requestMethod(): string
     {
         if ($this->requestMethod === null && $this->request) {
             $this->requestMethod = $this->request->requestMethod();

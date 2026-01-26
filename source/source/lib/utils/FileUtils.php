@@ -7,14 +7,12 @@ use Tent\Models\FolderLocation;
 class FileUtils
 {
     /**
-     * Constructs the full file path by combining the base path from the FolderLocation
-     * with the provided relative or absolute file path.
+     * Constructs the full file path by combining multiple path segments.
      *
      * @param string ...$paths Variable number of path segments to concatenate.
-     *
      * @return string The full file path.
      */
-    public static function getFullPath(...$paths): string
+    public static function getFullPath(string ...$paths): string
     {
         $paths = array_map(function ($p, $i) use ($paths) {
             if ($i === 0) {

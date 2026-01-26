@@ -15,9 +15,9 @@ class CacheFilePath
      *
      * @return string The constructed cache file path.
      *
-     * @throws \InvalidArgumentException If an invalid cache type is provided.
+     * @throws InvalidArgumentException If an invalid cache type is provided.
      */
-    public static function path(string $type, $basePath, string $query): string
+    public static function path(string $type, string $basePath, string $query): string
     {
         switch ($type) {
             case 'body':
