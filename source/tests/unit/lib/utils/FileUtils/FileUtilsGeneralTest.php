@@ -11,25 +11,21 @@ class FileUtilsGeneralTest extends TestCase
 {
     public function testGetFullPathConcatenatesBasePathAndFilePath()
     {
-        $location = new FolderLocation('/var/www/');
-           $this->assertEquals('/var/www/index.html', FileUtils::getFullPath('index.html', $location));
+        $this->assertEquals('/var/www/index.html', FileUtils::getFullPath('index.html', '/var/www/'));
     }
 
     public function testGetFullPathWithTrailingSlashInBasePath()
     {
-        $location = new FolderLocation('/var/www/');
-           $this->assertEquals('/var/www/assets/style.css', FileUtils::getFullPath('assets/style.css', $location));
+        $this->assertEquals('/var/www/assets/style.css', FileUtils::getFullPath('assets/style.css', '/var/www/'));
     }
 
     public function testGetFullPathWithNoTrailingSlashInBasePath()
     {
-        $location = new FolderLocation('/var/www');
-           $this->assertEquals('/var/www/assets/app.js', FileUtils::getFullPath('/assets/app.js', $location));
+        $this->assertEquals('/var/www/assets/app.js', FileUtils::getFullPath('/assets/app.js', '/var/www'));
     }
 
     public function testGetFullPathWithNoSlashInBasePathOrFilePath()
     {
-        $location = new FolderLocation('/var/www');
-           $this->assertEquals('/var/www/app.js', FileUtils::getFullPath('app.js', $location));
+        $this->assertEquals('/var/www/app.js', FileUtils::getFullPath('app.js', '/var/www'));
     }
 }

@@ -11,13 +11,13 @@ class FileUtils
      * with the provided relative or absolute file path.
      *
      * @param string         $path     Relative or absolute file path.
-     * @param FolderLocation $location The base folder location.
+     * @param string $location The base folder location.
      *
      * @return string The full file path.
      */
-    public static function getFullPath(string $path, FolderLocation $location): string
+    public static function getFullPath(string $path, string $location): string
     {
-        $base = rtrim($location->basePath(), '/');
+        $base = rtrim($location, '/');
         $file = ltrim($path, '/');
         return $base . '/' . $file;
     }
