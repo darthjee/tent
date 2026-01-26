@@ -25,7 +25,15 @@ class FileCache implements Cache
      */
     private FolderLocation $location;
 
-    private $content;
+    /**
+     * @var string|null Cached content of the response body.
+     */
+    private ?string $content = null;
+
+    /**
+     * @var string Cached hash of the request query.
+     */
+    private string $queryHash;
 
     /**
      * Constructs a Cache object.
@@ -38,6 +46,7 @@ class FileCache implements Cache
         $this->request = $request;
         $this->path = $request->requestPath();
         $this->location = $location;
+        $this->queryHash = hash('sha256', $request->query() ?? '');
     }
 
     /**
@@ -111,13 +120,6 @@ class FileCache implements Cache
                 throw new InvalidArgumentException("Invalid cache type: $type");
         }
     }
-
-    /*
-    protected function fileHash(): string
-    {
-        return hash('sha256', '');
-    }
-    */
 
     /**
      * Returns the base path for the cache files.
