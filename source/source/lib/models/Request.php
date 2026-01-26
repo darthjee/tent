@@ -98,7 +98,7 @@ class Request implements RequestInterface
      *
      * @see RequestInterface::query()
      */
-    public function query()
+    public function query(): string
     {
         if (isset($this->options['query'])) {
             return $this->options['query'];
