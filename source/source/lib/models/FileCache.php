@@ -30,8 +30,8 @@ class FileCache implements Cache
     /**
      * Constructs a Cache object.
      *
-     * @param RequestInterface $request The request associated with this cache.
-     * @param FolderLocation $location The base folder location.
+     * @param RequestInterface $request  The request associated with this cache.
+     * @param FolderLocation   $location The base folder location.
      */
     public function __construct(RequestInterface $request, FolderLocation $location)
     {
