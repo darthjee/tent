@@ -9,7 +9,7 @@ class CacheFilePath
 {
     public static function path(string $type, RequestInterface $request, string $location): string
     {
-        $basePath = FileUtils::getFullPath($request->requestPath(), $location);
+        $basePath = FileUtils::getFullPath($location, $request->requestPath());
 
         switch ($type) {
             case 'body':
