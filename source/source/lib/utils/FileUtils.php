@@ -15,8 +15,9 @@ class FileUtils
      *
      * @return string The full file path.
      */
-    public static function getFullPath(string $location, string $path): string
+    public static function getFullPath($paths): string
     {
+        [$location, $path] = $paths;
         $base = rtrim($location, '/');
         $file = ltrim($path, '/');
         return $base . '/' . $file;

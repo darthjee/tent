@@ -122,7 +122,7 @@ class FileCache implements Cache
      */
     protected function basePath(): string
     {
-        return FileUtils::getFullPath($this->location->basePath(), $this->path);
+        return FileUtils::getFullPath([$this->location->basePath(), $this->path]);
     }
 
     /**
