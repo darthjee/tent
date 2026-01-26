@@ -108,7 +108,12 @@ class Request implements RequestInterface
         return $parts['query'] ?? '';
     }
 
-    protected function requestUri()
+    /**
+     * Helper method to get the full request URI.
+     *
+     * @return string The full request URI
+     */
+    protected function requestUri(): string
     {
         if (isset($this->options['requestUri'])) {
             return $this->options['requestUri'];
