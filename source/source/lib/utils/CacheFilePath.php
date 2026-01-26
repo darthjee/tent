@@ -7,8 +7,10 @@ use Tent\Models\FolderLocation;
 
 class CacheFilePath
 {
-    public static function path(string $basePath, string $type, RequestInterface $request, FolderLocation $location): string
+    public static function path(string $type, RequestInterface $request, FolderLocation $location): string
     {
+        $basePath = FileUtils::getFullPath($request->requestPath(), $location);
+        
         switch ($type) {
             case 'body':
                 return $basePath . '/cache.body.txt';
