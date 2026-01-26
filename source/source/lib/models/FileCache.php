@@ -106,6 +106,13 @@ class FileCache implements Cache
         }
     }
 
+    /*
+    protected function fileHash(): string
+    {
+        return hash('sha256', '');
+    }
+    */
+
     /**
      * Returns the base path for the cache files.
      *
