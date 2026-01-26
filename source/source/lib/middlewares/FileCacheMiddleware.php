@@ -64,7 +64,7 @@ class FileCacheMiddleware extends Middleware
         }
 
         $path = $request->requestPath();
-        $cache = new FileCache($path, $this->location);
+        $cache = new FileCache($request, $this->location);
 
         if ($cache->exists()) {
             $reader = new ResponseContentReader($request, $cache);
@@ -88,7 +88,7 @@ class FileCacheMiddleware extends Middleware
     {
         if ($response && HttpCodeMatcher::matchAny($response->httpCode(), $this->httpCodes)) {
             $path = $response->request()->requestPath();
-            $cache = new FileCache($path, $this->location);
+            $cache = new FileCache($response->request(), $this->location);
             $cache->store($response);
         }
         return $response;
