@@ -11,6 +11,11 @@ use Tent\Models\Response;
 class FileCache implements Cache
 {
     /**
+     * @var RequestInterface The request associated with this cache.
+     */
+    private RequestInterface $request;
+
+    /**
      * @var string Relative or absolute file path.
      */
     private string $path;
@@ -25,12 +30,13 @@ class FileCache implements Cache
     /**
      * Constructs a Cache object.
      *
-     * @param string         $path     Relative or absolute file path.
+     * @param RequestInterface $request The request associated with this cache.
      * @param FolderLocation $location The base folder location.
      */
-    public function __construct(string $path, FolderLocation $location)
+    public function __construct(RequestInterface $request, FolderLocation $location)
     {
-        $this->path = $path;
+        $this->request = $request;
+        $this->path = $request->requestPath();
         $this->location = $location;
     }
 
