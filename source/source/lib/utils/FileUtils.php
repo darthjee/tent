@@ -17,12 +17,9 @@ class FileUtils
      */
     public static function getFullPath($paths): string
     {
-        $count = count($paths);
-        $paths = array_map(function ($p, $i) use ($count, $paths) {
+        $paths = array_map(function ($p, $i) use ($paths) {
             if ($i === 0) {
                 return rtrim($p, '/');
-            } elseif ($i === $count - 1) {
-                return ltrim($p, '/');
             } else {
                 return trim($p, '/');
             }

@@ -36,7 +36,7 @@ class FileUtilsGeneralTest extends TestCase
 
     public function testGetFullPathWithThreeElementsTrailingSlashes()
     {
-        $this->assertEquals('/a/b/c/', FileUtils::getFullPath(['/a/', '/b/', '/c/']));
+        $this->assertEquals('/a/b/c', FileUtils::getFullPath(['/a/', '/b/', '/c/']));
     }
 
     public function testGetFullPathWithThreeElementsNoSlashes()
@@ -47,6 +47,6 @@ class FileUtilsGeneralTest extends TestCase
     public function testGetFullPathWithThreeElementsMixedSlashes()
     {
         $this->assertEquals('/a/b/c', FileUtils::getFullPath(['/a/', 'b/', '/c']));
-        $this->assertEquals('a/b/c/', FileUtils::getFullPath(['a/', '/b/', 'c/']));
+        $this->assertEquals('a/b/c', FileUtils::getFullPath(['a/', '/b/', 'c/']));
     }
 }
