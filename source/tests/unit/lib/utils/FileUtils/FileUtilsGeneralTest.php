@@ -26,6 +26,6 @@ class FileUtilsGeneralTest extends TestCase
 
     public function testGetFullPathWithNoSlashInBasePathOrFilePath()
     {
-        $this->assertEquals('/var/www/app.js', FileUtils::getFullPath('/var/www','app.js'));
+        $this->assertEquals('/var/www/app.js', FileUtils::getFullPath('/var/www', 'app.js'));
     }
 }

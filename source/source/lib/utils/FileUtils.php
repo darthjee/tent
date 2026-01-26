@@ -10,8 +10,8 @@ class FileUtils
      * Constructs the full file path by combining the base path from the FolderLocation
      * with the provided relative or absolute file path.
      *
-     * @param string         $location The base folder location.
-     * @param string         $path     Relative or absolute file path.
+     * @param string $location The base folder location.
+     * @param string $path     Relative or absolute file path.
      *
      * @return string The full file path.
      */
