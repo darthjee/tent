@@ -31,7 +31,14 @@ class FileCache implements Cache
      */
     private ?string $content = null;
 
+    /**
+     * @var string Full path to the body cache file.
+     */
     private string $bodyFilePath;
+
+    /**
+     * @var string Full path to the headers cache file.
+     */
     private string $headersFilePath;
 
     /**
