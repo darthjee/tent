@@ -3,10 +3,11 @@
 namespace Tent\Utils;
 
 use Tent\Models\RequestInterface;
+use Tent\Models\FolderLocation;
 
 class CacheFilePath
 {
-    public static function path(string $basePath, string $type, RequestInterface $request): string
+    public static function path(string $basePath, string $type, RequestInterface $request, FolderLocation $location): string
     {
         switch ($type) {
             case 'body':

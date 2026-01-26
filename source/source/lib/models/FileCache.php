@@ -112,7 +112,7 @@ class FileCache implements Cache
      */
     protected function fullPath(string $type): string
     {
-        return CacheFilePath::path($this->basePath(), $type, $this->request);
+        return CacheFilePath::path($this->basePath(), $type, $this->request, $this->location);
     }
 
     /**
