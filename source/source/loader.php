@@ -32,6 +32,7 @@ require_once __DIR__ . '/lib/models/Rule.php';
 require_once __DIR__ . '/lib/models/Server.php';
 require_once __DIR__ . '/lib/service/ResponseContentReader.php';
 require_once __DIR__ . '/lib/service/RequestProcessor.php';
+require_once __DIR__ . '/lib/utils/CacheFilePath.php';
 require_once __DIR__ . '/lib/utils/CurlUtils.php';
 require_once __DIR__ . '/lib/utils/ContentType.php';
 require_once __DIR__ . '/lib/utils/FileUtils.php';

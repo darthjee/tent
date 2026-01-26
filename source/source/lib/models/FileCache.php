@@ -7,6 +7,7 @@ use Tent\Models\ResponseContent;
 use Tent\Utils\FileUtils;
 use InvalidArgumentException;
 use Tent\Models\Response;
+use Tent\Utils\CacheFilePath;
 
 class FileCache implements Cache
 {
@@ -111,14 +112,7 @@ class FileCache implements Cache
      */
     protected function fullPath(string $type): string
     {
-        switch ($type) {
-            case 'body':
-                return $this->basePath() . '/cache.body.txt';
-            case 'headers':
-                return $this->basePath() . '/cache.headers.json';
-            default:
-                throw new InvalidArgumentException("Invalid cache type: $type");
-        }
+        return CacheFilePath::path($this->basePath(), $type, $this->request);
     }
 
     /**
