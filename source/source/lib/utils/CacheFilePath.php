@@ -2,15 +2,10 @@
 
 namespace Tent\Utils;
 
-use Tent\Models\RequestInterface;
-use Tent\Models\FolderLocation;
-
 class CacheFilePath
 {
-    public static function path(string $type, RequestInterface $request, string $location): string
+    public static function path(string $type, $basePath, ?string $query): string
     {
-        $basePath = FileUtils::getFullPath($location, $request->requestPath());
-
         switch ($type) {
             case 'body':
                 return $basePath . '/cache.body.txt';
