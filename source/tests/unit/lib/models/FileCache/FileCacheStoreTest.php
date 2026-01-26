@@ -32,12 +32,12 @@ class FileCacheStoreTest extends TestCase
     {
         $path = '/path/file.txt';
         $headers = ['Content-Type: text/plain', 'Content-Length: 11'];
-        $request = new Request([]);
+        $request = new Request([ 'requestPath' => $path ]);
         $response = new Response([
             'body' => 'cached body', 'httpCode' => 200, 'headers' => $headers, 'request' => $request
         ]);
 
-        $cache = new FileCache($path, $this->location);
+        $cache = new FileCache($request, $this->location);
 
         $cache->store($response);
 
@@ -49,12 +49,12 @@ class FileCacheStoreTest extends TestCase
     public function testStoreCreatesDirectories()
     {
         $path = '/nested_dir/file.txt';
-        $request = new Request([]);
+        $request = new Request([ 'requestPath' => $path ]);
         $response = new Response([
             'body' => 'nested body', 'httpCode' => 200, 'headers' => [], 'request' => $request
         ]);
 
-        $cache = new FileCache($path, $this->location);
+        $cache = new FileCache($request, $this->location);
 
         $cache->store($response);
 
@@ -68,12 +68,12 @@ class FileCacheStoreTest extends TestCase
         $fullPath = $this->cacheDir . '/nested_dir/file.txt';
         mkdir($fullPath, 0777, true);
 
-        $request = new Request([]);
+        $request = new Request([ 'requestPath' => $path ]);
         $response = new Response([
             'body' => 'some body', 'httpCode' => 200, 'headers' => [], 'request' => $request
         ]);
 
-        $cache = new FileCache($path, $this->location);
+        $cache = new FileCache($request, $this->location);
 
         $cache->store($response);
 
