@@ -129,16 +129,16 @@ class ProcessingRequest implements RequestInterface
     /**
      * Returns the HTTP request method (e.g., GET, POST), caching the result after first access.
      *
-     * @return string|null HTTP method or null if no request is set
+     * @return string HTTP method or empty string if no request is set
      *
      * @see RequestInterface::requestMethod()
      */
-    public function requestMethod()
+    public function requestMethod() : string
     {
         if ($this->requestMethod === null && $this->request) {
             $this->requestMethod = $this->request->requestMethod();
         }
-        return $this->requestMethod;
+        return $this->requestMethod ?? '';
     }
 
     /**
@@ -159,16 +159,16 @@ class ProcessingRequest implements RequestInterface
     /**
      * Returns the request headers as an associative array, caching the result after first access.
      *
-     * @return array|null Associative array of request headers or null if no request is set
+     * @return array Associative array of request headers or empty array if no request is set
      *
      * @see RequestInterface::headers()
      */
-    public function headers()
+    public function headers(): array
     {
         if ($this->headers === null && $this->request) {
             $this->headers = $this->request->headers();
         }
-        return $this->headers;
+        return $this->headers ?? [];
     }
 
     /**
@@ -188,7 +188,7 @@ class ProcessingRequest implements RequestInterface
     /**
      * Returns the request URL path (e.g., /index.html), caching the result after first access.
      *
-     * @return string|null The path portion of the request URL or null if no request is set
+     * @return string The path portion of the request URL or empty string if no request is set
      *
      * @see RequestInterface::requestPath()
      */
@@ -197,21 +197,21 @@ class ProcessingRequest implements RequestInterface
         if ($this->requestPath === null && $this->request) {
             $this->requestPath = $this->request->requestPath();
         }
-        return $this->requestPath;
+        return $this->requestPath ?? '';
     }
 
     /**
      * Returns the query string from the request URL, caching the result after first access.
      *
-     * @return string|null The query string or null if no request is set
+     * @return string The query string or empty string if no request is set
      *
      * @see RequestInterface::query()
      */
-    public function query()
+    public function query(): string
     {
         if ($this->query === null && $this->request) {
             $this->query = $this->request->query();
         }
-        return $this->query;
+        return $this->query ?? '';
     }
 }

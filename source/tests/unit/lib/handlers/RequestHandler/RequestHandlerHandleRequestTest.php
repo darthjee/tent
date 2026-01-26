@@ -25,9 +25,9 @@ class RequestHandlerHandleRequestTest extends TestCase
         $this->assertInstanceOf(Response::class, $response);
         $expected = [
             'uri' => null,
-            'query' => null,
+            'query' => '',
             'method' => null,
-            'headers' => null,
+            'headers' => [],
             'body' => null,
         ];
         $actual = json_decode($response->body(), true);
