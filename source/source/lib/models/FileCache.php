@@ -36,6 +36,9 @@ class FileCache implements Cache
      */
     private string $queryHash;
 
+    private string $bodyFilePath;
+    private string $headersFilePath;
+
     /**
      * Constructs a Cache object.
      *
@@ -48,6 +51,9 @@ class FileCache implements Cache
         $this->path = $request->requestPath();
         $this->location = $location;
         $this->queryHash = hash('sha256', $request->query() ?? '');
+
+        $this->bodyFilePath = CacheFilePath::path('body', $this->basePath(), $this->request->query());
+        $this->headersFilePath = CacheFilePath::path('headers', $this->basePath(), $this->request->query());
     }
 
     /**
@@ -58,7 +64,7 @@ class FileCache implements Cache
     public function content(): string
     {
         if ($this->content == null) {
-            $this->content = file_get_contents($this->fullPath('body'));
+            $this->content = file_get_contents($this->bodyFilePath);
         }
         return $this->content;
     }
@@ -70,7 +76,7 @@ class FileCache implements Cache
      */
     public function headers(): array
     {
-        $headersPath = $this->fullPath('headers');
+        $headersPath = $this->headersFilePath;
         $content = file_get_contents($headersPath);
         return json_decode($content, true);
     }
@@ -84,10 +90,7 @@ class FileCache implements Cache
      */
     public function exists(): bool
     {
-        $bodyPath = $this->fullPath('body');
-        $headersPath = $this->fullPath('headers');
-
-        return FileUtils::exists($bodyPath) && FileUtils::exists($headersPath);
+        return FileUtils::exists($this->bodyFilePath) && FileUtils::exists($this->headersFilePath);
     }
 
     /**
@@ -100,8 +103,8 @@ class FileCache implements Cache
     {
         $basePath = $this->basePath();
         $this->ensureCacheFolderExists($basePath);
-        file_put_contents($this->fullPath('body'), $response->body());
-        file_put_contents($this->fullPath('headers'), json_encode($response->headerLines()));
+        file_put_contents($this->bodyFilePath, $response->body());
+        file_put_contents($this->headersFilePath, json_encode($response->headerLines()));
     }
 
     /**
