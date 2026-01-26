@@ -23,11 +23,18 @@ class RequestTest extends TestCase
 
     public function testRequestMethodReturnsGetMethod()
     {
-        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_METHOD'] = 'PUT';
 
         $request = new Request();
 
-        $this->assertEquals('GET', $request->requestMethod());
+        $this->assertEquals('PUT', $request->requestMethod());
+    }
+
+    public function testRequestMethodReturnsGetMethodWithSetup()
+    {
+        $request = new Request(['requestMethod' => 'POST']);
+
+        $this->assertEquals('POST', $request->requestMethod());
     }
 
     public function testRequestMethodReturnsPostMethod()
@@ -37,6 +44,13 @@ class RequestTest extends TestCase
         $request = new Request();
 
         $this->assertEquals('POST', $request->requestMethod());
+    }
+
+    public function testRequestPathReturnsPathWithSetup()
+    {
+        $request = new Request(['requestPath' => '/api/users/1']);
+
+        $this->assertEquals('/api/users/1', $request->requestPath());
     }
 
     public function testRequestPathReturnsPath()
@@ -57,6 +71,13 @@ class RequestTest extends TestCase
         $this->assertEquals('/api/users', $request->requestPath());
     }
 
+    public function testRequestPathReturnsPathWitUriSetup()
+    {
+        $request = new Request(['requestUri' => '/api/users/all?page=1&limit=10']);
+
+        $this->assertEquals('/api/users/all', $request->requestPath());
+    }
+
     public function testRequestPathReturnsRootWhenEmpty()
     {
         $_SERVER['REQUEST_URI'] = '/';
@@ -73,6 +94,20 @@ class RequestTest extends TestCase
         $request = new Request();
 
         $this->assertEquals('page=1&limit=10', $request->query());
+    }
+
+    public function testQueryReturnsQueryStringWithSetup()
+    {
+        $request = new Request(['query' => 'page=1&limit=20']);
+
+        $this->assertEquals('page=1&limit=20', $request->query());
+    }
+
+    public function testQueryReturnsQueryStringWithUriSetup()
+    {
+        $request = new Request(['requestUri' => '/api/users?page=1&limit=100']);
+
+        $this->assertEquals('page=1&limit=100', $request->query());
     }
 
     public function testQueryReturnsEmptyStringWhenNoQuery()
