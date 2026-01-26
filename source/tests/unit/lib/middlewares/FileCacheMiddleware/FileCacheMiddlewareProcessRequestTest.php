@@ -110,7 +110,7 @@ class FileCacheMiddlewareProcessRequestTest extends TestCase
             'headers' => $this->headers,
             'request' => $this->request
         ]);
-        $cache = new FileCache($this->path, $this->location);
+        $cache = new FileCache($this->request, $this->location);
         $cache->store($this->response);
     }
 }

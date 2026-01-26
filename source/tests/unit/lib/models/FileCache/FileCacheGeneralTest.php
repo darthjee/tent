@@ -5,6 +5,7 @@ namespace Tent\Tests;
 use PHPUnit\Framework\TestCase;
 use Tent\Models\FileCache;
 use Tent\Models\FolderLocation;
+use Tent\Models\Request;
 
 class FileCacheGeneralTest extends TestCase
 {
@@ -12,6 +13,7 @@ class FileCacheGeneralTest extends TestCase
     private $path;
     private $fullPath;
     private $headers;
+    private $request;
 
     public function setUp(): void
     {
@@ -19,6 +21,7 @@ class FileCacheGeneralTest extends TestCase
         $this->path = 'some_file.txt';
         $this->fullPath = $this->basePath . '/' . $this->path;
         $this->headers = ['Content-Type' => 'text/plain'];
+        $this->request = new Request(['requestPath' => $this->path]);
 
         mkdir($this->fullPath, 0777, true);
 
@@ -37,21 +40,21 @@ class FileCacheGeneralTest extends TestCase
     public function testContentReadsCacheBodyFile()
     {
         $location = new FolderLocation($this->basePath);
-        $cache = new FileCache($this->path, $location);
+        $cache = new FileCache($this->request, $location);
         $this->assertEquals('Cached body content', $cache->content());
     }
 
     public function testContentReadsCacheHeadersFile()
     {
         $location = new FolderLocation($this->basePath);
-        $cache = new FileCache($this->path, $location);
+        $cache = new FileCache($this->request, $location);
         $this->assertEquals($this->headers, $cache->headers());
     }
 
     public function testExistsReturnsTrueWhenBothFilesExist()
     {
         $location = new FolderLocation($this->basePath);
-        $cache = new FileCache($this->path, $location);
+        $cache = new FileCache($this->request, $location);
         $this->assertTrue($cache->exists());
     }
 
@@ -59,7 +62,7 @@ class FileCacheGeneralTest extends TestCase
     {
         @unlink($this->fullPath . '/cache.body.txt');
         $location = new FolderLocation($this->basePath);
-        $cache = new FileCache($this->path, $location);
+        $cache = new FileCache($this->request, $location);
         $this->assertFalse($cache->exists());
     }
 
@@ -67,7 +70,7 @@ class FileCacheGeneralTest extends TestCase
     {
         @unlink($this->fullPath . '/cache.headers.json');
         $location = new FolderLocation($this->basePath);
-        $cache = new FileCache($this->path, $location);
+        $cache = new FileCache($this->request, $location);
         $this->assertFalse($cache->exists());
     }
 }

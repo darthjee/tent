@@ -39,7 +39,7 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
         $middleware = $this->buildMiddleware();
         $middleware->processResponse($response);
 
-        $this->cache = new FileCache($this->path, $this->location);
+        $this->cache = new FileCache($this->request, $this->location);
         $this->assertTrue($this->cache->exists());
         $this->assertEquals('cached body', $this->cache->content());
         $this->assertEquals($this->headers, $this->cache->headers());
@@ -52,7 +52,7 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
         $middleware = $this->buildMiddleware();
         $middleware->processResponse($response);
 
-        $this->cache = new FileCache($this->path, $this->location);
+        $this->cache = new FileCache($this->request, $this->location);
         $this->assertFalse($this->cache->exists());
     }
 
@@ -63,7 +63,7 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
         $middleware = $this->buildMiddleware([403]);
         $middleware->processResponse($response);
 
-        $this->cache = new FileCache($this->path, $this->location);
+        $this->cache = new FileCache($this->request, $this->location);
         $this->assertTrue($this->cache->exists());
     }
 
@@ -74,7 +74,7 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
         $middleware = $this->buildMiddleware(['4XX']);
         $middleware->processResponse($response);
 
-        $this->cache = new FileCache($this->path, $this->location);
+        $this->cache = new FileCache($this->request, $this->location);
         $this->assertTrue($this->cache->exists());
     }
 
