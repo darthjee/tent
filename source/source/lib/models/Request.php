@@ -86,7 +86,7 @@ class Request implements RequestInterface
         if (isset($this->options['requestPath'])) {
             return $this->options['requestPath'];
         }
-        $uri = $this->get('uri');
+        $uri = $this->requestUri();
         $parts = parse_url($uri);
         return $parts['path'] ?? '/';
     }
@@ -103,9 +103,17 @@ class Request implements RequestInterface
         if (isset($this->options['query'])) {
             return $this->options['query'];
         }
-        $uri = $this->get('uri');
+        $uri = $this->requestUri();
         $parts = parse_url($uri);
         return $parts['query'] ?? '';
+    }
+
+    protected function requestUri()
+    {
+        if (isset($this->options['requestUri'])) {
+            return $this->options['requestUri'];
+        }
+        return $this->get('uri');
     }
 
     /**
