@@ -84,7 +84,7 @@ class File implements ResponseContent
      */
     private function fullPath(): string
     {
-        return FileUtils::getFullPath([$this->location->basePath(), $this->path]);
+        return FileUtils::getFullPath($this->location->basePath(), $this->path);
     }
 
     /**

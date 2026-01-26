@@ -10,12 +10,11 @@ class FileUtils
      * Constructs the full file path by combining the base path from the FolderLocation
      * with the provided relative or absolute file path.
      *
-     * @param string $location The base folder location.
-     * @param string $path     Relative or absolute file path.
+     * @param string ...$paths Variable number of path segments to concatenate.
      *
      * @return string The full file path.
      */
-    public static function getFullPath($paths): string
+    public static function getFullPath(...$paths): string
     {
         $paths = array_map(function ($p, $i) use ($paths) {
             if ($i === 0) {
