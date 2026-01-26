@@ -17,10 +17,17 @@ class FileUtils
      */
     public static function getFullPath($paths): string
     {
-        [$location, $path] = $paths;
-        $base = rtrim($location, '/');
-        $file = ltrim($path, '/');
-        return $base . '/' . $file;
+        $count = count($paths);
+        $paths = array_map(function ($p, $i) use ($count, $paths) {
+            if ($i === 0) {
+                return rtrim($p, '/');
+            } elseif ($i === $count - 1) {
+                return ltrim($p, '/');
+            } else {
+                return trim($p, '/');
+            }
+        }, $paths, array_keys($paths));
+        return implode('/', $paths);
     }
 
     /**
