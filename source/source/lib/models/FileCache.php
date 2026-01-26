@@ -31,11 +31,6 @@ class FileCache implements Cache
      */
     private ?string $content = null;
 
-    /**
-     * @var string Cached hash of the request query.
-     */
-    private string $queryHash;
-
     private string $bodyFilePath;
     private string $headersFilePath;
 
@@ -50,10 +45,10 @@ class FileCache implements Cache
         $this->request = $request;
         $this->path = $request->requestPath();
         $this->location = $location;
-        $this->queryHash = hash('sha256', $request->query() ?? '');
 
-        $this->bodyFilePath = CacheFilePath::path('body', $this->basePath(), $this->request->query());
-        $this->headersFilePath = CacheFilePath::path('headers', $this->basePath(), $this->request->query());
+        $query = $this->request->query();
+        $this->bodyFilePath = CacheFilePath::path('body', $this->basePath(), $query);
+        $this->headersFilePath = CacheFilePath::path('headers', $this->basePath(), $query);
     }
 
     /**
@@ -76,8 +71,7 @@ class FileCache implements Cache
      */
     public function headers(): array
     {
-        $headersPath = $this->headersFilePath;
-        $content = file_get_contents($headersPath);
+        $content = file_get_contents($this->headersFilePath);
         return json_decode($content, true);
     }
 
