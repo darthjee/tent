@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Tent\Models\FileCache;
 use Tent\Models\FolderLocation;
 use Tent\Models\Request;
+use Tent\Utils\CacheFilePath;
 
 class FileCacheGeneralTest extends TestCase
 {
@@ -25,14 +26,14 @@ class FileCacheGeneralTest extends TestCase
 
         mkdir($this->fullPath, 0777, true);
 
-        file_put_contents($this->fullPath . '/cache.body.txt', 'Cached body content');
-        file_put_contents($this->fullPath . '/cache.headers.json', json_encode($this->headers));
+        file_put_contents(CacheFilePath::path('body', $this->fullPath, ''), 'Cached body content');
+        file_put_contents(CacheFilePath::path('headers', $this->fullPath, ''), json_encode($this->headers));
     }
 
     public function tearDown(): void
     {
-        @unlink($this->fullPath . '/cache.body.txt');
-        @unlink($this->fullPath . '/cache.headers.json');
+        @unlink(CacheFilePath::path('body', $this->fullPath, ''));
+        @unlink(CacheFilePath::path('headers', $this->fullPath, ''));
         @rmdir($this->fullPath);
         @rmdir($this->basePath);
     }
@@ -60,7 +61,7 @@ class FileCacheGeneralTest extends TestCase
 
     public function testExistsReturnsFalseWhenBodyFileIsMissing()
     {
-        @unlink($this->fullPath . '/cache.body.txt');
+        @unlink(CacheFilePath::path('body', $this->fullPath, ''));
         $location = new FolderLocation($this->basePath);
         $cache = new FileCache($this->request, $location);
         $this->assertFalse($cache->exists());
@@ -68,7 +69,7 @@ class FileCacheGeneralTest extends TestCase
 
     public function testExistsReturnsFalseWhenHeadersFileIsMissing()
     {
-        @unlink($this->fullPath . '/cache.headers.json');
+        @unlink(CacheFilePath::path('headers', $this->fullPath, ''));
         $location = new FolderLocation($this->basePath);
         $cache = new FileCache($this->request, $location);
         $this->assertFalse($cache->exists());

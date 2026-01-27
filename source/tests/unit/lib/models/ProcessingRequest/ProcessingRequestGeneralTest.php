@@ -111,11 +111,11 @@ class ProcessingRequestGeneralTest extends TestCase
     public function testReturnsNullIfNoRequestProvided()
     {
         $processingRequest = new ProcessingRequest([]);
-        $this->assertNull($processingRequest->requestMethod());
+        $this->assertEquals('', $processingRequest->requestMethod());
         $this->assertNull($processingRequest->body());
-        $this->assertNull($processingRequest->headers());
-        $this->assertNull($processingRequest->requestPath());
-        $this->assertNull($processingRequest->query());
+        $this->assertEquals([], $processingRequest->headers());
+        $this->assertEquals('', $processingRequest->requestPath());
+        $this->assertEquals('', $processingRequest->query());
     }
 
     public function testHasResponse()

@@ -7,6 +7,7 @@ use Tent\Models\ResponseContent;
 use Tent\Utils\FileUtils;
 use InvalidArgumentException;
 use Tent\Models\Response;
+use Tent\Utils\CacheFilePath;
 
 class FileCache implements Cache
 {
@@ -25,7 +26,20 @@ class FileCache implements Cache
      */
     private FolderLocation $location;
 
-    private $content;
+    /**
+     * @var string|null Cached content of the response body.
+     */
+    private ?string $content = null;
+
+    /**
+     * @var string Full path to the body cache file.
+     */
+    private string $bodyFilePath;
+
+    /**
+     * @var string Full path to the headers cache file.
+     */
+    private string $headersFilePath;
 
     /**
      * Constructs a Cache object.
@@ -38,6 +52,10 @@ class FileCache implements Cache
         $this->request = $request;
         $this->path = $request->requestPath();
         $this->location = $location;
+
+        $query = $this->request->query();
+        $this->bodyFilePath = CacheFilePath::path('body', $this->basePath(), $query);
+        $this->headersFilePath = CacheFilePath::path('headers', $this->basePath(), $query);
     }
 
     /**
@@ -48,7 +66,7 @@ class FileCache implements Cache
     public function content(): string
     {
         if ($this->content == null) {
-            $this->content = file_get_contents($this->fullPath('body'));
+            $this->content = file_get_contents($this->bodyFilePath);
         }
         return $this->content;
     }
@@ -60,8 +78,7 @@ class FileCache implements Cache
      */
     public function headers(): array
     {
-        $headersPath = $this->fullPath('headers');
-        $content = file_get_contents($headersPath);
+        $content = file_get_contents($this->headersFilePath);
         return json_decode($content, true);
     }
 
@@ -74,10 +91,7 @@ class FileCache implements Cache
      */
     public function exists(): bool
     {
-        $bodyPath = $this->fullPath('body');
-        $headersPath = $this->fullPath('headers');
-
-        return FileUtils::exists($bodyPath) && FileUtils::exists($headersPath);
+        return FileUtils::exists($this->bodyFilePath) && FileUtils::exists($this->headersFilePath);
     }
 
     /**
@@ -90,8 +104,8 @@ class FileCache implements Cache
     {
         $basePath = $this->basePath();
         $this->ensureCacheFolderExists($basePath);
-        file_put_contents($this->fullPath('body'), $response->body());
-        file_put_contents($this->fullPath('headers'), json_encode($response->headerLines()));
+        file_put_contents($this->bodyFilePath, $response->body());
+        file_put_contents($this->headersFilePath, json_encode($response->headerLines()));
     }
 
     /**
@@ -102,14 +116,7 @@ class FileCache implements Cache
      */
     protected function fullPath(string $type): string
     {
-        switch ($type) {
-            case 'body':
-                return $this->basePath() . '/cache.body.txt';
-            case 'headers':
-                return $this->basePath() . '/cache.headers.json';
-            default:
-                throw new InvalidArgumentException("Invalid cache type: $type");
-        }
+        return CacheFilePath::path($type, $this->basePath(), $this->request->query());
     }
 
     /**
@@ -119,7 +126,7 @@ class FileCache implements Cache
      */
     protected function basePath(): string
     {
-        return FileUtils::getFullPath($this->path, $this->location);
+        return FileUtils::getFullPath($this->location->basePath(), $this->path);
     }
 
     /**
