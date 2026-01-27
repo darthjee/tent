@@ -10,12 +10,14 @@ class CacheFilePathTest extends TestCase
 {
     public function testPathReturnsBodyCacheFile()
     {
-        $this->assertEquals('/tmp/cache.body.txt', CacheFilePath::path('body', '/tmp', 'query'));
+        $expected = '/tmp/a8b771920b8319e47251d1360f5e880bc18e8d329b0f0d003ea3c7e615558947.body.txt';
+        $this->assertEquals($expected, CacheFilePath::path('body', '/tmp', 'query'));
     }
 
     public function testPathReturnsHeadersCacheFile()
     {
-        $this->assertEquals('/tmp/cache.headers.json', CacheFilePath::path('headers', '/tmp', 'query'));
+        $expected = '/tmp/a8b771920b8319e47251d1360f5e880bc18e8d329b0f0d003ea3c7e615558947.headers.json';
+        $this->assertEquals($expected, CacheFilePath::path('headers', '/tmp', 'query'));
     }
 
     public function testPathThrowsOnInvalidType()

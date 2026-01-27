@@ -19,11 +19,12 @@ class CacheFilePath
      */
     public static function path(string $type, string $basePath, string $query): string
     {
+        $queryHash = hash('sha256', $query);
         switch ($type) {
             case 'body':
-                return $basePath . '/cache.body.txt';
+                return $basePath . '/' . $queryHash . '.body.txt';
             case 'headers':
-                return $basePath . '/cache.headers.json';
+                return $basePath . '/' . $queryHash . '.headers.json';
             default:
                 throw new InvalidArgumentException("Invalid cache type: $type");
         }
