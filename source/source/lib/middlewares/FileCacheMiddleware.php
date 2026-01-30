@@ -85,10 +85,22 @@ class FileCacheMiddleware extends Middleware
      */
     public function processResponse(Response $response): Response
     {
-        if ($response && HttpCodeMatcher::matchAny($response->httpCode(), $this->httpCodes)) {
+        if ($this->isCacheable($response)) {
             $cache = new FileCache($response->request(), $this->location);
             $cache->store($response);
         }
         return $response;
+    }
+
+    /**
+     * Determines if the response is storable based on its HTTP status code.
+     *
+     * @param Response $response The response to check.
+     * @return bool True if the response is storable, false otherwise.
+     */
+    private function isCacheable(Response $response): bool
+    {
+        return $response &&
+            HttpCodeMatcher::matchAny($response->httpCode(), $this->httpCodes);
     }
 }
