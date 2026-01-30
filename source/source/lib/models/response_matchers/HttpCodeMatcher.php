@@ -2,6 +2,8 @@
 
 namespace Tent\Models\ResponseMatchers;
 
+use Tent\Models\Response;
+
 class HttpCodeMatcher implements ResponseMatcher
 {
     private array $httpCodes;
@@ -12,6 +14,6 @@ class HttpCodeMatcher implements ResponseMatcher
 
     public function match(Response $response): bool
     {
-        return in_array($response->getHttpCode(), $this->httpCodes, true);
+        return HttpCodeMatcher::matchAny($response->getHttpCode(), $this->httpCodes);
     }
 }
