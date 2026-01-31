@@ -10,8 +10,7 @@ class StatusCodeMatcherTest extends TestCase
 {
     private function mockResponse($code)
     {
-        $response = $this->createMock(Response::class);
-        $response->method('httpCode')->willReturn($code);
+        $response = new Response(['httpCode' => $code]);
         return $response;
     }
 
