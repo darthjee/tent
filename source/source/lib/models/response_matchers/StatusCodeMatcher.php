@@ -15,6 +15,13 @@ class StatusCodeMatcher implements ResponseMatcher
 
     public function match(Response $response): bool
     {
-        return HttpCodeMatcher::matchAny($response->httpCode(), $this->httpCodes);
+        $target = $response->httpCode();
+
+        foreach ($this->httpCodes as $code) {
+            if (new HttpCodeMatcher($code)->match($target)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
