@@ -3,6 +3,7 @@
 namespace Tent\Models\ResponseMatchers;
 
 use Tent\Models\Response;
+use Tent\Utils\HttpCodeMatcher;
 
 class StatusCodeMatcher implements ResponseMatcher
 {
@@ -14,6 +15,6 @@ class StatusCodeMatcher implements ResponseMatcher
 
     public function match(Response $response): bool
     {
-        return \Tent\Utils\HttpCodeMatcher::matchAny($response->httpCode(), $this->httpCodes);
+        return HttpCodeMatcher::matchAny($response->httpCode(), $this->httpCodes);
     }
 }
