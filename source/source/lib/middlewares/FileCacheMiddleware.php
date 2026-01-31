@@ -100,7 +100,6 @@ class FileCacheMiddleware extends Middleware
      */
     private function isCacheable(Response $response): bool
     {
-        return $response &&
-            HttpCodeMatcher::matchAny($response->httpCode(), $this->httpCodes);
+        return $response && (new HttpCodeMatcher($this->httpCodes))->match($response);
     }
 }
