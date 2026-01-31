@@ -14,6 +14,6 @@ class HttpCodeMatcher implements ResponseMatcher
 
     public function match(Response $response): bool
     {
-        return HttpCodeMatcher::matchAny($response->getHttpCode(), $this->httpCodes);
+        return \Tent\Utils\HttpCodeMatcher::matchAny($response->httpCode(), $this->httpCodes);
     }
 }

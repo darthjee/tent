@@ -7,7 +7,7 @@ use Tent\Models\FolderLocation;
 use Tent\Models\FileCache;
 use Tent\Models\Response;
 use Tent\Service\ResponseContentReader;
-use Tent\Utils\HttpCodeMatcher;
+use Tent\Models\ResponseMatchers\HttpCodeMatcher;
 
 /**
  * Middleware for caching responses to files.
