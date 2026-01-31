@@ -14,27 +14,6 @@ class HttpCodeMatcher
     private $target;
 
     /**
-     * Checks if the given HTTP code matches any in the provided list.
-     *
-     * @param integer $httpCode  The HTTP status code to check.
-     * @param array   $httpCodes The list of allowed HTTP status codes.
-     * @return boolean True if the code matches, false otherwise.
-     *
-     * @example
-     *   HttpCodeMatcher::matchAny(404, ['2xx', '404', '500']) // returns true
-     *   HttpCodeMatcher::matchAny(201, ['4xx', '500'])        // returns false
-     */
-    public static function matchAny(int $httpCode, array $httpCodes): bool
-    {
-        foreach ($httpCodes as $code) {
-            if (new self($code)->match($httpCode)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * Constructs an HttpCodeMatcher with the given target code or pattern.
      *
      * @param string|integer $target The target HTTP status code or pattern.
