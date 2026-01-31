@@ -7,7 +7,7 @@ use Tent\Models\FolderLocation;
 use Tent\Models\FileCache;
 use Tent\Models\Response;
 use Tent\Service\ResponseContentReader;
-use Tent\Models\ResponseMatchers\HttpCodeMatcher;
+use Tent\Models\ResponseMatchers\StatusCodeMatcher;
 
 /**
  * Middleware for caching responses to files.
@@ -100,6 +100,6 @@ class FileCacheMiddleware extends Middleware
      */
     private function isCacheable(Response $response): bool
     {
-        return $response && (new HttpCodeMatcher($this->httpCodes))->match($response);
+        return $response && (new StatusCodeMatcher($this->httpCodes))->match($response);
     }
 }

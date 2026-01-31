@@ -4,7 +4,7 @@ namespace Tent\Models\ResponseMatchers;
 
 use Tent\Models\Response;
 
-class HttpCodeMatcher implements ResponseMatcher
+class StatusCodeMatcher implements ResponseMatcher
 {
     private array $httpCodes;
 
