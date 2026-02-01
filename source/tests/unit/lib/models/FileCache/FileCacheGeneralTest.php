@@ -16,6 +16,7 @@ class FileCacheGeneralTest extends TestCase
     private $headers;
     private $request;
     private $meta;
+    private $location;
 
     public function setUp(): void
     {
@@ -24,7 +25,11 @@ class FileCacheGeneralTest extends TestCase
         $this->fullPath = $this->basePath . '/' . $this->path;
         $this->headers = ['Content-Type' => 'text/plain'];
         $this->request = new Request(['requestPath' => $this->path]);
-        $this->meta = ['headers' => $this->headers];
+        $this->location = new FolderLocation($this->basePath);
+        $this->meta = [
+            'headers' => $this->headers,
+            'httpCode' => 201
+        ];
 
         mkdir($this->fullPath, 0777, true);
 
@@ -42,38 +47,67 @@ class FileCacheGeneralTest extends TestCase
 
     public function testContentReadsCacheBodyFile()
     {
-        $location = new FolderLocation($this->basePath);
-        $cache = new FileCache($this->request, $location);
+        $cache = new FileCache($this->request, $this->location);
         $this->assertEquals('Cached body content', $cache->content());
     }
 
-    public function testContentReadsCacheHeadersFile()
+    public function testContentReadsCacheHeaders()
     {
-        $location = new FolderLocation($this->basePath);
-        $cache = new FileCache($this->request, $location);
+        $cache = new FileCache($this->request, $this->location);
         $this->assertEquals($this->headers, $cache->headers());
+    }
+
+    public function testContentReadsCacheHttpCode()
+    {
+        $cache = new FileCache($this->request, $this->location);
+        $this->assertEquals(201, $cache->httpCode());
     }
 
     public function testExistsReturnsTrueWhenBothFilesExist()
     {
-        $location = new FolderLocation($this->basePath);
-        $cache = new FileCache($this->request, $location);
+        $cache = new FileCache($this->request, $this->location);
         $this->assertTrue($cache->exists());
     }
 
     public function testExistsReturnsFalseWhenBodyFileIsMissing()
     {
         @unlink(CacheFilePath::path('body', $this->fullPath, ''));
-        $location = new FolderLocation($this->basePath);
-        $cache = new FileCache($this->request, $location);
+        $cache = new FileCache($this->request, $this->location);
         $this->assertFalse($cache->exists());
     }
 
     public function testExistsReturnsFalseWhenMetaFileIsMissing()
     {
         @unlink(CacheFilePath::path('meta', $this->fullPath, ''));
-        $location = new FolderLocation($this->basePath);
-        $cache = new FileCache($this->request, $location);
+        $cache = new FileCache($this->request, $this->location);
         $this->assertFalse($cache->exists());
+    }
+
+    public function testHeadersReturnsEmptyArrayWhenMetaFileIsMissing()
+    {
+        @unlink(CacheFilePath::path('meta', $this->fullPath, ''));
+        $cache = new FileCache($this->request, $this->location);
+        $this->assertEquals([], $cache->headers());
+    }
+
+    public function testHttpCodeReturnsDefaultWhenMetaFileIsMissing()
+    {
+        @unlink(CacheFilePath::path('meta', $this->fullPath, ''));
+        $cache = new FileCache($this->request, $this->location);
+        $this->assertEquals(200, $cache->httpCode());
+    }
+
+    public function testHeadersReturnsEmptyArrayWhenMetaFileIsCorrupt()
+    {
+        file_put_contents(CacheFilePath::path('meta', $this->fullPath, ''), 'invalid json {]');
+        $cache = new FileCache($this->request, $this->location);
+        $this->assertEquals([], $cache->headers());
+    }
+
+    public function testHttpCodeReturnsDefaultWhenMetaFileIsCorrupt()
+    {
+        file_put_contents(CacheFilePath::path('meta', $this->fullPath, ''), 'invalid json {]');
+        $cache = new FileCache($this->request, $this->location);
+        $this->assertEquals(200, $cache->httpCode());
     }
 }
