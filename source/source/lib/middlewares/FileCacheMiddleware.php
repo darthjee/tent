@@ -20,14 +20,14 @@ class FileCacheMiddleware extends Middleware
     private FolderLocation $location;
 
     /**
-     * @var array The list of HTTP status codes to cache.
-     */
-    private array $httpCodes;
-
-    /**
      * @var array The list of HTTP request methods to cache.
      */
     private array $requestMethods;
+
+    /**
+     * @var array The list of response matchers to determine cacheability.
+     */
+    private array $matchers;
 
     /**
      * Constructs a FileCacheMiddleware instance.
@@ -39,8 +39,10 @@ class FileCacheMiddleware extends Middleware
     public function __construct(FolderLocation $location, ?array $httpCodes = null, ?array $requestMethods = null)
     {
         $this->location = $location;
-        $this->httpCodes = $httpCodes ?? [200];
         $this->requestMethods = $requestMethods ?? ['GET'];
+
+        $httpCodes = $httpCodes ?? [200];
+        $this->matchers = [new StatusCodeMatcher($httpCodes)];
     }
 
     /**
@@ -88,8 +90,7 @@ class FileCacheMiddleware extends Middleware
     /**
      * Caches the response to a file.
      *
-     * Only stores the response if its HTTP status code is included in the configured httpCodes filter.
-     * If the code is not allowed, the response is returned without caching.
+     * Only stores the response if it matches all configured matchers.
      *
      * @param Response $response The response to cache.
      * @return Response The original response.
@@ -104,13 +105,18 @@ class FileCacheMiddleware extends Middleware
     }
 
     /**
-     * Determines if the response is storable based on its HTTP status code.
+     * Check if the response is cacheable based on the configured matchers.
      *
      * @param Response $response The response to check.
      * @return boolean True if the response is storable, false otherwise.
      */
     private function isCacheable(Response $response): bool
     {
-        return $response && (new StatusCodeMatcher($this->httpCodes))->match($response);
+        foreach ($this->matchers as $matcher) {
+            if (!$matcher->match($response)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
