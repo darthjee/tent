@@ -15,6 +15,7 @@ class FileCacheGeneralTest extends TestCase
     private $fullPath;
     private $headers;
     private $request;
+    private $meta;
 
     public function setUp(): void
     {
@@ -23,17 +24,18 @@ class FileCacheGeneralTest extends TestCase
         $this->fullPath = $this->basePath . '/' . $this->path;
         $this->headers = ['Content-Type' => 'text/plain'];
         $this->request = new Request(['requestPath' => $this->path]);
+        $this->meta = ['headers' => $this->headers];
 
         mkdir($this->fullPath, 0777, true);
 
         file_put_contents(CacheFilePath::path('body', $this->fullPath, ''), 'Cached body content');
-        file_put_contents(CacheFilePath::path('headers', $this->fullPath, ''), json_encode($this->headers));
+        file_put_contents(CacheFilePath::path('meta', $this->fullPath, ''), json_encode($this->meta));
     }
 
     public function tearDown(): void
     {
         @unlink(CacheFilePath::path('body', $this->fullPath, ''));
-        @unlink(CacheFilePath::path('headers', $this->fullPath, ''));
+        @unlink(CacheFilePath::path('meta', $this->fullPath, ''));
         @rmdir($this->fullPath);
         @rmdir($this->basePath);
     }
@@ -67,9 +69,9 @@ class FileCacheGeneralTest extends TestCase
         $this->assertFalse($cache->exists());
     }
 
-    public function testExistsReturnsFalseWhenHeadersFileIsMissing()
+    public function testExistsReturnsFalseWhenMetaFileIsMissing()
     {
-        @unlink(CacheFilePath::path('headers', $this->fullPath, ''));
+        @unlink(CacheFilePath::path('meta', $this->fullPath, ''));
         $location = new FolderLocation($this->basePath);
         $cache = new FileCache($this->request, $location);
         $this->assertFalse($cache->exists());

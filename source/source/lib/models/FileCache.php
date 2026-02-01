@@ -37,9 +37,9 @@ class FileCache implements Cache
     private string $bodyFilePath;
 
     /**
-     * @var string Full path to the headers cache file.
+     * @var string Full path to the meta cache file.
      */
-    private string $headersFilePath;
+    private string $metaFilePath;
 
     /**
      * Constructs a Cache object.
@@ -55,7 +55,7 @@ class FileCache implements Cache
 
         $query = $this->request->query();
         $this->bodyFilePath = CacheFilePath::path('body', $this->basePath(), $query);
-        $this->headersFilePath = CacheFilePath::path('headers', $this->basePath(), $query);
+        $this->metaFilePath = CacheFilePath::path('meta', $this->basePath(), $query);
     }
 
     /**
@@ -78,8 +78,9 @@ class FileCache implements Cache
      */
     public function headers(): array
     {
-        $content = file_get_contents($this->headersFilePath);
-        return json_decode($content, true);
+        $content = file_get_contents($this->metaFilePath);
+        $meta = json_decode($content, true);
+        return $meta['headers'] ?? [];
     }
 
     /**
@@ -91,7 +92,7 @@ class FileCache implements Cache
      */
     public function exists(): bool
     {
-        return FileUtils::exists($this->bodyFilePath) && FileUtils::exists($this->headersFilePath);
+        return FileUtils::exists($this->bodyFilePath) && FileUtils::exists($this->metaFilePath);
     }
 
     /**
@@ -102,16 +103,28 @@ class FileCache implements Cache
      */
     public function store(Response $response): void
     {
-        $basePath = $this->basePath();
-        $this->ensureCacheFolderExists($basePath);
+        $this->ensureCacheFolderExists();
         file_put_contents($this->bodyFilePath, $response->body());
-        file_put_contents($this->headersFilePath, json_encode($response->headerLines()));
+        file_put_contents($this->metaFilePath, json_encode($this->buildMeta($response)));
+    }
+
+    /**
+     * Builds the metadata array for the cached response.
+     *
+     * @param Response $response The response to build metadata from.
+     * @return array The metadata array.
+     */
+    protected function buildMeta(Response $response): array
+    {
+        return [
+            'headers' => $response->headerLines(),
+        ];
     }
 
     /**
      * Returns the full path for the specified cache type.
      *
-     * @param string $type The cache type ('body' or 'headers').
+     * @param string $type The cache type ('body' or 'meta').
      * @return string The full path to the cache file.
      */
     protected function fullPath(string $type): string
@@ -132,11 +145,11 @@ class FileCache implements Cache
     /**
      * Ensures the cache folder exists, creating it if necessary.
      *
-     * @param string $basePath The path to the cache folder.
      * @return void
      */
-    protected function ensureCacheFolderExists(string $basePath): void
+    protected function ensureCacheFolderExists(): void
     {
+        $basePath = $this->basePath();
         if (!is_dir($basePath)) {
             mkdir($basePath, 0777, true);
         }

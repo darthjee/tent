@@ -63,16 +63,17 @@ class ResponseCacherTest extends TestCase
         $cache = new FileCache($this->request, $this->location);
 
         $bodyFile = CacheFilePath::path('body', $this->cacheDir . '/file.txt', '');
-        $headersFile = CacheFilePath::path('headers', $this->cacheDir . '/file.txt', '');
+        $metaFile = CacheFilePath::path('meta', $this->cacheDir . '/file.txt', '');
         mkdir(dirname($bodyFile), 0777, true);
         file_put_contents($bodyFile, 'original body');
-        file_put_contents($headersFile, "Header1: original\nHeader2: value");
+        file_put_contents($metaFile, json_encode(['headers' => ["Header1: original", "Header2: value"]]));
 
         $cacher = new ResponseCacher($cache, $response);
         $cacher->process();
 
         $this->assertEquals('original body', file_get_contents($bodyFile));
-        $this->assertEquals("Header1: original\nHeader2: value", file_get_contents($headersFile));
+        $meta = json_decode(file_get_contents($metaFile), true);
+        $this->assertEquals(["Header1: original", "Header2: value"], $meta['headers']);
     }
 
     private function buildResponse(int $httpCode)
