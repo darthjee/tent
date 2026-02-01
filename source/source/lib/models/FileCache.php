@@ -78,8 +78,7 @@ class FileCache implements Cache
      */
     public function headers(): array
     {
-        $content = file_get_contents($this->metaFilePath);
-        $meta = json_decode($content, true);
+        $meta = $this->readMeta();
         return $meta['headers'] ?? [];
     }
 
@@ -92,8 +91,7 @@ class FileCache implements Cache
      */
     public function httpCode(): int
     {
-        $content = file_get_contents($this->metaFilePath);
-        $meta = json_decode($content, true);
+        $meta = $this->readMeta();
         return $meta['httpCode'] ?? 200;
     }
 
@@ -120,6 +118,17 @@ class FileCache implements Cache
         $this->ensureCacheFolderExists();
         file_put_contents($this->bodyFilePath, $response->body());
         file_put_contents($this->metaFilePath, json_encode($this->buildMeta($response)));
+    }
+
+    /**
+     * Reads and decodes the metadata file.
+     *
+     * @return array The decoded metadata array, or empty array on failure.
+     */
+    protected function readMeta(): array
+    {
+        $content = @file_get_contents($this->metaFilePath);
+        return json_decode($content, true);
     }
 
     /**
