@@ -34,6 +34,8 @@ class ResponseCacher
 
     /**
      * Processes the response and stores it in the cache if it does not already exist.
+     *
+     * @return void
      */
     public function process(): void
     {
