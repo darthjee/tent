@@ -68,6 +68,16 @@ class File implements ResponseContent
     }
 
     /**
+     * Returns the HTTP status code for the file.
+     *
+     * @return int The HTTP status code (always 200 for files).
+     */
+    public function httpCode(): int
+    {
+        return 200;
+    }
+
+    /**
      * Checks if the file exists and is a regular file.
      *
      * @return boolean True if the file exists and is a regular file, false otherwise.
