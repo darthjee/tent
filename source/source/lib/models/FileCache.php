@@ -88,7 +88,7 @@ class FileCache implements Cache
      *
      * @see FileUtils::exists()
      *
-     * @return boolean True if both body and headers cache files exist, false otherwise.
+     * @return boolean True if both body and metadata cache files exist, false otherwise.
      */
     public function exists(): bool
     {
@@ -96,7 +96,7 @@ class FileCache implements Cache
     }
 
     /**
-     * Stores the response body and headers into cache files.
+     * Stores the response body and metadata into cache files.
      *
      * @param Response $response The response to cache.
      * @return void
@@ -124,7 +124,7 @@ class FileCache implements Cache
     /**
      * Returns the full path for the specified cache type.
      *
-     * @param string $type The cache type ('body' or 'headers').
+     * @param string $type The cache type ('body' or 'meta').
      * @return string The full path to the cache file.
      */
     protected function fullPath(string $type): string
