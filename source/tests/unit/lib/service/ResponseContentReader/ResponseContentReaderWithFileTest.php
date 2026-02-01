@@ -11,7 +11,7 @@ use Tent\Models\Response;
 use Tent\Exceptions\FileNotFoundException;
 use Tent\Exceptions\InvalidFilePathException;
 
-class ResponseContentReaderTest extends TestCase
+class ResponseContentReaderWithFileTest extends TestCase
 {
     private $testDir;
 
