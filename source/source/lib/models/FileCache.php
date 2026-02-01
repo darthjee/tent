@@ -79,7 +79,8 @@ class FileCache implements Cache
     public function headers(): array
     {
         $content = file_get_contents($this->metaFilePath);
-        return json_decode($content, true);
+        $meta = json_decode($content, true);
+        return $meta['headers'] ?? [];
     }
 
     /**
@@ -102,10 +103,22 @@ class FileCache implements Cache
      */
     public function store(Response $response): void
     {
-        $basePath = $this->basePath();
-        $this->ensureCacheFolderExists($basePath);
+        $this->ensureCacheFolderExists();
         file_put_contents($this->bodyFilePath, $response->body());
-        file_put_contents($this->metaFilePath, json_encode($response->headerLines()));
+        file_put_contents($this->metaFilePath, json_encode($this->buildMeta($response)));
+    }
+
+    /**
+     * Builds the metadata array for the cached response.
+     *
+     * @param Response $response The response to build metadata from.
+     * @return array The metadata array.
+     */
+    protected function buildMeta(Response $response): array
+    {
+        return [
+            'headers' => $response->headerLines(),
+        ];
     }
 
     /**
@@ -132,11 +145,11 @@ class FileCache implements Cache
     /**
      * Ensures the cache folder exists, creating it if necessary.
      *
-     * @param string $basePath The path to the cache folder.
      * @return void
      */
-    protected function ensureCacheFolderExists(string $basePath): void
+    protected function ensureCacheFolderExists(): void
     {
+        $basePath = $this->basePath();
         if (!is_dir($basePath)) {
             mkdir($basePath, 0777, true);
         }
