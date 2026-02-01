@@ -118,6 +118,7 @@ class FileCache implements Cache
     {
         return [
             'headers' => $response->headerLines(),
+            'httpCode' => $response->httpCode()
         ];
     }
 
