@@ -7,6 +7,7 @@ use Tent\Models\FileCache;
 use Tent\Models\Response;
 use Tent\Models\Request;
 use Tent\Models\FolderLocation;
+use Tent\Utils\CacheFilePath;
 
 class FileCacheStoreTest extends TestCase
 {
@@ -81,5 +82,32 @@ class FileCacheStoreTest extends TestCase
         $this->assertTrue($cache->exists());
         $this->assertEquals('some body', $cache->content());
         $this->assertEquals([], $cache->headers());
+    }
+
+    public function testStoreFileContents()
+    {
+        $path = '/path/file.txt';
+        $headers = ['Content-Type: text/plain', 'Content-Length: 11'];
+        $request = new Request([ 'requestPath' => $path ]);
+        $response = new Response([
+            'body' => 'cached body', 'httpCode' => 200, 'headers' => $headers, 'request' => $request
+        ]);
+
+        $cache = new FileCache($request, $this->location);
+        $cache->store($response);
+
+        $basePath = $this->cacheDir . '/path/file.txt';
+        $bodyPath = CacheFilePath::path('body', $basePath, $request->query());
+        $metaPath = CacheFilePath::path('meta', $basePath, $request->query());
+
+        $this->assertTrue(is_file($bodyPath), 'Body file does not exist or is not a file');
+        $this->assertTrue(is_file($metaPath), 'Meta file does not exist or is not a file');
+        
+        $this->assertEquals('cached body', file_get_contents($bodyPath));
+        $meta = json_decode(file_get_contents($metaPath), true);
+        $this->assertEquals([
+            'headers' => $headers,
+            'httpCode' => 200
+        ], $meta);
     }
 }
