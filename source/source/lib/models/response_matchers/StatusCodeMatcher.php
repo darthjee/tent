@@ -20,7 +20,8 @@ class StatusCodeMatcher implements ResponseMatcher
      *
      * @param array $httpCodes The list of HTTP status codes or patterns to match against.
      */
-    public function __construct(array $httpCodes) {
+    public function __construct(array $httpCodes)
+    {
         $this->httpCodes = $httpCodes;
     }
 
@@ -28,7 +29,7 @@ class StatusCodeMatcher implements ResponseMatcher
      * Checks if the response's HTTP status code matches any of the configured codes.
      *
      * @param Response $response The response to check.
-     * @return bool True if the response's status code matches, false otherwise.
+     * @return boolean True if the response's status code matches, false otherwise.
      */
     public function match(Response $response): bool
     {

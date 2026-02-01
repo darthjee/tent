@@ -10,8 +10,7 @@ class StatusCodeMatcherTest extends TestCase
 {
     private function mockResponse($code)
     {
-        $response = new Response(['httpCode' => $code]);
-        return $response;
+        return new Response(['httpCode' => $code]);
     }
 
     public function testMatchReturnsTrueWhenCodeIsInList()

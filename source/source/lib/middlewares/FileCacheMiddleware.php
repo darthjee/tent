@@ -107,7 +107,7 @@ class FileCacheMiddleware extends Middleware
      * Determines if the response is storable based on its HTTP status code.
      *
      * @param Response $response The response to check.
-     * @return bool True if the response is storable, false otherwise.
+     * @return boolean True if the response is storable, false otherwise.
      */
     private function isCacheable(Response $response): bool
     {
