@@ -8,6 +8,7 @@ use Tent\Models\FileCache;
 use Tent\Models\Response;
 use Tent\Service\ResponseContentReader;
 use Tent\Models\ResponseMatchers\StatusCodeMatcher;
+use Tent\Service\ResponseCacher;
 
 /**
  * Middleware for caching responses to files.
@@ -99,7 +100,7 @@ class FileCacheMiddleware extends Middleware
     {
         if ($this->isCacheable($response)) {
             $cache = new FileCache($response->request(), $this->location);
-            $cache->store($response);
+            new ResponseCacher($cache, $response)->process();
         }
         return $response;
     }

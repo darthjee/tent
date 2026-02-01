@@ -13,6 +13,11 @@ class ResponseCacher
     public function __construct(Cache $cache, Response $response)
     {
         $this->cache = $cache;
-        $this->$response = $response;
+        $this->response = $response;
+    }
+
+    public function process(): void
+    {
+        $this->cache->store($this->response);
     }
 }
