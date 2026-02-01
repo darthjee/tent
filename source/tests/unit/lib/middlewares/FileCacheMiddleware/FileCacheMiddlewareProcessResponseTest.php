@@ -8,6 +8,7 @@ use Tent\Models\FolderLocation;
 use Tent\Models\Response;
 use Tent\Models\ProcessingRequest;
 use Tent\Models\FileCache;
+use Tent\Utils\CacheFilePath;
 
 class FileCacheMiddlewareProcessResponseTest extends TestCase
 {
@@ -78,15 +79,40 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
         $this->assertTrue($this->cache->exists());
     }
 
+    public function testProcessResponseDoesNotOverwriteExistingCache()
+    {
+        $response = $this->buildResponse(200);
+
+        $bodyFile = CacheFilePath::path('body', $this->cacheDir . '/file.txt', '');
+        $headersFile = CacheFilePath::path('headers', $this->cacheDir . '/file.txt', '');
+        mkdir(dirname($bodyFile), 0777, true);
+        file_put_contents($bodyFile, 'original body');
+        file_put_contents($headersFile, "Header1: original\nHeader2: value");
+
+        $middleware = $this->buildMiddleware();
+        $middleware->processResponse($response);
+
+        $this->assertEquals('original body', file_get_contents($bodyFile));
+        $this->assertEquals("Header1: original\nHeader2: value", file_get_contents($headersFile));
+    }
+
     private function buildResponse(int $httpCode)
     {
         $this->path = '/file.txt';
         $this->headers = ['Content-Type: text/plain', 'Content-Length: 11'];
-        $this->request = new ProcessingRequest(['requestPath' => $this->path]);
+        $this->request = $this->buildRequest($this->path, 'GET');
 
         return new Response([
             'body' => 'cached body', 'httpCode' => $httpCode, 'headers' => $this->headers,
             'request' => $this->request
+        ]);
+    }
+
+    private function buildRequest(string $path, string $method): ProcessingRequest
+    {
+        return new ProcessingRequest([
+            'requestPath' => $path,
+            'requestMethod' => $method
         ]);
     }
 
