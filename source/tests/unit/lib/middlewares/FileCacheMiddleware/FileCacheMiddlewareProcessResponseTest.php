@@ -8,6 +8,7 @@ use Tent\Models\FolderLocation;
 use Tent\Models\Response;
 use Tent\Models\ProcessingRequest;
 use Tent\Models\FileCache;
+use Tent\Utils\CacheFilePath;
 
 class FileCacheMiddlewareProcessResponseTest extends TestCase
 {
@@ -78,6 +79,39 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
         $this->assertTrue($this->cache->exists());
     }
 
+    public function testProcessResponseDoesNotOverwriteExistingCache()
+    {
+        $response = $this->buildResponse(200);
+
+        // Cria arquivos de cache manualmente
+        $bodyFile = CacheFilePath::path('body', $this->cacheDir . '/file.txt', '');
+        $headersFile = CacheFilePath::path('headers', $this->cacheDir . '/file.txt', '');
+        mkdir(dirname($bodyFile), 0777, true);
+        file_put_contents($bodyFile, 'original body');
+        file_put_contents($headersFile, "Header1: original\nHeader2: value");
+
+        // Garante que os arquivos existem e têm o conteúdo esperado
+        $this->assertFileExists($bodyFile);
+        $this->assertFileExists($headersFile);
+        $this->assertEquals('original body', file_get_contents($bodyFile));
+        $this->assertEquals("Header1: original\nHeader2: value", file_get_contents($headersFile));
+
+        // Cria um response diferente
+        $response = new Response([
+            'body' => 'new body',
+            'httpCode' => 200,
+            'headers' => ['Header1: changed', 'Header2: changed'],
+            'request' => $this->request
+        ]);
+
+        $middleware = $this->buildMiddleware();
+        $middleware->processResponse($response);
+
+        // Verifica que os arquivos não foram sobrescritos
+        $this->assertEquals('original body', file_get_contents($bodyFile));
+        $this->assertEquals("Header1: original\nHeader2: value", file_get_contents($headersFile));
+    }
+
     private function buildResponse(int $httpCode)
     {
         $this->path = '/file.txt';
@@ -87,6 +121,14 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
         return new Response([
             'body' => 'cached body', 'httpCode' => $httpCode, 'headers' => $this->headers,
             'request' => $this->request
+        ]);
+    }
+
+    private function buildRequest(string $path, string $method): ProcessingRequest
+    {
+        return new ProcessingRequest([
+            'requestPath' => $path,
+            'requestMethod' => $method
         ]);
     }
 
