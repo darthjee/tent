@@ -22,7 +22,7 @@ class CacheFilePath
         $queryHash = hash('sha256', $query);
         switch ($type) {
             case 'body':
-                return $basePath . '/' . $queryHash . '.body.txt';
+                return $basePath . '/' . $queryHash . '.body.dat';
             case 'meta':
                 return $basePath . '/' . $queryHash . '.meta.json';
             default:
