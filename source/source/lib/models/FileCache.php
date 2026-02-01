@@ -86,13 +86,15 @@ class FileCache implements Cache
     /**
      * Returns the HTTP status code for the cached response.
      *
-     * @return int|null The HTTP status code, or null if not present.
+     * Returns 200 if not found.
+     *
+     * @return integer The HTTP status code.
      */
-    public function httpCode(): ?int
+    public function httpCode(): int
     {
         $content = file_get_contents($this->metaFilePath);
         $meta = json_decode($content, true);
-        return $meta['httpCode'] ?? null;
+        return $meta['httpCode'] ?? 200;
     }
 
     /**
