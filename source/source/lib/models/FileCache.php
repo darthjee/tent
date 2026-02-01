@@ -79,7 +79,8 @@ class FileCache implements Cache
     public function headers(): array
     {
         $content = file_get_contents($this->metaFilePath);
-        return json_decode($content, true);
+        $meta = json_decode($content, true);
+        return $meta['headers'] ?? [];
     }
 
     /**
@@ -105,7 +106,9 @@ class FileCache implements Cache
         $basePath = $this->basePath();
         $this->ensureCacheFolderExists($basePath);
         file_put_contents($this->bodyFilePath, $response->body());
-        file_put_contents($this->metaFilePath, json_encode($response->headerLines()));
+        file_put_contents($this->metaFilePath, json_encode([
+            'headers' => $response->headerLines()
+        ]));
     }
 
     /**
