@@ -84,16 +84,16 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
         $response = $this->buildResponse(200);
 
         $bodyFile = CacheFilePath::path('body', $this->cacheDir . '/file.txt', '');
-        $headersFile = CacheFilePath::path('headers', $this->cacheDir . '/file.txt', '');
+        $metaFile = CacheFilePath::path('meta', $this->cacheDir . '/file.txt', '');
         mkdir(dirname($bodyFile), 0777, true);
         file_put_contents($bodyFile, 'original body');
-        file_put_contents($headersFile, "Header1: original\nHeader2: value");
+        file_put_contents($metaFile, "Header1: original\nHeader2: value");
 
         $middleware = $this->buildMiddleware();
         $middleware->processResponse($response);
 
         $this->assertEquals('original body', file_get_contents($bodyFile));
-        $this->assertEquals("Header1: original\nHeader2: value", file_get_contents($headersFile));
+        $this->assertEquals("Header1: original\nHeader2: value", file_get_contents($metaFile));
     }
 
     private function buildResponse(int $httpCode)
