@@ -110,9 +110,6 @@ class FileCacheMiddleware extends Middleware
      */
     private function isCacheable(Response $response): bool
     {
-        if (!$response) {
-            return false;
-        }
         foreach ($this->matchers as $matcher) {
             if ($matcher->match($response)) {
                 return true;
