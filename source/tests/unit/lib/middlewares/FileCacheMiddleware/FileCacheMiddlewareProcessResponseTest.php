@@ -83,7 +83,6 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
     {
         $response = $this->buildResponse(200);
 
-        // Cria arquivos de cache manualmente
         $bodyFile = CacheFilePath::path('body', $this->cacheDir . '/file.txt', '');
         $headersFile = CacheFilePath::path('headers', $this->cacheDir . '/file.txt', '');
         mkdir(dirname($bodyFile), 0777, true);
@@ -93,7 +92,6 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
         $middleware = $this->buildMiddleware();
         $middleware->processResponse($response);
 
-        // Verifica que os arquivos não foram sobrescritos
         $this->assertEquals('original body', file_get_contents($bodyFile));
         $this->assertEquals("Header1: original\nHeader2: value", file_get_contents($headersFile));
     }
