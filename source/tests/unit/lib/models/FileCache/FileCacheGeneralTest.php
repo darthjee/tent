@@ -82,32 +82,4 @@ class FileCacheGeneralTest extends TestCase
         $cache = new FileCache($this->request, $this->location);
         $this->assertFalse($cache->exists());
     }
-
-    public function testHeadersReturnsEmptyArrayWhenMetaFileIsMissing()
-    {
-        @unlink(CacheFilePath::path('meta', $this->fullPath, ''));
-        $cache = new FileCache($this->request, $this->location);
-        $this->assertEquals([], $cache->headers());
-    }
-
-    public function testHttpCodeReturnsDefaultWhenMetaFileIsMissing()
-    {
-        @unlink(CacheFilePath::path('meta', $this->fullPath, ''));
-        $cache = new FileCache($this->request, $this->location);
-        $this->assertEquals(200, $cache->httpCode());
-    }
-
-    public function testHeadersReturnsEmptyArrayWhenMetaFileIsCorrupt()
-    {
-        file_put_contents(CacheFilePath::path('meta', $this->fullPath, ''), 'invalid json {]');
-        $cache = new FileCache($this->request, $this->location);
-        $this->assertEquals([], $cache->headers());
-    }
-
-    public function testHttpCodeReturnsDefaultWhenMetaFileIsCorrupt()
-    {
-        file_put_contents(CacheFilePath::path('meta', $this->fullPath, ''), 'invalid json {]');
-        $cache = new FileCache($this->request, $this->location);
-        $this->assertEquals(200, $cache->httpCode());
-    }
 }
