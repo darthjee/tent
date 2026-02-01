@@ -39,7 +39,7 @@ class FileCacheMiddleware extends Middleware
         $this->requestMethods = $requestMethods ?? ['GET'];
 
         $httpCodes = $httpCodes ?? [200];
-        $this->matchers = array_map(fn($code) => new StatusCodeMatcher([$code]), $httpCodes);
+        $this->matchers = [new StatusCodeMatcher($httpCodes)];
     }
 
     /**
