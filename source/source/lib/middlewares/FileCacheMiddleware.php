@@ -106,7 +106,8 @@ class FileCacheMiddleware extends Middleware
 
     public function isCacheable(Response $response): bool
     {
-        return $this->responseMatch($response);
+        $cache = new FileCache($response->request(), $this->location);
+        return !$cache->exists() && $this->responseMatch($response);
     }
 
     /**
