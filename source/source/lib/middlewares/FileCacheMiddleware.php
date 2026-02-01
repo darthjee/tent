@@ -7,15 +7,26 @@ use Tent\Models\FolderLocation;
 use Tent\Models\FileCache;
 use Tent\Models\Response;
 use Tent\Service\ResponseContentReader;
-use Tent\Utils\HttpCodeMatcher;
+use Tent\Models\ResponseMatchers\StatusCodeMatcher;
 
 /**
  * Middleware for caching responses to files.
  */
 class FileCacheMiddleware extends Middleware
 {
+    /**
+     * @var FolderLocation The base folder location for caching.
+     */
     private FolderLocation $location;
+
+    /**
+     * @var array The list of HTTP status codes to cache.
+     */
     private array $httpCodes;
+
+    /**
+     * @var array The list of HTTP request methods to cache.
+     */
     private array $requestMethods;
 
     /**
@@ -96,11 +107,10 @@ class FileCacheMiddleware extends Middleware
      * Determines if the response is storable based on its HTTP status code.
      *
      * @param Response $response The response to check.
-     * @return bool True if the response is storable, false otherwise.
+     * @return boolean True if the response is storable, false otherwise.
      */
     private function isCacheable(Response $response): bool
     {
-        return $response &&
-            HttpCodeMatcher::matchAny($response->httpCode(), $this->httpCodes);
+        return $response && (new StatusCodeMatcher($this->httpCodes))->match($response);
     }
 }

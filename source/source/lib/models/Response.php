@@ -47,10 +47,10 @@ class Response
      */
     public function __construct(array $data)
     {
-        $this->body = $data['body'];
-        $this->httpCode = $data['httpCode'];
-        $this->headerLines = $data['headers'];
-        $this->request = $data['request'];
+        $this->body = $data['body'] ?? '';
+        $this->httpCode = $data['httpCode'] ?? 200;
+        $this->headerLines = $data['headers'] ?? [];
+        $this->request = $data['request'] ?? new Request();
     }
 
     /**
