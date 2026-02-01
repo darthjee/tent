@@ -105,19 +105,13 @@ class FileCacheMiddleware extends Middleware
         return $response;
     }
 
-    private function isCacheable(Response $response): bool
-    {
-        $cache = new FileCache($response->request(), $this->location);
-        return !$cache->exists() && $this->responseMatch($response);
-    }
-
     /**
      * Check if the response is cacheable based on the configured matchers.
      *
      * @param Response $response The response to check.
      * @return boolean True if the response is storable, false otherwise.
      */
-    private function responseMatch(Response $response): bool
+    private function isCacheable(Response $response): bool
     {
         foreach ($this->matchers as $matcher) {
             if (!$matcher->match($response)) {

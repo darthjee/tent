@@ -18,6 +18,10 @@ class ResponseCacher
 
     public function process(): void
     {
+        if ($this->cache->exists()) {
+            return;
+        }
+
         $this->cache->store($this->response);
     }
 }
