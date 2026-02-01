@@ -57,4 +57,11 @@ class FileTest extends TestCase
         $file = new \Tent\Models\File('notfound.txt', $location);
         $this->assertFalse($file->exists());
     }
+
+    public function testHttpCodeReturns200()
+    {
+        $location = new \Tent\Models\FolderLocation($this->basePath);
+        $file = new \Tent\Models\File('test.txt', $location);
+        $this->assertEquals(200, $file->httpCode());
+    }
 }
