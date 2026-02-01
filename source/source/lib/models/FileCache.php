@@ -96,7 +96,7 @@ class FileCache implements Cache
     }
 
     /**
-     * Stores the response body and headers into cache files.
+     * Stores the response body and metadata into cache files.
      *
      * @param Response $response The response to cache.
      * @return void
