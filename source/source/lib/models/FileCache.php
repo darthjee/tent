@@ -106,9 +106,20 @@ class FileCache implements Cache
         $basePath = $this->basePath();
         $this->ensureCacheFolderExists($basePath);
         file_put_contents($this->bodyFilePath, $response->body());
-        file_put_contents($this->metaFilePath, json_encode([
-            'headers' => $response->headerLines()
-        ]));
+        file_put_contents($this->metaFilePath, json_encode($this->buildMeta($response)));
+    }
+
+    /**
+     * Builds the metadata array for the cached response.
+     *
+     * @param Response $response The response to build metadata from.
+     * @return array The metadata array.
+     */
+    protected function buildMeta(Response $response): array
+    {
+        return [
+            'headers' => $response->headerLines(),
+        ];
     }
 
     /**
