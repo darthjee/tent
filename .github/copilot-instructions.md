@@ -47,7 +47,6 @@ dev/
 
 This project is designed to be run using Docker Compose. All services and development environments are defined in the `docker-compose.yml` file at the root of the repository.
 
-
 Example:
 
 ```
