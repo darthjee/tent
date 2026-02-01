@@ -20,14 +20,11 @@ class FileCacheMiddleware extends Middleware
     private FolderLocation $location;
 
     /**
-     * @var array The list of HTTP status codes to cache.
-     */
-    private array $httpCodes;
-
-    /**
      * @var array The list of HTTP request methods to cache.
      */
     private array $requestMethods;
+
+    private array $matchers;
 
     /**
      * Constructs a FileCacheMiddleware instance.
@@ -39,8 +36,10 @@ class FileCacheMiddleware extends Middleware
     public function __construct(FolderLocation $location, ?array $httpCodes = null, ?array $requestMethods = null)
     {
         $this->location = $location;
-        $this->httpCodes = $httpCodes ?? [200];
         $this->requestMethods = $requestMethods ?? ['GET'];
+
+        $httpCodes = $httpCodes ?? [200];
+        $this->matchers = array_map(fn($code) => new StatusCodeMatcher([$code]), $httpCodes);
     }
 
     /**
@@ -111,6 +110,6 @@ class FileCacheMiddleware extends Middleware
      */
     private function isCacheable(Response $response): bool
     {
-        return $response && (new StatusCodeMatcher($this->httpCodes))->match($response);
+        return $response && array_reduce($this->matchers, fn($carry, $matcher) => $carry || $matcher->match($response), false);
     }
 }
