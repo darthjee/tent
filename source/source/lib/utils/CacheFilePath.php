@@ -25,6 +25,8 @@ class CacheFilePath
                 return $basePath . '/' . $queryHash . '.body.txt';
             case 'headers':
                 return $basePath . '/' . $queryHash . '.headers.json';
+            case 'meta':
+                return $basePath . '/' . $queryHash . '.meta.json';
             default:
                 throw new InvalidArgumentException("Invalid cache type: $type");
         }
