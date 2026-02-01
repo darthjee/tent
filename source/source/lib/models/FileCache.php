@@ -88,7 +88,7 @@ class FileCache implements Cache
      *
      * @see FileUtils::exists()
      *
-     * @return boolean True if both body and headers cache files exist, false otherwise.
+     * @return boolean True if both body and metadata cache files exist, false otherwise.
      */
     public function exists(): bool
     {
