@@ -87,8 +87,7 @@ class FileCacheMiddleware extends Middleware
     /**
      * Caches the response to a file.
      *
-     * Only stores the response if its HTTP status code is included in the configured httpCodes filter.
-     * If the code is not allowed, the response is returned without caching.
+     * Only stores the response if it matches all configured matchers.
      *
      * @param Response $response The response to cache.
      * @return Response The original response.
@@ -103,7 +102,7 @@ class FileCacheMiddleware extends Middleware
     }
 
     /**
-     * Determines if the response is storable based on its HTTP status code.
+     * Check if the response is cacheable based on the configured matchers.
      *
      * @param Response $response The response to check.
      * @return boolean True if the response is storable, false otherwise.
