@@ -13,6 +13,8 @@ class FileCacheStoreTest extends TestCase
 {
     private $cacheDir;
     private $location;
+    private $request;
+    private $headers;
 
     protected function setUp(): void
     {
@@ -32,13 +34,9 @@ class FileCacheStoreTest extends TestCase
     public function testStoreBodyAndHeaders()
     {
         $path = '/path/file.txt';
-        $headers = ['Content-Type: text/plain', 'Content-Length: 11'];
-        $request = new Request([ 'requestPath' => $path ]);
-        $response = new Response([
-            'body' => 'cached body', 'httpCode' => 200, 'headers' => $headers, 'request' => $request
-        ]);
+        $response = $this->buildResponse($path, 200, 'cached body');
 
-        $cache = new FileCache($request, $this->location);
+        $cache = new FileCache($this->request, $this->location);
 
         $cache->store($response);
 
@@ -50,12 +48,9 @@ class FileCacheStoreTest extends TestCase
     public function testStoreCreatesDirectories()
     {
         $path = '/nested_dir/file.txt';
-        $request = $this->buildRequest($path);
-        $response = new Response([
-            'body' => 'nested body', 'httpCode' => 200, 'headers' => [], 'request' => $request
-        ]);
+        $response = $this->buildResponse($path, 200, 'cached body');
 
-        $cache = new FileCache($request, $this->location);
+        $cache = new FileCache($this->request, $this->location);
 
         $cache->store($response);
 
@@ -69,36 +64,29 @@ class FileCacheStoreTest extends TestCase
         $fullPath = $this->cacheDir . '/nested_dir/file.txt';
         mkdir($fullPath, 0777, true);
 
-        $request = $this->buildRequest($path);
-        $response = new Response([
-            'body' => 'some body', 'httpCode' => 200, 'headers' => [], 'request' => $request
-        ]);
+        $response = $this->buildResponse($path, 200, 'some body');
 
-        $cache = new FileCache($request, $this->location);
+        $cache = new FileCache($this->request, $this->location);
 
         $cache->store($response);
 
         $this->assertTrue(is_dir($fullPath));
         $this->assertTrue($cache->exists());
         $this->assertEquals('some body', $cache->content());
-        $this->assertEquals([], $cache->headers());
+        $this->assertEquals($this->headers, $cache->headers());
     }
 
     public function testStoreFileContents()
     {
         $path = '/path/file.txt';
-        $headers = ['Content-Type: text/plain', 'Content-Length: 11'];
-        $request = $this->buildRequest($path);
-        $response = new Response([
-            'body' => 'cached body', 'httpCode' => 200, 'headers' => $headers, 'request' => $request
-        ]);
+        $response = $this->buildResponse($path, 200, 'cached body');
 
-        $cache = new FileCache($request, $this->location);
+        $cache = new FileCache($this->request, $this->location);
         $cache->store($response);
 
         $basePath = $this->cacheDir . '/path/file.txt';
-        $bodyPath = CacheFilePath::path('body', $basePath, $request->query());
-        $metaPath = CacheFilePath::path('meta', $basePath, $request->query());
+        $bodyPath = CacheFilePath::path('body', $basePath, $this->request->query());
+        $metaPath = CacheFilePath::path('meta', $basePath, $this->request->query());
 
         $this->assertTrue(is_file($bodyPath), 'Body file does not exist or is not a file');
         $this->assertTrue(is_file($metaPath), 'Meta file does not exist or is not a file');
@@ -106,9 +94,20 @@ class FileCacheStoreTest extends TestCase
         $this->assertEquals('cached body', file_get_contents($bodyPath));
         $meta = json_decode(file_get_contents($metaPath), true);
         $this->assertEquals([
-            'headers' => $headers,
+            'headers' => $this->headers,
             'httpCode' => 200
         ], $meta);
+    }
+
+    private function buildResponse(string $path, int $httpCode, string $body)
+    {
+        $this->headers = ['Content-Type: text/plain', 'Content-Length: 11'];
+        $this->request = $this->buildRequest($path);
+
+        return new Response([
+            'body' => $body, 'httpCode' => $httpCode, 'headers' => $this->headers,
+            'request' => $this->request
+        ]);
     }
 
     private function buildRequest(string $path): Request
