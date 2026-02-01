@@ -14,8 +14,19 @@ use Tent\Models\ResponseMatchers\StatusCodeMatcher;
  */
 class FileCacheMiddleware extends Middleware
 {
+    /**
+     * @var FolderLocation The base folder location for caching.
+     */
     private FolderLocation $location;
+
+    /**
+     * @var array The list of HTTP status codes to cache.
+     */
     private array $httpCodes;
+
+    /**
+     * @var array The list of HTTP request methods to cache.
+     */
     private array $requestMethods;
 
     /**
