@@ -24,6 +24,9 @@ class FileCacheMiddleware extends Middleware
      */
     private array $requestMethods;
 
+    /**
+     * @var array The list of response matchers to determine cacheability.
+     */
     private array $matchers;
 
     /**
