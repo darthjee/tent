@@ -57,7 +57,6 @@ docker-compose exec frontend_dev npm install
 
 > Do not run commands directly on the host. Always use Docker Compose to ensure the correct environment and dependencies.
 
-
 ## Language Guidelines
 
 - All code, comments, and documentation must be written in **English**.
