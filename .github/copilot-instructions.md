@@ -43,4 +43,19 @@ dev/
 
 ---
 
+## Running the Project
+
+This project is designed to be run using Docker Compose. All services and development environments are defined in the `docker-compose.yml` file at the root of the repository.
+
+
+Example:
+
+```
+docker-compose exec tent_app composer install
+docker-compose exec tent_tests composer tests
+docker-compose exec frontend_dev npm install
+```
+
+> Do not run commands directly on the host. Always use Docker Compose to ensure the correct environment and dependencies.
+
 For more details on each folder or to contribute, please refer to the README.md or open an issue.
