@@ -67,7 +67,7 @@ class FileCacheGeneralTest extends TestCase
         $this->assertFalse($cache->exists());
     }
 
-    public function testExistsReturnsFalseWhenHeadersFileIsMissing()
+    public function testExistsReturnsFalseWhenMetaFileIsMissing()
     {
         @unlink(CacheFilePath::path('meta', $this->fullPath, ''));
         $location = new FolderLocation($this->basePath);
