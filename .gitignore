@@ -16,3 +16,4 @@ docker_volumes/mysql_data
 docker_volumes/node_modules
 docker_volumes/vendor/
 docker_volumes/cache/
+source/vendor/
