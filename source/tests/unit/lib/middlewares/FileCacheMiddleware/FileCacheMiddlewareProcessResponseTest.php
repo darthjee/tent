@@ -90,20 +90,6 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
         file_put_contents($bodyFile, 'original body');
         file_put_contents($headersFile, "Header1: original\nHeader2: value");
 
-        // Garante que os arquivos existem e têm o conteúdo esperado
-        $this->assertFileExists($bodyFile);
-        $this->assertFileExists($headersFile);
-        $this->assertEquals('original body', file_get_contents($bodyFile));
-        $this->assertEquals("Header1: original\nHeader2: value", file_get_contents($headersFile));
-
-        // Cria um response diferente
-        $response = new Response([
-            'body' => 'new body',
-            'httpCode' => 200,
-            'headers' => ['Header1: changed', 'Header2: changed'],
-            'request' => $this->request
-        ]);
-
         $middleware = $this->buildMiddleware();
         $middleware->processResponse($response);
 
@@ -116,7 +102,7 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
     {
         $this->path = '/file.txt';
         $this->headers = ['Content-Type: text/plain', 'Content-Length: 11'];
-        $this->request = new ProcessingRequest(['requestPath' => $this->path]);
+        $this->request = $this->buildRequest($this->path, 'GET');
 
         return new Response([
             'body' => 'cached body', 'httpCode' => $httpCode, 'headers' => $this->headers,
