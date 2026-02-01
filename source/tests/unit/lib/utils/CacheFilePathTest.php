@@ -14,7 +14,7 @@ class CacheFilePathTest extends TestCase
         $this->assertEquals($expected, CacheFilePath::path('body', '/tmp', 'query'));
     }
 
-    public function testPathReturnsHeadersCacheFile()
+    public function testPathReturnsMetaCacheFile()
     {
         $expected = '/tmp/a8b771920b8319e47251d1360f5e880bc18e8d329b0f0d003ea3c7e615558947.meta.json';
         $this->assertEquals($expected, CacheFilePath::path('meta', '/tmp', 'query'));
