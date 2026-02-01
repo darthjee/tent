@@ -24,7 +24,10 @@ class FileCacheGeneralTest extends TestCase
         $this->fullPath = $this->basePath . '/' . $this->path;
         $this->headers = ['Content-Type' => 'text/plain'];
         $this->request = new Request(['requestPath' => $this->path]);
-        $this->meta = ['headers' => $this->headers];
+        $this->meta = [
+            'headers' => $this->headers,
+            'httpCode' => 201
+        ];
 
         mkdir($this->fullPath, 0777, true);
 
@@ -47,11 +50,18 @@ class FileCacheGeneralTest extends TestCase
         $this->assertEquals('Cached body content', $cache->content());
     }
 
-    public function testContentReadsCacheHeadersFile()
+    public function testContentReadsCacheHeaders()
     {
         $location = new FolderLocation($this->basePath);
         $cache = new FileCache($this->request, $location);
         $this->assertEquals($this->headers, $cache->headers());
+    }
+
+    public function testContentReadsCacheHttpCode()
+    {
+        $location = new FolderLocation($this->basePath);
+        $cache = new FileCache($this->request, $location);
+        $this->assertEquals(201, $cache->httpCode());
     }
 
     public function testExistsReturnsTrueWhenBothFilesExist()
