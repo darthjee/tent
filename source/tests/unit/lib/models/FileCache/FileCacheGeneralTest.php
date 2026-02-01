@@ -15,6 +15,7 @@ class FileCacheGeneralTest extends TestCase
     private $fullPath;
     private $headers;
     private $request;
+    private $meta;
 
     public function setUp(): void
     {
@@ -23,11 +24,12 @@ class FileCacheGeneralTest extends TestCase
         $this->fullPath = $this->basePath . '/' . $this->path;
         $this->headers = ['Content-Type' => 'text/plain'];
         $this->request = new Request(['requestPath' => $this->path]);
+        $this->meta = ['headers' => $this->headers];
 
         mkdir($this->fullPath, 0777, true);
 
         file_put_contents(CacheFilePath::path('body', $this->fullPath, ''), 'Cached body content');
-        file_put_contents(CacheFilePath::path('meta', $this->fullPath, ''), json_encode($this->headers));
+        file_put_contents(CacheFilePath::path('meta', $this->fullPath, ''), json_encode($this->meta));
     }
 
     public function tearDown(): void
