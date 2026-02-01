@@ -124,7 +124,7 @@ class FileCache implements Cache
     /**
      * Returns the full path for the specified cache type.
      *
-     * @param string $type The cache type ('body' or 'headers').
+     * @param string $type The cache type ('body' or 'meta').
      * @return string The full path to the cache file.
      */
     protected function fullPath(string $type): string
