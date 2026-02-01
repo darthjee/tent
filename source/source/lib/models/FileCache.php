@@ -96,33 +96,6 @@ class FileCache implements Cache
     }
 
     /**
-     * Reads and decodes the metadata file.
-     *
-     * Returns an empty array if the file doesn't exist, is not readable,
-     * or if JSON decoding fails.
-     *
-     * @return array The decoded metadata array, or empty array on failure.
-     */
-    protected function readMeta(): array
-    {
-        if (!file_exists($this->metaFilePath) || !is_readable($this->metaFilePath)) {
-            return [];
-        }
-
-        $content = @file_get_contents($this->metaFilePath);
-        if ($content === false) {
-            return [];
-        }
-
-        $meta = json_decode($content, true);
-        if (!is_array($meta)) {
-            return [];
-        }
-
-        return $meta;
-    }
-
-    /**
      * Checks if the cached response files exist.
      *
      * @see FileUtils::exists()
@@ -145,6 +118,17 @@ class FileCache implements Cache
         $this->ensureCacheFolderExists();
         file_put_contents($this->bodyFilePath, $response->body());
         file_put_contents($this->metaFilePath, json_encode($this->buildMeta($response)));
+    }
+
+    /**
+     * Reads and decodes the metadata file.
+     *
+     * @return array The decoded metadata array, or empty array on failure.
+     */
+    protected function readMeta(): array
+    {
+        $content = @file_get_contents($this->metaFilePath);
+        return json_decode($content, true);
     }
 
     /**
