@@ -70,7 +70,7 @@ class File implements ResponseContent
     /**
      * Returns the HTTP status code for the file.
      *
-     * @return int The HTTP status code (always 200 for files).
+     * @return integer The HTTP status code (always 200 for files).
      */
     public function httpCode(): int
     {
