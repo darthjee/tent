@@ -38,12 +38,14 @@ Tent is in active development. Currently implemented:
 - ✅ Header forwarding
 - ✅ Static file serving (serves files from a directory)
 - ✅ Middleware system (ready)
-- ⏳ Configuration system (in progress)
+- ⏳ Initial Configuration system (in progress)
 - ✅ Response caching
 
 ### Error Responses (403/404)
 
 Currently, 404 (Not Found) and 403 (Forbidden) responses return a simple default body. In the future, Tent will support custom bodies or templates for these responses, allowing more complex or branded error pages.
+
+In the future, custom body will be available through configuration
 
 ## Architecture
 
