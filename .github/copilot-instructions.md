@@ -16,6 +16,7 @@ Tent is a PHP-based intelligent proxy server that routes requests to backend ser
 ## Critical Developer Workflows
 
 ### Running Commands
+
 **ALWAYS use Docker Compose**. Never run commands directly on the host:
 ```bash
 # Backend tests
@@ -49,6 +50,7 @@ docker-compose exec frontend_dev npm run lint
 ## Project-Specific Conventions
 
 ### Configuration Rules Pattern
+
 Rules are defined declaratively using `Configuration::buildRule()`:
 ```php
 Configuration::buildRule([
@@ -70,6 +72,7 @@ Configuration::buildRule([
 ```
 
 ### Middleware Pattern
+
 Middlewares implement `processRequest(ProcessingRequest): ProcessingRequest` and/or `processResponse(Response): Response`. They're applied in order and can short-circuit with `$request->setResponse()`.
 
 Examples:
