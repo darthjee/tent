@@ -70,6 +70,7 @@ Configuration::buildRule([
 Middlewares implement `processRequest(ProcessingRequest): ProcessingRequest` and/or `processResponse(Response): Response`. They're applied in order and can short-circuit with `$request->setResponse()`.
 
 Examples:
+
 - `FileCacheMiddleware`: Caches responses matching HTTP codes
 - `SetHeadersMiddleware`: Overrides request headers
 - `SetPathMiddleware`: Changes request path (e.g., `/` → `/index.html`)
