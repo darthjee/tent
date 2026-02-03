@@ -1,67 +1,120 @@
-# Copilot Instructions: Project Folder Architecture
+# Copilot Instructions for Tent
 
-This document provides an overview of the main folder structure in this repository to help contributors and Copilot understand the project organization and responsibilities of each directory.
+Tent is a PHP-based intelligent proxy server that routes requests to backend services, caches responses, or serves static files based on configuration rules.
 
-## Folder Structure Overview
+## Architecture Overview
+
+**Request Flow**: Apache rewrites all requests to [source/source/index.php](source/source/index.php) → `RequestProcessor` evaluates configured `Rule` objects → Middlewares process the request → `RequestHandler` executes (proxy/static/cache) → Middlewares process response → Response sent.
+
+**Key Components**:
+- **Configuration System**: Rules defined in `docker_volumes/configuration/configure.php` and loaded at runtime
+- **Rule Matching**: Each `Rule` has matchers (URI patterns, HTTP methods) and a handler
+- **Middleware Chain**: Middlewares modify requests/responses (headers, paths, caching)
+- **Handlers**: `ProxyRequestHandler` (forwards to backends), `StaticFileHandler` (serves files), `MissingRequestHandler` (404 fallback)
+
+## Critical Developer Workflows
+
+### Running Commands
+**ALWAYS use Docker Compose**. Never run commands directly on the host:
+```bash
+# Backend tests
+docker-compose exec tent_tests composer tests
+
+# Frontend tests
+docker-compose exec frontend_dev npm test
+
+# Install dependencies
+docker-compose exec tent_app composer install
+docker-compose exec frontend_dev npm install
+
+# Linting
+docker-compose exec tent_app composer lint
+docker-compose exec frontend_dev npm run lint
+```
+
+### Development Containers
+- `tent_app`: Main Tent proxy (port 8080)
+- `tent_tests`: Test environment for backend
+- `api_dev`: Mock backend API (port 8040)
+- `frontend_dev`: React/Vite dev server (port 8030)
+- `api_dev_phpmyadmin`: Database management (port 8050)
+
+### Environment Variable: FRONTEND_DEV_MODE
+- `true`: Proxies frontend requests to Vite dev server (hot reload)
+- `false`: Serves frontend from static build at `dev/frontend/dist/`
+
+## Project-Specific Conventions
+
+### Configuration Rules Pattern
+Rules are defined declaratively using `Configuration::buildRule()`:
+```php
+Configuration::buildRule([
+    'handler' => [
+        'type' => 'proxy',        // or 'static'
+        'host' => 'http://api:80' // for proxy type
+    ],
+    'matchers' => [
+        ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact']
+        // type: 'exact', 'begins_with'
+    ],
+    'middlewares' => [
+        [
+            'class' => 'Tent\Middlewares\SetHeadersMiddleware',
+            'headers' => ['Host' => 'backend.local']
+        ]
+    ]
+]);
+```
+
+### Middleware Pattern
+Middlewares implement `processRequest(ProcessingRequest): ProcessingRequest` and/or `processResponse(Response): Response`. They're applied in order and can short-circuit with `$request->setResponse()`.
+
+Examples:
+- `FileCacheMiddleware`: Caches responses matching HTTP codes
+- `SetHeadersMiddleware`: Overrides request headers
+- `SetPathMiddleware`: Changes request path (e.g., `/` → `/index.html`)
+
+### Testing Standards
+- **PHP**: PHPUnit tests in `source/tests/unit/`. Use `Configuration::reset()` in `setUp()` to clear rules between tests.
+- **Frontend**: Jasmine specs in `dev/frontend/spec/`. Run with `npm test`.
+- Always test handler behavior via `Rule::match()` and handler execution separately.
+
+## Directory Structure
 
 ```
-source/
-  ├── source/           # Main application source code (core logic, models, services, etc.)
-  ├── tests/            # Unit and integration tests for the application
-  ├── vendor/           # Composer dependencies (auto-generated)
-  ├── coverage/         # Code coverage reports (auto-generated)
-  ├── ...               # Other supporting files (config, docs, etc.)
+source/source/               # Core Tent application
+  ├── lib/
+  │   ├── handlers/          # ProxyRequestHandler, StaticFileHandler, etc.
+  │   ├── middlewares/       # Request/response middleware implementations
+  │   ├── models/            # Request, Response, Rule, Server, etc.
+  │   ├── service/           # RequestProcessor (main routing engine)
+  │   └── Configuration.php  # Static rule registry
+  └── index.php              # Entry point (processes all HTTP requests)
+
+docker_volumes/configuration/  # User-provided configuration (NOT version controlled)
+  ├── configure.php            # Main config loader
+  └── rules/                   # Rule definitions (backend.php, frontend.php)
 
 dev/
-  ├── api/              # Development environment for the backend API
-  │   ├── composer.json     # PHP dependencies for API
-  │   ├── phpcs.xml         # PHP code style configuration
-  │   ├── phpunit.xml       # PHPUnit configuration
-  │   ├── bin/              # API scripts and binaries
-  │   ├── migrations/       # Database migrations
-  │   ├── source/           # API source code (may mirror main source/)
-  │   ├── tests/            # API-specific tests
-  │   ├── vendor/           # API Composer dependencies
-  │   └── ...
-  ├── frontend/         # Development environment for the frontend
-  │   ├── package.json      # Node.js dependencies for frontend
-  │   ├── vite.config.js    # Vite build configuration
-  │   ├── assets/           # Static assets (images, styles, etc.)
-  │   ├── bin/              # Frontend scripts and binaries
-  │   ├── spec/             # Frontend tests/specs
-  │   └── ...
-  └── ...
+  ├── api/                   # Mock backend API for development
+  └── frontend/              # React frontend (Vite, Jasmine tests)
 ```
 
-## Directory Responsibilities
+## Integration Points
 
-- **source/**: Contains the main application logic, core models, services, and supporting files. This is the heart of the project and is used in both development and production.
-- **dev/api/**: Provides a development environment for the backend API, including its own dependencies, configuration, and scripts. Useful for local development, testing, and isolated API work.
-- **dev/frontend/**: Provides a development environment for the frontend, including its own dependencies, configuration, and scripts. Useful for local development, UI testing, and frontend-specific workflows.
+- **Backend API**: Communicates via HTTP proxy through Tent. Tent sets `Host` header via `SetHeadersMiddleware`.
+- **Frontend**: In dev mode (`FRONTEND_DEV_MODE=true`), proxies to Vite server. In prod mode, serves built static files.
+- **Cache**: `FileCacheMiddleware` stores responses in `docker_volumes/cache/` based on request path hash and HTTP status codes.
+- **Database**: `api_dev` connects to MySQL (`api_dev_mysql` container) for mock data.
 
-> Note: The `dev/` folder is intended for local development setups and may contain environment-specific overrides or tools that are not part of the main production build.
+## Key Files to Reference
 
----
-
-## Running the Project
-
-This project is designed to be run using Docker Compose. All services and development environments are defined in the `docker-compose.yml` file at the root of the repository.
-
-Example:
-
-```
-docker-compose exec tent_app composer install
-docker-compose exec tent_tests composer tests
-docker-compose exec frontend_dev npm install
-```
-
-> Do not run commands directly on the host. Always use Docker Compose to ensure the correct environment and dependencies.
+- [source/source/lib/service/RequestProcessor.php](source/source/lib/service/RequestProcessor.php): Main request routing logic
+- [source/source/lib/handlers/RequestHandler.php](source/source/lib/handlers/RequestHandler.php): Handler base class with middleware application
+- [source/source/lib/Configuration.php](source/source/lib/Configuration.php): Rule registry and builder
+- [docker_volumes/configuration/rules/backend.php](docker_volumes/configuration/rules/backend.php): Example backend proxy rule
+- [docker_volumes/configuration/rules/frontend.php](docker_volumes/configuration/rules/frontend.php): Example frontend rules (dev vs prod)
 
 ## Language Guidelines
 
-- All code, comments, and documentation must be written in **English**.
-- Avoid using other languages in code, comments, commit messages, and documentation files.
-
-This ensures consistency and makes the project accessible to a wider audience.
-
-For more details on each folder or to contribute, please refer to the README.md or open an issue.
+All code, comments, and documentation must be in **English**.
