@@ -33,6 +33,7 @@ docker-compose exec frontend_dev npm run lint
 ```
 
 ### Development Containers
+
 - `tent_app`: Main Tent proxy (port 8080)
 - `tent_tests`: Test environment for backend
 - `api_dev`: Mock backend API (port 8040)
@@ -40,6 +41,7 @@ docker-compose exec frontend_dev npm run lint
 - `api_dev_phpmyadmin`: Database management (port 8050)
 
 ### Environment Variable: FRONTEND_DEV_MODE
+
 - `true`: Proxies frontend requests to Vite dev server (hot reload)
 - `false`: Serves frontend from static build at `dev/frontend/dist/`
 
@@ -76,6 +78,7 @@ Examples:
 - `SetPathMiddleware`: Changes request path (e.g., `/` → `/index.html`)
 
 ### Testing Standards
+
 - **PHP**: PHPUnit tests in `source/tests/unit/`. Use `Configuration::reset()` in `setUp()` to clear rules between tests.
 - **Frontend**: Jasmine specs in `dev/frontend/spec/`. Run with `npm test`.
 - Always test handler behavior via `Rule::match()` and handler execution separately.
