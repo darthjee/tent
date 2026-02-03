@@ -51,22 +51,31 @@ In the future, custom body will be available through configuration
 
 ```
 Client Request
-      ↓
+   ↓
    Apache (.htaccess rewrite)
-      ↓
+   ↓
    index.php
-      ↓
+   ↓
 RequestProcessor
-      ↓
-Middleware (chain)
-      ↓
- ┌────────────┬──────────┬───────────┬───────────┐
- ↓            ↓          ↓           ↓
-Proxy     Cache     StaticFile     Error
-Handler   Handler   Handler        Handler
-                                 ┌─────────────┐
-                                 ↓             ↓
-                           404 Not Found   403 Forbidden
+   ↓
+┌─────────────────────────────┐
+│      Middleware Chain       │
+│ ┌─────────────────────────┐ │
+│ │ FileCacheMiddleware     │ │
+│ │ SetHeadersMiddleware    │ │
+│ │ CacheMiddleware         │ │
+│ │ ...                     │ │
+│ └─────────────────────────┘ │
+└─────────────────────────────┘
+   ↓
+Handler Selection
+ ┌────────────┬───────────────┬─────────────┐
+ ↓            ↓               ↓
+Proxy     StaticFile      Error
+Handler   Handler         Handler
+                  ┌─────────────┐
+                  ↓             ↓
+               404 Not Found   403 Forbidden
 ```
 
 ## Middleware System
