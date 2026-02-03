@@ -27,7 +27,7 @@ Tent uses Apache with PHP to process all incoming requests through a centralized
 
 ## Docker Image
 
-Tent is available as a Docker image: `darthjee/tent` *(coming soon)*
+Tent is available as a Docker image: `darthjee/tent`
 
 ## Current Status
 
