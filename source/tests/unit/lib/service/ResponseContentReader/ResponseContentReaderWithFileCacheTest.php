@@ -8,6 +8,7 @@ use Tent\Models\FileCache;
 use Tent\Models\Request;
 use Tent\Models\FolderLocation;
 use Tent\Models\Response;
+use Tent\Utils\CacheFilePath;
 
 class ResponseContentReaderWithFileCacheTest extends TestCase
 {
@@ -25,9 +26,12 @@ class ResponseContentReaderWithFileCacheTest extends TestCase
             'httpCode' => 207
         ];
         $fullPath = $this->testDir . '/file.txt';
+        $bodyPath = CacheFilePath::path('body', $fullPath, '');
+        $metaPath = CacheFilePath::path('meta', $fullPath, '');
+
         mkdir($fullPath, 0777, true);
-        file_put_contents($fullPath . '/0000000000000000000000000000000000000000000000000000000000000000.body.txt', $this->body);
-        file_put_contents($fullPath . '/0000000000000000000000000000000000000000000000000000000000000000.meta.json', json_encode($this->meta));
+        file_put_contents($bodyPath, $this->body);
+        file_put_contents($metaPath, json_encode($this->meta));
     }
 
     protected function tearDown(): void
