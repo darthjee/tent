@@ -7,6 +7,7 @@ Tent is a PHP-based intelligent proxy server that routes requests to backend ser
 **Request Flow**: Apache rewrites all requests to [source/source/index.php](source/source/index.php) → `RequestProcessor` evaluates configured `Rule` objects → Middlewares process the request → `RequestHandler` executes (proxy/static/cache) → Middlewares process response → Response sent.
 
 **Key Components**:
+
 - **Configuration System**: Rules defined in `docker_volumes/configuration/configure.php` and loaded at runtime
 - **Rule Matching**: Each `Rule` has matchers (URI patterns, HTTP methods) and a handler
 - **Middleware Chain**: Middlewares modify requests/responses (headers, paths, caching)
