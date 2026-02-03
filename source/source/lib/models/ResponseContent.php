@@ -19,6 +19,13 @@ interface ResponseContent
     public function headers(): array;
 
     /**
+     * Returns the HTTP status code for the response content.
+     *
+     * @return integer
+     */
+    public function httpCode(): int;
+
+    /**
      * Checks if the content exists.
      *
      * @return boolean

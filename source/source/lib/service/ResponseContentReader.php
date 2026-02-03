@@ -69,7 +69,7 @@ class ResponseContentReader
 
         return new Response([
             'body' => $this->responseContent->content(),
-            'httpCode' => 200,
+            'httpCode' => $this->responseContent->httpCode(),
             'headers' => $this->responseContent->headers(),
             'request' => $this->request
         ]);

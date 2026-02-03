@@ -28,15 +28,15 @@ class FileTest extends TestCase
 
     public function testContentReturnsFileContent()
     {
-        $location = new \Tent\Models\FolderLocation($this->basePath);
-        $file = new \Tent\Models\File('test.txt', $location);
+        $location = new FolderLocation($this->basePath);
+        $file = new File('test.txt', $location);
         $this->assertEquals('Hello World', $file->content());
     }
 
     public function testHeadersReturnsContentTypeAndLength()
     {
-        $location = new \Tent\Models\FolderLocation($this->basePath);
-        $file = new \Tent\Models\File('test.txt', $location);
+        $location = new FolderLocation($this->basePath);
+        $file = new File('test.txt', $location);
         $headers = $file->headers();
         $this->assertIsArray($headers);
         $this->assertNotEmpty($headers);
@@ -46,15 +46,22 @@ class FileTest extends TestCase
 
     public function testExistsReturnsTrueForExistingFile()
     {
-        $location = new \Tent\Models\FolderLocation($this->basePath);
-        $file = new \Tent\Models\File('test.txt', $location);
+        $location = new FolderLocation($this->basePath);
+        $file = new File('test.txt', $location);
         $this->assertTrue($file->exists());
     }
 
     public function testExistsReturnsFalseForNonexistentFile()
     {
-        $location = new \Tent\Models\FolderLocation($this->basePath);
-        $file = new \Tent\Models\File('notfound.txt', $location);
+        $location = new FolderLocation($this->basePath);
+        $file = new File('notfound.txt', $location);
         $this->assertFalse($file->exists());
+    }
+
+    public function testHttpCodeReturns200()
+    {
+        $location = new FolderLocation($this->basePath);
+        $file = new File('test.txt', $location);
+        $this->assertEquals(200, $file->httpCode());
     }
 }
