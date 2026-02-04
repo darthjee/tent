@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<phpdocumentor
+    configVersion="3"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://www.phpdoc.org"
+    xsi:schemaLocation="https://www.phpdoc.org https://raw.githubusercontent.com/phpDocumentor/phpDocumentor/master/data/xsd/phpdoc.xsd"
+>
+    <title>Tent Documentation</title>
+    <paths>
+        <output>.phpdoc</output>
+        <cache>.phpdoc/cache</cache>
+    </paths>
+    <version number="latest">
+        <folder>build</folder>
+        <api>
+            <source dsn=".">
+                <path>source</path>
+            </source>
+            <output>build</output>
+            <ignore hidden="true" symlinks="true">
+                <path>cache</path>
+                <path>configuration</path>
+                <path>static</path>
+            </ignore>
+            <default-package-name>Tent</default-package-name>
+            <include-source>true</include-source>
+        </api>
+        <guide>
+            <source dsn="./">
+                <path>README.md</path>
+            </source>
+            <output>build</output>
+        </guide>
+    </version>
+    <template name="default"/>
+</phpdocumentor>
