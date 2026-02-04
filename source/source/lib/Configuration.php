@@ -10,6 +10,90 @@ use Tent\Models\Rule;
  *
  * This class is used to configure the server by adding Rule objects that define how requests are handled.
  * Rules are stored statically and can be retrieved or reset as needed.
+ *
+ * @example Basic proxy configuration:
+ * ```php
+ * Configuration::buildRule([
+ *     'handler' => [
+ *         'type' => 'proxy',
+ *         'host' => 'http://api:80'
+ *     ],
+ *     'matchers' => [
+ *         ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact']
+ *     ]
+ * ]);
+ * ```
+ *
+ * @example Proxy with caching and custom headers sent to backend:
+ * ```php
+ * Configuration::buildRule([
+ *     'handler' => [
+ *         'type' => 'proxy',
+ *         'host' => 'http://api:80'
+ *     ],
+ *     'matchers' => [
+ *         ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact']
+ *     ],
+ *     'middlewares' => [
+ *         [
+ *             'class' => 'Tent\Middlewares\FileCacheMiddleware',
+ *             'location' => './cache',
+ *             'httpCodes' => [200]
+ *         ],
+ *         [
+ *             'class' => 'Tent\Middlewares\SetHeadersMiddleware',
+ *             'headers' => ['Host' => 'backend.local']
+ *         ]
+ *     ]
+ * ]);
+ * ```
+ *
+ * @example Static file serving:
+ * ```php
+ * Configuration::buildRule([
+ *     'handler' => [
+ *         'type' => 'static',
+ *         'location' => '/var/www/html/static'
+ *     ],
+ *     'matchers' => [
+ *         ['method' => 'GET', 'uri' => '/assets', 'type' => 'begins_with']
+ *     ]
+ * ]);
+ * ```
+ *
+ * @example Static file with static path rewriting:
+ * ```php
+ * Configuration::buildRule([
+ *     'handler' => [
+ *         'type' => 'static',
+ *         'location' => '/var/www/html/static/'
+ *     ],
+ *     'matchers' => [
+ *         ['method' => 'GET', 'uri' => '/', 'type' => 'exact']
+ *     ],
+ *     'middlewares' => [
+ *         [
+ *             'class' => 'Tent\Middlewares\SetPathMiddleware',
+ *             'path' => '/index.html'
+ *         ]
+ *     ]
+ * ]);
+ * ```
+ *
+ * @example Multiple matchers for one handler:
+ * ```php
+ * Configuration::buildRule([
+ *     'handler' => [
+ *         'type' => 'proxy',
+ *         'host' => 'http://frontend:8080'
+ *     ],
+ *     'matchers' => [
+ *         ['method' => 'GET', 'uri' => '/', 'type' => 'exact'],
+ *         ['method' => 'GET', 'uri' => '/assets/js/', 'type' => 'begins_with'],
+ *         ['method' => 'GET', 'uri' => '/assets/css/', 'type' => 'begins_with']
+ *     ]
+ * ]);
+ * ```
  */
 class Configuration
 {
