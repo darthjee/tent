@@ -39,7 +39,8 @@ use Tent\Service\ResponseCacher;
  * - `httpCodes`: Array of HTTP status codes to cache (e.g., [200], ["2xx"]).
  * - `requestMethods`: Array of HTTP methods to cache (default: ['GET']).
  *
- * This middleware will cache responses matching the specified codes and methods, and serve them from cache on subsequent requests.
+ * This middleware will cache responses matching the specified codes and
+ * methods, and serve them from cache on subsequent requests.
  */
 class FileCacheMiddleware extends Middleware
 {
