@@ -12,6 +12,34 @@ use Tent\Service\ResponseCacher;
 
 /**
  * Middleware for caching responses to files.
+ *
+ * ## Usage Example
+ *
+ * ```php
+ * Configuration::buildRule([
+ *     'handler' => [
+ *         'type' => 'proxy',
+ *         'host' => 'http://api:80'
+ *     ],
+ *     'matchers' => [
+ *         ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact']
+ *     ],
+ *     'middlewares' => [
+ *         [
+ *             'class' => 'Tent\\Middlewares\\FileCacheMiddleware',
+ *             'location' => './cache',
+ *             'httpCodes' => [200], // or ["2xx"] for all 2xx codes
+ *             // 'requestMethods' => ['GET'] // optional, defaults to ['GET']
+ *         ]
+ *     ]
+ * ]);
+ * ```
+ *
+ * - `location`: Directory where cached responses are stored (required).
+ * - `httpCodes`: Array of HTTP status codes to cache (e.g., [200], ["2xx"]).
+ * - `requestMethods`: Array of HTTP methods to cache (default: ['GET']).
+ *
+ * This middleware will cache responses matching the specified codes and methods, and serve them from cache on subsequent requests.
  */
 class FileCacheMiddleware extends Middleware
 {
