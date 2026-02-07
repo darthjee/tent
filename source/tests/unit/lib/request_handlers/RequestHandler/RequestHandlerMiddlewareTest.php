@@ -6,7 +6,7 @@ require_once __DIR__ . '/../../../../support/handlers/RequestToBodyHandler.php';
 require_once __DIR__ . '/../../../../support/middlewares/DummyRequestMiddleware.php';
 
 use PHPUnit\Framework\TestCase;
-use Tent\Handlers\RequestHandler;
+use Tent\RequestHandlers\RequestHandler;
 use Tent\Models\ProcessingRequest;
 use Tent\Middlewares\Middleware;
 use Tent\Tests\Support\Handlers\RequestToBodyHandler;

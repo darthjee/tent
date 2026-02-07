@@ -6,7 +6,7 @@ require_once __DIR__ . '/../../../../support/handlers/RequestToBodyHandler.php';
 require_once __DIR__ . '/../../../../support/middlewares/DummyRequestMiddleware.php';
 
 use PHPUnit\Framework\TestCase;
-use Tent\Handlers\RequestHandler;
+use Tent\RequestHandlers\RequestHandler;
 use Tent\Models\ProcessingRequest;
 use Tent\Tests\Support\Handlers\RequestToBodyHandler;
 
@@ -37,7 +37,7 @@ class RequestHandlerBuildTest extends TestCase
             'host' => 'http://api.com'
         ]);
 
-        $this->assertInstanceOf(\Tent\Handlers\ProxyRequestHandler::class, $handler);
+        $this->assertInstanceOf(\Tent\RequestHandlers\ProxyRequestHandler::class, $handler);
     }
 
     public function testBuildWithTypeStatic()
@@ -47,7 +47,7 @@ class RequestHandlerBuildTest extends TestCase
             'filePath' => '/path/to/file.txt',
         ]);
 
-        $this->assertInstanceOf(\Tent\Handlers\StaticFileHandler::class, $handler);
+        $this->assertInstanceOf(\Tent\RequestHandlers\StaticFileHandler::class, $handler);
     }
 
     public function testBuildWithUnknownTypeThrowsException()

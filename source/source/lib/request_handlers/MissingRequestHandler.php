@@ -1,8 +1,8 @@
 <?php
 
-namespace Tent\Handlers;
+namespace Tent\RequestHandlers;
 
-use Tent\Handlers\RequestHandler;
+use Tent\RequestHandlers\RequestHandler;
 use Tent\Models\RequestInterface;
 use Tent\Models\Response;
 use Tent\Models\MissingResponse;

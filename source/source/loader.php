@@ -2,7 +2,7 @@
 
 // tests_loader.php
 
-require_once __DIR__ . '/lib/handlers/RequestHandler.php';
+require_once __DIR__ . '/lib/request_handlers/RequestHandler.php';
 require_once __DIR__ . '/lib/http/HttpClientInterface.php';
 require_once __DIR__ . '/lib/models/Response.php';
 require_once __DIR__ . '/lib/models/RequestInterface.php';
@@ -10,9 +10,9 @@ require_once __DIR__ . '/lib/models/RequestInterface.php';
 require_once __DIR__ . '/lib/Configuration.php';
 require_once __DIR__ . '/lib/exceptions/FileNotFoundException.php';
 require_once __DIR__ . '/lib/exceptions/InvalidFilePathException.php';
-require_once __DIR__ . '/lib/handlers/MissingRequestHandler.php';
-require_once __DIR__ . '/lib/handlers/ProxyRequestHandler.php';
-require_once __DIR__ . '/lib/handlers/StaticFileHandler.php';
+require_once __DIR__ . '/lib/request_handlers/MissingRequestHandler.php';
+require_once __DIR__ . '/lib/request_handlers/ProxyRequestHandler.php';
+require_once __DIR__ . '/lib/request_handlers/StaticFileHandler.php';
 require_once __DIR__ . '/lib/http/CurlHttpClient.php';
 require_once __DIR__ . '/lib/middlewares/Middleware.php';
 require_once __DIR__ . '/lib/middlewares/FileCacheMiddleware.php';

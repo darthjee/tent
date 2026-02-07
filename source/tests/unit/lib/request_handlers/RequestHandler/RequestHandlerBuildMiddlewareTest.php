@@ -3,7 +3,7 @@
 namespace Tent\Tests\Handlers\RequestHandler;
 
 use PHPUnit\Framework\TestCase;
-use Tent\Handlers\RequestHandler;
+use Tent\RequestHandlers\RequestHandler;
 use Tent\Middlewares\SetHeadersMiddleware;
 use Tent\Middlewares\Middleware;
 use Tent\Tests\Support\Handlers\RequestToBodyHandler;

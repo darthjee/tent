@@ -2,7 +2,7 @@
 
 namespace Tent\Tests\Support\Handlers;
 
-use Tent\Handlers\RequestHandler;
+use Tent\RequestHandlers\RequestHandler;
 use Tent\Models\RequestInterface;
 use Tent\Models\Response;
 
