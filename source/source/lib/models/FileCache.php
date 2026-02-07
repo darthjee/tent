@@ -23,6 +23,46 @@ use Tent\Utils\CacheFilePath;
  * - Paths are generated using CacheFilePath utilities.
  *
  * Used by FileCacheMiddleware to provide persistent caching for proxy/static responses.
+ *
+ * ## Example: Direct usage
+ *
+ * ```php
+ * $request = ...; // RequestInterface instance
+ * $location = new FolderLocation('/tmp/cache');
+ * $cache = new FileCache($request, $location);
+ *
+ * // Reading from cache
+ * if ($cache->exists()) {
+ *     $body = $cache->content();
+ *     $headers = $cache->headers();
+ *     $code = $cache->httpCode();
+ * }
+ *
+ * // Storing a response
+ * $response = ...; // Response instance
+ * $cache->store($response);
+ * ```
+ *
+ * ## Example: Configuration (via FileCacheMiddleware)
+ *
+ * ```php
+ * Configuration::buildRule([
+ *     'handler' => [
+ *         'type' => 'proxy',
+ *         'host' => 'http://api:80'
+ *     ],
+ *     'matchers' => [
+ *         ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact']
+ *     ],
+ *     'middlewares' => [
+ *         [
+ *             'class' => 'Tent\\Middlewares\\FileCacheMiddleware',
+ *             'location' => './cache',
+ *             'httpCodes' => [200]
+ *         ]
+ *     ]
+ * ]);
+ * ```
  */
 class FileCache implements Cache
 {
