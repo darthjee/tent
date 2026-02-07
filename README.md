@@ -27,7 +27,7 @@ Tent uses Apache with PHP to process all incoming requests through a centralized
 
 ## Docker Image
 
-Tent is available as a Docker image: `darthjee/tent` *(coming soon)*
+Tent is available as a Docker image: `darthjee/tent`
 
 ## Current Status
 
@@ -38,33 +38,44 @@ Tent is in active development. Currently implemented:
 - ✅ Header forwarding
 - ✅ Static file serving (serves files from a directory)
 - ✅ Middleware system (ready)
-- ⏳ Configuration system (in progress)
-- ✅ Response caching (basic, for simple requests without query parameters)
+- ⏳ Initial Configuration system (in progress)
+- ✅ Response caching
 
 ### Error Responses (403/404)
 
 Currently, 404 (Not Found) and 403 (Forbidden) responses return a simple default body. In the future, Tent will support custom bodies or templates for these responses, allowing more complex or branded error pages.
 
+In the future, custom body will be available through configuration
+
 ## Architecture
 
 ```
 Client Request
-      ↓
+   ↓
    Apache (.htaccess rewrite)
-      ↓
+   ↓
    index.php
-      ↓
+   ↓
 RequestProcessor
-      ↓
-Middleware (chain)
-      ↓
- ┌────────────┬──────────┬───────────┬───────────┐
- ↓            ↓          ↓           ↓
-Proxy     Cache     StaticFile     Error
-Handler   Handler   Handler        Handler
-                                 ┌─────────────┐
-                                 ↓             ↓
-                           404 Not Found   403 Forbidden
+   ↓
+┌─────────────────────────────┐
+│      Middleware Chain       │
+│ ┌─────────────────────────┐ │
+│ │ FileCacheMiddleware     │ │
+│ │ SetHeadersMiddleware    │ │
+│ │ CacheMiddleware         │ │
+│ │ ...                     │ │
+│ └─────────────────────────┘ │
+└─────────────────────────────┘
+   ↓
+Handler Selection
+ ┌────────────┬───────────────┬─────────────┐
+ ↓            ↓               ↓
+Proxy     StaticFile      Error
+Handler   Handler         Handler
+                  ┌─────────────┐
+                  ↓             ↓
+               404 Not Found   403 Forbidden
 ```
 
 ## Middleware System
@@ -132,10 +143,39 @@ Configuration::buildRule([
 
 - **SetHeadersMiddleware**: Sets or overrides request headers (e.g., Host, X-Test).
 - **SetPathMiddleware**: Changes the request path, useful for serving a fixed file with StaticFileHandler.
+- **FileCacheMiddleware**: Caches responses matching configured HTTP codes.
 
-You can also implement your own middlewares by extending `RequestMiddleware`.
+All built-in and custom middlewares must extend the `Tent\Middlewares\Middleware` base class (not `RequestMiddleware`).
 
-Middlewares make Tent highly customizable, enabling advanced routing, header manipulation, authentication, and more.
+#### Implementing a Custom Middleware
+
+To create your own middleware, extend the `Middleware` base class and override `processRequest()` and/or `processResponse()` as needed:
+
+```php
+namespace Tent\Middlewares;
+
+use Tent\Models\ProcessingRequest;
+use Tent\Models\Response;
+
+class MyCustomMiddleware extends Middleware
+{
+   public function processRequest(ProcessingRequest $request): ProcessingRequest
+   {
+      // Custom request logic
+      return $request;
+   }
+
+   public function processResponse(Response $response): Response
+   {
+      // Custom response logic
+      return $response;
+   }
+}
+```
+
+To use your middleware, reference its class and any required parameters in your configuration rule (see examples above).
+
+Middlewares make Tent highly customizable, enabling advanced routing, header manipulation, authentication, caching, and more.
 
 ## Development
 
