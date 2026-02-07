@@ -3,7 +3,7 @@
 namespace Tent\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Tent\Handlers\ProxyRequestHandler;
+use Tent\RequestHandlers\ProxyRequestHandler;
 
 class ProxyRequestHandlerBuildTest extends TestCase
 {

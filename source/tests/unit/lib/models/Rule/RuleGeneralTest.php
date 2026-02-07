@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Tent\Models\Rule;
 use Tent\Models\RequestMatcher;
 use Tent\Models\Request;
-use Tent\Handlers\RequestHandler;
+use Tent\RequestHandlers\RequestHandler;
 
 class RuleGeneralTest extends TestCase
 {
