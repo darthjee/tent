@@ -9,6 +9,21 @@ use InvalidArgumentException;
 use Tent\Models\Response;
 use Tent\Utils\CacheFilePath;
 
+/**
+ * File-based cache implementation for Tent.
+ *
+ * FileCache stores and retrieves HTTP response bodies and metadata (headers, status code)
+ * in the filesystem, using a folder structure and hashed paths based on the request.
+ *
+ * Implements the Cache interface, so it can both read cached content (as ResponseContent)
+ * and store new responses (via store()).
+ *
+ * - Body is stored in a file (body cache).
+ * - Metadata (headers, httpCode) is stored in a separate file (meta cache).
+ * - Paths are generated using CacheFilePath utilities.
+ *
+ * Used by FileCacheMiddleware to provide persistent caching for proxy/static responses.
+ */
 class FileCache implements Cache
 {
     /**
