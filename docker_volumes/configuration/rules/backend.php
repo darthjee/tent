@@ -2,9 +2,9 @@
 
 use Tent\Configuration;
 use Tent\Models\Rule;
-use Tent\Handlers\ProxyRequestHandler;
+use Tent\RequestHandlers\ProxyRequestHandler;
 use Tent\Models\Server;
-use Tent\Models\RequestMatcher;
+use Tent\Matchers\RequestMatcher;
 
 Configuration::buildRule([
     'handler' => [

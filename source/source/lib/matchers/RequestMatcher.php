@@ -1,6 +1,8 @@
 <?php
 
-namespace Tent\Models;
+namespace Tent\Matchers;
+
+use Tent\Models\RequestInterface;
 
 /**
  * Matches an incoming Request against method and URI criteria.

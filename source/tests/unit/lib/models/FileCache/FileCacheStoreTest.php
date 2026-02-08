@@ -3,7 +3,7 @@
 namespace Tent\Tests\Models\FileCache;
 
 use PHPUnit\Framework\TestCase;
-use Tent\Models\FileCache;
+use Tent\Content\FileCache;
 use Tent\Models\Response;
 use Tent\Models\Request;
 use Tent\Models\FolderLocation;

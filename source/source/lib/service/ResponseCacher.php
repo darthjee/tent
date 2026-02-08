@@ -2,7 +2,7 @@
 
 namespace Tent\Service;
 
-use Tent\Models\Cache;
+use Tent\Content\Cache;
 use Tent\Models\Response;
 
 /**

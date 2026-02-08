@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../../../source/loader.php';
 use PHPUnit\Framework\TestCase;
 use Tent\Configuration;
 use Tent\Models\Rule;
-use Tent\Handlers\ProxyRequestHandler;
+use Tent\RequestHandlers\ProxyRequestHandler;
 use Tent\Models\Request;
 
 class ConfigurationBuildRuleTest extends TestCase

@@ -1,10 +1,10 @@
 <?php
 
-namespace Tent\Models;
+namespace Tent\Content;
 
 use Tent\Models\FolderLocation;
 use Tent\Utils\ContentType;
-use Tent\Models\ResponseContent;
+use Tent\Content\ResponseContent;
 use Tent\Utils\FileUtils;
 
 /**

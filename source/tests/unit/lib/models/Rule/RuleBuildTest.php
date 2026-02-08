@@ -5,7 +5,7 @@ namespace Tent\Tests;
 use PHPUnit\Framework\TestCase;
 use Tent\Models\Rule;
 use Tent\Models\ProcessingRequest;
-use Tent\Handlers\ProxyRequestHandler;
+use Tent\RequestHandlers\ProxyRequestHandler;
 
 class RuleBuildTest extends TestCase
 {

@@ -2,10 +2,10 @@
 
 namespace Tent\Models;
 
-use Tent\Handlers\RequestHandler;
-use Tent\Models\RequestMatcher;
+use Tent\RequestHandlers\RequestHandler;
+use Tent\Matchers\RequestMatcher;
 use Tent\Models\Server;
-use Tent\Handlers\ProxyRequestHandler;
+use Tent\RequestHandlers\ProxyRequestHandler;
 use Tent\Middlewares\Middleware;
 
 /**

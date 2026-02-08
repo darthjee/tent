@@ -3,7 +3,7 @@
 namespace Tent\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Tent\Handlers\StaticFileHandler;
+use Tent\RequestHandlers\StaticFileHandler;
 
 class StaticFileHandlerBuildTest extends TestCase
 {

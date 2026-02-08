@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent\Models\ResponseMatchers;
+namespace Tent\Matchers;
 
 use Tent\Models\Response;
 

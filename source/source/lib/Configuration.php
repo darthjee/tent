@@ -2,7 +2,7 @@
 
 namespace Tent;
 
-use Tent\Handlers\MissingRequestHandler;
+use Tent\RequestHandlers\MissingRequestHandler;
 use Tent\Models\Rule;
 
 /**

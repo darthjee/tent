@@ -2,7 +2,7 @@
 
 namespace Tent\Service;
 
-use Tent\Handlers\MissingRequestHandler;
+use Tent\RequestHandlers\MissingRequestHandler;
 use Tent\Models\RequestInterface;
 use Tent\Configuration;
 use Tent\Models\Request;

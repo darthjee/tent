@@ -3,7 +3,7 @@
 namespace Tent\Tests\Models\ResponseMatchers;
 
 use PHPUnit\Framework\TestCase;
-use Tent\Models\ResponseMatchers\StatusCodeMatcher;
+use Tent\Matchers\StatusCodeMatcher;
 use Tent\Models\Response;
 
 class StatusCodeMatcherTest extends TestCase

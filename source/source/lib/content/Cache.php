@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent\Models;
+namespace Tent\Content;
 
 use Tent\Models\Response;
 

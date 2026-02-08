@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent\Models;
+namespace Tent\Content;
 
 /**
  * Interface representing a data source for generating a Response.

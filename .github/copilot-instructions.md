@@ -62,10 +62,17 @@ Configuration::buildRule([
         ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact']
         // type: 'exact', 'begins_with'
     ],
-    'middlewares' => [
+      'middlewares' => [
         [
-            'class' => 'Tent\Middlewares\SetHeadersMiddleware',
-            'headers' => ['Host' => 'backend.local']
+          'class' => 'Tent\Content\FileCache',
+          'location' => "./cache",
+          'httpCodes' => [200]
+        ],
+        [
+          'class' => 'Tent\Content\SetHeaders',
+          'headers' => [
+            'Host' => 'backend.local'
+          ]
         ]
     ]
 ]);

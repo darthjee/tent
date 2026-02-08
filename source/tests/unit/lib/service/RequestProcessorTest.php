@@ -6,12 +6,12 @@ use PHPUnit\Framework\TestCase;
 use Tent\Service\RequestProcessor;
 use Tent\Configuration;
 use Tent\Models\Rule;
-use Tent\Handlers\ProxyRequestHandler;
-use Tent\Handlers\StaticFileHandler;
+use Tent\RequestHandlers\ProxyRequestHandler;
+use Tent\RequestHandlers\StaticFileHandler;
 use Tent\Models\FolderLocation;
 use Tent\Models\Request;
 use Tent\Models\Response;
-use Tent\Models\RequestMatcher;
+use Tent\Matchers\RequestMatcher;
 use Tent\Models\Server;
 
 class RequestProcessorTest extends TestCase

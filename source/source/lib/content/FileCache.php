@@ -1,13 +1,14 @@
 <?php
 
-namespace Tent\Models;
+namespace Tent\Content;
 
 use Tent\Models\FolderLocation;
-use Tent\Models\ResponseContent;
+use Tent\Content\ResponseContent;
 use Tent\Utils\FileUtils;
 use InvalidArgumentException;
 use Tent\Models\Response;
 use Tent\Utils\CacheFilePath;
+use Tent\Models\RequestInterface;
 
 /**
  * File-based cache implementation for Tent.
