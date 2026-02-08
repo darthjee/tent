@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Tent\Service\ResponseCacher;
 use Tent\Models\Response;
 use Tent\Models\ProcessingRequest;
-use Tent\Models\FileCache;
+use Tent\Content\FileCache;
 use Tent\Models\FolderLocation;
 use Tent\Utils\CacheFilePath;
 

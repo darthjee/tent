@@ -8,6 +8,7 @@ use Tent\Utils\FileUtils;
 use InvalidArgumentException;
 use Tent\Models\Response;
 use Tent\Utils\CacheFilePath;
+use Tent\Models\RequestInterface;
 
 /**
  * File-based cache implementation for Tent.

@@ -7,7 +7,7 @@ use Tent\Middlewares\FileCacheMiddleware;
 use Tent\Models\FolderLocation;
 use Tent\Models\Response;
 use Tent\Models\ProcessingRequest;
-use Tent\Models\FileCache;
+use Tent\Content\FileCache;
 use Tent\Utils\CacheFilePath;
 
 class FileCacheMiddlewareProcessResponseTest extends TestCase
