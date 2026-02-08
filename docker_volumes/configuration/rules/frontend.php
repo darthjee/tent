@@ -6,7 +6,7 @@ use Tent\RequestHandlers\ProxyRequestHandler;
 use Tent\RequestHandlers\StaticFileHandler;
 use Tent\Models\Server;
 use Tent\Models\FolderLocation;
-use Tent\Models\RequestMatcher;
+use Tent\Matchers\RequestMatcher;
 
 if (getenv('FRONTEND_DEV_MODE') === 'true') {
     Configuration::buildRule([

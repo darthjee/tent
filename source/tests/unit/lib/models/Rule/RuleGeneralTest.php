@@ -4,7 +4,7 @@ namespace Tent\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Tent\Models\Rule;
-use Tent\Models\RequestMatcher;
+use Tent\Matchers\RequestMatcher;
 use Tent\Models\Request;
 use Tent\RequestHandlers\RequestHandler;
 

@@ -3,7 +3,7 @@
 namespace Tent\Models;
 
 use Tent\RequestHandlers\RequestHandler;
-use Tent\Models\RequestMatcher;
+use Tent\Matchers\RequestMatcher;
 use Tent\Models\Server;
 use Tent\RequestHandlers\ProxyRequestHandler;
 use Tent\Middlewares\Middleware;

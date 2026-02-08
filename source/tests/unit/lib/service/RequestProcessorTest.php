@@ -11,7 +11,7 @@ use Tent\RequestHandlers\StaticFileHandler;
 use Tent\Models\FolderLocation;
 use Tent\Models\Request;
 use Tent\Models\Response;
-use Tent\Models\RequestMatcher;
+use Tent\Matchers\RequestMatcher;
 use Tent\Models\Server;
 
 class RequestProcessorTest extends TestCase
