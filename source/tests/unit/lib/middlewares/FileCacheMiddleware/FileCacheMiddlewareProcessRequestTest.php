@@ -27,7 +27,8 @@ class FileCacheMiddlewareProcessRequestTest extends TestCase
 
     protected function tearDown(): void
     {
-        array_map('unlink', glob($this->cacheDir . '/*/*'));
+        array_map('unlink', glob($this->cacheDir . '/*/*/*'));
+        array_map('rmdir', glob($this->cacheDir . '/*/*'));
         array_map('rmdir', glob($this->cacheDir . '/*'));
         rmdir($this->cacheDir);
     }
