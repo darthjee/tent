@@ -6,7 +6,7 @@ use Tent\Models\Response;
 use Tent\Validators\RequestPathValidator;
 use Tent\Exceptions\FileNotFoundException;
 use Tent\Exceptions\InvalidFilePathException;
-use Tent\Models\ResponseContent;
+use Tent\Content\ResponseContent;
 use Tent\Models\RequestInterface;
 
 /**
@@ -19,11 +19,11 @@ class ResponseContentReader
     /**
      * @var ResponseContent The source for content to be read.
      *
-     * This is typically a File or Cache object implementing ResponseContent.
+    * This is typically a File or Cache object implementing ResponseContent.
      *
-     * @see ResponseContent
-     * @see File
-     * @see Cache
+    * @see ResponseContent
+    * @see File
+    * @see Cache
      */
     private ResponseContent $responseContent;
 
@@ -43,11 +43,11 @@ class ResponseContentReader
      * @param RequestInterface $request         The HTTP request containing the request path.
      * @param ResponseContent  $responseContent The source for content to be read.
      *
-     * The source `$responseContent` is typically a File or Cache object implementing ResponseContent.
+    * The source `$responseContent` is typically a File or Cache object implementing ResponseContent.
      *
-     * @see ResponseContent
-     * @see File
-     * @see Cache
+    * @see ResponseContent
+    * @see File
+    * @see Cache
      */
     public function __construct(RequestInterface $request, ResponseContent $responseContent)
     {

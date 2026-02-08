@@ -5,7 +5,7 @@ namespace Tent\RequestHandlers;
 use Tent\Models\FolderLocation;
 use Tent\Models\RequestInterface;
 use Tent\Models\Response;
-use Tent\Models\File;
+use Tent\Content\File;
 use Tent\Exceptions\FileNotFoundException;
 use Tent\Exceptions\InvalidFilePathException;
 use Tent\Models\MissingResponse;

@@ -4,7 +4,7 @@ namespace Tent\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Tent\Service\ResponseContentReader;
-use Tent\Models\FileCache;
+use Tent\Content\FileCache;
 use Tent\Models\Request;
 use Tent\Models\FolderLocation;
 use Tent\Models\Response;

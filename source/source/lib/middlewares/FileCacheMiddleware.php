@@ -4,7 +4,7 @@ namespace Tent\Middlewares;
 
 use Tent\Models\ProcessingRequest;
 use Tent\Models\FolderLocation;
-use Tent\Models\FileCache;
+use Tent\Content\FileCache;
 use Tent\Models\Response;
 use Tent\Service\ResponseContentReader;
 use Tent\Matchers\StatusCodeMatcher;
