@@ -85,8 +85,8 @@ class FileCacheStoreTest extends TestCase
         $cache->store($response);
 
         $basePath = $this->cacheDir . '/path/file.txt';
-        $bodyPath = CacheFilePath::path('body', $basePath, $this->request->query());
-        $metaPath = CacheFilePath::path('meta', $basePath, $this->request->query());
+        $bodyPath = CacheFilePath::path('body', $basePath, $this->request->requestMethod(), $this->request->query());
+        $metaPath = CacheFilePath::path('meta', $basePath, $this->request->requestMethod(), $this->request->query());
 
         $this->assertTrue(is_file($bodyPath), 'Body file does not exist or is not a file');
         $this->assertTrue(is_file($metaPath), 'Meta file does not exist or is not a file');
@@ -113,7 +113,8 @@ class FileCacheStoreTest extends TestCase
     private function buildRequest(string $path): Request
     {
         return new Request([
-            'requestPath' => $path
+            'requestPath' => $path,
+            'requestMethod' => 'GET'
         ]);
     }
 }

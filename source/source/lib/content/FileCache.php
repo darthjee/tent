@@ -19,9 +19,15 @@ use Tent\Models\RequestInterface;
  *
  * - Body is stored in a file (body cache).
  * - Metadata (headers, httpCode) is stored in a separate file (meta cache).
- * - Paths are generated using CacheFilePath utilities.
+ * - Paths are generated using CacheFilePath utilities, including the HTTP method.
  *
  * Used by FileCacheMiddleware to provide persistent caching for proxy/static responses.
+ *
+ * ## Cache Path Structure
+ *
+ * The cache files are organized by request path and HTTP method:
+ * - `GET /persons` → `<basepath>/persons/GET/<hash>.body.dat` and `<basepath>/persons/GET/<hash>.meta.json`
+ * - `POST /persons` → `<basepath>/persons/POST/<hash>.body.dat` and `<basepath>/persons/POST/<hash>.meta.json`
  *
  * ## Example: Direct usage
  *
@@ -108,8 +114,9 @@ class FileCache implements Cache
         $this->location = $location;
 
         $query = $this->request->query();
-        $this->bodyFilePath = CacheFilePath::path('body', $this->basePath(), $query);
-        $this->metaFilePath = CacheFilePath::path('meta', $this->basePath(), $query);
+        $method = $this->request->requestMethod();
+        $this->bodyFilePath = CacheFilePath::path('body', $this->basePath(), $method, $query);
+        $this->metaFilePath = CacheFilePath::path('meta', $this->basePath(), $method, $query);
     }
 
     /**
@@ -223,7 +230,7 @@ class FileCache implements Cache
      */
     protected function fullPath(string $type): string
     {
-        return CacheFilePath::path($type, $this->basePath(), $this->request->query());
+        return CacheFilePath::path($type, $this->basePath(), $this->request->requestMethod(), $this->request->query());
     }
 
     /**

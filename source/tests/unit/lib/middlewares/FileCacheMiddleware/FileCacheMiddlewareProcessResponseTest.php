@@ -28,7 +28,8 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
 
     protected function tearDown(): void
     {
-        array_map('unlink', glob($this->cacheDir . '/*/*'));
+        array_map('unlink', glob($this->cacheDir . '/*/*/*'));
+        array_map('rmdir', glob($this->cacheDir . '/*/*'));
         array_map('rmdir', glob($this->cacheDir . '/*'));
         rmdir($this->cacheDir);
     }
@@ -83,8 +84,8 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
     {
         $response = $this->buildResponse(200);
 
-        $bodyFile = CacheFilePath::path('body', $this->cacheDir . '/file.txt', '');
-        $metaFile = CacheFilePath::path('meta', $this->cacheDir . '/file.txt', '');
+        $bodyFile = CacheFilePath::path('body', $this->cacheDir . '/file.txt', 'GET', '');
+        $metaFile = CacheFilePath::path('meta', $this->cacheDir . '/file.txt', 'GET', '');
         mkdir(dirname($bodyFile), 0777, true);
         file_put_contents($bodyFile, 'original body');
         file_put_contents($metaFile, json_encode(['headers' => ["Header1: original", "Header2: value"]]));
