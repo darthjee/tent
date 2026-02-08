@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent\Tests\Models\ResponseMatchers;
+namespace Tent\Tests\Matchers;
 
 use PHPUnit\Framework\TestCase;
 use Tent\Matchers\StatusCodeMatcher;

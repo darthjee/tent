@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent\Tests;
+namespace Tent\Tests\Middlewares\SetHeadersMiddleware;
 
 use PHPUnit\Framework\TestCase;
 use Tent\Middlewares\SetHeadersMiddleware;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent\Tests;
+namespace Tent\Tests\Configuration;
 
 require_once __DIR__ . '/../../../../source/loader.php';
 

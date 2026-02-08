@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent\Tests;
+namespace Tent\Tests\Models;
 
 use PHPUnit\Framework\TestCase;
 use Tent\Models\FolderLocation;

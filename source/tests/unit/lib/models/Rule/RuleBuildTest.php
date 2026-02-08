@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent\Tests;
+namespace Tent\Tests\Models\Rule;
 
 use PHPUnit\Framework\TestCase;
 use Tent\Models\Rule;

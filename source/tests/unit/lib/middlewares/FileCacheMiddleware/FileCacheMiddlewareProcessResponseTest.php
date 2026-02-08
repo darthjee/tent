@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent\Tests\Middlewares;
+namespace Tent\Tests\Middlewares\FileCacheMiddleware;
 
 use PHPUnit\Framework\TestCase;
 use Tent\Middlewares\FileCacheMiddleware;

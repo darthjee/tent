@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent\Tests;
+namespace Tent\Tests\Utils\FileUtils;
 
 use PHPUnit\Framework\TestCase;
 use Tent\Utils\FileUtils;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent\Tests;
+namespace Tent\Tests\RequestHandlers\StaticFileHandler;
 
 use PHPUnit\Framework\TestCase;
 use Tent\RequestHandlers\StaticFileHandler;

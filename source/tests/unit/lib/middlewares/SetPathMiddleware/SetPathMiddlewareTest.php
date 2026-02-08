@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent\Tests;
+namespace Tent\Tests\Middlewares\SetPathMiddleware;
 
 use PHPUnit\Framework\TestCase;
 use Tent\Middlewares\SetPathMiddleware;

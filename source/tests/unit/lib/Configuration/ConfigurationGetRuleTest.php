@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent\Tests;
+namespace Tent\Tests\Configuration;
 
 use PHPUnit\Framework\TestCase;
 use Tent\Configuration;
