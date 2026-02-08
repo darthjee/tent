@@ -7,8 +7,6 @@ use Tent\Middlewares\Middleware;
 use Tent\Models\ProcessingRequest;
 use Tent\Models\Response;
 use InvalidArgumentException;
-use Tent\RequestHandlers\ProxyRequestHandler;
-use Tent\RequestHandlers\StaticFileHandler;
 
 /**
  * Abstract class for handling HTTP requests and producing responses.

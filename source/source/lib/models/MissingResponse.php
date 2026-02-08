@@ -2,8 +2,6 @@
 
 namespace Tent\Models;
 
-use Tent\Models\Response;
-
 /**
  * Response representing a 404 Not Found error.
  *

@@ -2,8 +2,6 @@
 
 namespace Tent\Utils;
 
-use Tent\Models\FolderLocation;
-
 class FileUtils
 {
     /**

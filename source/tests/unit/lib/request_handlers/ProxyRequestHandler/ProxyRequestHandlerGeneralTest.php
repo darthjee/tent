@@ -4,12 +4,10 @@ namespace Tent\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Tent\RequestHandlers\ProxyRequestHandler;
-use Tent\Models\Request;
 use Tent\Models\Response;
 use Tent\Models\ProcessingRequest;
 use Tent\Models\Server;
 use Tent\Http\HttpClientInterface;
-use Tent\Models\ForbiddenResponse;
 
 class ProxyRequestHandlerGeneralTest extends TestCase
 {

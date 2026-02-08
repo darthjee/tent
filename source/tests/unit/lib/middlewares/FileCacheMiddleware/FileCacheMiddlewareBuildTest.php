@@ -4,7 +4,6 @@ namespace Tent\Tests\Middlewares;
 
 use PHPUnit\Framework\TestCase;
 use Tent\Middlewares\FileCacheMiddleware;
-use Tent\Models\FolderLocation;
 
 class FileCacheMiddlewareBuildTest extends TestCase
 {
