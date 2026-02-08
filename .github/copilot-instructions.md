@@ -64,12 +64,12 @@ Configuration::buildRule([
     ],
       'middlewares' => [
         [
-          'class' => 'Tent\Content\FileCache',
+          'class' => 'Tent\Middlewares\FileCacheMiddleware',
           'location' => "./cache",
           'httpCodes' => [200]
         ],
         [
-          'class' => 'Tent\Content\SetHeaders',
+          'class' => 'Tent\Middlewares\SetHeadersMiddleware',
           'headers' => [
             'Host' => 'backend.local'
           ]
