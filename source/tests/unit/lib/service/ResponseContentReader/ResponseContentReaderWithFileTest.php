@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent\Tests;
+namespace Tent\Tests\Service\ResponseContentReader;
 
 use PHPUnit\Framework\TestCase;
 use Tent\Service\ResponseContentReader;

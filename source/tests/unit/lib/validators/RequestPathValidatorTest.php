@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent\Tests;
+namespace Tent\Tests\Validators;
 
 use PHPUnit\Framework\TestCase;
 use Tent\Validators\RequestPathValidator;

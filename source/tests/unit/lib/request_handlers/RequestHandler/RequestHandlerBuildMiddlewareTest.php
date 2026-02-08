@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent\Tests\Handlers\RequestHandler;
+namespace Tent\Tests\RequestHandlers\RequestHandler;
 
 use PHPUnit\Framework\TestCase;
 use Tent\RequestHandlers\RequestHandler;

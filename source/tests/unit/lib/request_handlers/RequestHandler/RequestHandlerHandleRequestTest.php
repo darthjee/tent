@@ -1,6 +1,6 @@
 <?php
 
-namespace Tent\Tests\Handlers\RequestHandler;
+namespace Tent\Tests\RequestHandlers\RequestHandler;
 
 require_once __DIR__ . '/../../../../support/handlers/RequestToBodyHandler.php';
 require_once __DIR__ . '/../../../../support/middlewares/QuickResponseMiddleware.php';
