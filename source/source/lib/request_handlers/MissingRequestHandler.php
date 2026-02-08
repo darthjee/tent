@@ -2,7 +2,6 @@
 
 namespace Tent\RequestHandlers;
 
-use Tent\RequestHandlers\RequestHandler;
 use Tent\Models\RequestInterface;
 use Tent\Models\Response;
 use Tent\Models\MissingResponse;

@@ -7,7 +7,6 @@ use Tent\Models\RequestInterface;
 use Tent\Models\Response;
 use Tent\Http\HttpClientInterface;
 use Tent\Http\CurlHttpClient;
-use Tent\Models\ForbiddenResponse;
 
 /**
  * Handles HTTP requests by proxying them to a target server.

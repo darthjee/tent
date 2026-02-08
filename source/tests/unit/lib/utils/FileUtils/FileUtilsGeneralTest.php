@@ -3,9 +3,7 @@
 namespace Tent\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Tent\Utils\FilePath;
 use Tent\Utils\FileUtils;
-use Tent\Models\FolderLocation;
 
 class FileUtilsGeneralTest extends TestCase
 {

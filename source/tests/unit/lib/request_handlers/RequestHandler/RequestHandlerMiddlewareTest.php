@@ -8,7 +8,6 @@ require_once __DIR__ . '/../../../../support/middlewares/DummyRequestMiddleware.
 use PHPUnit\Framework\TestCase;
 use Tent\RequestHandlers\RequestHandler;
 use Tent\Models\ProcessingRequest;
-use Tent\Middlewares\Middleware;
 use Tent\Tests\Support\Handlers\RequestToBodyHandler;
 use Tent\Tests\Support\Middlewares\DummyRequestMiddleware;
 

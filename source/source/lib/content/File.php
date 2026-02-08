@@ -4,7 +4,6 @@ namespace Tent\Content;
 
 use Tent\Models\FolderLocation;
 use Tent\Utils\ContentType;
-use Tent\Content\ResponseContent;
 use Tent\Utils\FileUtils;
 
 /**

@@ -2,7 +2,6 @@
 
 namespace Tent\Http;
 
-use Tent\Http\HttpClientInterface;
 use Tent\Utils\CurlUtils;
 
 /**

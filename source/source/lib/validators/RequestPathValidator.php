@@ -2,8 +2,6 @@
 
 namespace Tent\Validators;
 
-use Tent\Models\Request;
-
 /**
  * Validates a request path string to prevent path traversal and other invalid patterns.
  *

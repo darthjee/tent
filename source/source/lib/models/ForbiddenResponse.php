@@ -2,9 +2,6 @@
 
 namespace Tent\Models;
 
-use Tent\Models\Response;
-use Tent\Models\RequestInterface;
-
 /**
  * Response representing a 403 Forbidden error.
  *
