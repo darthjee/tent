@@ -31,7 +31,8 @@ class FileCacheGeneralTest extends TestCase
             'httpCode' => 201
         ];
 
-        mkdir($this->fullPath, 0777, true);
+        $methodPath = $this->fullPath . '/GET';
+        mkdir($methodPath, 0777, true);
 
         file_put_contents(CacheFilePath::path('body', $this->fullPath, 'GET', ''), 'Cached body content');
         file_put_contents(CacheFilePath::path('meta', $this->fullPath, 'GET', ''), json_encode($this->meta));
@@ -41,6 +42,7 @@ class FileCacheGeneralTest extends TestCase
     {
         @unlink(CacheFilePath::path('body', $this->fullPath, 'GET', ''));
         @unlink(CacheFilePath::path('meta', $this->fullPath, 'GET', ''));
+        @rmdir($this->fullPath . '/GET');
         @rmdir($this->fullPath);
         @rmdir($this->basePath);
     }

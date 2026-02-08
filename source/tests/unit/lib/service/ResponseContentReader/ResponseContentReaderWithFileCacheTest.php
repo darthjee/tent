@@ -29,7 +29,7 @@ class ResponseContentReaderWithFileCacheTest extends TestCase
         $bodyPath = CacheFilePath::path('body', $fullPath, 'GET', '');
         $metaPath = CacheFilePath::path('meta', $fullPath, 'GET', '');
 
-        mkdir($fullPath, 0777, true);
+        mkdir(dirname($bodyPath), 0777, true);
         file_put_contents($bodyPath, $this->body);
         file_put_contents($metaPath, json_encode($this->meta));
     }
