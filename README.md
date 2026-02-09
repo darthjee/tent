@@ -210,6 +210,17 @@ Middlewares make Tent highly customizable, enabling advanced routing, header man
    You can modify this file if needed, especially `FRONTEND_DEV_MODE` (see below).
 
 3. **Build the Docker images:**
+   
+   You can use Make commands to build the images:
+   ```bash
+   # Build a fresh new image
+   make build
+   
+   # Or ensure the image exists (builds only if needed)
+   make ensure-image
+   ```
+   
+   Alternatively, you can use Docker Compose directly:
    ```bash
    docker compose build base_build
    ```
@@ -235,7 +246,9 @@ Once the services are running, you can access:
 
 ### Running Tests
 
-**Backend (PHP) Tests:**
+**Proxy Backend (PHP) Tests:**
+
+These tests validate the Tent proxy application itself. Note that there is also a Dev Backend application (auxiliary service used for testing the proxy) that can be tested separately.
 ```bash
 # Run all PHP tests
 docker compose run tent_tests composer tests
@@ -250,7 +263,9 @@ docker compose run tent_tests composer tests:integration
 docker compose run tent_tests /bin/bash
 ```
 
-**Frontend Tests:**
+**Dev Frontend Tests:**
+
+These are tests for the development frontend application (an auxiliary React application used to test the proxy). In the future, the proxy will have its own frontend for configuration.
 ```bash
 # Run frontend tests (requires frontend_dev container to be running)
 docker compose exec frontend_dev npm test
