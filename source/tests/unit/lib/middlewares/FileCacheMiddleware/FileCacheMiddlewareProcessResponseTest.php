@@ -28,9 +28,18 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
 
     protected function tearDown(): void
     {
-        array_map('unlink', glob($this->cacheDir . '/*/*/*'));
-        array_map('rmdir', glob($this->cacheDir . '/*/*'));
-        array_map('rmdir', glob($this->cacheDir . '/*'));
+        // Remove all files inside $this->cacheDir
+        $files = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($this->cacheDir, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );
+        foreach ($files as $file) {
+            if ($file->isFile() || $file->isLink()) {
+                unlink($file->getPathname());
+            } elseif ($file->isDir()) {
+                rmdir($file->getPathname());
+            }
+        }
         rmdir($this->cacheDir);
     }
 
