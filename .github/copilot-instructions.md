@@ -19,22 +19,44 @@ Tent is a PHP-based intelligent proxy server that routes requests to backend ser
 
 **ALWAYS use Docker Compose**. Never run commands directly on the host.
 
-**Important**: Use `docker compose run` (not `exec`) for `tent_tests` because it has `command: /bin/bash` and doesn't stay running. Use `docker compose exec` for services that are already running (like `tent_app`, `frontend_dev`).
+**Important:** Use `docker compose` (v2 syntax) instead of `docker-compose` (v1 syntax).
+
+**Understanding `run` vs `exec`:**
+
+- `docker compose run`: Creates a new container instance to run a one-off command. Use this for:
+  - Running tests
+  - Installing dependencies
+  - One-off commands when containers aren't already running
+  - Example: `docker compose run --rm tent_tests composer tests`
+  
+- `docker compose exec`: Executes a command in an already running container. Use this for:
+  - Running commands in active services started with `docker compose up`
+  - Interactive debugging in running containers
+  - Example: `docker compose exec tent_app composer install` (only if tent_app is already running)
+
+**Recommended Commands:**
 
 ```bash
-# Backend tests (use 'run' - tent_tests is not a long-running service)
-docker compose run tent_tests composer tests
+# Backend tests (use run for one-off test execution)
+docker compose run --rm tent_tests composer tests
 
-# Frontend tests (use 'exec' if frontend_dev is running)
-docker compose exec frontend_dev npm test
+# Frontend tests
+docker compose run --rm frontend_dev npm test
 
-# Install dependencies
-docker compose exec tent_app composer install
-docker compose exec frontend_dev npm install
+# Install dependencies (use run for one-off installation)
+docker compose run --rm tent_app composer install
+docker compose run --rm frontend_dev npm install
 
 # Linting
-docker compose run tent_tests composer lint
-docker compose exec frontend_dev npm run lint
+docker compose run --rm tent_tests composer lint
+docker compose run --rm frontend_dev npm run lint
+
+# Interactive development shell
+docker compose run --rm tent_tests /bin/bash
+
+# If services are already running with docker compose up, you can use exec:
+docker compose exec tent_app composer install
+docker compose exec frontend_dev npm test
 ```
 
 **Understanding `docker compose run` vs `docker compose exec`:**
