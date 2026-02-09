@@ -42,13 +42,13 @@ push: ensure-image
 	docker push $(IMAGE):latest
 
 tests:
-	docker-compose run $(PROJECT)_tests /bin/bash
+	docker compose run $(PROJECT)_tests /bin/bash
 
 dev:
-	docker-compose run $(PROJECT)_tests /bin/bash
+	docker compose run $(PROJECT)_tests /bin/bash
 
 dev-api:
-	docker-compose run api_dev /bin/bash
+	docker compose run api_dev /bin/bash
 
 dev-up:
-	docker-compose up $(PROJECT)_app
+	docker compose up $(PROJECT)_app

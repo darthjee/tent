@@ -48,6 +48,7 @@ docker compose exec frontend_dev npm run lint
 - `api_dev`: Mock backend API (port 8040)
 - `frontend_dev`: React/Vite dev server (port 8030)
 - `api_dev_phpmyadmin`: Database management (port 8050)
+- `tent_httpbin`: HTTPBin testing service (port 3060)
 
 ### Environment Variable: FRONTEND_DEV_MODE
 
