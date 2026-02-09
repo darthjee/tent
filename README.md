@@ -323,6 +323,38 @@ docker compose down
 docker compose down -v
 ```
 
+### Troubleshooting
+
+**Issue: "pull access denied for darthjee/dev_tent"**
+
+If you encounter an error about the Docker image not being available, you need to build the images locally first:
+```bash
+docker compose build base_build
+```
+
+**Issue: "command not found: docker-compose"**
+
+If you see this error, you're using Docker Compose v1 syntax. Update your commands to use `docker compose` (with a space) instead of `docker-compose` (with a hyphen).
+
+**Issue: Containers fail to start or have permission issues**
+
+Ensure that the required directories exist and have proper permissions:
+```bash
+mkdir -p docker_volumes/vendor docker_volumes/cache docker_volumes/node_modules docker_volumes/mysql_data
+```
+
+**Issue: Port already in use**
+
+If you get a "port is already allocated" error, another service is using one of the required ports. You can either:
+- Stop the conflicting service
+- Modify the port mappings in `docker-compose.yml`
+
+**Issue: Frontend not loading or showing errors**
+
+Check the `FRONTEND_DEV_MODE` environment variable in your `.env` file:
+- Set to `true` to use the Vite development server (with hot reload)
+- Set to `false` to serve static files (requires building the frontend first)
+
 ## Development
 
 To develop Tent, you will run the main Tent application (in the source/source directory) along with three auxiliary services:
