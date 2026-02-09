@@ -29,7 +29,7 @@ class ResponseContentReaderWithFileCacheTest extends TestCase
             'headers' => ['Content-Type: text/plain', 'X-Test: yes'],
             'httpCode' => 207
         ];
-        $fullPath = $this->testDir . '/POST/file.txt';
+        $fullPath = $this->testDir . '/file.txt/POST';
         $bodyPath = CacheFilePath::path('body', $fullPath, '');
         $metaPath = CacheFilePath::path('meta', $fullPath, '');
 
