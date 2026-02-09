@@ -181,198 +181,137 @@ Middlewares make Tent highly customizable, enabling advanced routing, header man
 
 ### Prerequisites
 
-Before you begin, ensure you have the following installed:
-- **Docker** (version 20.10 or higher)
-- **Docker Compose** (version 2.0 or higher)
-- **Git** (for cloning the repository)
+- Docker (version 20.10 or higher)
+- Docker Compose (v2.0 or higher)
+- Git
 
 ### Initial Setup
 
-1. **Clone the repository**
+1. **Clone the repository:**
    ```bash
    git clone https://github.com/darthjee/tent.git
    cd tent
    ```
 
-2. **Verify the .env file**
+2. **Create/verify the .env file:**
    
-   The repository includes a `.env` file with default configuration for development. Review and modify if needed:
-   ```bash
-   cat .env
+   A sample `.env` file is included in the repository with default values:
    ```
-
-3. **Build the Docker images**
+   API_DEV_MYSQL_HOST=mysql
+   API_DEV_MYSQL_USER=root
+   API_DEV_MYSQL_PASSWORD=tent
+   API_DEV_MYSQL_PORT=3306
+   API_DEV_MYSQL_TEST_DATABASE=api_tent_test_db
+   API_DEV_MYSQL_DEV_DATABASE=api_tent_dev_db
    
-   Before running the services for the first time, you need to build the Docker images:
+   FRONTEND_DEV_MODE=false
+   ```
+   
+   You can modify this file if needed, especially `FRONTEND_DEV_MODE` (see below).
+
+3. **Build the Docker images:**
+   
+   You can use Make commands to build the images:
+   ```bash
+   # Build a fresh new image
+   make build
+   
+   # Or ensure the image exists (builds only if needed)
+   make ensure-image
+   ```
+   
+   Alternatively, you can use Docker Compose directly:
    ```bash
    docker compose build base_build
    ```
-   
-   This command will:
-   - Pull the required base images from Docker Hub
-   - Build the custom Tent development image
-   - Install PHP dependencies via Composer
-   - Set up the development environment
 
-   **Note:** The first build may take several minutes (10-15 minutes) as it downloads and installs all dependencies. Composer needs to download numerous PHP packages, and you may see warnings about GitHub API rate limits during the build process. This is normal and the build will complete successfully.
-   
-   **Alternative:** If you prefer not to build locally, you can pull the pre-built images directly:
+4. **Start the development environment:**
    ```bash
-   docker compose pull
+   # Start all services
+   docker compose up
+   
+   # Or use the Make target to start just the main Tent app with dependencies
+   make dev-up
    ```
 
-### Running the Development Environment
+### Accessing Services
 
-Once the images are built, you can start the services:
+Once the services are running, you can access:
 
-```bash
-# Start all services
-docker compose up
-
-# Or start services in detached mode (background)
-docker compose up -d
-
-# Or use the Makefile shortcut
-make dev-up
-```
-
-### Accessing the Services
-
-Once the services are running, you can access them at the following URLs:
-
-- **Tent Proxy:** http://localhost:8080 (Main application entry point)
-- **Backend API:** http://localhost:8040 (Development backend with /persons endpoint)
-- **Frontend:** http://localhost:8030 (React/Vite dev server)
-- **phpMyAdmin:** http://localhost:8050 (Database management interface)
-- **HTTPBin:** http://localhost:3060 (HTTP testing service)
+- **Tent Proxy**: <http://localhost:8080> - Main application entry point
+- **Backend API**: <http://localhost:8040> - Development backend service
+- **Frontend Dev Server**: <http://localhost:8030> - Vite development server (when `FRONTEND_DEV_MODE=true`)
+- **phpMyAdmin**: <http://localhost:8050> - Database management interface
+- **HTTPBin**: <http://localhost:3060> - Testing service
 
 ### Running Tests
 
-To run the PHP backend tests:
+**Proxy Backend (PHP) Tests:**
 
+These tests validate the Tent proxy application itself. Note that there is also a Dev Backend application (auxiliary service used for testing the proxy) that can be tested separately.
 ```bash
-# Run all tests
-docker compose run --rm tent_tests composer tests
+# Run all PHP tests
+docker compose run tent_tests composer tests
 
 # Run only unit tests
-docker compose run --rm tent_tests composer tests:unit
+docker compose run tent_tests composer tests:unit
 
 # Run only integration tests
-docker compose run --rm tent_tests composer tests:integration
+docker compose run tent_tests composer tests:integration
 
-# Or use the Makefile to get an interactive shell in the test container
-make tests
-# Then inside the container:
-composer tests
+# Interactive shell in test environment
+docker compose run tent_tests /bin/bash
 ```
 
-To run the frontend tests:
+**Dev Frontend Tests:**
 
+These are tests for the development frontend application (an auxiliary React application used to test the proxy). In the future, the proxy will have its own frontend for configuration.
 ```bash
-docker compose run --rm frontend_dev npm test
+# Run frontend tests (requires frontend_dev container to be running)
+docker compose exec frontend_dev npm test
+
+# Or start a shell in the frontend container
+docker compose run frontend_dev /bin/bash
 ```
 
-### Running Linters
-
-To check code style:
-
+**Linting:**
 ```bash
-# PHP linting
-docker compose run --rm tent_tests composer lint
+# Lint PHP code
+docker compose run tent_tests composer lint
 
-# PHP linting with auto-fix
-docker compose run --rm tent_tests composer lint:fix
+# Fix PHP code style issues
+docker compose run tent_tests composer lint:fix
 
-# Frontend linting
-docker compose run --rm frontend_dev npm run lint
+# Lint frontend code
+docker compose exec frontend_dev npm run lint
+
+# Fix frontend linting issues
+docker compose exec frontend_dev npm run lint_fix
 ```
 
-### Managing Dependencies
+### Development Commands
 
-To install or update dependencies:
-
+**Using Make:**
 ```bash
-# Install PHP dependencies
-docker compose run --rm tent_app composer install
-
-# Update PHP dependencies
-docker compose run --rm tent_app composer update
-
-# Install frontend dependencies
-docker compose run --rm frontend_dev npm install
+make dev      # Start interactive shell in test environment
+make dev-up   # Start the tent_app service with all dependencies
+make tests    # Start interactive shell in test environment (same as dev)
 ```
 
-### Interactive Development Shell
-
-To get an interactive shell in any container:
-
+**Using Docker Compose directly:**
 ```bash
-# Tent test environment (includes all development tools)
-make dev
-# or
-docker compose run --rm tent_tests /bin/bash
+# Start services in detached mode
+docker compose up -d
 
-# Backend API container
-make dev-api
-# or
-docker compose run --rm api_dev /bin/bash
-```
+# View logs
+docker compose logs -f tent_app
 
-### Stopping the Services
-
-```bash
-# Stop all running services
+# Stop all services
 docker compose down
 
-# Stop and remove volumes (clears database data)
-docker compose down -v
+# Rebuild specific service
+docker compose build tent_app
 ```
-
-### Troubleshooting
-
-**Issue: "pull access denied for darthjee/dev_tent"**
-
-If you encounter an error about the Docker image not being available when building, this means the base image needs to be pulled or built locally. The project uses pre-built base images from Docker Hub (`darthjee/dev_tent-base:0.0.1`). 
-
-Solution:
-```bash
-# Pull the base image first
-docker pull darthjee/dev_tent-base:0.0.1
-
-# Then build the development image
-docker compose build base_build
-```
-
-**Issue: Build taking too long or timing out**
-
-The composer install step during build can take 10-15 minutes due to:
-- Downloading many PHP packages
-- GitHub API rate limiting during package downloads
-
-This is normal. Let the build complete - you'll see progress messages about syncing packages. Once complete, subsequent builds will be much faster due to Docker layer caching.
-
-**Issue: "command not found: docker-compose"**
-
-If you see this error, you're using Docker Compose v1 syntax. Update your commands to use `docker compose` (with a space) instead of `docker-compose` (with a hyphen).
-
-**Issue: Containers fail to start or have permission issues**
-
-Ensure that the required directories exist and have proper permissions:
-```bash
-mkdir -p docker_volumes/vendor docker_volumes/cache docker_volumes/node_modules docker_volumes/mysql_data
-```
-
-**Issue: Port already in use**
-
-If you get a "port is already allocated" error, another service is using one of the required ports. You can either:
-- Stop the conflicting service
-- Modify the port mappings in `docker-compose.yml`
-
-**Issue: Frontend not loading or showing errors**
-
-Check the `FRONTEND_DEV_MODE` environment variable in your `.env` file:
-- Set to `true` to use the Vite development server (with hot reload)
-- Set to `false` to serve static files (requires building the frontend first)
 
 ## Development
 

@@ -58,6 +58,11 @@ docker compose exec tent_app composer install
 docker compose exec frontend_dev npm test
 ```
 
+**Understanding `docker compose run` vs `docker compose exec`:**
+
+- **`run`**: Creates a new container instance, executes the command, then exits. Use for one-off commands or services that aren't continuously running (like `tent_tests`).
+- **`exec`**: Executes commands in an already-running container. Use for services that are up and running (like `tent_app`, `frontend_dev`, `api_dev`).
+
 ### Development Containers
 
 - `tent_app`: Main Tent proxy (port 8080)
@@ -65,6 +70,7 @@ docker compose exec frontend_dev npm test
 - `api_dev`: Mock backend API (port 8040)
 - `frontend_dev`: React/Vite dev server (port 8030)
 - `api_dev_phpmyadmin`: Database management (port 8050)
+- `tent_httpbin`: HTTPBin testing service (port 3060)
 
 ### Environment Variable: FRONTEND_DEV_MODE
 
