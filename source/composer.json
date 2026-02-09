@@ -8,8 +8,9 @@
     },
     "autoload": {
         "psr-4": {
-            "Tent\\": "html/"
-        }
+            "Tent\\": "html/lib/"
+        },
+        "classmap": ["html/lib/"]
     },
     "require-dev": {
         "phpunit/phpunit": "^9.0",

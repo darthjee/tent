@@ -227,13 +227,14 @@ class FileCache implements Cache
     }
 
     /**
-     * Returns the base path for the cache files.
+     * Returns the base path for the cache files, including the HTTP method.
      *
      * @return string The base path.
      */
     protected function basePath(): string
     {
-        return FileUtils::getFullPath($this->location->basePath(), $this->path);
+        $pathWithMethod = FileUtils::getFullPath($this->path, $this->request->requestMethod());
+        return FileUtils::getFullPath($this->location->basePath(), $pathWithMethod);
     }
 
     /**
