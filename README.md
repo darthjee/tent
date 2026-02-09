@@ -227,11 +227,11 @@ Middlewares make Tent highly customizable, enabling advanced routing, header man
 
 Once the services are running, you can access:
 
-- **Tent Proxy**: http://localhost:8080 - Main application entry point
-- **Backend API**: http://localhost:8040 - Development backend service
-- **Frontend Dev Server**: http://localhost:8030 - Vite development server (when `FRONTEND_DEV_MODE=true`)
-- **phpMyAdmin**: http://localhost:8050 - Database management interface
-- **HTTPBin**: http://localhost:3060 - Testing service
+- **Tent Proxy**: <http://localhost:8080> - Main application entry point
+- **Backend API**: <http://localhost:8040> - Development backend service
+- **Frontend Dev Server**: <http://localhost:8030> - Vite development server (when `FRONTEND_DEV_MODE=true`)
+- **phpMyAdmin**: <http://localhost:8050> - Database management interface
+- **HTTPBin**: <http://localhost:3060> - Testing service
 
 ### Running Tests
 
