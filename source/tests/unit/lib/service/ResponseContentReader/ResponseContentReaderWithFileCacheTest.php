@@ -28,7 +28,7 @@ class ResponseContentReaderWithFileCacheTest extends TestCase
             'headers' => ['Content-Type: text/plain', 'X-Test: yes'],
             'httpCode' => 207
         ];
-        $fullPath = $this->testDir . '/file.txt';
+        $fullPath = $this->testDir . '/POST/file.txt';
         $bodyPath = CacheFilePath::path('body', $fullPath, '');
         $metaPath = CacheFilePath::path('meta', $fullPath, '');
 
@@ -45,7 +45,7 @@ class ResponseContentReaderWithFileCacheTest extends TestCase
     public function testGetResponseReturnsCacheContentAndMeta()
     {
         $location = new FolderLocation($this->testDir);
-        $request = new Request(['requestPath' => '/file.txt']);
+        $request = new Request(['requestPath' => '/file.txt', 'requestMethod' => 'POST']);
         $cache = new FileCache($request, $location);
         $reader = new ResponseContentReader($request, $cache);
 
