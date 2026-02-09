@@ -2,6 +2,8 @@
 
 namespace Tent\Tests\Service;
 
+require_once __DIR__ . '/../../../support/utils/FileSystemUtils.php';
+
 use PHPUnit\Framework\TestCase;
 use Tent\Service\ResponseCacher;
 use Tent\Models\Response;
@@ -9,6 +11,7 @@ use Tent\Models\ProcessingRequest;
 use Tent\Content\FileCache;
 use Tent\Models\FolderLocation;
 use Tent\Utils\CacheFilePath;
+use Tent\Tests\Support\Utils\FileSystemUtils;
 
 class ResponseCacherTest extends TestCase
 {
@@ -28,10 +31,7 @@ class ResponseCacherTest extends TestCase
 
     protected function tearDown(): void
     {
-        array_map('unlink', glob($this->cacheDir . '/*/*/*'));
-        array_map('rmdir', glob($this->cacheDir . '/*/*'));
-        array_map('rmdir', glob($this->cacheDir . '/*'));
-        rmdir($this->cacheDir);
+        FileSystemUtils::removeDirRecursive($this->cacheDir);
     }
 
     public function testProcessStoresCache()

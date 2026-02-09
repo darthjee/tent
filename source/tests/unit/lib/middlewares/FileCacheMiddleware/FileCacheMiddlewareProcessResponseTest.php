@@ -2,6 +2,8 @@
 
 namespace Tent\Tests\Middlewares\FileCacheMiddleware;
 
+require_once __DIR__ . '/../../../../support/utils/FileSystemUtils.php';
+
 use PHPUnit\Framework\TestCase;
 use Tent\Middlewares\FileCacheMiddleware;
 use Tent\Models\FolderLocation;
@@ -9,6 +11,7 @@ use Tent\Models\Response;
 use Tent\Models\ProcessingRequest;
 use Tent\Content\FileCache;
 use Tent\Utils\CacheFilePath;
+use Tent\Tests\Support\Utils\FileSystemUtils;
 
 class FileCacheMiddlewareProcessResponseTest extends TestCase
 {
@@ -28,19 +31,7 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
 
     protected function tearDown(): void
     {
-        // Remove all files inside $this->cacheDir
-        $files = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($this->cacheDir, \FilesystemIterator::SKIP_DOTS),
-            \RecursiveIteratorIterator::CHILD_FIRST
-        );
-        foreach ($files as $file) {
-            if ($file->isFile() || $file->isLink()) {
-                unlink($file->getPathname());
-            } elseif ($file->isDir()) {
-                rmdir($file->getPathname());
-            }
-        }
-        rmdir($this->cacheDir);
+        FileSystemUtils::removeDirRecursive($this->cacheDir);
     }
 
     public function testProcessResponseStoresCache()
