@@ -209,12 +209,17 @@ Before you begin, ensure you have the following installed:
    ```
    
    This command will:
-   - Pull the required base images
+   - Pull the required base images from Docker Hub
    - Build the custom Tent development image
    - Install PHP dependencies via Composer
    - Set up the development environment
 
-   **Note:** The first build may take several minutes as it downloads and installs all dependencies.
+   **Note:** The first build may take several minutes (10-15 minutes) as it downloads and installs all dependencies. Composer needs to download numerous PHP packages, and you may see warnings about GitHub API rate limits during the build process. This is normal and the build will complete successfully.
+   
+   **Alternative:** If you prefer not to build locally, you can pull the pre-built images directly:
+   ```bash
+   docker compose pull
+   ```
 
 ### Running the Development Environment
 
@@ -327,10 +332,24 @@ docker compose down -v
 
 **Issue: "pull access denied for darthjee/dev_tent"**
 
-If you encounter an error about the Docker image not being available, you need to build the images locally first:
+If you encounter an error about the Docker image not being available when building, this means the base image needs to be pulled or built locally. The project uses pre-built base images from Docker Hub (`darthjee/dev_tent-base:0.0.1`). 
+
+Solution:
 ```bash
+# Pull the base image first
+docker pull darthjee/dev_tent-base:0.0.1
+
+# Then build the development image
 docker compose build base_build
 ```
+
+**Issue: Build taking too long or timing out**
+
+The composer install step during build can take 10-15 minutes due to:
+- Downloading many PHP packages
+- GitHub API rate limiting during package downloads
+
+This is normal. Let the build complete - you'll see progress messages about syncing packages. Once complete, subsequent builds will be much faster due to Docker layer caching.
 
 **Issue: "command not found: docker-compose"**
 
