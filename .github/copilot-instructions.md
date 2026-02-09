@@ -22,6 +22,7 @@ Tent is a PHP-based intelligent proxy server that routes requests to backend ser
 **Important:** Use `docker compose` (v2 syntax) instead of `docker-compose` (v1 syntax).
 
 **Understanding `run` vs `exec`:**
+
 - `docker compose run`: Creates a new container instance to run a one-off command. Use this for:
   - Running tests
   - Installing dependencies
