@@ -2,6 +2,9 @@
 
 namespace Tent\Tests\Service\ResponseContentReader;
 
+require_once __DIR__ . '/../../../../support/utils/FileSystemUtils.php';
+require_once __DIR__ . '/../../../../support/loader.php';
+
 use PHPUnit\Framework\TestCase;
 use Tent\Service\ResponseContentReader;
 use Tent\Content\FileCache;
@@ -9,6 +12,7 @@ use Tent\Models\Request;
 use Tent\Models\FolderLocation;
 use Tent\Models\Response;
 use Tent\Utils\CacheFilePath;
+use Tent\Tests\Support\Utils\FileSystemUtils;
 
 class ResponseContentReaderWithFileCacheTest extends TestCase
 {
@@ -25,7 +29,7 @@ class ResponseContentReaderWithFileCacheTest extends TestCase
             'headers' => ['Content-Type: text/plain', 'X-Test: yes'],
             'httpCode' => 207
         ];
-        $fullPath = $this->testDir . '/file.txt';
+        $fullPath = $this->testDir . '/file.txt/POST';
         $bodyPath = CacheFilePath::path('body', $fullPath, '');
         $metaPath = CacheFilePath::path('meta', $fullPath, '');
 
@@ -36,26 +40,13 @@ class ResponseContentReaderWithFileCacheTest extends TestCase
 
     protected function tearDown(): void
     {
-        $this->removeDirectory($this->testDir);
-    }
-
-    private function removeDirectory($dir)
-    {
-        if (!file_exists($dir)) {
-            return;
-        }
-        $files = array_diff(scandir($dir), ['.', '..']);
-        foreach ($files as $file) {
-            $path = "$dir/$file";
-            is_dir($path) ? $this->removeDirectory($path) : unlink($path);
-        }
-        rmdir($dir);
+        FileSystemUtils::removeDirRecursive($this->testDir);
     }
 
     public function testGetResponseReturnsCacheContentAndMeta()
     {
         $location = new FolderLocation($this->testDir);
-        $request = new Request(['requestPath' => '/file.txt']);
+        $request = new Request(['requestPath' => '/file.txt', 'requestMethod' => 'POST']);
         $cache = new FileCache($request, $location);
         $reader = new ResponseContentReader($request, $cache);
 

@@ -22,9 +22,9 @@ class FileCacheGeneralTest extends TestCase
     {
         $this->basePath = sys_get_temp_dir() . '/tent_cache_' . uniqid();
         $this->path = 'some_file.txt';
-        $this->fullPath = $this->basePath . '/' . $this->path;
+        $this->fullPath = $this->basePath . '/' . $this->path . '/GET';
         $this->headers = ['Content-Type' => 'text/plain'];
-        $this->request = new Request(['requestPath' => $this->path]);
+        $this->request = new Request(['requestPath' => $this->path, 'requestMethod' => 'GET']);
         $this->location = new FolderLocation($this->basePath);
         $this->meta = [
             'headers' => $this->headers,
@@ -42,6 +42,7 @@ class FileCacheGeneralTest extends TestCase
         @unlink(CacheFilePath::path('body', $this->fullPath, ''));
         @unlink(CacheFilePath::path('meta', $this->fullPath, ''));
         @rmdir($this->fullPath);
+        @rmdir($this->basePath . '/' . $this->path);
         @rmdir($this->basePath);
     }
 

@@ -25,7 +25,8 @@ class FileCacheStoreTest extends TestCase
 
     protected function tearDown(): void
     {
-        array_map('unlink', glob($this->cacheDir . '/*/*/*'));
+        array_map('unlink', glob($this->cacheDir . '/*/*/*/*'));
+        array_map('rmdir', glob($this->cacheDir . '/*/*/*'));
         array_map('rmdir', glob($this->cacheDir . '/*/*'));
         array_map('rmdir', glob($this->cacheDir . '/*'));
         rmdir($this->cacheDir);
@@ -54,14 +55,14 @@ class FileCacheStoreTest extends TestCase
 
         $cache->store($response);
 
-        $fullPath = $this->cacheDir . '/nested_dir/file.txt';
+        $fullPath = $this->cacheDir . '/nested_dir/file.txt/GET';
         $this->assertTrue(is_dir($fullPath));
     }
 
     public function testStoreWithExistingDirectory()
     {
         $path = '/nested_dir/file.txt';
-        $fullPath = $this->cacheDir . '/nested_dir/file.txt';
+        $fullPath = $this->cacheDir . '/nested_dir/file.txt/GET';
         mkdir($fullPath, 0777, true);
 
         $response = $this->buildResponse($path, 200, 'some body');
@@ -84,7 +85,7 @@ class FileCacheStoreTest extends TestCase
         $cache = new FileCache($this->request, $this->location);
         $cache->store($response);
 
-        $basePath = $this->cacheDir . '/path/file.txt';
+        $basePath = $this->cacheDir . '/path/file.txt/GET';
         $bodyPath = CacheFilePath::path('body', $basePath, $this->request->query());
         $metaPath = CacheFilePath::path('meta', $basePath, $this->request->query());
 
@@ -113,7 +114,8 @@ class FileCacheStoreTest extends TestCase
     private function buildRequest(string $path): Request
     {
         return new Request([
-            'requestPath' => $path
+            'requestPath' => $path,
+            'requestMethod' => 'GET'
         ]);
     }
 }
