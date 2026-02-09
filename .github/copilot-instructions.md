@@ -38,6 +38,7 @@ docker compose exec frontend_dev npm run lint
 ```
 
 **Understanding `docker compose run` vs `docker compose exec`:**
+
 - **`run`**: Creates a new container instance, executes the command, then exits. Use for one-off commands or services that aren't continuously running (like `tent_tests`).
 - **`exec`**: Executes commands in an already-running container. Use for services that are up and running (like `tent_app`, `frontend_dev`, `api_dev`).
 
