@@ -177,6 +177,127 @@ To use your middleware, reference its class and any required parameters in your 
 
 Middlewares make Tent highly customizable, enabling advanced routing, header manipulation, authentication, caching, and more.
 
+## Getting Started
+
+### Prerequisites
+
+- Docker (version 20.10 or higher)
+- Docker Compose (v2.0 or higher)
+- Git
+
+### Initial Setup
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/darthjee/tent.git
+   cd tent
+   ```
+
+2. **Create/verify the .env file:**
+   
+   A sample `.env` file is included in the repository with default values:
+   ```
+   API_DEV_MYSQL_HOST=mysql
+   API_DEV_MYSQL_USER=root
+   API_DEV_MYSQL_PASSWORD=tent
+   API_DEV_MYSQL_PORT=3306
+   API_DEV_MYSQL_TEST_DATABASE=api_tent_test_db
+   API_DEV_MYSQL_DEV_DATABASE=api_tent_dev_db
+   
+   FRONTEND_DEV_MODE=false
+   ```
+   
+   You can modify this file if needed, especially `FRONTEND_DEV_MODE` (see below).
+
+3. **Build the Docker images:**
+   ```bash
+   docker compose build base_build
+   ```
+
+4. **Start the development environment:**
+   ```bash
+   # Start all services
+   docker compose up
+   
+   # Or use the Make target to start just the main Tent app with dependencies
+   make dev-up
+   ```
+
+### Accessing Services
+
+Once the services are running, you can access:
+
+- **Tent Proxy**: http://localhost:8080 - Main application entry point
+- **Backend API**: http://localhost:8040 - Development backend service
+- **Frontend Dev Server**: http://localhost:8030 - Vite development server (when `FRONTEND_DEV_MODE=true`)
+- **phpMyAdmin**: http://localhost:8050 - Database management interface
+- **HTTPBin**: http://localhost:3060 - Testing service
+
+### Running Tests
+
+**Backend (PHP) Tests:**
+```bash
+# Run all PHP tests
+docker compose run tent_tests composer tests
+
+# Run only unit tests
+docker compose run tent_tests composer tests:unit
+
+# Run only integration tests
+docker compose run tent_tests composer tests:integration
+
+# Interactive shell in test environment
+docker compose run tent_tests /bin/bash
+```
+
+**Frontend Tests:**
+```bash
+# Run frontend tests (requires frontend_dev container to be running)
+docker compose exec frontend_dev npm test
+
+# Or start a shell in the frontend container
+docker compose run frontend_dev /bin/bash
+```
+
+**Linting:**
+```bash
+# Lint PHP code
+docker compose run tent_tests composer lint
+
+# Fix PHP code style issues
+docker compose run tent_tests composer lint:fix
+
+# Lint frontend code
+docker compose exec frontend_dev npm run lint
+
+# Fix frontend linting issues
+docker compose exec frontend_dev npm run lint_fix
+```
+
+### Development Commands
+
+**Using Make:**
+```bash
+make dev      # Start interactive shell in test environment
+make dev-up   # Start the tent_app service with all dependencies
+make tests    # Start interactive shell in test environment (same as dev)
+```
+
+**Using Docker Compose directly:**
+```bash
+# Start services in detached mode
+docker compose up -d
+
+# View logs
+docker compose logs -f tent_app
+
+# Stop all services
+docker compose down
+
+# Rebuild specific service
+docker compose build tent_app
+```
+
 ## Development
 
 To develop Tent, you will run the main Tent application (in the source/source directory) along with three auxiliary services:

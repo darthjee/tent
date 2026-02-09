@@ -17,22 +17,29 @@ Tent is a PHP-based intelligent proxy server that routes requests to backend ser
 
 ### Running Commands
 
-**ALWAYS use Docker Compose**. Never run commands directly on the host:
-```bash
-# Backend tests
-docker-compose exec tent_tests composer tests
+**ALWAYS use Docker Compose**. Never run commands directly on the host.
 
-# Frontend tests
-docker-compose exec frontend_dev npm test
+**Important**: Use `docker compose run` (not `exec`) for `tent_tests` because it has `command: /bin/bash` and doesn't stay running. Use `docker compose exec` for services that are already running (like `tent_app`, `frontend_dev`).
+
+```bash
+# Backend tests (use 'run' - tent_tests is not a long-running service)
+docker compose run tent_tests composer tests
+
+# Frontend tests (use 'exec' if frontend_dev is running)
+docker compose exec frontend_dev npm test
 
 # Install dependencies
-docker-compose exec tent_app composer install
-docker-compose exec frontend_dev npm install
+docker compose exec tent_app composer install
+docker compose exec frontend_dev npm install
 
 # Linting
-docker-compose exec tent_app composer lint
-docker-compose exec frontend_dev npm run lint
+docker compose run tent_tests composer lint
+docker compose exec frontend_dev npm run lint
 ```
+
+**Understanding `docker compose run` vs `docker compose exec`:**
+- **`run`**: Creates a new container instance, executes the command, then exits. Use for one-off commands or services that aren't continuously running (like `tent_tests`).
+- **`exec`**: Executes commands in an already-running container. Use for services that are up and running (like `tent_app`, `frontend_dev`, `api_dev`).
 
 ### Development Containers
 
