@@ -2,7 +2,7 @@
 
 namespace Tent\Tests\Configuration;
 
-require_once __DIR__ . '/../../../../source/loader.php';
+require_once __DIR__ . '/../../../support/loader.php';
 
 use PHPUnit\Framework\TestCase;
 use Tent\Configuration;
