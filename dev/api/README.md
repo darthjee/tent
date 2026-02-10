@@ -448,6 +448,7 @@ Configuration::buildRule([
 ```
 
 This setup allows you to:
+
 - Test proxy functionality
 - Verify caching behavior
 - Test middleware processing
