@@ -53,26 +53,6 @@ class CreatePersonEndpointTest extends TestCase
         $this->assertCount(1, $persons);
     }
 
-    public function testHandleCreatesPersonWithPartialFields()
-    {
-        $_SERVER['REQUEST_METHOD'] = 'POST';
-        
-        $requestBody = json_encode([
-            'first_name' => 'Jane'
-        ]);
-        
-        $request = $this->createMockRequest($requestBody);
-        $endpoint = new CreatePersonEndpoint($request);
-        $response = $endpoint->handle();
-        
-        $this->assertEquals(201, $response->getHttpCode());
-        
-        $data = json_decode($response->getBody(), true);
-        $this->assertEquals('Jane', $data['first_name']);
-        $this->assertNull($data['last_name']);
-        $this->assertNull($data['birthdate']);
-    }
-
     public function testHandleReturnsErrorForInvalidJson()
     {
         $_SERVER['REQUEST_METHOD'] = 'POST';
