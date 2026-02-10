@@ -92,7 +92,7 @@ class CreatePersonEndpointTest extends TestCase
     {
         $_SERVER['REQUEST_METHOD'] = 'POST';
         
-        $request = $this->createMockRequest(json_encode([]));
+        $request = $this->createMockRequest("{}");
         $endpoint = new CreatePersonEndpoint($request);
         $response = $endpoint->handle();
         
