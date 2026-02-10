@@ -289,6 +289,8 @@ docker compose exec frontend_dev npm run lint
 docker compose exec frontend_dev npm run lint_fix
 ```
 
+For more frontend development details, see the [Dev Frontend README](dev/frontend/README.md).
+
 ### Development Commands
 
 **Using Make:**
@@ -318,7 +320,7 @@ docker compose build tent_app
 To develop Tent, you will run the main Tent application (in the source/source directory) along with three auxiliary services:
 
 - **Backend (api_dev):** A simple PHP backend with endpoints (currently /persons). See the [Dev API README](dev/api/README.md) for detailed documentation on adding endpoints and running migrations.
-- **Frontend (frontend_dev):** A React frontend, served by Vite in development mode.
+- **Frontend (frontend_dev):** A React frontend, served by Vite in development mode. See the [Dev Frontend README](dev/frontend/README.md) for detailed documentation on frontend development, building, and testing.
 - **phpMyAdmin (api_dev_phpmyadmin):** For managing and inserting data into the backend database.
 
 ### How requests are routed
