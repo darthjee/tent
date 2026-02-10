@@ -71,6 +71,7 @@ Browser receives response with HMR enabled
 ```
 
 In development mode:
+
 - Requests are proxied to the Vite development server
 - Hot Module Reloading (HMR) is enabled
 - Changes are reflected immediately without manual refresh
@@ -91,6 +92,7 @@ Browser receives static response
 ```
 
 In production mode:
+
 - Static files are served directly from the `dist/` directory
 - No development server overhead
 - Optimized and minified assets
@@ -206,6 +208,7 @@ docker compose run --rm frontend_dev npm run lint_report
 ### ESLint Configuration
 
 ESLint is configured in `eslint.config.mjs` with:
+
 - Standard JavaScript style guide
 - React-specific rules
 - Jasmine testing rules
