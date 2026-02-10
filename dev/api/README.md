@@ -292,6 +292,7 @@ docker compose run --rm api_dev php bin/migrate_databases.php
 4. SQL statements are run directly via the MySQL connection
 
 **Important Notes:**
+
 - Migrations are NOT tracked (no migration table)
 - Each migration is re-run every time the script executes
 - Use idempotent SQL when possible (e.g., `CREATE TABLE IF NOT EXISTS`)
@@ -317,12 +318,14 @@ These are configured in the `.env` file at the root of the repository.
 When the Docker Compose environment is running, you can access:
 
 ### Dev API Service
+
 - **URL**: http://localhost:8040
 - **Available Endpoints**:
   - `GET /health` - Health check endpoint
   - `GET /persons` - List all persons from the database
 
 ### phpMyAdmin (Database Management)
+
 - **URL**: http://localhost:8050
 - **Username**: root
 - **Password**: tent
