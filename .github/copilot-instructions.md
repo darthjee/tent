@@ -125,6 +125,46 @@ Examples:
 - **Frontend**: Jasmine specs in `dev/frontend/spec/`. Run with `npm test`.
 - Always test handler behavior via `Rule::match()` and handler execution separately.
 
+### Dev API Application
+
+The `dev/api` directory contains a dummy backend application used for testing the Tent proxy. Key characteristics:
+
+**Architecture:**
+
+- Entry point: `dev/api/source/index.php` receives all requests via Apache rewrite
+- Routes are registered in `index.php` using `Configuration::add('METHOD', '/path', EndpointClass::class)`
+- `RequestHandler` processes requests and matches them to configured routes
+- Endpoint classes extend `Endpoint` and implement `handle()` method returning a `Response`
+
+**Adding New Endpoints:**
+
+1. Create endpoint class in `dev/api/source/lib/api_dev/endpoints/` extending `Endpoint`
+2. Implement `handle()` method to return a `Response` with body, status code, and headers
+3. Include the endpoint file with `require_once` in `index.php`
+4. Register the route: `Configuration::add('GET', '/my-path', MyEndpoint::class)`
+
+**Database Migrations:**
+
+- Migration files: `dev/api/migrations/NNNN_description.sql` (numbered for ordering)
+- Run migrations: `docker compose run --rm api_dev php bin/migrate_databases.php`
+- Migrations are simple SQL files executed in alphabetical order
+- No migration tracking table - migrations re-run each time (use idempotent SQL)
+
+**Testing the Dev API:**
+```bash
+# Run dev API tests
+docker compose run --rm api_dev composer tests
+
+# Access API directly
+curl http://localhost:8040/health
+curl http://localhost:8040/persons
+
+# Access via Tent proxy (tests proxy behavior)
+curl http://localhost:8080/persons
+```
+
+See [dev/api/README.md](dev/api/README.md) for comprehensive documentation.
+
 ## Directory Structure
 
 ```
@@ -143,15 +183,25 @@ docker_volumes/configuration/  # User-provided configuration (NOT version contro
 
 dev/
   ├── api/                   # Mock backend API for development
+  │   ├── source/            # API application source
+  │   │   ├── index.php      # API entry point
+  │   │   └── lib/           # API classes (endpoints, models, DB layer)
+  │   ├── migrations/        # SQL migration files
+  │   └── bin/               # Utility scripts (database setup, migrations)
   └── frontend/              # React frontend (Vite, Jasmine tests)
 ```
 
 ## Integration Points
 
 - **Backend API**: Communicates via HTTP proxy through Tent. Tent sets `Host` header via `SetHeadersMiddleware`.
+  - The `api_dev` service is a lightweight PHP application that demonstrates typical REST API patterns
+  - All requests are routed through `index.php` to a `RequestHandler` that matches routes to endpoint classes
+  - See [dev/api/README.md](dev/api/README.md) for details on adding endpoints and running migrations
 - **Frontend**: In dev mode (`FRONTEND_DEV_MODE=true`), proxies to Vite server. In prod mode, serves built static files.
 - **Cache**: `FileCacheMiddleware` stores responses in `docker_volumes/cache/` based on request path hash and HTTP status codes.
 - **Database**: `api_dev` connects to MySQL (`api_dev_mysql` container) for mock data.
+  - Migrations are stored as numbered `.sql` files in `dev/api/migrations/`
+  - Run with: `docker compose run --rm api_dev php bin/migrate_databases.php`
 
 ## Key Files to Reference
 
@@ -160,6 +210,7 @@ dev/
 - [source/source/lib/Configuration.php](source/source/lib/Configuration.php): Rule registry and builder
 - [docker_volumes/configuration/rules/backend.php](docker_volumes/configuration/rules/backend.php): Example backend proxy rule
 - [docker_volumes/configuration/rules/frontend.php](docker_volumes/configuration/rules/frontend.php): Example frontend rules (dev vs prod)
+- [dev/api/README.md](dev/api/README.md): Dev API documentation (adding endpoints, migrations)
 
 ## Language Guidelines
 

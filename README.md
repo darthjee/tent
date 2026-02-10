@@ -317,7 +317,7 @@ docker compose build tent_app
 
 To develop Tent, you will run the main Tent application (in the source/source directory) along with three auxiliary services:
 
-- **Backend (api_dev):** A simple PHP backend with endpoints (currently /persons).
+- **Backend (api_dev):** A simple PHP backend with endpoints (currently /persons). See the [Dev API README](dev/api/README.md) for detailed documentation on adding endpoints and running migrations.
 - **Frontend (frontend_dev):** A React frontend, served by Vite in development mode.
 - **phpMyAdmin (api_dev_phpmyadmin):** For managing and inserting data into the backend database.
 
