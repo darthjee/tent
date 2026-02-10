@@ -193,6 +193,7 @@ Controlled by `FRONTEND_DEV_MODE` environment variable in `.env`:
 **Adding New Components:**
 
 1. Create component file in `assets/js/components/`:
+
 ```jsx
 import React from 'react';
 
@@ -208,6 +209,7 @@ export default MyComponent;
 **Adding API Clients:**
 
 1. Create client in `assets/js/clients/`:
+2. 
 ```javascript
 const MyClient = {
   async fetchAll() {
@@ -220,6 +222,7 @@ export default MyClient;
 ```
 
 2. Use with TanStack Query in components:
+
 ```jsx
 import { useQuery } from '@tanstack/react-query';
 import MyClient from '../clients/MyClient';
@@ -265,6 +268,7 @@ docker compose run --rm frontend_dev npm run lint_fix
 **Integration with Tent:**
 
 Frontend is integrated via Tent configuration rules in `docker_volumes/configuration/rules/frontend.php`:
+
 - Dev mode: Proxy handler forwards to Vite dev server
 - Production mode: Static handler serves from `dist/` directory with `SetPathMiddleware` (e.g., `/` → `/index.html`)
 
