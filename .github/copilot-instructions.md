@@ -130,18 +130,21 @@ Examples:
 The `dev/api` directory contains a dummy backend application used for testing the Tent proxy. Key characteristics:
 
 **Architecture:**
+
 - Entry point: `dev/api/source/index.php` receives all requests via Apache rewrite
 - Routes are registered in `index.php` using `Configuration::add('METHOD', '/path', EndpointClass::class)`
 - `RequestHandler` processes requests and matches them to configured routes
 - Endpoint classes extend `Endpoint` and implement `handle()` method returning a `Response`
 
 **Adding New Endpoints:**
+
 1. Create endpoint class in `dev/api/source/lib/api_dev/endpoints/` extending `Endpoint`
 2. Implement `handle()` method to return a `Response` with body, status code, and headers
 3. Include the endpoint file with `require_once` in `index.php`
 4. Register the route: `Configuration::add('GET', '/my-path', MyEndpoint::class)`
 
 **Database Migrations:**
+
 - Migration files: `dev/api/migrations/NNNN_description.sql` (numbered for ordering)
 - Run migrations: `docker compose run --rm api_dev php bin/migrate_databases.php`
 - Migrations are simple SQL files executed in alphabetical order
