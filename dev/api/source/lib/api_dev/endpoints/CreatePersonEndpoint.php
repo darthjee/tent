@@ -10,7 +10,7 @@ class CreatePersonEndpoint extends Endpoint
     {
         $data = json_decode($this->request->body(), true);
         
-        if (!$data || !is_array($data)) {
+        if (!is_array($data)) {
             return new Response(
                 json_encode(['error' => 'Invalid JSON body']),
                 400,
