@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../source/lib/api_dev/Configuration.php';
 require_once __DIR__ . '/../../source/lib/api_dev/Endpoint.php';
 require_once __DIR__ . '/../../source/lib/api_dev/endpoints/HealthCheckEndpoint.php';
 require_once __DIR__ . '/../../source/lib/api_dev/endpoints/ListPersonsEndpoint.php';
+require_once __DIR__ . '/../../source/lib/api_dev/endpoints/CreatePersonEndpoint.php';
 require_once __DIR__ . '/../../source/lib/api_dev/models/MissingResponse.php';
 require_once __DIR__ . '/../../source/lib/api_dev/models/Person.php';
 require_once __DIR__ . '/../../source/lib/api_dev/models/Request.php';
