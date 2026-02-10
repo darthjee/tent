@@ -5,6 +5,7 @@ use ApiDev\RequestHandler;
 use ApiDev\Configuration;
 use ApiDev\HealthCheckEndpoint;
 use ApiDev\ListPersonsEndpoint;
+use ApiDev\CreatePersonEndpoint;
 
 require_once __DIR__ . '/lib/api_dev/models/Response.php';
 
@@ -12,6 +13,7 @@ require_once __DIR__ . '/lib/api_dev/Configuration.php';
 require_once __DIR__ . '/lib/api_dev/Endpoint.php';
 require_once __DIR__ . '/lib/api_dev/endpoints/HealthCheckEndpoint.php';
 require_once __DIR__ . '/lib/api_dev/endpoints/ListPersonsEndpoint.php';
+require_once __DIR__ . '/lib/api_dev/endpoints/CreatePersonEndpoint.php';
 require_once __DIR__ . '/lib/api_dev/models/MissingResponse.php';
 require_once __DIR__ . '/lib/api_dev/models/Person.php';
 require_once __DIR__ . '/lib/api_dev/models/Request.php';
@@ -24,6 +26,7 @@ require_once __DIR__ . '/lib/mysql/ModelConnection.php';
 
 Configuration::add('GET', '/health', HealthCheckEndpoint::class);
 Configuration::add('GET', '/persons', ListPersonsEndpoint::class);
+Configuration::add('POST', '/persons', CreatePersonEndpoint::class);
 
 \ApiDev\Mysql\Configuration::configure(
     getenv('API_DEV_MYSQL_HOST') ?: 'localhost',
