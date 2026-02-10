@@ -8,6 +8,8 @@ use ApiDev\Mysql\Configuration;
 use ApiDev\ListPersonsEndpoint;
 use ApiDev\Request;
 
+require_once __DIR__ . '/../../../../support/tests_loader.php';
+
 class ListPersonsEndpointTest extends TestCase
 {
     protected function setUp(): void

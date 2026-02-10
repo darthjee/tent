@@ -6,6 +6,8 @@ use PHPUnit\Framework\TestCase;
 use ApiDev\Models\Person;
 use ApiDev\Mysql\Configuration;
 
+require_once __DIR__ . '/../../../../support/tests_loader.php';
+
 class PersonAllTest extends TestCase
 {
     protected function setUp(): void
