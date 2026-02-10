@@ -165,6 +165,111 @@ curl http://localhost:8080/persons
 
 See [dev/api/README.md](dev/api/README.md) for comprehensive documentation.
 
+### Dev Frontend Application
+
+The `dev/frontend` directory contains a React-based frontend application used for development and testing of the Tent proxy. Key characteristics:
+
+**Architecture:**
+
+- **Tech Stack**: React 19, Vite (build tool & dev server), Bootstrap 5, TanStack Query (React Query), Jasmine (testing), ESLint
+- Entry point: `dev/frontend/index.html` → `assets/js/main.jsx` bootstraps React application
+- Components in `assets/js/components/` (e.g., `App.jsx`, `PersonList.jsx`)
+- API clients in `assets/js/clients/` (e.g., `PersonClient.js`)
+- Tests in `spec/` directory using Jasmine
+
+**Development Mode vs Production Mode:**
+
+Controlled by `FRONTEND_DEV_MODE` environment variable in `.env`:
+
+- **Dev Mode (`true`)**: Tent proxies requests to Vite dev server (port 8030) with Hot Module Reloading (HMR)
+  - Changes reflected immediately in browser
+  - Access via Tent proxy: <http://localhost:8080>
+  - Direct dev server: <http://localhost:8030>
+
+- **Production Mode (`false`)**: Tent serves static files from `dev/frontend/dist/` directory
+  - Optimized and minified assets
+  - Build with: `docker compose run --rm frontend_dev npm run build`
+
+**Adding New Components:**
+
+1. Create component file in `assets/js/components/`:
+```jsx
+import React from 'react';
+
+const MyComponent = () => {
+  return <div className="my-component">My Component</div>;
+};
+
+export default MyComponent;
+```
+
+2. Import and use in parent component (e.g., `App.jsx`)
+
+**Adding API Clients:**
+
+1. Create client in `assets/js/clients/`:
+```javascript
+const MyClient = {
+  async fetchAll() {
+    const response = await fetch('/api/resources');
+    return await response.json();
+  }
+};
+
+export default MyClient;
+```
+
+2. Use with TanStack Query in components:
+```jsx
+import { useQuery } from '@tanstack/react-query';
+import MyClient from '../clients/MyClient';
+
+const { data, isLoading, error } = useQuery({
+  queryKey: ['resources'],
+  queryFn: MyClient.fetchAll
+});
+```
+
+**Testing:**
+
+```bash
+# Run Jasmine tests
+docker compose run --rm frontend_dev npm test
+
+# Run with coverage
+docker compose run --rm frontend_dev npm run coverage
+```
+
+Tests follow Jasmine conventions in `spec/` directory:
+```javascript
+import MyClient from '../../assets/js/clients/MyClient';
+
+describe('MyClient', () => {
+  it('should fetch data', async () => {
+    const result = await MyClient.fetchAll();
+    expect(result).toBeDefined();
+  });
+});
+```
+
+**Linting:**
+
+```bash
+# Lint with ESLint
+docker compose run --rm frontend_dev npm run lint
+
+# Auto-fix issues
+docker compose run --rm frontend_dev npm run lint_fix
+```
+
+**Integration with Tent:**
+
+Frontend is integrated via Tent configuration rules in `docker_volumes/configuration/rules/frontend.php`:
+- Dev mode: Proxy handler forwards to Vite dev server
+- Production mode: Static handler serves from `dist/` directory with `SetPathMiddleware` (e.g., `/` → `/index.html`)
+
+See [dev/frontend/README.md](dev/frontend/README.md) for comprehensive documentation.
+
 ## Directory Structure
 
 ```
@@ -189,6 +294,17 @@ dev/
   │   ├── migrations/        # SQL migration files
   │   └── bin/               # Utility scripts (database setup, migrations)
   └── frontend/              # React frontend (Vite, Jasmine tests)
+      ├── assets/            # Application source code
+      │   ├── css/           # Stylesheets (CSS, SCSS)
+      │   └── js/            # JavaScript/JSX files
+      │       ├── main.jsx   # Application entry point
+      │       ├── components/ # React components (App.jsx, PersonList.jsx)
+      │       └── clients/   # API client modules (PersonClient.js)
+      ├── dist/              # Built static files (production)
+      ├── spec/              # Jasmine test files
+      ├── index.html         # HTML entry point
+      ├── package.json       # Node.js dependencies and scripts
+      └── vite.config.js     # Vite configuration
 ```
 
 ## Integration Points
@@ -198,6 +314,13 @@ dev/
   - All requests are routed through `index.php` to a `RequestHandler` that matches routes to endpoint classes
   - See [dev/api/README.md](dev/api/README.md) for details on adding endpoints and running migrations
 - **Frontend**: In dev mode (`FRONTEND_DEV_MODE=true`), proxies to Vite server. In prod mode, serves built static files.
+  - The `frontend_dev` service is a React 19 application using Vite for development and building
+  - Vite dev server runs on port 8030 with Hot Module Reloading (HMR) for instant updates
+  - Uses TanStack Query (React Query) for data fetching and state management
+  - Components are in `assets/js/components/`, API clients in `assets/js/clients/`
+  - Tests use Jasmine framework in `spec/` directory
+  - Build command: `docker compose run --rm frontend_dev npm run build` creates optimized static files in `dist/`
+  - See [dev/frontend/README.md](dev/frontend/README.md) for details on adding components, API clients, and testing
 - **Cache**: `FileCacheMiddleware` stores responses in `docker_volumes/cache/` based on request path hash and HTTP status codes.
 - **Database**: `api_dev` connects to MySQL (`api_dev_mysql` container) for mock data.
   - Migrations are stored as numbered `.sql` files in `dev/api/migrations/`
@@ -211,6 +334,7 @@ dev/
 - [docker_volumes/configuration/rules/backend.php](docker_volumes/configuration/rules/backend.php): Example backend proxy rule
 - [docker_volumes/configuration/rules/frontend.php](docker_volumes/configuration/rules/frontend.php): Example frontend rules (dev vs prod)
 - [dev/api/README.md](dev/api/README.md): Dev API documentation (adding endpoints, migrations)
+- [dev/frontend/README.md](dev/frontend/README.md): Dev Frontend documentation (adding components, API clients, testing)
 
 ## Language Guidelines
 
