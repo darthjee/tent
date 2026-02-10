@@ -94,6 +94,7 @@ Configuration::add('GET', '/persons', ListPersonsEndpoint::class);
 ```
 
 Each route associates:
+
 - HTTP method (GET, POST, PUT, DELETE, etc.)
 - URL path (exact match)
 - Endpoint class that handles the request
@@ -231,6 +232,7 @@ The Dev API uses a simple SQL-based migration system for managing database schem
 ### Migration Files
 
 Migration files are stored in the `migrations/` directory and must:
+
 - Have a `.sql` extension
 - Use a numbered prefix for ordering (e.g., `0001_`, `0002_`)
 - Contain valid SQL statements
@@ -319,14 +321,14 @@ When the Docker Compose environment is running, you can access:
 
 ### Dev API Service
 
-- **URL**: http://localhost:8040
+- **URL**: <http://localhost:8040>
 - **Available Endpoints**:
   - `GET /health` - Health check endpoint
   - `GET /persons` - List all persons from the database
 
 ### phpMyAdmin (Database Management)
 
-- **URL**: http://localhost:8050
+- **URL**: <http://localhost:8050>
 - **Username**: root
 - **Password**: tent
 - Use this to:
@@ -338,8 +340,8 @@ When the Docker Compose environment is running, you can access:
 
 The Dev API is typically accessed through the Tent proxy:
 
-- **Via Tent**: http://localhost:8080/persons
-- **Direct**: http://localhost:8040/persons
+- **Via Tent**: <http://localhost:8080/persons>
+- **Direct**: <http://localhost:8040/persons>
 
 This allows you to test proxy behavior, caching, and middleware.
 
@@ -369,7 +371,7 @@ docker compose run --rm api_dev php bin/migrate_databases.php
 
 ### 3. Add Sample Data
 
-Use phpMyAdmin (http://localhost:8050) to insert sample data:
+Use phpMyAdmin (<http://localhost:8050>) to insert sample data:
 
 ```sql
 INSERT INTO persons (first_name, last_name, birthdate) VALUES
@@ -563,6 +565,7 @@ If migrations fail:
 ## Summary
 
 The Dev API is a straightforward PHP application demonstrating:
+
 - Simple request routing without external frameworks
 - Configuration-based endpoint registration
 - Database integration with models
