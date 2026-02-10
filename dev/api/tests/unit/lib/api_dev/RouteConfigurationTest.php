@@ -8,6 +8,8 @@ use ApiDev\Request;
 use ApiDev\Response;
 use ApiDev\HealthCheckEndpoint;
 
+require_once __DIR__ . '/../../../support/tests_loader.php';
+
 class RouteConfigurationTest extends TestCase
 {
     public function testMatchReturnsTrueWhenRouteMatches()

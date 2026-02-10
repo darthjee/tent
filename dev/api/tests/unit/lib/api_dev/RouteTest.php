@@ -6,6 +6,8 @@ use PHPUnit\Framework\TestCase;
 use ApiDev\Route;
 use ApiDev\Request;
 
+require_once __DIR__ . '/../../../support/tests_loader.php';
+
 class RouteTest extends TestCase
 {
     public function testMatchesWithExactMethodAndPath()
