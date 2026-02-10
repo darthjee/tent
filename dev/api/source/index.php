@@ -5,7 +5,6 @@ use ApiDev\RequestHandler;
 use ApiDev\Configuration;
 use ApiDev\HealthCheckEndpoint;
 use ApiDev\ListPersonsEndpoint;
-use ApiDev\CreatePersonEndpoint;
 
 require_once __DIR__ . '/loader.php';
 
