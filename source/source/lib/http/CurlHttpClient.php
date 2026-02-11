@@ -65,4 +65,59 @@ class CurlHttpClient implements HttpClientInterface
             'headers' => $headerLines
         ];
     }
+
+    /**
+     * Sends an HTTP POST request to the given URL with the provided headers and body.
+     *
+     * This method performs a POST request using cURL. It accepts a URL, an associative array of headers,
+     * and a request body (payload). The response is returned as an array containing:
+     *   - 'body': The response body as a string
+     *   - 'httpCode': The HTTP status code (e.g., 200, 201, 404)
+     *   - 'headers': An array of response headers in "Key: Value" format
+     *
+     * Usage example:
+     *   $client = new CurlHttpClient();
+     *   $result = $client->post('http://api/users', ['Content-Type' => 'application/json'], '{"name":"John"}');
+     *   // $result['body'] contains the response body
+     *   // $result['httpCode'] contains the status code
+     *   // $result['headers'] contains the response headers
+     *
+     * @param string $url     The target URL for the POST request.
+     * @param array  $headers Associative array of headers to send (e.g., ['Content-Type' => 'application/json']).
+     * @param string $body    The request body/payload to send.
+     * @return array{
+     *   body: string,
+     *   httpCode: int,
+     *   headers: string[]
+     * } Array with response body, status code, and headers.
+     */
+    public function post(string $url, array $headers, string $body)
+    {
+        $headerLines = CurlUtils::buildHeaderLines($headers);
+
+        $curl = curl_init($url);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_HEADER, true);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($curl, CURLOPT_POST, true);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $body);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headerLines);
+
+        $response = curl_exec($curl);
+        $headerSize = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+        $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+        $headers = substr($response, 0, $headerSize);
+        $responseBody = substr($response, $headerSize);
+
+        curl_close($curl);
+
+        $headerLines = CurlUtils::parseResponseHeaders($headers);
+
+        return [
+            'body' => $responseBody,
+            'httpCode' => $httpCode,
+            'headers' => $headerLines
+        ];
+    }
 }

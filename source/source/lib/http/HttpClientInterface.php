@@ -19,4 +19,14 @@ interface HttpClientInterface
      * @return array Response data (format depends on implementation).
      */
     public function get(string $url, array $headers);
+
+    /**
+     * Sends an HTTP POST request to the given URL with the provided headers and body.
+     *
+     * @param string $url     The target URL for the request.
+     * @param array  $headers Associative array of headers to send.
+     * @param string $body    The request body/payload to send.
+     * @return array Response data (format depends on implementation).
+     */
+    public function post(string $url, array $headers, string $body);
 }
