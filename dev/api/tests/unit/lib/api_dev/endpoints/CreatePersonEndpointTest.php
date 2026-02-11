@@ -20,15 +20,13 @@ class CreatePersonEndpointTest extends TestCase
 
     public function testHandleCreatesPersonWithAllFields()
     {
-        $_SERVER['REQUEST_METHOD'] = 'POST';
-
         $requestBody = json_encode([
             'first_name' => 'John',
             'last_name' => 'Doe',
             'birthdate' => '1990-05-15'
         ]);
 
-        $request = new MockRequest(['body' => $requestBody]);
+        $request = new MockRequest(['body' => $requestBody, 'requestMethod' => 'POST']);
         $endpoint = new CreatePersonEndpoint($request);
         $response = $endpoint->handle();
 
@@ -50,9 +48,7 @@ class CreatePersonEndpointTest extends TestCase
 
     public function testHandleReturnsErrorForInvalidJson()
     {
-        $_SERVER['REQUEST_METHOD'] = 'POST';
-
-        $request = new MockRequest(['body' => 'invalid json']);
+        $request = new MockRequest(['body' => 'invalid json', 'requestMethod' => 'POST']);
         $endpoint = new CreatePersonEndpoint($request);
         $response = $endpoint->handle();
 
@@ -65,9 +61,7 @@ class CreatePersonEndpointTest extends TestCase
 
     public function testHandleReturnsErrorForEmptyBody()
     {
-        $_SERVER['REQUEST_METHOD'] = 'POST';
-
-        $request = new MockRequest(['body' => '{}']);
+        $request = new MockRequest(['body' => '{}', 'requestMethod' => 'POST']);
         $endpoint = new CreatePersonEndpoint($request);
         $response = $endpoint->handle();
 
