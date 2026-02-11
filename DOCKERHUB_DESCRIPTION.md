@@ -78,6 +78,7 @@ Configuration::buildRule([
 ```php
 <?php
 use Tent\Configuration;
+
 if (getenv('FRONTEND_DEV_MODE') === 'true') {
   Configuration::buildRule([
     'handler' => [
@@ -86,18 +87,28 @@ if (getenv('FRONTEND_DEV_MODE') === 'true') {
     ],
     'matchers' => [
       ['method' => 'GET', 'uri' => '/', 'type' => 'exact'],
-      // ...
+    ],
+    'middlewares' => [
+      [
+        'class' => 'Tent\Middlewares\SetHeadersMiddleware',
+        'headers' => ['Host' => 'frontend.local']
+      ]
     ]
   ]);
 } else {
   Configuration::buildRule([
     'handler' => [
-    'type' => 'static',
-    'location' => '/var/www/html/static'
-  ],
-  'matchers' => [
-      ['method' => 'GET', 'uri' => '/index.html', 'type' => 'exact'],
-      // ...
+      'type' => 'static',
+      'location' => '/var/www/html/static'
+    ],
+    'matchers' => [
+      ['method' => 'GET', 'uri' => '/', 'type' => 'exact'],
+    ],
+    'middlewares' => [
+      [
+        'class' => 'Tent\Middlewares\SetPathMiddleware',
+        'path' => '/index.html'
+      ]
     ]
   ]);
 }
@@ -143,26 +154,45 @@ Tent uses Apache with PHP to process all incoming requests through a centralized
 2. **Request Processing**: The PHP application analyzes the request and configuration
 3. **Action Selection**: Based on configuration, Tent will:
    - **Proxy Mode**: Forward requests to configured backend servers
-   - **Static Mode**: Serve static files directly (future feature)
+   - **Static Mode**: Serve static files directly
 
 ## Architecture
 
 ```
 Client Request
-      ↓
+   ↓
    Apache (.htaccess rewrite)
-      ↓
+   ↓
    index.php
-      ↓
+   ↓
 RequestProcessor
-      ↓
-Middleware (chain)
-      ↓
- ┌────────────┬──────────┬───────────┬───────────┐
- ↓            ↓          ↓           ↓
-Proxy     Cache     StaticFile     Error
-Handler   Handler   Handler        Handler
-                                 ┌─────────────┐
-                                 ↓             ↓
-                           404 Not Found   403 Forbidden
+   ↓
+┌─────────────────────────────┐
+│      Middleware Chain       │
+│ ┌─────────────────────────┐ │
+│ │ FileCacheMiddleware     │ │
+│ │ SetHeadersMiddleware    │ │
+│ │ CacheMiddleware         │ │
+│ │ ...                     │ │
+│ └─────────────────────────┘ │
+└─────────────────────────────┘
+   ↓
+Handler Selection
+ ┌────────────┬───────────────┬─────────────┐
+ ↓            ↓               ↓
+Proxy     StaticFile      Error
+Handler   Handler         Handler
+                  ┌─────────────┐
+                  ↓             ↓
+               404 Not Found   403 Forbidden
 ```
+
+## Middleware System
+
+Tent includes a flexible middleware system for request/response processing. Built-in middlewares include:
+
+- **FileCacheMiddleware**: Caches responses to files based on HTTP status codes
+- **SetHeadersMiddleware**: Sets or overrides request headers
+- **SetPathMiddleware**: Changes the request path (useful for serving index.html on root requests)
+
+Middlewares are specified in configuration rules and executed in order. See configuration examples below.
