@@ -13,7 +13,12 @@ class CreatePersonEndpoint extends Endpoint
     private $id;
     private $person;
 
-    public function handle()
+    /**
+     * Creates a new person and returns the created record as a Response.
+     *
+     * @return Response
+     */
+    public function handle(): Response
     {
         try {
             return $this->handleRequest();
@@ -26,12 +31,24 @@ class CreatePersonEndpoint extends Endpoint
         }
     }
 
-    private function handleRequest()
+    /**
+     * Handles the request to create a new person.
+     *
+     * @return Response
+     * @throws InvalidRequestException
+     * @throws ServerErrorException
+     */
+    private function handleRequest(): Response
     {
         $this->initData();
         $this->createPerson();
         $this->retrievePerson();
 
+        return $this->buildResponse();
+    }
+
+    private function buildResponse(): Response
+    {
         $responseData = [
             'id' => $this->person->getId(),
             'first_name' => $this->person->getFirstName(),
@@ -48,7 +65,7 @@ class CreatePersonEndpoint extends Endpoint
         );
     }
 
-    private function initData()
+    private function initData(): void
     {
         $this->data = json_decode($this->request->body(), true);
         if (!is_array($this->data)) {
@@ -56,7 +73,7 @@ class CreatePersonEndpoint extends Endpoint
         }
     }
 
-    private function createPerson()
+    private function createPerson(): void
     {
         $firstName = $this->data['first_name'] ?? null;
         $lastName = $this->data['last_name'] ?? null;
@@ -75,7 +92,7 @@ class CreatePersonEndpoint extends Endpoint
         $this->id = Person::getConnection()->insert($attributes);
     }
 
-    private function retrievePerson()
+    private function retrievePerson(): void
     {
         $persons = Person::getConnection()->getConnection()->fetchAll(
             "SELECT * FROM persons WHERE id = ?",
