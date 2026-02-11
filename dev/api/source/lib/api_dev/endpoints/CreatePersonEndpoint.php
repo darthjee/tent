@@ -64,9 +64,10 @@ class CreatePersonEndpoint extends Endpoint
 
     private function initData()
     {
-       $this->data = json_decode($this->request->body(), true);
-       if (!is_array($this->data)) 
-         throw new InvalidJsonException();
+        $this->data = json_decode($this->request->body(), true);
+        if (!is_array($this->data)) {
+            throw new InvalidJsonException();
+        }
     }
 
     private function createPerson()
