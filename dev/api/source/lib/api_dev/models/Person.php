@@ -13,11 +13,6 @@ class Person extends BaseModel
         return 'persons';
     }
 
-    public function getId()
-    {
-        return $this->attributes['id'] ?? null;
-    }
-
     public function getFirstName()
     {
         return $this->attributes['first_name'] ?? null;

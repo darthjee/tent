@@ -65,6 +65,16 @@ abstract class BaseModel
     }
 
     /**
+     * Returns the ID of the model, or null if not set.
+     *
+     * @return int|null
+     */
+    public function getId()
+    {
+        return $this->attributes['id'] ?? null;
+    }
+
+    /**
      * Checks if the model's attributes are valid. Must be implemented by subclasses.
      */
     abstract public function valid(): bool;
