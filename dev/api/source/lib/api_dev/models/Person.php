@@ -42,4 +42,9 @@ class Person extends BaseModel
     {
         return isset($this->attributes['first_name']) && isset($this->attributes['last_name']);
     }
+
+    protected static function attributeNames(): array
+    {
+        return ['id', 'first_name', 'last_name', 'birthdate', 'created_at', 'updated_at'];
+    }
 }

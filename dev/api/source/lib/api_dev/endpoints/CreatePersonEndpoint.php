@@ -59,7 +59,7 @@ class CreatePersonEndpoint extends Endpoint
         ];
 
         return new Response(
-            json_encode($responseData),
+            $this->person->toJson(),
             201,
             ['Content-Type: application/json']
         );

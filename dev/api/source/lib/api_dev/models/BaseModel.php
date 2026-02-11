@@ -85,6 +85,13 @@ abstract class BaseModel
     }
 
     /**
+     * Returns the list of valid attribute names for the model.
+     *
+     * @return array
+     */
+    abstract protected static function attributeNames(): array;
+
+    /**
      * Checks if the model's attributes are valid. Must be implemented by subclasses.
      */
     abstract public function valid(): bool;
@@ -119,28 +126,25 @@ abstract class BaseModel
     }
 
     /**
-     * Converts camelCase to snake_case
-     */
-    private function camelToSnake(string $input): string
-    {
-        return strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $input));
-    }
-
-    /**
-     * Returns the model's attributes as a JSON string with snake_case keys.
+     * Returns the model's attributes as a JSON array.
      *
      * @return array
      */
     public function asJson(): array
     {
-        $snakeCaseAttributes = [];
-        foreach ($this->getAttributes() as $key => $value) {
-            $snakeCaseKey = $this->camelToSnake($key);
-            $snakeCaseAttributes[$snakeCaseKey] = $value;
+        $attributes = [];
+        static::attributeNames();
+        foreach (static::attributeNames() as $key) {
+            $attributes[$key] = $this->attributes[$key] ?? null;
         }
-        return $snakeCaseAttributes;
+        return $attributes;
     }
 
+    /**
+     * Returns the model's attributes as a JSON string.
+     *
+     * @return string
+     */
     public function toJson(): string
     {
         return json_encode($this->asJson());
