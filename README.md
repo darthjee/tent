@@ -185,7 +185,7 @@ Middlewares make Tent highly customizable, enabling advanced routing, header man
 - Docker Compose (v2.0 or higher)
 - Git
 
-### Initial Setup
+### Setup and Running
 
 1. **Clone the repository:**
    ```bash
@@ -193,50 +193,23 @@ Middlewares make Tent highly customizable, enabling advanced routing, header man
    cd tent
    ```
 
-2. **Create/verify the .env file:**
+2. **Configure environment variables:**
    
-   A sample `.env` file is included in the repository with default values:
-   ```
-   API_DEV_MYSQL_HOST=mysql
-   API_DEV_MYSQL_USER=root
-   API_DEV_MYSQL_PASSWORD=tent
-   API_DEV_MYSQL_PORT=3306
-   API_DEV_MYSQL_TEST_DATABASE=api_tent_test_db
-   API_DEV_MYSQL_DEV_DATABASE=api_tent_dev_db
-   
-   FRONTEND_DEV_MODE=false
-   ```
-   
-   You can modify this file if needed, especially `FRONTEND_DEV_MODE` (see below).
+   A sample `.env` file is included with default values. Modify if needed, especially `FRONTEND_DEV_MODE`:
+   - `FRONTEND_DEV_MODE=true`: Proxies frontend requests to Vite dev server (hot reload)
+   - `FRONTEND_DEV_MODE=false`: Serves frontend from static build at `dev/frontend/dist/`
 
-3. **Build the Docker images:**
-   
-   You can use Make commands to build the images:
+3. **Build and start:**
    ```bash
-   # Build a fresh new image
-   make build
+   # Build and start all services
+   make build && docker compose up
    
-   # Or ensure the image exists (builds only if needed)
-   make ensure-image
-   ```
-   
-   Alternatively, you can use Docker Compose directly:
-   ```bash
+   # Or use separate commands
    docker compose build base_build
-   ```
-
-4. **Start the development environment:**
-   ```bash
-   # Start all services
    docker compose up
-   
-   # Or use the Make target to start just the main Tent app with dependencies
-   make dev-up
    ```
 
 ### Accessing Services
-
-Once the services are running, you can access:
 
 - **Tent Proxy**: <http://localhost:8080> - Main application entry point
 - **Backend API**: <http://localhost:8040> - Development backend service
@@ -244,91 +217,57 @@ Once the services are running, you can access:
 - **phpMyAdmin**: <http://localhost:8050> - Database management interface
 - **HTTPBin**: <http://localhost:3060> - Testing service
 
-### Running Tests
+### Testing and Development
 
-**Proxy Backend (PHP) Tests:**
-
-These tests validate the Tent proxy application itself. Note that there is also a Dev Backend application (auxiliary service used for testing the proxy) that can be tested separately.
+**Running Tests:**
 ```bash
-# Run all PHP tests
-docker compose run tent_tests composer tests
+# Tent proxy (PHP) tests
+docker compose run tent_tests composer tests           # All tests
+docker compose run tent_tests composer tests:unit      # Unit tests only
+docker compose run tent_tests composer tests:integration  # Integration tests only
 
-# Run only unit tests
-docker compose run tent_tests composer tests:unit
-
-# Run only integration tests
-docker compose run tent_tests composer tests:integration
-
-# Interactive shell in test environment
-docker compose run tent_tests /bin/bash
-```
-
-**Dev Frontend Tests:**
-
-These are tests for the development frontend application (an auxiliary React application used to test the proxy). In the future, the proxy will have its own frontend for configuration.
-```bash
-# Run frontend tests (requires frontend_dev container to be running)
+# Frontend tests (for dev frontend app)
 docker compose exec frontend_dev npm test
-
-# Or start a shell in the frontend container
-docker compose run frontend_dev /bin/bash
 ```
 
 **Linting:**
 ```bash
-# Lint PHP code
+# PHP code
 docker compose run tent_tests composer lint
-
-# Fix PHP code style issues
 docker compose run tent_tests composer lint:fix
 
-# Lint frontend code
+# Frontend code
 docker compose exec frontend_dev npm run lint
-
-# Fix frontend linting issues
 docker compose exec frontend_dev npm run lint_fix
 ```
 
-For more frontend development details, see the [Dev Frontend README](dev/frontend/README.md).
-
-### Development Commands
-
-**Using Make:**
+**Development Commands:**
 ```bash
-make dev      # Start interactive shell in test environment
-make dev-up   # Start the tent_app service with all dependencies
-make tests    # Start interactive shell in test environment (same as dev)
+# Make shortcuts
+make dev      # Interactive shell in test environment
+make dev-up   # Start tent_app service with dependencies
+make tests    # Interactive shell in test environment
+
+# Docker Compose
+docker compose up -d              # Start services in detached mode
+docker compose logs -f tent_app   # View logs
+docker compose down               # Stop all services
+docker compose build tent_app     # Rebuild specific service
 ```
 
-**Using Docker Compose directly:**
-```bash
-# Start services in detached mode
-docker compose up -d
-
-# View logs
-docker compose logs -f tent_app
-
-# Stop all services
-docker compose down
-
-# Rebuild specific service
-docker compose build tent_app
-```
+For more details on auxiliary services:
+- Backend API development: See [Dev API README](dev/api/README.md)
+- Frontend development: See [Dev Frontend README](dev/frontend/README.md)
 
 ## Development
 
-To develop Tent, you will run the main Tent application (in the source/source directory) along with three auxiliary services:
+The Tent development environment includes the main proxy application plus three auxiliary services for testing:
 
-- **Backend (api_dev):** A simple PHP backend with endpoints (currently /persons). See the [Dev API README](dev/api/README.md) for detailed documentation on adding endpoints and running migrations.
-- **Frontend (frontend_dev):** A React frontend, served by Vite in development mode. See the [Dev Frontend README](dev/frontend/README.md) for detailed documentation on frontend development, building, and testing.
-- **phpMyAdmin (api_dev_phpmyadmin):** For managing and inserting data into the backend database.
+- **Backend (api_dev):** A simple PHP backend with sample endpoints. See [Dev API README](dev/api/README.md) for details.
+- **Frontend (frontend_dev):** A React application served by Vite. See [Dev Frontend README](dev/frontend/README.md) for details.
+- **phpMyAdmin (api_dev_phpmyadmin):** For managing the backend database.
 
-### How requests are routed
-
-Tent is configured so that backend requests are proxied to the backend service. Frontend requests depend on the `FRONTEND_DEV_MODE` environment variable:
-
-- If `FRONTEND_DEV_MODE=true`, frontend requests are proxied to the Vite development server (hot reload, etc).
-- If `FRONTEND_DEV_MODE=false`, the frontend is served statically from the built files (as in production).
+### Request Routing
 
 ```
 Browser
@@ -344,15 +283,13 @@ Backend       Frontend (React)   Static Files
 phpMyAdmin   (Vite dev server)   (Served by Tent)
 ```
 
-Depending on FRONTEND_DEV_MODE:
-
-- If true: frontend requests → Vite dev server (hot reload)
-- If false: frontend requests → static files from build
+Backend requests are proxied to `api_dev`. Frontend requests route based on `FRONTEND_DEV_MODE`:
+- `true`: Proxies to Vite dev server (hot reload enabled)
+- `false`: Serves static files from `frontend/dist` (production mode)
 
 ### Docker Volumes
 
-- **Static files:** The static files are mounted from `frontend/dist` into the Tent container, so the built frontend is served in production mode.
-- **Configuration:** The `docker_volumes/configuration` directory is mounted into the Tent app for configuration. The shipped code does not include a configuration; users are expected to provide their own to define proxy rules.
+Key volume mounts for development:
 
 ```
 Host Directory                →   Container Path
@@ -366,7 +303,7 @@ Host Directory                →   Container Path
 ./docker_volumes/node_modules →   /home/node/app/node_modules (for frontend_dev)
 ```
 
-See `docker-compose.yml` for details on service setup and volume mounts.
+See `docker-compose.yml` for complete service configuration.
 
 ## Contributing
 
