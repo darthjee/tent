@@ -15,9 +15,8 @@ class FileUtils
         $paths = array_map(function ($p, $i) use ($paths) {
             if ($i === 0) {
                 return rtrim($p, '/');
-            } else {
-                return trim($p, '/');
             }
+            return trim($p, '/');
         }, $paths, array_keys($paths));
         return implode('/', $paths);
     }
