@@ -2,6 +2,6 @@
 
 namespace ApiDev\Exceptions;
 
-class InvalidModelException
+class InvalidModelException extends \Exception
 {
 }
