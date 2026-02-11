@@ -10,6 +10,7 @@ class CreatePersonEndpoint extends Endpoint
 {
     private $data;
     private $id;
+    private $person;
 
     public function handle()
     {
@@ -31,15 +32,15 @@ class CreatePersonEndpoint extends Endpoint
                 );
             }
 
-            $person = new Person($persons[0]);
+            $this->person = new Person($persons[0]);
 
             $responseData = [
-                'id' => $person->getId(),
-                'first_name' => $person->getFirstName(),
-                'last_name' => $person->getLastName(),
-                'birthdate' => $person->getBirthdate(),
-                'created_at' => $person->getCreatedAt(),
-                'updated_at' => $person->getUpdatedAt(),
+                'id' => $this->person->getId(),
+                'first_name' => $this->person->getFirstName(),
+                'last_name' => $this->person->getLastName(),
+                'birthdate' => $this->person->getBirthdate(),
+                'created_at' => $this->person->getCreatedAt(),
+                'updated_at' => $this->person->getUpdatedAt(),
             ];
 
             return new Response(
@@ -85,8 +86,6 @@ class CreatePersonEndpoint extends Endpoint
             'last_name' => $lastName,
             'birthdate' => $birthdate
         ];
-
-        $person = new Person($attributes);
 
         $this->id = Person::getConnection()->insert($attributes);
     }
