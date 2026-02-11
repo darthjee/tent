@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState } from 'react';
 import { PersonClient } from '../clients/PersonClient';
 
 export default function PersonForm() {
