@@ -40,7 +40,8 @@ class CurlHttpClient implements HttpClientInterface
      */
     public function get(string $url, array $headers)
     {
-        return new CurlHttpExecutor($url, $headers)->get();
+        $executor = new CurlHttpExecutor(['url' => $url, 'headers' => $headers]);
+        return $executor->get();
     }
 
     /**
@@ -70,6 +71,7 @@ class CurlHttpClient implements HttpClientInterface
      */
     public function post(string $url, array $headers, string $body)
     {
-        return new CurlHttpExecutor($url, $headers)->post($body);
+        $executor = new CurlHttpExecutor(['url' => $url, 'headers' => $headers, 'body' => $body]);
+        return $executor->post();
     }
 }

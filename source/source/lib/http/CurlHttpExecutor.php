@@ -8,11 +8,13 @@ class CurlHttpExecutor
 {
     private string $url;
     private array $headers;
+    private ?string $body;
 
-    public function __construct(string $url, array $headers)
+    public function __construct(array $options)
     {
-        $this->url = $url;
-        $this->headers = $headers;
+        $this->url = $options['url'] ?? '';
+        $this->headers = $options['headers'] ?? [];
+        $this->body = $options['body'] ?? null;
     }
 
     public function get()
@@ -38,14 +40,14 @@ class CurlHttpExecutor
             'headers' => $headerLines
         ];
     }
-    public function post(string $body)
+    public function post()
     {
         $headerLines = CurlUtils::buildHeaderLines($this->headers);
 
         $curl = $this->initCurlRequest($this->url, $headerLines);
 
         curl_setopt($curl, CURLOPT_POST, true);
-        curl_setopt($curl, CURLOPT_POSTFIELDS, $body);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $this->body);
 
         $response = curl_exec($curl);
         $headerSize = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
