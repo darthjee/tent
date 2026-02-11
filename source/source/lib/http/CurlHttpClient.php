@@ -22,10 +22,10 @@ class CurlHttpClient implements HttpClientInterface
      * This method serves as a general request handler that can be used for different HTTP methods.
      * It determines the appropriate executor class based on the method and executes the request.
      *
-     * @param string $method  The HTTP method (e.g., 'GET', 'POST').
-     * @param string $url     The target URL for the request (may include query parameters).
-     * @param array  $headers Associative array of headers to send (e.g., ['User-Agent' => 'Test']).
-     * @param string|null $body Optional request body/payload to send (used for POST requests).
+     * @param string      $method  The HTTP method (e.g., 'GET', 'POST').
+     * @param string      $url     The target URL for the request (may include query parameters).
+     * @param array       $headers Associative array of headers to send (e.g., ['User-Agent' => 'Test']).
+     * @param string|null $body    Optional request body/payload to send (used for POST requests).
      * @return array{
      *   body: string,
      *   httpCode: int,
