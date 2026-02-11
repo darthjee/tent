@@ -20,12 +20,12 @@ class ProxyRequestHandler extends RequestHandler
     /**
      * @var Server The target server to which requests are proxied.
      */
-    private $server;
+    private Server $server;
 
     /**
      * @var HttpClientInterface The HTTP client used to make requests to the target server.
      */
-    private $httpClient;
+    private HttpClientInterface $httpClient;
 
     /**
      * Constructs a ProxyRequestHandler.
@@ -68,7 +68,7 @@ class ProxyRequestHandler extends RequestHandler
             $url .= '?' . $request->query();
         }
 
-        $response = $this->httpClient->get($url, $request->headers());
+        $response = $this->httpClient->request($request->requestMethod(), $url, $request->headers(), $request->body());
         $response['request'] = $request;
 
         return new Response($response);
