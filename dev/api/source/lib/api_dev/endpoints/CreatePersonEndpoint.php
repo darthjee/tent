@@ -15,24 +15,7 @@ class CreatePersonEndpoint extends Endpoint
     public function handle()
     {
         try {
-            $this->initData();
-            $this->createPerson();
-            $this->retrievePerson();
-
-            $responseData = [
-                'id' => $this->person->getId(),
-                'first_name' => $this->person->getFirstName(),
-                'last_name' => $this->person->getLastName(),
-                'birthdate' => $this->person->getBirthdate(),
-                'created_at' => $this->person->getCreatedAt(),
-                'updated_at' => $this->person->getUpdatedAt(),
-            ];
-
-            return new Response(
-                json_encode($responseData),
-                201,
-                ['Content-Type: application/json']
-            );
+            return $this->handleRequest();
         } catch (InvalidRequestException $e) {
             return new Response(
                 json_encode(['error' =>$e->getMessage()]),
@@ -46,6 +29,28 @@ class CreatePersonEndpoint extends Endpoint
                 ['Content-Type: application/json']
             );
         }
+    }
+
+    private function handleRequest()
+    {
+        $this->initData();
+        $this->createPerson();
+        $this->retrievePerson();
+
+        $responseData = [
+            'id' => $this->person->getId(),
+            'first_name' => $this->person->getFirstName(),
+            'last_name' => $this->person->getLastName(),
+            'birthdate' => $this->person->getBirthdate(),
+            'created_at' => $this->person->getCreatedAt(),
+            'updated_at' => $this->person->getUpdatedAt(),
+        ];
+
+        return new Response(
+            json_encode($responseData),
+            201,
+            ['Content-Type: application/json']
+        );
     }
 
     private function initData()
