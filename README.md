@@ -256,6 +256,7 @@ docker compose build tent_app     # Rebuild specific service
 ```
 
 For more details on auxiliary services:
+
 - Backend API development: See [Dev API README](dev/api/README.md)
 - Frontend development: See [Dev Frontend README](dev/frontend/README.md)
 
@@ -284,6 +285,7 @@ phpMyAdmin   (Vite dev server)   (Served by Tent)
 ```
 
 Backend requests are proxied to `api_dev`. Frontend requests route based on `FRONTEND_DEV_MODE`:
+
 - `true`: Proxies to Vite dev server (hot reload enabled)
 - `false`: Serves static files from `frontend/dist` (production mode)
 
