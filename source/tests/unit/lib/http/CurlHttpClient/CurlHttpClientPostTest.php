@@ -13,7 +13,7 @@ class CurlHttpClientPostTest extends TestCase
     {
         $client = new CurlHttpClient();
 
-        $result = $client->post($this->baseUrl . '/post', [], '');
+        $result = $client->request('POST', $this->baseUrl . '/post', [], '');
 
         $this->assertIsArray($result);
         $this->assertArrayHasKey('body', $result);
@@ -25,7 +25,7 @@ class CurlHttpClientPostTest extends TestCase
     {
         $client = new CurlHttpClient();
 
-        $result = $client->post($this->baseUrl . '/post', [], '');
+        $result = $client->request('POST', $this->baseUrl . '/post', [], '');
 
         $this->assertEquals(200, $result['httpCode']);
         $this->assertNotEmpty($result['body']);
@@ -38,7 +38,7 @@ class CurlHttpClientPostTest extends TestCase
         $payload = json_encode(['name' => 'John Doe', 'email' => 'john@example.com']);
         $headers = ['Content-Type' => 'application/json'];
 
-        $result = $client->post($this->baseUrl . '/post', $headers, $payload);
+        $result = $client->request('POST', $this->baseUrl . '/post', $headers, $payload);
 
         $this->assertEquals(200, $result['httpCode']);
 
@@ -57,7 +57,7 @@ class CurlHttpClientPostTest extends TestCase
             'X-Custom-Header' => 'CustomValue'
         ];
 
-        $result = $client->post($this->baseUrl . '/post', $headers, 'test data');
+        $result = $client->request('POST', $this->baseUrl . '/post', $headers, 'test data');
 
         $this->assertEquals(200, $result['httpCode']);
 
@@ -75,7 +75,7 @@ class CurlHttpClientPostTest extends TestCase
         $formData = 'field1=value1&field2=value2';
         $headers = ['Content-Type' => 'application/x-www-form-urlencoded'];
 
-        $result = $client->post($this->baseUrl . '/post', $headers, $formData);
+        $result = $client->request('POST', $this->baseUrl . '/post', $headers, $formData);
 
         $this->assertEquals(200, $result['httpCode']);
 
