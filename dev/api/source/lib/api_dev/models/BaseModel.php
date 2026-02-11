@@ -117,4 +117,32 @@ abstract class BaseModel
             $connection->update($this->getId(), $this->attributes);
         }
     }
+
+    /**
+     * Converts camelCase to snake_case
+     */
+    private function camelToSnake(string $input): string
+    {
+        return strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $input));
+    }
+
+    /**
+     * Returns the model's attributes as a JSON string with snake_case keys.
+     *
+     * @return array
+     */
+    public function asJson(): array
+    {
+        $snakeCaseAttributes = [];
+        foreach ($this->getAttributes() as $key => $value) {
+            $snakeCaseKey = $this->camelToSnake($key);
+            $snakeCaseAttributes[$snakeCaseKey] = $value;
+        }
+        return $snakeCaseAttributes;
+    }
+
+    public function toJson(): string
+    {
+        return json_encode($this->asJson());
+    }
 }
