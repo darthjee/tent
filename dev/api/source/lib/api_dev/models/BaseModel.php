@@ -8,7 +8,7 @@ use ApiDev\Exceptions\InvalidModelException;
 
 /**
  * Abstract base class for database models.
- * 
+ *
  * Provides common functionality for interacting with database tables including
  * querying, saving, validating, and serializing model data. Subclasses must
  * implement table-specific logic such as table name and attribute definitions.
@@ -27,14 +27,14 @@ abstract class BaseModel
 
     /**
      * Returns the database table name for this model.
-     * 
+     *
      * @return string The table name
      */
     abstract public static function tableName(): string;
 
     /**
      * Returns all rows from the table as an array of model instances.
-     * 
+     *
      * @return array Array of model instances
      */
     public static function all(): array
@@ -47,9 +47,9 @@ abstract class BaseModel
 
     /**
      * Returns a ModelConnection instance for the model's table.
-     * 
+     *
      * Creates and caches a connection on first call.
-     * 
+     *
      * @return ModelConnection The database connection for this model
      */
     public static function getConnection(): ModelConnection
@@ -66,7 +66,7 @@ abstract class BaseModel
 
     /**
      * Creates a new model instance.
-     * 
+     *
      * @param array $attributes Associative array of column => value
      */
     public function __construct(array $attributes = [])
@@ -76,7 +76,7 @@ abstract class BaseModel
 
     /**
      * Returns the ID of the model, or null if not set.
-     * 
+     *
      * @return int|null The model ID
      */
     public function getId(): ?int
@@ -86,7 +86,7 @@ abstract class BaseModel
 
     /**
      * Returns the model's attributes as an associative array.
-     * 
+     *
      * @return array The model attributes
      */
     public function getAttributes(): array
@@ -96,23 +96,23 @@ abstract class BaseModel
 
     /**
      * Returns the list of valid attribute names for the model.
-     * 
+     *
      * @return array The attribute names
      */
     abstract protected static function attributeNames(): array;
 
     /**
      * Checks if the model's attributes are valid.
-     * 
+     *
      * Must be implemented by subclasses to define validation rules.
-     * 
+     *
      * @return bool True if valid, false otherwise
      */
     abstract public function valid(): bool;
 
     /**
      * Validates the model's attributes and throws an exception if invalid.
-     * 
+     *
      * @return void
      * @throws InvalidModelException If validation fails
      */
@@ -125,10 +125,10 @@ abstract class BaseModel
 
     /**
      * Saves the model to the database.
-     * 
+     *
      * Inserts a new record if the model doesn't have an ID, otherwise updates
      * the existing record. Validates the model before saving.
-     * 
+     *
      * @return void
      * @throws InvalidModelException If validation fails
      */
@@ -148,10 +148,10 @@ abstract class BaseModel
 
     /**
      * Returns the model's attributes as a JSON-ready array.
-     * 
+     *
      * Includes only the attributes defined by attributeNames(),
      * setting missing attributes to null.
-     * 
+     *
      * @return array Associative array of attributes
      */
     public function asJson(): array
@@ -166,7 +166,7 @@ abstract class BaseModel
 
     /**
      * Returns the model's attributes as a JSON string.
-     * 
+     *
      * @return string JSON-encoded string of attributes
      */
     public function toJson(): string

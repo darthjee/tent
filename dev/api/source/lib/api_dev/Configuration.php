@@ -4,7 +4,7 @@ namespace ApiDev;
 
 /**
  * Singleton configuration manager for route registration.
- * 
+ *
  * Maintains a centralized registry of route configurations for the application.
  * Provides static methods for registering and retrieving route configurations.
  */
@@ -14,7 +14,7 @@ class Configuration
      * @var Configuration|null Singleton instance
      */
     private static $instance;
-    
+
     /**
      * @var array Array of RouteConfiguration instances
      */
@@ -22,7 +22,7 @@ class Configuration
 
     /**
      * Returns the singleton instance of Configuration.
-     * 
+     *
      * @return Configuration The singleton instance
      */
     public static function getInstance(): Configuration
@@ -35,7 +35,7 @@ class Configuration
 
     /**
      * Adds a new route configuration to the registry.
-     * 
+     *
      * @param string|null $requestMethod The HTTP method to match (e.g., GET, POST)
      * @param string|null $path The URL path to match
      * @param string $endpoint The fully qualified class name of the endpoint handler
@@ -48,7 +48,7 @@ class Configuration
 
     /**
      * Returns all registered route configurations.
-     * 
+     *
      * @return array Array of RouteConfiguration instances
      */
     public static function getConfigurations(): array
@@ -58,7 +58,7 @@ class Configuration
 
     /**
      * Resets the singleton instance (useful for testing).
-     * 
+     *
      * @return void
      */
     public static function reset(): void
@@ -68,7 +68,7 @@ class Configuration
 
     /**
      * Adds a route configuration to the internal registry.
-     * 
+     *
      * @param string|null $requestMethod The HTTP method to match
      * @param string|null $path The URL path to match
      * @param string $endpoint The endpoint class name
@@ -81,7 +81,7 @@ class Configuration
 
     /**
      * Returns the registered route configurations.
-     * 
+     *
      * @return array Array of RouteConfiguration instances
      */
     public function fetchConfigurations(): array

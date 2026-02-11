@@ -10,7 +10,7 @@ use ApiDev\Exceptions\InvalidModelException;
 
 /**
  * Endpoint for creating new person records.
- * 
+ *
  * Handles POST requests to create a new person in the database.
  * Expects a JSON body with first_name, last_name, and birthdate fields.
  */
@@ -20,12 +20,12 @@ class CreatePersonEndpoint extends Endpoint
      * @var array|null The parsed JSON request data
      */
     private $data;
-    
+
     /**
      * @var int|null The ID of the created person (unused in current implementation)
      */
     private $id;
-    
+
     /**
      * @var Person|null The Person instance being created
      */
@@ -66,7 +66,7 @@ class CreatePersonEndpoint extends Endpoint
 
     /**
      * Builds the success response with the created person data.
-     * 
+     *
      * @return Response JSON response with HTTP 201 status
      */
     private function buildResponse(): Response
@@ -80,7 +80,7 @@ class CreatePersonEndpoint extends Endpoint
 
     /**
      * Parses and validates the JSON request body.
-     * 
+     *
      * @return void
      * @throws InvalidRequestException If JSON is invalid
      */
@@ -94,7 +94,7 @@ class CreatePersonEndpoint extends Endpoint
 
     /**
      * Creates and saves the Person instance.
-     * 
+     *
      * @return void
      * @throws InvalidRequestException If model validation fails
      */
@@ -110,7 +110,7 @@ class CreatePersonEndpoint extends Endpoint
 
     /**
      * Builds a Person instance from the request data.
-     * 
+     *
      * @return Person The Person instance
      */
     private function buildPerson(): Person

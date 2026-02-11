@@ -7,7 +7,7 @@ use Exception;
 
 /**
  * Represents a single database migration.
- * 
+ *
  * Handles execution of SQL migration files, tracking whether they've been applied,
  * and recording their execution in the migrations table.
  */
@@ -17,7 +17,7 @@ class Migration
      * @var Connection The database connection
      */
     private $connection;
-    
+
     /**
      * @var string The file path to the SQL migration file
      */
@@ -30,7 +30,7 @@ class Migration
 
     /**
      * Creates a new Migration instance.
-     * 
+     *
      * @param Connection $connection The database connection
      * @param string $sqlFilePath The path to the SQL migration file
      */
@@ -42,10 +42,10 @@ class Migration
 
     /**
      * Runs the migration if it hasn't been applied yet.
-     * 
+     *
      * Checks if the migration has already been executed, and if not,
      * executes the SQL statements and records the migration.
-     * 
+     *
      * @return void
      * @throws Exception If file doesn't exist or execution fails
      */
@@ -59,7 +59,7 @@ class Migration
 
     /**
      * Checks if this migration has already been applied.
-     * 
+     *
      * @return bool True if the migration has been applied, false otherwise
      */
     public function isMigrated(): bool
@@ -74,7 +74,7 @@ class Migration
 
     /**
      * Records that this migration has been applied.
-     * 
+     *
      * @return void
      */
     private function recordMigration(): void
@@ -89,7 +89,7 @@ class Migration
 
     /**
      * Executes the SQL statements in the migration file.
-     * 
+     *
      * @return void
      * @throws Exception If file doesn't exist or execution fails
      */
@@ -108,7 +108,7 @@ class Migration
 
     /**
      * Returns the content of the SQL file.
-     * 
+     *
      * @return string The SQL file content
      * @throws Exception If reading the file fails
      */
@@ -127,7 +127,7 @@ class Migration
 
     /**
      * Checks if the SQL file exists.
-     * 
+     *
      * @return void
      * @throws Exception If the file doesn't exist
      */
@@ -140,7 +140,7 @@ class Migration
 
     /**
      * Returns the filename (without path) of the migration.
-     * 
+     *
      * @return string The migration filename
      */
     private function fileName(): string

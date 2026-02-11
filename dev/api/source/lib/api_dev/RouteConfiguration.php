@@ -4,7 +4,7 @@ namespace ApiDev;
 
 /**
  * Combines a route pattern with an endpoint handler.
- * 
+ *
  * Represents a complete route configuration that can match incoming requests
  * and dispatch them to the appropriate endpoint handler.
  */
@@ -14,7 +14,7 @@ class RouteConfiguration
      * @var Route The route pattern for matching requests
      */
     private $route;
-    
+
     /**
      * @var string The fully qualified class name of the endpoint handler
      */
@@ -22,7 +22,7 @@ class RouteConfiguration
 
     /**
      * Creates a new RouteConfiguration instance.
-     * 
+     *
      * @param string|null $requestMethod The HTTP method to match (e.g., GET, POST)
      * @param string|null $path The URL path to match
      * @param string $endpoint The fully qualified class name of the endpoint handler
@@ -35,7 +35,7 @@ class RouteConfiguration
 
     /**
      * Checks if this route configuration matches the given request.
-     * 
+     *
      * @param RequestInterface $request The HTTP request to match against
      * @return bool True if the route matches the request, false otherwise
      */
@@ -46,7 +46,7 @@ class RouteConfiguration
 
     /**
      * Handles the request by instantiating and invoking the endpoint.
-     * 
+     *
      * @param RequestInterface $request The HTTP request to handle
      * @return Response The HTTP response from the endpoint
      */

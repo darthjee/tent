@@ -6,7 +6,7 @@ use ApiDev\Models\Person;
 
 /**
  * Endpoint for listing all persons.
- * 
+ *
  * Retrieves all person records from the database and returns them as JSON.
  */
 class ListPersonsEndpoint extends Endpoint
@@ -18,7 +18,7 @@ class ListPersonsEndpoint extends Endpoint
 
     /**
      * Handles the request to list all persons.
-     * 
+     *
      * @return Response JSON response with array of person data and HTTP 200
      */
     public function handle(): Response
@@ -30,7 +30,7 @@ class ListPersonsEndpoint extends Endpoint
 
     /**
      * Returns the list of Person instances, fetching from database if needed.
-     * 
+     *
      * @return array Array of Person model instances
      */
     protected function getPersons(): array
@@ -44,7 +44,7 @@ class ListPersonsEndpoint extends Endpoint
 
     /**
      * Transforms Person instances into an array of data arrays for JSON output.
-     * 
+     *
      * @return array Array of associative arrays with person data
      */
     protected function getData(): array

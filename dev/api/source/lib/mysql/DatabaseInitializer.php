@@ -6,7 +6,7 @@ use Exception;
 
 /**
  * Initializes database schema for the application.
- * 
+ *
  * Sets up required database tables such as the migrations tracking table.
  */
 class DatabaseInitializer
@@ -18,7 +18,7 @@ class DatabaseInitializer
 
     /**
      * Creates a new DatabaseInitializer instance.
-     * 
+     *
      * @param Connection $connection The database connection to use
      */
     public function __construct(Connection $connection)
@@ -28,9 +28,9 @@ class DatabaseInitializer
 
     /**
      * Initializes the database schema.
-     * 
+     *
      * Creates the migrations tracking table if it doesn't already exist.
-     * 
+     *
      * @return void
      * @throws Exception If initialization fails
      */

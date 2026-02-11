@@ -8,7 +8,7 @@ use ApiDev\Models\BaseModel;
 
 /**
  * Represents a person record in the database.
- * 
+ *
  * Provides access to person attributes such as name, birthdate, and timestamps.
  * Includes validation logic requiring both first and last name to be present.
  */
@@ -16,7 +16,7 @@ class Person extends BaseModel
 {
     /**
      * Returns the database table name for persons.
-     * 
+     *
      * @return string The table name
      */
     public static function tableName(): string
@@ -26,7 +26,7 @@ class Person extends BaseModel
 
     /**
      * Returns the person's first name.
-     * 
+     *
      * @return string|null The first name, or null if not set
      */
     public function getFirstName(): ?string
@@ -36,7 +36,7 @@ class Person extends BaseModel
 
     /**
      * Returns the person's last name.
-     * 
+     *
      * @return string|null The last name, or null if not set
      */
     public function getLastName(): ?string
@@ -46,7 +46,7 @@ class Person extends BaseModel
 
     /**
      * Returns the person's birthdate.
-     * 
+     *
      * @return string|null The birthdate, or null if not set
      */
     public function getBirthdate(): ?string
@@ -56,7 +56,7 @@ class Person extends BaseModel
 
     /**
      * Returns the timestamp when the person record was created.
-     * 
+     *
      * @return string|null The creation timestamp, or null if not set
      */
     public function getCreatedAt(): ?string
@@ -66,7 +66,7 @@ class Person extends BaseModel
 
     /**
      * Returns the timestamp when the person record was last updated.
-     * 
+     *
      * @return string|null The update timestamp, or null if not set
      */
     public function getUpdatedAt(): ?string
@@ -76,7 +76,7 @@ class Person extends BaseModel
 
     /**
      * Validates that the person has both first and last name.
-     * 
+     *
      * @return bool True if valid, false otherwise
      */
     public function valid(): bool
@@ -86,7 +86,7 @@ class Person extends BaseModel
 
     /**
      * Returns the list of valid attribute names for the Person model.
-     * 
+     *
      * @return array The attribute names
      */
     protected static function attributeNames(): array

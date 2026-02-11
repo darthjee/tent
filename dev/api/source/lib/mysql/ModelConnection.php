@@ -4,7 +4,7 @@ namespace ApiDev\Mysql;
 
 /**
  * Database connection for model operations on a specific table.
- * 
+ *
  * Provides high-level methods for common database operations (list, insert, update)
  * on a single table, abstracting away SQL query construction.
  */
@@ -14,7 +14,7 @@ class ModelConnection
      * @var Connection The underlying database connection
      */
     private $connection;
-    
+
     /**
      * @var string The table name for this model connection
      */
@@ -22,7 +22,7 @@ class ModelConnection
 
     /**
      * Creates a new ModelConnection instance.
-     * 
+     *
      * @param Connection $connection The database connection
      * @param string $tableName The name of the table to operate on
      */
@@ -34,7 +34,7 @@ class ModelConnection
 
     /**
      * Lists rows from the table with optional limit and offset.
-     * 
+     *
      * @param array $options Optional array with 'limit' and/or 'offset' keys
      * @return array Array of rows as associative arrays
      */
@@ -59,7 +59,7 @@ class ModelConnection
 
     /**
      * Inserts a row into the table.
-     * 
+     *
      * @param array $attributes Associative array of column => value
      * @return int The ID of the inserted row (cast from string)
      */
@@ -79,7 +79,7 @@ class ModelConnection
 
     /**
      * Updates a row in the table by ID.
-     * 
+     *
      * @param int $id The ID of the row to update
      * @param array $attributes Associative array of column => value to update
      * @return void
@@ -103,7 +103,7 @@ class ModelConnection
 
     /**
      * Returns the underlying database connection.
-     * 
+     *
      * @return Connection The database connection
      */
     public function getConnection(): Connection
@@ -113,7 +113,7 @@ class ModelConnection
 
     /**
      * Returns the table name for this model connection.
-     * 
+     *
      * @return string The table name
      */
     public function getTableName(): string
