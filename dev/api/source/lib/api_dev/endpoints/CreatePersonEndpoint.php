@@ -3,8 +3,7 @@
 namespace ApiDev;
 
 use ApiDev\Models\Person;
-use ApiDev\Exceptions\InvalidJsonException;
-use ApiDev\Exceptions\InvalidDataException;
+use ApiDev\Exceptions\InvalidRequestException;
 
 class CreatePersonEndpoint extends Endpoint
 {
@@ -33,15 +32,9 @@ class CreatePersonEndpoint extends Endpoint
                 201,
                 ['Content-Type: application/json']
             );
-        } catch (InvalidJsonException $e) {
+        } catch (InvalidRequestException $e) {
             return new Response(
-                json_encode(['error' => 'Invalid JSON body']),
-                400,
-                ['Content-Type: application/json']
-            );
-        } catch (InvalidDataException $e) {
-            return new Response(
-                json_encode(['error' => 'At least one field required']),
+                json_encode(['error' =>$e->getMessage()]),
                 400,
                 ['Content-Type: application/json']
             );
@@ -52,7 +45,7 @@ class CreatePersonEndpoint extends Endpoint
     {
         $this->data = json_decode($this->request->body(), true);
         if (!is_array($this->data)) {
-            throw new InvalidJsonException();
+            throw new InvalidRequestException('Invalid JSON body');
         }
     }
 
@@ -63,7 +56,7 @@ class CreatePersonEndpoint extends Endpoint
         $birthdate = $this->data['birthdate'] ?? null;
 
         if (is_null($firstName) && is_null($lastName) && is_null($birthdate)) {
-            throw new InvalidDataException();
+            throw new InvalidRequestException('At least one field required');
         }
 
         $attributes = [
