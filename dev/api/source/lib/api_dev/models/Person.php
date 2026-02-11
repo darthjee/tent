@@ -8,6 +8,11 @@ use ApiDev\Models\BaseModel;
 
 class Person extends BaseModel
 {
+    public static function tableName(): string
+    {
+        return 'persons';
+    }
+
     /**
      * Returns all rows from the 'persons' table.
      *
@@ -52,10 +57,5 @@ class Person extends BaseModel
     public function getAttributes()
     {
         return $this->attributes;
-    }
-
-    public static function tableName(): string
-    {
-        return 'persons';
     }
 }
