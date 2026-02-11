@@ -6,6 +6,7 @@ use ApiDev\Models\Person;
 use ApiDev\Exceptions\RequestException;
 use ApiDev\Exceptions\InvalidRequestException;
 use ApiDev\Exceptions\ServerErrorException;
+use ApiDev\Exceptions\InvalidModelException;
 
 class CreatePersonEndpoint extends Endpoint
 {
@@ -74,35 +75,20 @@ class CreatePersonEndpoint extends Endpoint
 
     private function createPerson(): void
     {
-        $firstName = $this->data['first_name'] ?? null;
-        $lastName = $this->data['last_name'] ?? null;
-        $birthdate = $this->data['birthdate'] ?? null;
-
-        if (is_null($firstName) && is_null($lastName) && is_null($birthdate)) {
+        try {
+            $this->person = $this->buildPerson();
+            $this->person->save();
+        } catch (InvalidModelException $e) {
             throw new InvalidRequestException('At least one field required');
         }
-
-        $attributes = [
-            'first_name' => $firstName,
-            'last_name' => $lastName,
-            'birthdate' => $birthdate
-        ];
-
-        $this->id = Person::getConnection()->insert($attributes);
-        $this->person = $this->retrievePerson();
     }
 
-    private function retrievePerson(): Person
+    private function buildPerson(): Person
     {
-        $persons = Person::getConnection()->getConnection()->fetchAll(
-            "SELECT * FROM persons WHERE id = ?",
-            [$this->id]
-        );
-
-        if (empty($persons)) {
-            throw new ServerErrorException('Failed to retrieve created person');
-        }
-
-        return new Person($persons[0]);
+        return new Person([
+            'first_name' => $this->data['first_name'] ?? null,
+            'last_name' => $this->data['last_name'] ?? null,
+            'birthdate' => $this->data['birthdate'] ?? null
+        ]);
     }
 }
