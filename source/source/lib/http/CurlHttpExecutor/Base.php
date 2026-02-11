@@ -1,8 +1,8 @@
 <?php
 
-namespace Tent\Http;
+namespace Tent\Http\CurlHttpExecutor;
 
-use Tent\Utils\CurlUtils\CurlHttpExecutor;
+use Tent\Utils\CurlUtils;
 use CurlHandle;
 
 abstract class Base
@@ -21,7 +21,7 @@ abstract class Base
 
     abstract public function request();
 
-    private function initCurlRequest()
+    protected function initCurlRequest()
     {
         $headerLines = CurlUtils::buildHeaderLines($this->headers);
 
@@ -33,7 +33,7 @@ abstract class Base
         curl_setopt($this->curlHandle, CURLOPT_HTTPHEADER, $headerLines);
     }
 
-    private function executeCurlRequest()
+    protected function executeCurlRequest()
     {
         $response = curl_exec($this->curlHandle);
         $headerSize = curl_getinfo($this->curlHandle, CURLINFO_HEADER_SIZE);

@@ -15,6 +15,7 @@ require_once __DIR__ . '/lib/request_handlers/ProxyRequestHandler.php';
 require_once __DIR__ . '/lib/request_handlers/StaticFileHandler.php';
 require_once __DIR__ . '/lib/http/CurlHttpClient.php';
 require_once __DIR__ . '/lib/http/CurlHttpExecutor/Base.php';
+require_once __DIR__ . '/lib/http/CurlHttpExecutor/Get.php';
 require_once __DIR__ . '/lib/http/CurlHttpExecutor.php';
 require_once __DIR__ . '/lib/middlewares/Middleware.php';
 require_once __DIR__ . '/lib/middlewares/FileCacheMiddleware.php';

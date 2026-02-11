@@ -4,6 +4,7 @@ namespace Tent\Http;
 
 use Tent\Utils\CurlUtils;
 use Tent\Http\CurlHttpExecutor;
+use Tent\Http\CurlHttpExecutor\Get;
 
 /**
  * HTTP client for proxying requests using cURL.
@@ -40,8 +41,8 @@ class CurlHttpClient implements HttpClientInterface
      */
     public function get(string $url, array $headers)
     {
-        $executor = new CurlHttpExecutor(['url' => $url, 'headers' => $headers]);
-        return $executor->get();
+        $executor = new Get(['url' => $url, 'headers' => $headers]);
+        return $executor->request();
     }
 
     /**
