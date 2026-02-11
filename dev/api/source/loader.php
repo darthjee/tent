@@ -11,6 +11,7 @@ require_once __DIR__ . '/lib/api_dev/exceptions/RequestException.php';
 require_once __DIR__ . '/lib/api_dev/exceptions/InvalidRequestException.php';
 require_once __DIR__ . '/lib/api_dev/exceptions/ServerErrorException.php';
 require_once __DIR__ . '/lib/api_dev/models/MissingResponse.php';
+require_once __DIR__ . '/lib/api_dev/models/BaseModel.php';
 require_once __DIR__ . '/lib/api_dev/models/Person.php';
 require_once __DIR__ . '/lib/api_dev/models/RequestInterface.php';
 require_once __DIR__ . '/lib/api_dev/models/Request.php';

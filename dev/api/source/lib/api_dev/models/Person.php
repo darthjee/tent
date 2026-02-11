@@ -4,8 +4,9 @@ namespace ApiDev\Models;
 
 use ApiDev\Mysql\ModelConnection;
 use ApiDev\Mysql\Configuration;
+use ApiDev\Models\BaseModel;
 
-class Person
+class Person extends BaseModel
 {
     /**
      * Returns all rows from the 'persons' table.
@@ -53,30 +54,8 @@ class Person
         return $this->attributes;
     }
 
-    public static function all(): array
+    public static function tableName(): string
     {
-        $rows = self::getConnection()->list();
-        return array_map(function ($attrs) {
-            return new self($attrs);
-        }, $rows);
-    }
-
-    /**
-     * Returns a ModelConnection for the 'persons' table.
-     *
-     * @return ModelConnection
-     */
-    private static $connection = null;
-
-    public static function getConnection(): ModelConnection
-    {
-        if (self::$connection instanceof ModelConnection) {
-            return self::$connection;
-        }
-        self::$connection = new ModelConnection(
-            Configuration::connect(),
-            'persons'
-        );
-        return self::$connection;
+        return 'persons';
     }
 }
