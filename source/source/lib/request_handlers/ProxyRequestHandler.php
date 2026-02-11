@@ -68,7 +68,7 @@ class ProxyRequestHandler extends RequestHandler
             $url .= '?' . $request->query();
         }
 
-        $response = $this->httpClient->request('GET', $url, $request->headers());
+        $response = $this->httpClient->request($request->requestMethod(), $url, $request->headers(), $request->body());
         $response['request'] = $request;
 
         return new Response($response);
