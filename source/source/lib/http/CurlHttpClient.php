@@ -17,6 +17,34 @@ use Tent\Http\CurlHttpExecutor\Post;
 class CurlHttpClient implements HttpClientInterface
 {
     /**
+     * Sends an HTTP request to the given URL with the provided method, headers, and optional body.
+     *
+     * This method serves as a general request handler that can be used for different HTTP methods.
+     * It determines the appropriate executor class based on the method and executes the request.
+     *
+     * @param string $method  The HTTP method (e.g., 'GET', 'POST').
+     * @param string $url     The target URL for the request (may include query parameters).
+     * @param array  $headers Associative array of headers to send (e.g., ['User-Agent' => 'Test']).
+     * @param string|null $body Optional request body/payload to send (used for POST requests).
+     * @return array{
+     *   body: string,
+     *   httpCode: int,
+     *   headers: string[]
+     * } Array with response body, status code, and headers.
+     */
+    public function request(string $method, string $url, array $headers, ?string $body = null): array
+    {
+        $executorClass = match (strtoupper($method)) {
+            'GET' => Get::class,
+            'POST' => Post::class,
+            default => throw new InvalidArgumentException("Unsupported HTTP method: $method"),
+        };
+
+        $executor = new $executorClass(['url' => $url, 'headers' => $headers, 'body' => $body]);
+        return $executor->request();
+    }
+
+    /**
      * Sends an HTTP GET request to the given URL with the provided headers.
      *
      * This method performs a GET request using cURL. It accepts a URL and an associative array of headers.
@@ -40,10 +68,9 @@ class CurlHttpClient implements HttpClientInterface
      *   headers: string[]
      * } Array with response body, status code, and headers.
      */
-    public function get(string $url, array $headers)
+    public function get(string $url, array $headers): array
     {
-        $executor = new Get(['url' => $url, 'headers' => $headers]);
-        return $executor->request();
+        return $this->request('GET', $url, $headers);
     }
 
     /**
@@ -71,9 +98,8 @@ class CurlHttpClient implements HttpClientInterface
      *   headers: string[]
      * } Array with response body, status code, and headers.
      */
-    public function post(string $url, array $headers, string $body)
+    public function post(string $url, array $headers, string $body): array
     {
-        $executor = new Post(['url' => $url, 'headers' => $headers, 'body' => $body]);
-        return $executor->request();
+        return $this->request('POST', $url, $headers, $body);
     }
 }

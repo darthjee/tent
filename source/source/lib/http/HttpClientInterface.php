@@ -18,7 +18,7 @@ interface HttpClientInterface
      * @param array  $headers Associative array of headers to send.
      * @return array Response data (format depends on implementation).
      */
-    public function get(string $url, array $headers);
+    public function get(string $url, array $headers): array;
 
     /**
      * Sends an HTTP POST request to the given URL with the provided headers and body.
@@ -28,5 +28,5 @@ interface HttpClientInterface
      * @param string $body    The request body/payload to send.
      * @return array Response data (format depends on implementation).
      */
-    public function post(string $url, array $headers, string $body);
+    public function post(string $url, array $headers, string $body): array;
 }
