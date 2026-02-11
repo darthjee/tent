@@ -16,23 +16,8 @@ class CreatePersonEndpoint extends Endpoint
     {
         try {
             $this->initData();
-
             $this->createPerson();
-
-            $persons = Person::getConnection()->getConnection()->fetchAll(
-                "SELECT * FROM persons WHERE id = ?",
-                [$this->id]
-            );
-
-            if (empty($persons)) {
-                return new Response(
-                    json_encode(['error' => 'Failed to retrieve created person']),
-                    500,
-                    ['Content-Type: application/json']
-                );
-            }
-
-            $this->person = new Person($persons[0]);
+            $this->retrievePerson();
 
             $responseData = [
                 'id' => $this->person->getId(),
@@ -88,5 +73,23 @@ class CreatePersonEndpoint extends Endpoint
         ];
 
         $this->id = Person::getConnection()->insert($attributes);
+    }
+
+    private function retrievePerson()
+    {
+        $persons = Person::getConnection()->getConnection()->fetchAll(
+            "SELECT * FROM persons WHERE id = ?",
+            [$this->id]
+        );
+
+        if (empty($persons)) {
+            return new Response(
+                json_encode(['error' => 'Failed to retrieve created person']),
+                500,
+                ['Content-Type: application/json']
+            );
+        }
+
+        $this->person = new Person($persons[0]);
     }
 }
