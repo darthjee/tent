@@ -19,7 +19,17 @@ abstract class Base
         $this->body = $options['body'] ?? null;
     }
 
-    abstract public function request();
+    public function request()
+    {
+        $this->initCurlRequest();
+        $this->addExtraCurlOptions();
+
+        return $this->executeCurlRequest();
+    }
+
+    protected function addExtraCurlOptions()
+    {
+    }
 
     protected function initCurlRequest()
     {
