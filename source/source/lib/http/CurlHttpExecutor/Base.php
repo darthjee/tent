@@ -36,8 +36,8 @@ abstract class Base
      *
      * @param array $options Associative array with keys:
      *  - 'url': The target URL for the request
-     * - 'headers': Associative array of headers to send
-     * - 'body': (optional) The request body/payload to send (for POST requests)
+     *  - 'headers': Associative array of headers to send
+     *  - 'body': (optional) The request body/payload to send (for POST requests).
      */
     public function __construct(array $options)
     {
@@ -69,6 +69,7 @@ abstract class Base
      * Adds any extra cURL options specific to the HTTP method.
      *
      * Subclasses can override this method to set additional cURL options (e.g., for POST requests).
+     * @return void
      */
     protected function addExtraCurlOptions(): void
     {
@@ -77,6 +78,7 @@ abstract class Base
     /**
      * Initializes the cURL request with common options.
      * This method sets up the cURL handle with the target URL, headers, and common options for all requests.
+     * @return void
      */
     protected function initCurlRequest(): void
     {
@@ -93,7 +95,8 @@ abstract class Base
     /**
      * Executes the cURL request and processes the response.
      *
-     * This method performs the cURL execution, parses the response headers and body, and returns them in a structured format.
+     * This method performs the cURL execution, parses the response headers and body,
+     * and returns them in a structured format.
      *
      * @return array{
      *   body: string,
@@ -107,12 +110,12 @@ abstract class Base
         $headerSize = curl_getinfo($this->curlHandle, CURLINFO_HEADER_SIZE);
         $httpCode = curl_getinfo($this->curlHandle, CURLINFO_HTTP_CODE);
 
-        $headers = substr($response, 0, $headerSize);
+        $responseHeaders = substr($response, 0, $headerSize);
         $responseBody = substr($response, $headerSize);
 
         curl_close($this->curlHandle);
 
-        $headerLines = CurlUtils::parseResponseHeaders($headers);
+        $headerLines = CurlUtils::parseResponseHeaders($responseHeaders);
 
         return [
             'body' => $responseBody,
