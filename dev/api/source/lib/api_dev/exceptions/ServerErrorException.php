@@ -2,6 +2,6 @@
 
 namespace ApiDev\Exceptions;
 
-class ServerErrorException extends \Exception
+class ServerErrorException extends RequestException
 {
 }

@@ -2,6 +2,6 @@
 
 namespace ApiDev\Exceptions;
 
-class InvalidRequestException extends \Exception
+class InvalidRequestException extends RequestException
 {
 }
