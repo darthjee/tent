@@ -4,6 +4,14 @@ namespace ApiDev;
 
 class MockRequest implements RequestInterface
 {
+    private const ATTRIBUTES_DEFAULT = [
+        'requestMethod' => 'GET',
+        'body' => '',
+        'headers' => [],
+        'requestUrl' => '/',
+        'query' => ''
+    ];
+
     private string $requestMethod;
     private $body;
     private array $headers;
@@ -22,11 +30,9 @@ class MockRequest implements RequestInterface
      */
     public function __construct(array $attributes = [])
     {
-        $this->requestMethod = $attributes['requestMethod'] ?? 'GET';
-        $this->body = $attributes['body'] ?? '';
-        $this->headers = $attributes['headers'] ?? [];
-        $this->requestUrl = $attributes['requestUrl'] ?? '/';
-        $this->query = $attributes['query'] ?? '';
+        foreach (self::ATTRIBUTES_DEFAULT as $attribute => $default) {
+            $this->$attribute = $attributes[$attribute] ?? $default;
+        }
     }
 
     public function requestMethod(): string
