@@ -2,19 +2,42 @@
 
 namespace ApiDev\Mysql;
 
+/**
+ * Database connection wrapper for PDO.
+ * 
+ * Provides a simplified interface for executing SQL queries and managing
+ * database connections with prepared statements.
+ */
 class Connection
 {
+    /**
+     * @var \PDO The PDO database connection instance
+     */
     private $pdo;
 
+    /**
+     * Creates a new Connection instance.
+     * 
+     * @param \PDO $pdo The PDO database connection
+     */
     public function __construct(\PDO $pdo)
     {
         $this->pdo = $pdo;
     }
 
     /**
-     * Builds a new Connection from parameters.
+     * Builds a new Connection from database parameters.
+     * 
+     * Creates a PDO connection with error handling and UTF-8 charset support.
+     * 
+     * @param string $host The database host
+     * @param int $port The database port
+     * @param string $database The database name
+     * @param string $username The database username
+     * @param string $password The database password
+     * @return Connection A new Connection instance
      */
-    public static function build($host, $port, $database, $username, $password)
+    public static function build(string $host, int $port, string $database, string $username, string $password): Connection
     {
         $dsn_parts = [
             "mysql:host={$host}",
@@ -31,37 +54,75 @@ class Connection
         return new self($pdo);
     }
 
-    public function query($sql, $params = [])
+    /**
+     * Executes a prepared SQL query with parameters.
+     * 
+     * @param string $sql The SQL query with placeholders
+     * @param array $params The parameter values for the query
+     * @return \PDOStatement The executed statement
+     */
+    public function query(string $sql, array $params = []): \PDOStatement
     {
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
         return $stmt;
     }
 
-    public function fetch($sql, $params = [])
+    /**
+     * Fetches a single row from a query result.
+     * 
+     * @param string $sql The SQL query with placeholders
+     * @param array $params The parameter values for the query
+     * @return array|false The result row as an associative array, or false if no row found
+     */
+    public function fetch(string $sql, array $params = [])
     {
         $stmt = $this->query($sql, $params);
         return $stmt->fetch();
     }
 
-    public function fetchAll($sql, $params = [])
+    /**
+     * Fetches all rows from a query result.
+     * 
+     * @param string $sql The SQL query with placeholders
+     * @param array $params The parameter values for the query
+     * @return array Array of result rows as associative arrays
+     */
+    public function fetchAll(string $sql, array $params = []): array
     {
         $stmt = $this->query($sql, $params);
         return $stmt->fetchAll();
     }
 
-    public function execute($sql, $params = [])
+    /**
+     * Executes a SQL statement and returns the number of affected rows.
+     * 
+     * @param string $sql The SQL statement with placeholders
+     * @param array $params The parameter values for the statement
+     * @return int The number of affected rows
+     */
+    public function execute(string $sql, array $params = []): int
     {
         $stmt = $this->query($sql, $params);
         return $stmt->rowCount();
     }
 
-    public function lastInsertId()
+    /**
+     * Returns the ID of the last inserted row.
+     * 
+     * @return string The last insert ID
+     */
+    public function lastInsertId(): string
     {
         return $this->pdo->lastInsertId();
     }
 
-    public function getPdo()
+    /**
+     * Returns the underlying PDO instance.
+     * 
+     * @return \PDO The PDO connection
+     */
+    public function getPdo(): \PDO
     {
         return $this->pdo;
     }

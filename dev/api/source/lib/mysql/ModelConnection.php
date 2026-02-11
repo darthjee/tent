@@ -2,11 +2,30 @@
 
 namespace ApiDev\Mysql;
 
+/**
+ * Database connection for model operations on a specific table.
+ * 
+ * Provides high-level methods for common database operations (list, insert, update)
+ * on a single table, abstracting away SQL query construction.
+ */
 class ModelConnection
 {
+    /**
+     * @var Connection The underlying database connection
+     */
     private $connection;
+    
+    /**
+     * @var string The table name for this model connection
+     */
     private $tableName;
 
+    /**
+     * Creates a new ModelConnection instance.
+     * 
+     * @param Connection $connection The database connection
+     * @param string $tableName The name of the table to operate on
+     */
     public function __construct(Connection $connection, string $tableName)
     {
         $this->connection = $connection;
@@ -15,9 +34,9 @@ class ModelConnection
 
     /**
      * Lists rows from the table with optional limit and offset.
-     *
-     * @param array $options ['limit' => int, 'offset' => int]
-     * @return array
+     * 
+     * @param array $options Optional array with 'limit' and/or 'offset' keys
+     * @return array Array of rows as associative arrays
      */
     public function list(array $options = []): array
     {
@@ -40,9 +59,9 @@ class ModelConnection
 
     /**
      * Inserts a row into the table.
-     *
+     * 
      * @param array $attributes Associative array of column => value
-     * @return int Last insert ID
+     * @return int The ID of the inserted row
      */
     public function insert(array $attributes): int
     {
@@ -58,6 +77,13 @@ class ModelConnection
         return $this->connection->lastInsertId();
     }
 
+    /**
+     * Updates a row in the table by ID.
+     * 
+     * @param int $id The ID of the row to update
+     * @param array $attributes Associative array of column => value to update
+     * @return void
+     */
     public function update(int $id, array $attributes): void
     {
         $setClauses = [];
@@ -75,11 +101,21 @@ class ModelConnection
         $this->connection->execute($sql, $params);
     }
 
+    /**
+     * Returns the underlying database connection.
+     * 
+     * @return Connection The database connection
+     */
     public function getConnection(): Connection
     {
         return $this->connection;
     }
 
+    /**
+     * Returns the table name for this model connection.
+     * 
+     * @return string The table name
+     */
     public function getTableName(): string
     {
         return $this->tableName;
