@@ -49,15 +49,6 @@ class CreatePersonEndpoint extends Endpoint
 
     private function buildResponse(): Response
     {
-        $responseData = [
-            'id' => $this->person->getId(),
-            'first_name' => $this->person->getFirstName(),
-            'last_name' => $this->person->getLastName(),
-            'birthdate' => $this->person->getBirthdate(),
-            'created_at' => $this->person->getCreatedAt(),
-            'updated_at' => $this->person->getUpdatedAt(),
-        ];
-
         return new Response(
             $this->person->toJson(),
             201,
