@@ -188,7 +188,7 @@ class FileCache implements Cache
             return [];
         }
 
-        $content = @file_get_contents($this->metaFilePath);
+        $content = file_get_contents($this->metaFilePath);
         if ($content === false) {
             return [];
         }
