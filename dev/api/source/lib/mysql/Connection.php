@@ -75,7 +75,7 @@ class Connection
      * @param array $params The parameter values for the query
      * @return array|false The result row as an associative array, or false if no row found
      */
-    public function fetch(string $sql, array $params = [])
+    public function fetch(string $sql, array $params = []): array|false
     {
         $stmt = $this->query($sql, $params);
         return $stmt->fetch();
