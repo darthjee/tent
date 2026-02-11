@@ -48,7 +48,7 @@ class Person extends BaseModel
         return $this->attributes;
     }
 
-    public function valid()
+    public function valid(): bool
     {
         return isset($this->attributes['first_name']) && isset($this->attributes['last_name']);
     }

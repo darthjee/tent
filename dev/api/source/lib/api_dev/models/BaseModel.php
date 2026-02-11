@@ -4,6 +4,7 @@ namespace ApiDev\Models;
 
 use ApiDev\Mysql\ModelConnection;
 use ApiDev\Mysql\Configuration;
+use ApiDev\Exceptions\InvalidModelException;
 
 abstract class BaseModel
 {
@@ -63,7 +64,22 @@ abstract class BaseModel
         $this->attributes = $attributes;
     }
 
+    /**
+     * Checks if the model's attributes are valid. Must be implemented by subclasses.
+     */
     public abstract function valid(): bool;
+
+    /**
+     * Validates the model's attributes and throws an exception if invalid.
+     *
+     * @throws InvalidModelException
+     */
+    public function validate()
+    {
+        if (!$this->valid()) {
+            throw new InvalidModelException('Invalid model attributes');
+        }
+    }
 
     /**
      * Saves a record to the database
