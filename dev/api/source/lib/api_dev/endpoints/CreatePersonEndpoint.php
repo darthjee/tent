@@ -4,43 +4,23 @@ namespace ApiDev;
 
 use ApiDev\Models\Person;
 use ApiDev\Exceptions\InvalidJsonException;
+use ApiDev\Exceptions\InvalidDataException;
 
 class CreatePersonEndpoint extends Endpoint
 {
     private $data;
+    private $id;
 
     public function handle()
     {
         try {
             $this->initData();
 
-            $attributes = [];
-
-            if (isset($this->data['first_name'])) {
-                $attributes['first_name'] = $this->data['first_name'];
-            }
-
-            if (isset($this->data['last_name'])) {
-                $attributes['last_name'] = $this->data['last_name'];
-            }
-
-            if (isset($this->data['birthdate'])) {
-                $attributes['birthdate'] = $this->data['birthdate'];
-            }
-
-            if (empty($attributes)) {
-                return new Response(
-                    json_encode(['error' => 'At least one field required']),
-                    400,
-                    ['Content-Type: application/json']
-                );
-            }
-
-            $id = Person::getConnection()->insert($attributes);
+            $this->createPerson();
 
             $persons = Person::getConnection()->getConnection()->fetchAll(
                 "SELECT * FROM persons WHERE id = ?",
-                [$id]
+                [$this->id]
             );
 
             if (empty($persons)) {
@@ -73,6 +53,12 @@ class CreatePersonEndpoint extends Endpoint
                 400,
                 ['Content-Type: application/json']
             );
+        } catch (InvalidDataException $e) {
+            return new Response(
+                json_encode(['error' => 'At least one field required']),
+                400,
+                ['Content-Type: application/json']
+            );
         }
     }
 
@@ -81,5 +67,26 @@ class CreatePersonEndpoint extends Endpoint
        $this->data = json_decode($this->request->body(), true);
        if (!is_array($this->data)) 
          throw new InvalidJsonException();
+    }
+
+    private function createPerson()
+    {
+        $firstName = $this->data['first_name'] ?? null;
+        $lastName = $this->data['last_name'] ?? null;
+        $birthdate = $this->data['birthdate'] ?? null;
+
+        if (is_null($firstName) && is_null($lastName) && is_null($birthdate)) {
+            throw new InvalidDataException();
+        }
+
+        $attributes = [
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'birthdate' => $birthdate
+        ];
+
+        $person = new Person($attributes);
+
+        $this->id = Person::getConnection()->insert($attributes);
     }
 }
