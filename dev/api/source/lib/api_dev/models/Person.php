@@ -4,23 +4,13 @@ namespace ApiDev\Models;
 
 use ApiDev\Mysql\ModelConnection;
 use ApiDev\Mysql\Configuration;
+use ApiDev\Models\BaseModel;
 
-class Person
+class Person extends BaseModel
 {
-    /**
-     * Returns all rows from the 'persons' table.
-     *
-     * @return array
-     */
-    private $attributes = [];
-
-    public function __construct(array $attributes = [])
+    public static function tableName(): string
     {
-        $this->attributes = $attributes;
-    }
-    public function getId()
-    {
-        return $this->attributes['id'] ?? null;
+        return 'persons';
     }
 
     public function getFirstName()
@@ -48,35 +38,13 @@ class Person
         return $this->attributes['updated_at'] ?? null;
     }
 
-    public function getAttributes()
+    public function valid(): bool
     {
-        return $this->attributes;
+        return isset($this->attributes['first_name']) && isset($this->attributes['last_name']);
     }
 
-    public static function all(): array
+    protected static function attributeNames(): array
     {
-        $rows = self::getConnection()->list();
-        return array_map(function ($attrs) {
-            return new self($attrs);
-        }, $rows);
-    }
-
-    /**
-     * Returns a ModelConnection for the 'persons' table.
-     *
-     * @return ModelConnection
-     */
-    private static $connection = null;
-
-    public static function getConnection(): ModelConnection
-    {
-        if (self::$connection instanceof ModelConnection) {
-            return self::$connection;
-        }
-        self::$connection = new ModelConnection(
-            Configuration::connect(),
-            'persons'
-        );
-        return self::$connection;
+        return ['id', 'first_name', 'last_name', 'birthdate', 'created_at', 'updated_at'];
     }
 }
