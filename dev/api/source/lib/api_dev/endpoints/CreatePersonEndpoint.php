@@ -6,11 +6,13 @@ use ApiDev\Models\Person;
 
 class CreatePersonEndpoint extends Endpoint
 {
+    private $data;
+
     public function handle()
     {
-        $data = json_decode($this->request->body(), true);
+        $this->data = json_decode($this->request->body(), true);
 
-        if (!is_array($data)) {
+        if (!is_array($this->data)) {
             return new Response(
                 json_encode(['error' => 'Invalid JSON body']),
                 400,
@@ -20,16 +22,16 @@ class CreatePersonEndpoint extends Endpoint
 
         $attributes = [];
 
-        if (isset($data['first_name'])) {
-            $attributes['first_name'] = $data['first_name'];
+        if (isset($this->data['first_name'])) {
+            $attributes['first_name'] = $this->data['first_name'];
         }
 
-        if (isset($data['last_name'])) {
-            $attributes['last_name'] = $data['last_name'];
+        if (isset($this->data['last_name'])) {
+            $attributes['last_name'] = $this->data['last_name'];
         }
 
-        if (isset($data['birthdate'])) {
-            $attributes['birthdate'] = $data['birthdate'];
+        if (isset($this->data['birthdate'])) {
+            $attributes['birthdate'] = $this->data['birthdate'];
         }
 
         if (empty($attributes)) {
