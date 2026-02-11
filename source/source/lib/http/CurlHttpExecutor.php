@@ -3,12 +3,14 @@
 namespace Tent\Http;
 
 use Tent\Utils\CurlUtils;
+use CurlHandle;
 
 class CurlHttpExecutor
 {
     private string $url;
     private array $headers;
     private ?string $body;
+    private ?CurlHandle $curlHandle;
 
     public function __construct(array $options)
     {
@@ -19,42 +21,42 @@ class CurlHttpExecutor
 
     public function get()
     {
-        $curl = $this->initCurlRequest();
+        $this->initCurlRequest();
 
-        return $this->executeCurlRequest($curl);
+        return $this->executeCurlRequest();
     }
     public function post()
     {
-        $curl = $this->initCurlRequest();
+        $this->initCurlRequest();
 
-        curl_setopt($curl, CURLOPT_POST, true);
-        curl_setopt($curl, CURLOPT_POSTFIELDS, $this->body);
+        curl_setopt($this->curlHandle, CURLOPT_POST, true);
+        curl_setopt($this->curlHandle, CURLOPT_POSTFIELDS, $this->body);
 
-        return $this->executeCurlRequest($curl);
+        return $this->executeCurlRequest();
     }
 
     private function initCurlRequest()
     {
         $headerLines = CurlUtils::buildHeaderLines($this->headers);
 
-        $curl = curl_init($this->url);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_HEADER, true);
-        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, $headerLines);
-        return $curl;
+        $this->curlHandle = curl_init($this->url);
+
+        curl_setopt($this->curlHandle, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($this->curlHandle, CURLOPT_HEADER, true);
+        curl_setopt($this->curlHandle, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($this->curlHandle, CURLOPT_HTTPHEADER, $headerLines);
     }
 
-    private function executeCurlRequest($curl)
+    private function executeCurlRequest()
     {
-        $response = curl_exec($curl);
-        $headerSize = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
-        $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        $response = curl_exec($this->curlHandle);
+        $headerSize = curl_getinfo($this->curlHandle, CURLINFO_HEADER_SIZE);
+        $httpCode = curl_getinfo($this->curlHandle, CURLINFO_HTTP_CODE);
 
         $headers = substr($response, 0, $headerSize);
         $responseBody = substr($response, $headerSize);
 
-        curl_close($curl);
+        curl_close($this->curlHandle);
 
         $headerLines = CurlUtils::parseResponseHeaders($headers);
 
