@@ -63,6 +63,8 @@ abstract class BaseModel
         $this->attributes = $attributes;
     }
 
+    public abstract function valid(): bool;
+
     /**
      * Saves a record to the database
      */
