@@ -157,8 +157,8 @@ class ProxyRequestHandlerGeneralTest extends TestCase
         $httpClient = $this->createMock(HttpClientInterface::class);
 
         $httpClient->expects($this->once())
-            ->method('get')
-            ->with($expectedUrl, $expectedHeaders)
+            ->method('request')
+            ->with('GET', $expectedUrl, $expectedHeaders)
             ->willReturn($returnValue);
 
         return $httpClient;
