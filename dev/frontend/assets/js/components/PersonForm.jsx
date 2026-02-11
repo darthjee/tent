@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { PersonClient } from '../clients/PersonClient';
 
 export default function PersonForm() {
   const [formData, setFormData] = useState({
@@ -6,6 +7,9 @@ export default function PersonForm() {
     lastName: '',
     birthdate: ''
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -15,10 +19,33 @@ export default function PersonForm() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Implement form submission
-    console.log('Form data:', formData);
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
+
+    try {
+      const client = new PersonClient();
+      const payload = {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        birthdate: formData.birthdate
+      };
+      
+      await client.create(payload);
+      
+      setSuccess(true);
+      setFormData({
+        firstName: '',
+        lastName: '',
+        birthdate: ''
+      });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -30,6 +57,18 @@ export default function PersonForm() {
               <h4 className="mb-0">Create Person</h4>
             </div>
             <div className="card-body">
+              {error && (
+                <div className="alert alert-danger" role="alert">
+                  {error}
+                </div>
+              )}
+              
+              {success && (
+                <div className="alert alert-success" role="alert">
+                  Person created successfully!
+                </div>
+              )}
+
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
                   <label htmlFor="firstName" className="form-label">
@@ -79,8 +118,12 @@ export default function PersonForm() {
                 </div>
 
                 <div className="d-grid gap-2">
-                  <button type="submit" className="btn btn-primary">
-                    Create Person
+                  <button 
+                    type="submit" 
+                    className="btn btn-primary"
+                    disabled={loading}
+                  >
+                    {loading ? 'Creating...' : 'Create Person'}
                   </button>
                 </div>
               </form>
