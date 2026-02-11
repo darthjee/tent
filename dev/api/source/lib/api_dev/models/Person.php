@@ -38,11 +38,6 @@ class Person extends BaseModel
         return $this->attributes['updated_at'] ?? null;
     }
 
-    public function getAttributes()
-    {
-        return $this->attributes;
-    }
-
     public function valid(): bool
     {
         return isset($this->attributes['first_name']) && isset($this->attributes['last_name']);

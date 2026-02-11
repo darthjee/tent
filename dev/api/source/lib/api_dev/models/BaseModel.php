@@ -75,6 +75,16 @@ abstract class BaseModel
     }
 
     /**
+     * Returns the model's attributes as an associative array.
+     *
+     * @return array
+     */
+    public function getAttributes(): array
+    {
+        return $this->attributes;
+    }
+
+    /**
      * Checks if the model's attributes are valid. Must be implemented by subclasses.
      */
     abstract public function valid(): bool;
