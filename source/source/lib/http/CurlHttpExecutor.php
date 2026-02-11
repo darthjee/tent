@@ -21,22 +21,7 @@ class CurlHttpExecutor
     {
         $curl = $this->initCurlRequest();
 
-        $response = curl_exec($curl);
-        $headerSize = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
-        $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-        $headers = substr($response, 0, $headerSize);
-        $body = substr($response, $headerSize);
-
-        curl_close($curl);
-
-        $headerLines = CurlUtils::parseResponseHeaders($headers);
-
-        return [
-            'body' => $body,
-            'httpCode' => $httpCode,
-            'headers' => $headerLines
-        ];
+        return $this->executeCurlRequest($curl);
     }
     public function post()
     {
@@ -45,6 +30,23 @@ class CurlHttpExecutor
         curl_setopt($curl, CURLOPT_POST, true);
         curl_setopt($curl, CURLOPT_POSTFIELDS, $this->body);
 
+        return $this->executeCurlRequest($curl);
+    }
+
+    private function initCurlRequest()
+    {
+        $headerLines = CurlUtils::buildHeaderLines($this->headers);
+
+        $curl = curl_init($this->url);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_HEADER, true);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headerLines);
+        return $curl;
+    }
+
+    private function executeCurlRequest($curl)
+    {
         $response = curl_exec($curl);
         $headerSize = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
         $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
@@ -61,17 +63,5 @@ class CurlHttpExecutor
             'httpCode' => $httpCode,
             'headers' => $headerLines
         ];
-    }
-
-    private function initCurlRequest()
-    {
-        $headerLines = CurlUtils::buildHeaderLines($this->headers);
-
-        $curl = curl_init($this->url);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_HEADER, true);
-        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, $headerLines);
-        return $curl;
     }
 }
