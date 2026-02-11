@@ -58,4 +58,17 @@ class Person extends BaseModel
     {
         return $this->attributes;
     }
+
+    public function save()
+    {
+        $connection = static::getConnection();
+        if ($this->getId() === null) {
+            // Insert new record
+            $id = $connection->insert($this->attributes);
+            $this->attributes['id'] = $id;
+        } else {
+            // Update existing record
+            $connection->update($this->getId(), $this->attributes);
+        }
+    }
 }
