@@ -19,7 +19,7 @@ class CreatePersonEndpoint extends Endpoint
             return $this->handleRequest();
         } catch (RequestException $e) {
             return new Response(
-                json_encode(['error' =>$e->getMessage()]),
+                json_encode(['error' => $e->getMessage()]),
                 $e->getHttpStatusCode(),
                 ['Content-Type: application/json']
             );
