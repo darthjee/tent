@@ -54,6 +54,16 @@ abstract class BaseModel
     }
 
     /**
+     * BaseModel constructor.
+     *
+     * @param array $attributes Associative array of column => value
+     */
+    public function __construct(array $attributes = [])
+    {
+        $this->attributes = $attributes;
+    }
+
+    /**
      * Saves a record to the database
      */
     public function save()

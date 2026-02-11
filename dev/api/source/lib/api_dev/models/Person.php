@@ -13,10 +13,6 @@ class Person extends BaseModel
         return 'persons';
     }
 
-    public function __construct(array $attributes = [])
-    {
-        $this->attributes = $attributes;
-    }
     public function getId()
     {
         return $this->attributes['id'] ?? null;
