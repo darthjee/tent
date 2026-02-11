@@ -4,6 +4,7 @@ namespace ApiDev;
 
 use ApiDev\Models\Person;
 use ApiDev\Exceptions\InvalidRequestException;
+use ApiDev\Exceptions\ServerErrorException;
 
 class CreatePersonEndpoint extends Endpoint
 {
@@ -36,6 +37,12 @@ class CreatePersonEndpoint extends Endpoint
             return new Response(
                 json_encode(['error' =>$e->getMessage()]),
                 400,
+                ['Content-Type: application/json']
+            );
+        } catch (ServerErrorException $e) {
+            return new Response(
+                json_encode(['error' => $e->getMessage()]),
+                500,
                 ['Content-Type: application/json']
             );
         }
@@ -76,11 +83,7 @@ class CreatePersonEndpoint extends Endpoint
         );
 
         if (empty($persons)) {
-            return new Response(
-                json_encode(['error' => 'Failed to retrieve created person']),
-                500,
-                ['Content-Type: application/json']
-            );
+            throw new ServerErrorException('Failed to retrieve created person');
         }
 
         $this->person = new Person($persons[0]);
