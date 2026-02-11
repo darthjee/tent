@@ -3,67 +3,59 @@
 namespace ApiDev;
 
 use ApiDev\Models\Person;
+use ApiDev\Exceptions\RequestException;
+use ApiDev\Exceptions\InvalidRequestException;
+use ApiDev\Exceptions\ServerErrorException;
 
 class CreatePersonEndpoint extends Endpoint
 {
-    public function handle()
+    private $data;
+    private $id;
+    private $person;
+
+    /**
+     * Creates a new person and returns the created record as a Response.
+     *
+     * @return Response
+     */
+    public function handle(): Response
     {
-        $data = json_decode($this->request->body(), true);
-
-        if (!is_array($data)) {
+        try {
+            return $this->handleRequest();
+        } catch (RequestException $e) {
             return new Response(
-                json_encode(['error' => 'Invalid JSON body']),
-                400,
+                json_encode(['error' => $e->getMessage()]),
+                $e->getHttpStatusCode(),
                 ['Content-Type: application/json']
             );
         }
+    }
 
-        $attributes = [];
+    /**
+     * Handles the request to create a new person.
+     *
+     * @return Response
+     * @throws InvalidRequestException
+     * @throws ServerErrorException
+     */
+    private function handleRequest(): Response
+    {
+        $this->initData();
+        $this->createPerson();
+        $this->retrievePerson();
 
-        if (isset($data['first_name'])) {
-            $attributes['first_name'] = $data['first_name'];
-        }
+        return $this->buildResponse();
+    }
 
-        if (isset($data['last_name'])) {
-            $attributes['last_name'] = $data['last_name'];
-        }
-
-        if (isset($data['birthdate'])) {
-            $attributes['birthdate'] = $data['birthdate'];
-        }
-
-        if (empty($attributes)) {
-            return new Response(
-                json_encode(['error' => 'At least one field required']),
-                400,
-                ['Content-Type: application/json']
-            );
-        }
-
-        $id = Person::getConnection()->insert($attributes);
-
-        $persons = Person::getConnection()->getConnection()->fetchAll(
-            "SELECT * FROM persons WHERE id = ?",
-            [$id]
-        );
-
-        if (empty($persons)) {
-            return new Response(
-                json_encode(['error' => 'Failed to retrieve created person']),
-                500,
-                ['Content-Type: application/json']
-            );
-        }
-
-        $person = new Person($persons[0]);
-
+    private function buildResponse(): Response
+    {
         $responseData = [
-            'id' => $person->getId(),
-            'first_name' => $person->getFirstName(),
-            'last_name' => $person->getLastName(),
-            'birthdate' => $person->getBirthdate(),
-            'created_at' => $person->getCreatedAt(),
-            'updated_at' => $person->getUpdatedAt(),
+            'id' => $this->person->getId(),
+            'first_name' => $this->person->getFirstName(),
+            'last_name' => $this->person->getLastName(),
+            'birthdate' => $this->person->getBirthdate(),
+            'created_at' => $this->person->getCreatedAt(),
+            'updated_at' => $this->person->getUpdatedAt(),
         ];
 
         return new Response(
@@ -71,5 +63,46 @@ class CreatePersonEndpoint extends Endpoint
             201,
             ['Content-Type: application/json']
         );
+    }
+
+    private function initData(): void
+    {
+        $this->data = json_decode($this->request->body(), true);
+        if (!is_array($this->data)) {
+            throw new InvalidRequestException('Invalid JSON body');
+        }
+    }
+
+    private function createPerson(): void
+    {
+        $firstName = $this->data['first_name'] ?? null;
+        $lastName = $this->data['last_name'] ?? null;
+        $birthdate = $this->data['birthdate'] ?? null;
+
+        if (is_null($firstName) && is_null($lastName) && is_null($birthdate)) {
+            throw new InvalidRequestException('At least one field required');
+        }
+
+        $attributes = [
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'birthdate' => $birthdate
+        ];
+
+        $this->id = Person::getConnection()->insert($attributes);
+    }
+
+    private function retrievePerson(): void
+    {
+        $persons = Person::getConnection()->getConnection()->fetchAll(
+            "SELECT * FROM persons WHERE id = ?",
+            [$this->id]
+        );
+
+        if (empty($persons)) {
+            throw new ServerErrorException('Failed to retrieve created person');
+        }
+
+        $this->person = new Person($persons[0]);
     }
 }
