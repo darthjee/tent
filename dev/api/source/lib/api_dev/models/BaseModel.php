@@ -14,6 +14,13 @@ abstract class BaseModel
      */
     protected static $connection = null;
 
+    /**
+     * Returns all rows from the 'persons' table.
+     *
+     * @return array
+     */
+    protected $attributes = [];
+
     abstract public static function tableName(): string;
 
     public static function all(): array
@@ -34,5 +41,18 @@ abstract class BaseModel
             static::tableName()
         );
         return static::$connection;
+    }
+
+    public function save()
+    {
+        $connection = static::getConnection();
+        if ($this->getId() === null) {
+            // Insert new record
+            $id = $connection->insert($this->attributes);
+            $this->attributes['id'] = $id;
+        } else {
+            // Update existing record
+            $connection->update($this->getId(), $this->attributes);
+        }
     }
 }

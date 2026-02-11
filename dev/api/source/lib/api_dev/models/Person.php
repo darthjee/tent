@@ -13,13 +13,6 @@ class Person extends BaseModel
         return 'persons';
     }
 
-    /**
-     * Returns all rows from the 'persons' table.
-     *
-     * @return array
-     */
-    private $attributes = [];
-
     public function __construct(array $attributes = [])
     {
         $this->attributes = $attributes;
@@ -57,18 +50,5 @@ class Person extends BaseModel
     public function getAttributes()
     {
         return $this->attributes;
-    }
-
-    public function save()
-    {
-        $connection = static::getConnection();
-        if ($this->getId() === null) {
-            // Insert new record
-            $id = $connection->insert($this->attributes);
-            $this->attributes['id'] = $id;
-        } else {
-            // Update existing record
-            $connection->update($this->getId(), $this->attributes);
-        }
     }
 }
