@@ -28,23 +28,4 @@ interface HttpClientInterface
      * } Array with response body, status code, and headers.
      */
     public function request(string $method, string $url, array $headers, ?string $body = null): array;
-
-    /**
-     * Sends an HTTP GET request to the given URL with the provided headers.
-     *
-     * @param string $url     The target URL for the request.
-     * @param array  $headers Associative array of headers to send.
-     * @return array Response data (format depends on implementation).
-     */
-    public function get(string $url, array $headers): array;
-
-    /**
-     * Sends an HTTP POST request to the given URL with the provided headers and body.
-     *
-     * @param string $url     The target URL for the request.
-     * @param array  $headers Associative array of headers to send.
-     * @param string $body    The request body/payload to send.
-     * @return array Response data (format depends on implementation).
-     */
-    public function post(string $url, array $headers, string $body): array;
 }
