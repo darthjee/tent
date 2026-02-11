@@ -42,7 +42,6 @@ class CreatePersonEndpoint extends Endpoint
     {
         $this->initData();
         $this->createPerson();
-        $this->retrievePerson();
 
         return $this->buildResponse();
     }
@@ -90,9 +89,10 @@ class CreatePersonEndpoint extends Endpoint
         ];
 
         $this->id = Person::getConnection()->insert($attributes);
+        $this->person = $this->retrievePerson();
     }
 
-    private function retrievePerson(): void
+    private function retrievePerson(): Person
     {
         $persons = Person::getConnection()->getConnection()->fetchAll(
             "SELECT * FROM persons WHERE id = ?",
@@ -103,6 +103,6 @@ class CreatePersonEndpoint extends Endpoint
             throw new ServerErrorException('Failed to retrieve created person');
         }
 
-        $this->person = new Person($persons[0]);
+        return new Person($persons[0]);
     }
 }
