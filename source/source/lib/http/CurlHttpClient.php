@@ -3,6 +3,7 @@
 namespace Tent\Http;
 
 use Tent\Utils\CurlUtils;
+use Tent\Http\CurlHttpExecutor;
 
 /**
  * HTTP client for proxying requests using cURL.
@@ -39,26 +40,7 @@ class CurlHttpClient implements HttpClientInterface
      */
     public function get(string $url, array $headers)
     {
-        $headerLines = CurlUtils::buildHeaderLines($headers);
-
-        $curl = $this->initCurlRequest($url, $headerLines);
-
-        $response = curl_exec($curl);
-        $headerSize = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
-        $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-        $headers = substr($response, 0, $headerSize);
-        $body = substr($response, $headerSize);
-
-        curl_close($curl);
-
-        $headerLines = CurlUtils::parseResponseHeaders($headers);
-
-        return [
-            'body' => $body,
-            'httpCode' => $httpCode,
-            'headers' => $headerLines
-        ];
+        return new CurlHttpExecutor($url, $headers)->get();
     }
 
     /**
@@ -88,37 +70,6 @@ class CurlHttpClient implements HttpClientInterface
      */
     public function post(string $url, array $headers, string $body)
     {
-        $headerLines = CurlUtils::buildHeaderLines($headers);
-
-        $curl = $this->initCurlRequest($url, $headerLines);
-
-        curl_setopt($curl, CURLOPT_POST, true);
-        curl_setopt($curl, CURLOPT_POSTFIELDS, $body);
-
-        $response = curl_exec($curl);
-        $headerSize = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
-        $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-        $headers = substr($response, 0, $headerSize);
-        $responseBody = substr($response, $headerSize);
-
-        curl_close($curl);
-
-        $headerLines = CurlUtils::parseResponseHeaders($headers);
-
-        return [
-            'body' => $responseBody,
-            'httpCode' => $httpCode,
-            'headers' => $headerLines
-        ];
-    }
-
-    private function initCurlRequest($url, $headerLines) {
-        $curl = curl_init($url);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_HEADER, true);
-        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, $headerLines);
-        return $curl;
+        return new CurlHttpExecutor($url, $headers)->post($body);
     }
 }
