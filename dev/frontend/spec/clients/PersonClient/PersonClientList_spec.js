@@ -1,4 +1,4 @@
-import { PersonClient } from '../../assets/js/clients/PersonClient.js';
+import { PersonClient } from '../../../assets/js/clients/PersonClient.js';
 
 describe('PersonClient', function() {
   let client;
