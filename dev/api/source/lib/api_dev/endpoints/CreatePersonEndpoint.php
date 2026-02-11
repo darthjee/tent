@@ -3,6 +3,7 @@
 namespace ApiDev;
 
 use ApiDev\Models\Person;
+use ApiDev\Exceptions\RequestException;
 use ApiDev\Exceptions\InvalidRequestException;
 use ApiDev\Exceptions\ServerErrorException;
 
@@ -16,16 +17,10 @@ class CreatePersonEndpoint extends Endpoint
     {
         try {
             return $this->handleRequest();
-        } catch (InvalidRequestException $e) {
+        } catch (RequestException $e) {
             return new Response(
                 json_encode(['error' =>$e->getMessage()]),
-                400,
-                ['Content-Type: application/json']
-            );
-        } catch (ServerErrorException $e) {
-            return new Response(
-                json_encode(['error' => $e->getMessage()]),
-                500,
+                $e->getHttpStatusCode(),
                 ['Content-Type: application/json']
             );
         }

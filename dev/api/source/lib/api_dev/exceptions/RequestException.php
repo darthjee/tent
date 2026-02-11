@@ -2,6 +2,7 @@
 
 namespace ApiDev\Exceptions;
 
-class RequestException extends \Exception
+abstract class RequestException extends \Exception
 {
+    abstract public function getHttpStatusCode(): int;
 }
