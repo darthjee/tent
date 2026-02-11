@@ -13,12 +13,12 @@ class Configuration
     /**
      * @var Configuration|null Singleton instance
      */
-    private static $instance;
+    private static ?Configuration $instance = null;
 
     /**
      * @var array Array of RouteConfiguration instances
      */
-    private $configurations = [];
+    private array $configurations = [];
 
     /**
      * Returns the singleton instance of Configuration.

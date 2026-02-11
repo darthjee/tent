@@ -12,17 +12,17 @@ class Response
     /**
      * @var string The response body content
      */
-    public $body;
+    public string $body;
 
     /**
      * @var int The HTTP status code
      */
-    public $httpCode;
+    public int $httpCode;
 
     /**
      * @var array The response headers as strings
      */
-    public $headerLines;
+    public array $headerLines;
 
     /**
      * Creates a new Response instance.

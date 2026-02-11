@@ -2,6 +2,8 @@
 
 namespace ApiDev\Mysql;
 
+use PDO;
+
 /**
  * Database connection wrapper for PDO.
  *
@@ -11,16 +13,16 @@ namespace ApiDev\Mysql;
 class Connection
 {
     /**
-     * @var \PDO The PDO database connection instance
+     * @var PDO The PDO database connection instance
      */
-    private $pdo;
+    private PDO $pdo;
 
     /**
      * Creates a new Connection instance.
      *
-     * @param \PDO $pdo The PDO database connection
+     * @param PDO $pdo The PDO database connection
      */
-    public function __construct(\PDO $pdo)
+    public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
     }
@@ -51,10 +53,10 @@ class Connection
             "charset=utf8mb4"
         ];
         $dsn = implode(';', $dsn_parts);
-        $pdo = new \PDO($dsn, $username, $password, [
-            \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
-            \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
-            \PDO::ATTR_EMULATE_PREPARES => false,
+        $pdo = new PDO($dsn, $username, $password, [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false,
         ]);
         return new self($pdo);
     }
@@ -128,9 +130,9 @@ class Connection
     /**
      * Returns the underlying PDO instance.
      *
-     * @return \PDO The PDO connection
+     * @return PDO The PDO connection
      */
-    public function getPdo(): \PDO
+    public function getPdo(): PDO
     {
         return $this->pdo;
     }

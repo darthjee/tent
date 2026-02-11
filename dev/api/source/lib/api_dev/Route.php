@@ -13,12 +13,12 @@ class Route
     /**
      * @var string|null The HTTP method to match (e.g., GET, POST), or null for any method
      */
-    private $requestMethod;
+    private ?string $requestMethod;
 
     /**
      * @var string|null The URL path to match, or null for any path
      */
-    private $path;
+    private ?string $path;
 
     /**
      * Creates a new Route instance.

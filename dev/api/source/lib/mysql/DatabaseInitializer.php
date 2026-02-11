@@ -14,7 +14,7 @@ class DatabaseInitializer
     /**
      * @var Connection The database connection
      */
-    private $connection;
+    private Connection $connection;
 
     /**
      * Creates a new DatabaseInitializer instance.

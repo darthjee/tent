@@ -15,37 +15,37 @@ class Configuration
     /**
      * @var Configuration|null Singleton instance
      */
-    private static $instance;
+    private static ?Configuration $instance = null;
 
     /**
      * @var string The database host
      */
-    private $host;
+    private string $host;
 
     /**
      * @var string The database name
      */
-    private $database;
+    private string $database;
 
     /**
      * @var string The database username
      */
-    private $username;
+    private string $username;
 
     /**
      * @var string The database password
      */
-    private $password;
+    private string $password;
 
     /**
      * @var int The database port
      */
-    private $port;
+    private int $port;
 
     /**
      * @var Connection|null Cached database connection
      */
-    private $connection;
+    private ?Connection $connection = null;
 
     /**
      * Returns the singleton Configuration instance.

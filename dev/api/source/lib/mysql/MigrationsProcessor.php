@@ -20,12 +20,12 @@ class MigrationsProcessor
     /**
      * @var string The directory path containing migration files
      */
-    private $directoryPath;
+    private string $directoryPath;
 
     /**
      * @var Connection The database connection
      */
-    private $connection;
+    private Connection $connection;
 
     /**
      * Creates a new MigrationsProcessor instance.

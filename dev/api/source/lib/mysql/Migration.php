@@ -16,17 +16,17 @@ class Migration
     /**
      * @var Connection The database connection
      */
-    private $connection;
+    private Connection $connection;
 
     /**
      * @var string The file path to the SQL migration file
      */
-    private $sqlFilePath;
+    private string $sqlFilePath;
 
     /**
      * @var string|null Cached content of the SQL file
      */
-    private $fileContent = null;
+    private ?string $fileContent = null;
 
     /**
      * Creates a new Migration instance.

@@ -18,7 +18,7 @@ abstract class BaseModel
     /**
      * @var ModelConnection|null Shared database connection for the model's table
      */
-    protected static $connection = null;
+    protected static ?ModelConnection $connection = null;
 
     /**
      * @var array The model's attribute data (column => value)
@@ -40,7 +40,7 @@ abstract class BaseModel
     public static function all(): array
     {
         $rows = static::getConnection()->list();
-        return array_map(function ($attrs) {
+        return array_map(function (array $attrs) {
             return new static($attrs);
         }, $rows);
     }

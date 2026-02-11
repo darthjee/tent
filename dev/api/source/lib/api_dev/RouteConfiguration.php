@@ -13,12 +13,12 @@ class RouteConfiguration
     /**
      * @var Route The route pattern for matching requests
      */
-    private $route;
+    private Route $route;
 
     /**
      * @var string The fully qualified class name of the endpoint handler
      */
-    private $endpoint;
+    private string $endpoint;
 
     /**
      * Creates a new RouteConfiguration instance.

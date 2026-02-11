@@ -13,7 +13,7 @@ abstract class Endpoint
     /**
      * @var RequestInterface The HTTP request being handled
      */
-    protected $request;
+    protected RequestInterface $request;
 
     /**
      * Creates a new Endpoint instance.

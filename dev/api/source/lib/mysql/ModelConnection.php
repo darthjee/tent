@@ -13,12 +13,12 @@ class ModelConnection
     /**
      * @var Connection The underlying database connection
      */
-    private $connection;
+    private Connection $connection;
 
     /**
      * @var string The table name for this model connection
      */
-    private $tableName;
+    private string $tableName;
 
     /**
      * Creates a new ModelConnection instance.
