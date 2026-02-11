@@ -15,7 +15,7 @@ class PersonValidTest extends TestCase
             'first_name' => 'John',
             'last_name' => 'Doe'
         ]);
-        
+
         $this->assertTrue($person->valid());
     }
 
@@ -24,7 +24,7 @@ class PersonValidTest extends TestCase
         $person = new Person([
             'last_name' => 'Doe'
         ]);
-        
+
         $this->assertFalse($person->valid());
     }
 
@@ -33,7 +33,7 @@ class PersonValidTest extends TestCase
         $person = new Person([
             'first_name' => 'John'
         ]);
-        
+
         $this->assertFalse($person->valid());
     }
 
@@ -42,14 +42,14 @@ class PersonValidTest extends TestCase
         $person = new Person([
             'birthdate' => '1990-01-01'
         ]);
-        
+
         $this->assertFalse($person->valid());
     }
 
     public function testValidReturnsFalseWhenAttributesAreEmpty()
     {
         $person = new Person([]);
-        
+
         $this->assertFalse($person->valid());
     }
 
@@ -61,7 +61,7 @@ class PersonValidTest extends TestCase
             'birthdate' => '1990-01-01',
             'created_at' => '2024-01-01 00:00:00'
         ]);
-        
+
         $this->assertTrue($person->valid());
     }
 }

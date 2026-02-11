@@ -78,7 +78,7 @@ class CreatePersonEndpoint extends Endpoint
         try {
             $this->person = $this->buildPerson();
             $this->person->save();
-        } catch (InvalidModelException $e) {
+        } catch (InvalidModelException) {
             throw new InvalidRequestException('At least one field required');
         }
     }

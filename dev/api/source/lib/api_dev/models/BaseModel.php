@@ -67,7 +67,7 @@ abstract class BaseModel
     /**
      * Checks if the model's attributes are valid. Must be implemented by subclasses.
      */
-    public abstract function valid(): bool;
+    abstract public function valid(): bool;
 
     /**
      * Validates the model's attributes and throws an exception if invalid.
