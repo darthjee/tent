@@ -19,9 +19,7 @@ class CurlHttpExecutor
 
     public function get()
     {
-        $headerLines = CurlUtils::buildHeaderLines($this->headers);
-
-        $curl = $this->initCurlRequest($this->url, $headerLines);
+        $curl = $this->initCurlRequest();
 
         $response = curl_exec($curl);
         $headerSize = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
@@ -42,9 +40,7 @@ class CurlHttpExecutor
     }
     public function post()
     {
-        $headerLines = CurlUtils::buildHeaderLines($this->headers);
-
-        $curl = $this->initCurlRequest($this->url, $headerLines);
+        $curl = $this->initCurlRequest();
 
         curl_setopt($curl, CURLOPT_POST, true);
         curl_setopt($curl, CURLOPT_POSTFIELDS, $this->body);
@@ -67,9 +63,11 @@ class CurlHttpExecutor
         ];
     }
 
-    private function initCurlRequest(string $url, array $headerLines)
+    private function initCurlRequest()
     {
-        $curl = curl_init($url);
+        $headerLines = CurlUtils::buildHeaderLines($this->headers);
+
+        $curl = curl_init($this->url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_HEADER, true);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
