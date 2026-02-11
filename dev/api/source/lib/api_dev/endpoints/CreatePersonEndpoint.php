@@ -12,10 +12,7 @@ class CreatePersonEndpoint extends Endpoint
     public function handle()
     {
         try {
-            $this->data = json_decode($this->request->body(), true);
-            if (!is_array($this->data)) {
-                throw new InvalidJsonException();
-            }
+            $this->initData();
 
             $attributes = [];
 
@@ -77,5 +74,12 @@ class CreatePersonEndpoint extends Endpoint
                 ['Content-Type: application/json']
             );
         }
+    }
+
+    private function initData()
+    {
+       $this->data = json_decode($this->request->body(), true);
+       if (!is_array($this->data)) 
+         throw new InvalidJsonException();
     }
 }
