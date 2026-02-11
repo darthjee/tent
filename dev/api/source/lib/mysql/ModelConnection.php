@@ -61,7 +61,7 @@ class ModelConnection
      * Inserts a row into the table.
      * 
      * @param array $attributes Associative array of column => value
-     * @return int The ID of the inserted row
+     * @return int The ID of the inserted row (cast from string)
      */
     public function insert(array $attributes): int
     {
@@ -74,7 +74,7 @@ class ModelConnection
             implode(', ', $placeholders)
         );
         $this->connection->execute($sql, array_values($attributes));
-        return $this->connection->lastInsertId();
+        return (int)$this->connection->lastInsertId();
     }
 
     /**

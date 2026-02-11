@@ -110,7 +110,10 @@ class Connection
     /**
      * Returns the ID of the last inserted row.
      * 
-     * @return string The last insert ID
+     * Returns a string representation of the last insert ID.
+     * Returns "0" if no insert has occurred.
+     * 
+     * @return string The last insert ID as a string
      */
     public function lastInsertId(): string
     {
