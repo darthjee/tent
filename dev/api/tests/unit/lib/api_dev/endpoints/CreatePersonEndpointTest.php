@@ -6,7 +6,6 @@ use PHPUnit\Framework\TestCase;
 use ApiDev\Models\Person;
 use ApiDev\Mysql\Configuration;
 use ApiDev\CreatePersonEndpoint;
-use ApiDev\Request;
 use ApiDev\MockRequest;
 
 require_once __DIR__ . '/../../../../support/tests_loader.php';
@@ -34,7 +33,7 @@ class CreatePersonEndpointTest extends TestCase
         rewind($tmpFile);
         stream_filter_append($tmpFile, 'string.rot13', STREAM_FILTER_READ);
 
-        $request = $this->createMockRequest($requestBody);
+        $request = new MockRequest(['body' => $requestBody]);
         $endpoint = new CreatePersonEndpoint($request);
         $response = $endpoint->handle();
 
@@ -58,7 +57,7 @@ class CreatePersonEndpointTest extends TestCase
     {
         $_SERVER['REQUEST_METHOD'] = 'POST';
 
-        $request = $this->createMockRequest('invalid json');
+        $request = new MockRequest(['body' => 'invalid json']);
         $endpoint = new CreatePersonEndpoint($request);
         $response = $endpoint->handle();
 
@@ -73,7 +72,7 @@ class CreatePersonEndpointTest extends TestCase
     {
         $_SERVER['REQUEST_METHOD'] = 'POST';
 
-        $request = $this->createMockRequest("{}");
+        $request = new MockRequest(['body' => '{}']);
         $endpoint = new CreatePersonEndpoint($request);
         $response = $endpoint->handle();
 
@@ -82,22 +81,5 @@ class CreatePersonEndpointTest extends TestCase
         $data = json_decode($response->getBody(), true);
         $this->assertArrayHasKey('error', $data);
         $this->assertEquals('At least one field required', $data['error']);
-    }
-
-    private function createMockRequest($body)
-    {
-        return new class ($body) extends Request {
-            private $mockBody;
-
-            public function __construct($body)
-            {
-                $this->mockBody = $body;
-            }
-
-            public function body()
-            {
-                return $this->mockBody;
-            }
-        };
     }
 }
