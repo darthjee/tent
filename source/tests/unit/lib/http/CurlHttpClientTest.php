@@ -13,7 +13,7 @@ class CurlHttpClientTest extends TestCase
     {
         $client = new CurlHttpClient();
 
-        $result = $client->request($this->baseUrl . '/get', []);
+        $result = $client->get($this->baseUrl . '/get', []);
 
         $this->assertIsArray($result);
         $this->assertArrayHasKey('body', $result);
@@ -25,7 +25,7 @@ class CurlHttpClientTest extends TestCase
     {
         $client = new CurlHttpClient();
 
-        $result = $client->request($this->baseUrl . '/get', []);
+        $result = $client->get($this->baseUrl . '/get', []);
 
         $this->assertEquals(200, $result['httpCode']);
         $this->assertNotEmpty($result['body']);
@@ -40,7 +40,7 @@ class CurlHttpClientTest extends TestCase
             'Accept' => 'application/json'
         ];
 
-        $result = $client->request($this->baseUrl . '/headers', $headers);
+        $result = $client->get($this->baseUrl . '/headers', $headers);
 
         $this->assertEquals(200, $result['httpCode']);
 
@@ -54,7 +54,7 @@ class CurlHttpClientTest extends TestCase
     {
         $client = new CurlHttpClient();
 
-        $result = $client->request($this->baseUrl . '/get', []);
+        $result = $client->get($this->baseUrl . '/get', []);
 
         $this->assertIsArray($result['headers']);
         $this->assertNotEmpty($result['headers']);
@@ -69,7 +69,7 @@ class CurlHttpClientTest extends TestCase
     {
         $client = new CurlHttpClient();
 
-        $result = $client->request($this->baseUrl . '/status/404', []);
+        $result = $client->get($this->baseUrl . '/status/404', []);
 
         $this->assertEquals(404, $result['httpCode']);
     }
@@ -79,7 +79,7 @@ class CurlHttpClientTest extends TestCase
         $client = new CurlHttpClient();
 
         // httpbin/get?param=value should echo back the params
-        $result = $client->request($this->baseUrl . '/get?test=value&foo=bar', []);
+        $result = $client->get($this->baseUrl . '/get?test=value&foo=bar', []);
 
         $this->assertEquals(200, $result['httpCode']);
 

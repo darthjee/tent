@@ -12,11 +12,11 @@ namespace Tent\Http;
 interface HttpClientInterface
 {
     /**
-     * Sends an HTTP request to the given URL with the provided headers.
+     * Sends an HTTP GET request to the given URL with the provided headers.
      *
      * @param string $url     The target URL for the request.
      * @param array  $headers Associative array of headers to send.
      * @return array Response data (format depends on implementation).
      */
-    public function request(string $url, array $headers);
+    public function get(string $url, array $headers);
 }
