@@ -7,6 +7,7 @@ use ApiDev\Models\Person;
 use ApiDev\Mysql\Configuration;
 use ApiDev\CreatePersonEndpoint;
 use ApiDev\Request;
+use ApiDev\MockRequest;
 
 require_once __DIR__ . '/../../../../support/tests_loader.php';
 

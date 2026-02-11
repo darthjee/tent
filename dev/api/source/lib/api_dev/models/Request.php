@@ -2,7 +2,7 @@
 
 namespace ApiDev;
 
-class Request
+class Request implements RequestInterface
 {
     /**
      * Represents an HTTP request.
