@@ -26,8 +26,7 @@ class CreatePersonEndpointTest extends TestCase
             'birthdate' => '1990-05-15'
         ]);
 
-        $request = new MockRequest(['body' => $requestBody, 'requestMethod' => 'POST']);
-        $endpoint = new CreatePersonEndpoint($request);
+        $endpoint = $this->initEndpoint($requestBody);
         $response = $endpoint->handle();
 
         $this->assertEquals(201, $response->getHttpCode());
@@ -48,8 +47,7 @@ class CreatePersonEndpointTest extends TestCase
 
     public function testHandleReturnsErrorForInvalidJson()
     {
-        $request = new MockRequest(['body' => 'invalid json', 'requestMethod' => 'POST']);
-        $endpoint = new CreatePersonEndpoint($request);
+        $endpoint = $this->initEndpoint('invalid json');
         $response = $endpoint->handle();
 
         $this->assertEquals(400, $response->getHttpCode());
@@ -61,8 +59,7 @@ class CreatePersonEndpointTest extends TestCase
 
     public function testHandleReturnsErrorForEmptyBody()
     {
-        $request = new MockRequest(['body' => '{}', 'requestMethod' => 'POST']);
-        $endpoint = new CreatePersonEndpoint($request);
+        $endpoint = $this->initEndpoint('{}');
         $response = $endpoint->handle();
 
         $this->assertEquals(400, $response->getHttpCode());
@@ -70,5 +67,11 @@ class CreatePersonEndpointTest extends TestCase
         $data = json_decode($response->getBody(), true);
         $this->assertArrayHasKey('error', $data);
         $this->assertEquals('At least one field required', $data['error']);
+    }
+
+    private function initEndpoint(string $body): CreatePersonEndpoint
+    {
+        $request = new MockRequest(['body' => $body, 'requestMethod' => 'POST']);
+        return new CreatePersonEndpoint($request);
     }
 }
