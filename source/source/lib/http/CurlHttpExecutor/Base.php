@@ -7,10 +7,10 @@ use CurlHandle;
 
 abstract class Base
 {
-    private string $url;
-    private array $headers;
-    private ?string $body;
-    private ?CurlHandle $curlHandle;
+    protected string $url;
+    protected array $headers;
+    protected ?string $body;
+    protected ?CurlHandle $curlHandle;
 
     public function __construct(array $options)
     {
