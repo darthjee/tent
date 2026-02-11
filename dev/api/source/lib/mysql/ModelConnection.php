@@ -58,6 +58,23 @@ class ModelConnection
         return $this->connection->lastInsertId();
     }
 
+    public function update(int $id, array $attributes): void
+    {
+        $setClauses = [];
+        $params = [];
+        foreach ($attributes as $column => $value) {
+            $setClauses[] = "$column = ?";
+            $params[] = $value;
+        }
+        $sql = sprintf(
+            "UPDATE %s SET %s WHERE id = ?",
+            $this->tableName,
+            implode(', ', $setClauses)
+        );
+        $params[] = $id;
+        $this->connection->execute($sql, $params);
+    }
+
     public function getConnection(): Connection
     {
         return $this->connection;
