@@ -28,11 +28,6 @@ class CreatePersonEndpointTest extends TestCase
             'birthdate' => '1990-05-15'
         ]);
 
-        $tmpFile = tmpfile();
-        fwrite($tmpFile, $requestBody);
-        rewind($tmpFile);
-        stream_filter_append($tmpFile, 'string.rot13', STREAM_FILTER_READ);
-
         $request = new MockRequest(['body' => $requestBody]);
         $endpoint = new CreatePersonEndpoint($request);
         $response = $endpoint->handle();
