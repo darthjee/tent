@@ -41,12 +41,7 @@ class CurlHttpClient implements HttpClientInterface
     {
         $headerLines = CurlUtils::buildHeaderLines($headers);
 
-
-        $curl = curl_init($url);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_HEADER, true);
-        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, $headerLines);
+        $curl = $this->initCurlRequest($url, $headerLines);
 
         $response = curl_exec($curl);
         $headerSize = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
@@ -95,13 +90,10 @@ class CurlHttpClient implements HttpClientInterface
     {
         $headerLines = CurlUtils::buildHeaderLines($headers);
 
-        $curl = curl_init($url);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_HEADER, true);
-        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+        $curl = $this->initCurlRequest($url, $headerLines);
+
         curl_setopt($curl, CURLOPT_POST, true);
         curl_setopt($curl, CURLOPT_POSTFIELDS, $body);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, $headerLines);
 
         $response = curl_exec($curl);
         $headerSize = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
@@ -119,5 +111,14 @@ class CurlHttpClient implements HttpClientInterface
             'httpCode' => $httpCode,
             'headers' => $headerLines
         ];
+    }
+
+    private function initCurlRequest($url, $headerLines) {
+        $curl = curl_init($url);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_HEADER, true);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headerLines);
+        return $curl;
     }
 }
