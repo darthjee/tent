@@ -19,10 +19,15 @@ abstract class BaseModel
      *
      * @return array
      */
-    protected $attributes = [];
+    protected array $attributes = [];
 
     abstract public static function tableName(): string;
 
+    /**
+     * Returns all rows from the table as an array of model instances.
+     *
+     * @return array
+     */
     public static function all(): array
     {
         $rows = static::getConnection()->list();
@@ -31,6 +36,11 @@ abstract class BaseModel
         }, $rows);
     }
 
+    /**
+     * Returns a ModelConnection instance for the model's table.
+     *
+     * @return ModelConnection
+     */
     public static function getConnection(): ModelConnection
     {
         if (static::$connection instanceof ModelConnection) {
@@ -43,6 +53,9 @@ abstract class BaseModel
         return static::$connection;
     }
 
+    /**
+     * Saves a record to the database
+     */
     public function save()
     {
         $connection = static::getConnection();
