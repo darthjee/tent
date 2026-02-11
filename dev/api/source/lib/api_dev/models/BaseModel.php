@@ -6,33 +6,41 @@ use ApiDev\Mysql\ModelConnection;
 use ApiDev\Mysql\Configuration;
 use ApiDev\Exceptions\InvalidModelException;
 
+/**
+ * Abstract base class for database models.
+ *
+ * Provides common functionality for interacting with database tables including
+ * querying, saving, validating, and serializing model data. Subclasses must
+ * implement table-specific logic such as table name and attribute definitions.
+ */
 abstract class BaseModel
 {
     /**
-     * Returns a ModelConnection for the table.
-     *
-     * @return ModelConnection
+     * @var ModelConnection|null Shared database connection for the model's table
      */
-    protected static $connection = null;
+    protected static ?ModelConnection $connection = null;
 
     /**
-     * Returns all rows from the 'persons' table.
-     *
-     * @return array
+     * @var array The model's attribute data (column => value)
      */
     protected array $attributes = [];
 
+    /**
+     * Returns the database table name for this model.
+     *
+     * @return string The table name
+     */
     abstract public static function tableName(): string;
 
     /**
      * Returns all rows from the table as an array of model instances.
      *
-     * @return array
+     * @return array Array of model instances
      */
     public static function all(): array
     {
         $rows = static::getConnection()->list();
-        return array_map(function ($attrs) {
+        return array_map(function (array $attrs) {
             return new static($attrs);
         }, $rows);
     }
@@ -40,7 +48,9 @@ abstract class BaseModel
     /**
      * Returns a ModelConnection instance for the model's table.
      *
-     * @return ModelConnection
+     * Creates and caches a connection on first call.
+     *
+     * @return ModelConnection The database connection for this model
      */
     public static function getConnection(): ModelConnection
     {
@@ -55,7 +65,7 @@ abstract class BaseModel
     }
 
     /**
-     * BaseModel constructor.
+     * Creates a new model instance.
      *
      * @param array $attributes Associative array of column => value
      */
@@ -67,9 +77,9 @@ abstract class BaseModel
     /**
      * Returns the ID of the model, or null if not set.
      *
-     * @return int|null
+     * @return int|null The model ID
      */
-    public function getId()
+    public function getId(): ?int
     {
         return $this->attributes['id'] ?? null;
     }
@@ -77,7 +87,7 @@ abstract class BaseModel
     /**
      * Returns the model's attributes as an associative array.
      *
-     * @return array
+     * @return array The model attributes
      */
     public function getAttributes(): array
     {
@@ -87,21 +97,26 @@ abstract class BaseModel
     /**
      * Returns the list of valid attribute names for the model.
      *
-     * @return array
+     * @return array The attribute names
      */
     abstract protected static function attributeNames(): array;
 
     /**
-     * Checks if the model's attributes are valid. Must be implemented by subclasses.
+     * Checks if the model's attributes are valid.
+     *
+     * Must be implemented by subclasses to define validation rules.
+     *
+     * @return bool True if valid, false otherwise
      */
     abstract public function valid(): bool;
 
     /**
      * Validates the model's attributes and throws an exception if invalid.
      *
-     * @throws InvalidModelException
+     * @return void
+     * @throws InvalidModelException If validation fails
      */
-    public function validate()
+    public function validate(): void
     {
         if (!$this->valid()) {
             throw new InvalidModelException('Invalid model attributes');
@@ -109,9 +124,15 @@ abstract class BaseModel
     }
 
     /**
-     * Saves a record to the database
+     * Saves the model to the database.
+     *
+     * Inserts a new record if the model doesn't have an ID, otherwise updates
+     * the existing record. Validates the model before saving.
+     *
+     * @return void
+     * @throws InvalidModelException If validation fails
      */
-    public function save()
+    public function save(): void
     {
         $this->validate();
         $connection = static::getConnection();
@@ -126,9 +147,12 @@ abstract class BaseModel
     }
 
     /**
-     * Returns the model's attributes as a JSON array.
+     * Returns the model's attributes as a JSON-ready array.
      *
-     * @return array
+     * Includes only the attributes defined by attributeNames(),
+     * setting missing attributes to null.
+     *
+     * @return array Associative array of attributes
      */
     public function asJson(): array
     {
@@ -143,7 +167,7 @@ abstract class BaseModel
     /**
      * Returns the model's attributes as a JSON string.
      *
-     * @return string
+     * @return string JSON-encoded string of attributes
      */
     public function toJson(): string
     {
