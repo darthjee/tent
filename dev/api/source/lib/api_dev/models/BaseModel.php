@@ -86,6 +86,7 @@ abstract class BaseModel
      */
     public function save()
     {
+        $this->validate();
         $connection = static::getConnection();
         if ($this->getId() === null) {
             // Insert new record

@@ -5,6 +5,7 @@ namespace ApiDev\Tests;
 use PHPUnit\Framework\TestCase;
 use ApiDev\Models\Person;
 use ApiDev\Mysql\Configuration;
+use ApiDev\Exceptions\InvalidModelException;
 
 require_once __DIR__ . '/../../../../../support/tests_loader.php';
 
@@ -92,5 +93,41 @@ class PersonSaveTest extends TestCase
         // Should only have one record in database
         $count = $this->connection->fetch('SELECT COUNT(*) as total FROM persons WHERE id = ?', [$firstId]);
         $this->assertEquals(1, $count['total']);
+    }
+
+    public function testSaveThrowsExceptionWhenModelIsInvalid()
+    {
+        // Create an invalid person (missing first_name)
+        $person = new Person([
+            'last_name' => 'Doe',
+            'birthdate' => '1995-06-15'
+        ]);
+
+        $this->expectException(InvalidModelException::class);
+        $this->expectExceptionMessage('Invalid model attributes');
+
+        // Should throw exception and not save to database
+        $person->save();
+    }
+
+    public function testSaveDoesNotInsertInvalidModel()
+    {
+        // Get initial count
+        $initialCount = $this->connection->fetch('SELECT COUNT(*) as total FROM persons');
+
+        // Try to save invalid person
+        $person = new Person([
+            'birthdate' => '1995-06-15'
+        ]);
+
+        try {
+            $person->save();
+        } catch (InvalidModelException $e) {
+            // Exception expected
+        }
+
+        // Verify nothing was inserted
+        $finalCount = $this->connection->fetch('SELECT COUNT(*) as total FROM persons');
+        $this->assertEquals($initialCount['total'], $finalCount['total']);
     }
 }
