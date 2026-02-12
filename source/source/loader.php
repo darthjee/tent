@@ -37,6 +37,7 @@ require_once __DIR__ . '/lib/matchers/RequestMatcher.php';
 require_once __DIR__ . '/lib/matchers/Filter.php';
 require_once __DIR__ . '/lib/matchers/ResponseMatcher.php';
 require_once __DIR__ . '/lib/matchers/StatusCodeMatcher.php';
+require_once __DIR__ . '/lib/matchers/GetRequestSuccessFilter.php';
 require_once __DIR__ . '/lib/models/Rule.php';
 require_once __DIR__ . '/lib/models/Server.php';
 require_once __DIR__ . '/lib/service/ResponseContentReader.php';
