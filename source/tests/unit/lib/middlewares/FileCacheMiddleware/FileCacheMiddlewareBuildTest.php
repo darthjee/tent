@@ -23,7 +23,7 @@ class FileCacheMiddlewareBuildTest extends TestCase
         $matchersProp = $reflection->getProperty('matchers');
         $matchersProp->setAccessible(true);
         $matchers = $matchersProp->getValue($middleware);
-        $this->assertCount(1, $matchers);
+        $this->assertCount(2, $matchers);
         $matcher = $matchers[0];
         $response = new \Tent\Models\Response(['httpCode' => 200]);
         $this->assertTrue($matcher->match($response));

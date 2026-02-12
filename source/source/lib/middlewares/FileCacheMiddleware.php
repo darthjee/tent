@@ -74,11 +74,6 @@ class FileCacheMiddleware extends Middleware
     private FolderLocation $location;
 
     /**
-     * @var array The list of HTTP request methods to cache.
-     */
-    private array $requestMethods;
-
-    /**
      * @var array The list of response matchers to determine cacheability.
      */
     private array $matchers;
@@ -90,10 +85,9 @@ class FileCacheMiddleware extends Middleware
      * @param array|null     $requestMethods Array of HTTP request methods to cache. Defaults to ['GET'].
      * @param array          $matchers       Array of custom matchers for cacheability.
      */
-    public function __construct(FolderLocation $location, ?array $requestMethods = null, array $matchers = [])
+    public function __construct(FolderLocation $location, array $matchers = [])
     {
         $this->location = $location;
-        $this->requestMethods = $requestMethods ?? ['GET'];
 
         $this->matchers = $matchers;
     }
@@ -108,7 +102,6 @@ class FileCacheMiddleware extends Middleware
     public static function build(array $attributes): FileCacheMiddleware
     {
         $location = new FolderLocation($attributes['location']);
-        $requestMethods = $attributes['requestMethods'] ?? null;
 
         if (isset($attributes['httpCodes'])) {
             Logger::deprecate(self::DEPRECATION_HTTP_CODES_MSG);
@@ -136,7 +129,7 @@ class FileCacheMiddleware extends Middleware
             }
         }
 
-        return new self($location, $requestMethods, $matchers);
+        return new self($location, $matchers);
     }
 
     /**
