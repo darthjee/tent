@@ -44,28 +44,9 @@ class Response extends SimpleModel
     protected array $headers;
 
     /**
-     * @var RequestInterface The original request associated with this response (optional).
+     * @var RequestInterface|null The original request associated with this response (optional).
      */
-    protected RequestInterface $request;
-
-    /**
-     * Processes an attribute key and value before assignment.
-     *
-     * Instantiates a default Request object when request value is null.
-     *
-     * @param string $key   The attribute key from DEFAULT_ATTRIBUTES.
-     * @param mixed  $value The value to be assigned (may be from data or default).
-     * @return array An array with two elements: [attribute_name, processed_value].
-     */
-    protected function processAttributeValue(string $key, $value): array
-    {
-        // Special handling for request: instantiate default Request if null
-        if ($key === 'request' && $value === null) {
-            $value = new Request();
-        }
-
-        return [$key, $value];
-    }
+    protected ?RequestInterface $request;
 
     /**
      * Returns the response body content.
@@ -104,6 +85,9 @@ class Response extends SimpleModel
      */
     public function request()
     {
+        if ($this->request === null) {
+            return new Request();
+        }
         return $this->request;
     }
 

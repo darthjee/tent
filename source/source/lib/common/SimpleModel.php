@@ -44,25 +44,7 @@ abstract class SimpleModel
         foreach (static::DEFAULT_ATTRIBUTES as $key => $default) {
             $value = $data[$key] ?? $default;
 
-            // Allow child classes to process the attribute key and value
-            [$attribute, $processedValue] = $this->processAttributeValue($key, $value);
-
-            $this->$attribute = $processedValue;
+            $this->$key = $value;
         }
-    }
-
-    /**
-     * Processes an attribute key and value before assignment.
-     *
-     * Child classes can override this method to customize how attributes are
-     * mapped or processed (e.g., instantiating default objects for null values).
-     *
-     * @param string $key   The attribute key from DEFAULT_ATTRIBUTES.
-     * @param mixed  $value The value to be assigned (may be from data or default).
-     * @return array An array with two elements: [attribute_name, processed_value].
-     */
-    protected function processAttributeValue(string $key, $value): array
-    {
-        return [$key, $value];
     }
 }
