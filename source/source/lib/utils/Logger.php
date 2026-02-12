@@ -49,6 +49,6 @@ class Logger implements LoggerInterface
      */
     public function logDeprecation(string $message): void
     {
-        trigger_error($message, E_USER_DEPRECATED);
+        error_log($message, E_USER_DEPRECATED);
     }
 }
