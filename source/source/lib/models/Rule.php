@@ -24,6 +24,7 @@ class Rule
      * @var RequestMatcher[]|null List of matchers to validate if a request applies to this rule.
      */
     private ?array $matchers;
+    private ?array $matchersConfig;
 
     /**
      * @var string|null Optional name for the rule.
@@ -43,6 +44,7 @@ class Rule
         $this->handler = $attributes['handler'] ?? null;
         $this->handlerConfig = $attributes['handlerConfig'] ?? [];
         $this->matchers = $attributes['matchers'] ?? [];
+        $this->matchersConfig = $attributes['matchersConfig'] ?? [];
         $this->name = $attributes['name'] ?? null;
     }
 
@@ -67,6 +69,14 @@ class Rule
             $this->handler = RequestHandler::build($this->handlerConfig);
         }
         return $this->handler;
+    }
+
+    private function matchers(): array
+    {
+        if (!isset($this->matchers) && isset($this->matchersConfig)) {
+            $this->matchers = RequestMatcher::buildMatchers($this->matchersConfig);
+        }
+        return $this->matchers;
     }
 
     /**
@@ -117,7 +127,7 @@ class Rule
      */
     public function match(RequestInterface $request): bool
     {
-        foreach ($this->matchers as $matcher) {
+        foreach ($this->matchers() as $matcher) {
             if ($matcher->matches($request)) {
                 return true;
             }
