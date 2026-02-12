@@ -43,7 +43,7 @@ class Rule
     {
         $this->handler = $attributes['handler'] ?? null;
         $this->handlerConfig = $attributes['handlerConfig'] ?? [];
-        $this->matchers = $attributes['matchers'] ?? [];
+        $this->matchers = $attributes['matchers'] ?? null;
         $this->matchersConfig = $attributes['matchersConfig'] ?? [];
         $this->name = $attributes['name'] ?? null;
     }
@@ -103,7 +103,7 @@ class Rule
 
         return new self([
             'handlerConfig' => $handlerParams,
-            'matchers' => RequestMatcher::buildMatchers($params['matchers'] ?? []),
+            'matchersConfig' => $params['matchers'] ?? [],
             'name' => $params['name'] ?? null
         ]);
     }
