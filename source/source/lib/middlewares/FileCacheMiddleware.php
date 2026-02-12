@@ -87,6 +87,7 @@ class FileCacheMiddleware extends Middleware
      *
      * @param array $attributes The attributes to build the middleware.
      * @return FileCacheMiddleware The constructed FileCacheMiddleware instance.
+     * @deprecated The 'httpCodes' attribute is deprecated. Use 'matchers' instead.
      */
     public static function build(array $attributes): FileCacheMiddleware
     {
