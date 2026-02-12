@@ -4,12 +4,13 @@ namespace Tent\Utils;
 
 class Logger implements LoggerInterface
 {
-    static private $instance;
+    private static $instance;
 
     /**
      * Logs a deprecation message.
      *
      * @param string $message The deprecation message to log.
+     * @return void
      */
     public static function deprecate(string $message): void
     {
@@ -33,6 +34,7 @@ class Logger implements LoggerInterface
      * Sets the Logger instance to use for logging.
      *
      * @param LoggerInterface $logger The Logger instance to use.
+     * @return void
      */
     public static function setInstance(LoggerInterface $logger): void
     {
@@ -43,6 +45,7 @@ class Logger implements LoggerInterface
      * Logs a deprecation message using trigger_error.
      *
      * @param string $message The deprecation message to log.
+     * @return void
      */
     public function logDeprecation(string $message): void
     {
