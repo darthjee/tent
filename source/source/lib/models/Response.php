@@ -17,6 +17,16 @@ namespace Tent\Models;
 class Response
 {
     /**
+     * Default values for response attributes.
+     */
+    private const DEFAULT_ATTRIBUTES = [
+        'body' => '',
+        'httpCode' => 200,
+        'headers' => [],
+        'request' => null
+    ];
+
+    /**
      * @var string Response body content
      */
     private string $body;
@@ -47,10 +57,16 @@ class Response
      */
     public function __construct(array $data)
     {
-        $this->body = $data['body'] ?? '';
-        $this->httpCode = $data['httpCode'] ?? 200;
-        $this->headers = $data['headers'] ?? [];
-        $this->request = $data['request'] ?? new Request();
+        foreach (self::DEFAULT_ATTRIBUTES as $key => $default) {
+            $value = $data[$key] ?? $default;
+            
+            // Special handling for request: instantiate default Request if null
+            if ($key === 'request' && $value === null) {
+                $value = new Request();
+            }
+            
+            $this->$key = $value;
+        }
     }
 
     /**
