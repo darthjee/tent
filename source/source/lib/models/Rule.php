@@ -15,14 +15,15 @@ use Tent\Middlewares\Middleware;
 class Rule
 {
     /**
-     * @var RequestHandler The handler used to process matching requests.
+     * @var RequestHandler|null The handler used to process matching requests.
      */
-    private RequestHandler $handler;
+    private ?RequestHandler $handler;
+    private array $handlerConfig;
 
     /**
-     * @var RequestMatcher[] List of matchers to validate if a request applies to this rule.
+     * @var RequestMatcher[]|null List of matchers to validate if a request applies to this rule.
      */
-    private array $matchers;
+    private ?array $matchers;
 
     /**
      * @var string|null Optional name for the rule.
@@ -39,7 +40,8 @@ class Rule
      */
     public function __construct(array $attributes)
     {
-        $this->handler = $attributes['handler'];
+        $this->handler = $attributes['handler'] ?? null;
+        $this->handlerConfig = $attributes['handlerConfig'] ?? [];
         $this->matchers = $attributes['matchers'] ?? [];
         $this->name = $attributes['name'] ?? null;
     }
@@ -61,6 +63,9 @@ class Rule
      */
     public function handler(): RequestHandler
     {
+        if (!isset($this->handler) && isset($this->handlerConfig)) {
+            $this->handler = RequestHandler::build($this->handlerConfig);
+        }
         return $this->handler;
     }
 
@@ -87,7 +92,7 @@ class Rule
         $handlerParams['middlewares'] = $params['middlewares'] ?? [];
 
         return new self([
-            'handler' => RequestHandler::build($handlerParams),
+            'handlerConfig' => $handlerParams,
             'matchers' => RequestMatcher::buildMatchers($params['matchers'] ?? []),
             'name' => $params['name'] ?? null
         ]);
