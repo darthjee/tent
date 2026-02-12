@@ -16,4 +16,12 @@ abstract class ResponseMatcher
      * @return boolean True if the response matches, false otherwise.
      */
     abstract public function match(Response $response): bool;
+
+    // TODO implement it later
+    public static function build(array $params): self
+    {
+        $class = $params['class'];
+
+        return new $class();
+    }
 }
