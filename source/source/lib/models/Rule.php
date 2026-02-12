@@ -71,6 +71,11 @@ class Rule
         return $this->handler;
     }
 
+    /**
+     * Returns the list of RequestMatchers for this rule.
+     *
+     * @return RequestMatcher[]
+     */
     private function matchers(): array
     {
         if (!isset($this->matchers) && isset($this->matchersConfig)) {
