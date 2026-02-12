@@ -93,13 +93,13 @@ class FileCacheMiddleware extends Middleware
         $location = new FolderLocation($attributes['location']);
         $requestMethods = $attributes['requestMethods'] ?? null;
 
+        if (isset($attributes['httpCodes'])) {
+            Logger::deprecate(self::DEPRECATION_HTTP_CODES_MSG);
+        }
+
         if (isset($attributes['matchers'])) {
-            if (isset($attributes['httpCodes'])) {
-                Logger::deprecate(self::DEPRECATION_HTTP_CODES_MSG);
-            }
             $matchers = ResponseMatcher::buildMatchers($attributes['matchers']);
         } elseif (isset($attributes['httpCodes'])) {
-            Logger::deprecate(self::DEPRECATION_HTTP_CODES_MSG);
             $httpCodes = $attributes['httpCodes'] ?? [200];
             $matchers = [new StatusCodeMatcher($httpCodes)];
         } else {
