@@ -17,7 +17,7 @@ abstract class ResponseMatcher
      */
     abstract public function match(Response $response): bool;
 
-    /** */
+    /**
      * Builds a ResponseMatcher from the given parameters.
      *
      * @param array $params The parameters for building the matcher.
