@@ -83,7 +83,7 @@ class Rule
      */
     public static function build(array $params): self
     {
-        $handler = RequestHandler::build($params['handler'] ?? []);
+        $handler = RequestHandler::build($params['handler']);
         $name = $params['name'] ?? null;
 
         $rule = new self([
