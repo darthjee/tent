@@ -36,7 +36,7 @@ class StatusCodeMatcher extends ResponseMatcher
         $target = $response->httpCode();
 
         foreach ($this->httpCodes as $code) {
-            if (new HttpCodeMatcher($code)->match($target)) {
+            if ((new HttpCodeMatcher($code))->match($target)) {
                 return true;
             }
         }

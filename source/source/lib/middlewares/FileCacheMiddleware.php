@@ -150,7 +150,7 @@ class FileCacheMiddleware extends Middleware
     {
         if ($this->isCacheable($response)) {
             $cache = new FileCache($response->request(), $this->location);
-            new ResponseCacher($cache, $response)->process();
+            (new ResponseCacher($cache, $response))->process();
         }
         return $response;
     }
