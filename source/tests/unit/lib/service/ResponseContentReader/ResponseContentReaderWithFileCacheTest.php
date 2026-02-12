@@ -54,6 +54,6 @@ class ResponseContentReaderWithFileCacheTest extends TestCase
         $this->assertInstanceOf(Response::class, $response);
         $this->assertEquals($this->body, $response->body());
         $this->assertEquals(207, $response->httpCode());
-        $this->assertEquals($this->meta['headers'], $response->headerLines());
+        $this->assertEquals($this->meta['headers'], $response->headers());
     }
 }

@@ -63,7 +63,7 @@ class RequestProcessorTest extends TestCase
         $this->assertInstanceOf(Response::class, $response);
         $this->assertEquals(200, $response->httpCode());
         $this->assertEquals($expectedContent, $response->body());
-        $this->assertStringContainsString('Content-Type: text/html', implode("\n", $response->headerLines()));
+        $this->assertStringContainsString('Content-Type: text/html', implode("\n", $response->headers()));
     }
 
     public function testProxyRequestHandlerForwardsToHttpbin()

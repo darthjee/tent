@@ -210,7 +210,7 @@ class FileCache implements Cache
     protected function buildMeta(Response $response): array
     {
         return [
-            'headers' => $response->headerLines(),
+            'headers' => $response->headers(),
             'httpCode' => $response->httpCode()
         ];
     }

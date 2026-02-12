@@ -14,6 +14,6 @@ class ForbiddenResponseTest extends TestCase
         $response = new ForbiddenResponse($request);
         $this->assertSame(403, $response->httpCode());
         $this->assertSame('Forbidden', $response->body());
-        $this->assertContains('Content-Type: text/plain', $response->headerLines());
+        $this->assertContains('Content-Type: text/plain', $response->headers());
     }
 }

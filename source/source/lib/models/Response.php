@@ -29,7 +29,7 @@ class Response
     /**
      * @var array List of HTTP header lines (e.g., ['Content-Type: text/html'])
      */
-    private array $headerLines;
+    private array $headers;
 
     /**
      * @var RequestInterface The original request associated with this response (optional).
@@ -49,7 +49,7 @@ class Response
     {
         $this->body = $data['body'] ?? '';
         $this->httpCode = $data['httpCode'] ?? 200;
-        $this->headerLines = $data['headers'] ?? [];
+        $this->headers = $data['headers'] ?? [];
         $this->request = $data['request'] ?? new Request();
     }
 
@@ -78,9 +78,9 @@ class Response
      *
      * @return array
      */
-    public function headerLines(): array
+    public function headers(): array
     {
-        return $this->headerLines;
+        return $this->headers;
     }
 
     /**
@@ -118,11 +118,11 @@ class Response
     /**
      * Sets the list of HTTP header lines.
      *
-     * @param array $headerLines The new list of HTTP header lines.
+     * @param array $header The new list of HTTP header lines.
      * @return array
      */
-    public function setHeaderLines(array $headerLines): array
+    public function setHeaders(array $headers): array
     {
-        return $this->headerLines = $headerLines;
+        return $this->headers = $headers;
     }
 }

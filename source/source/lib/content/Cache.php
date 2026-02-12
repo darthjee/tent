@@ -52,7 +52,7 @@ use Tent\Models\Response;
  *     public function store(Response $response): void
  *     {
  *         $this->redis->set($this->key . ':body', $response->body());
- *         $this->redis->set($this->key . ':headers', json_encode($response->headerLines()));
+ *         $this->redis->set($this->key . ':headers', json_encode($response->headers()));
  *         $this->redis->set($this->key . ':httpCode', $response->httpCode());
  *     }
  * }
