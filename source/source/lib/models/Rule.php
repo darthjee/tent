@@ -5,6 +5,7 @@ namespace Tent\Models;
 use Tent\RequestHandlers\RequestHandler;
 use Tent\Matchers\RequestMatcher;
 use Tent\Middlewares\Middleware;
+use Tent\Common\SimpleModel;
 
 /**
  * Represents a routing rule for processing HTTP requests.
@@ -12,41 +13,35 @@ use Tent\Middlewares\Middleware;
  * A Rule contains multiple RequestMatchers to validate if a request applies to this rule.
  * When a request matches, the Rule provides the RequestHandler to process the request.
  */
-class Rule
+class Rule extends SimpleModel
 {
+    /**
+     * Default values for response attributes.
+     */
+    protected const DEFAULT_ATTRIBUTES = [
+        'handler' => null,
+        'handlerConfig' => [],
+        'matchers' => null,
+        'matchersConfig' => [],
+        'name' => null
+    ];
+
     /**
      * @var RequestHandler|null The handler used to process matching requests.
      */
-    private ?RequestHandler $handler;
-    private array $handlerConfig;
+    protected ?RequestHandler $handler;
+    protected array $handlerConfig;
 
     /**
      * @var RequestMatcher[]|null List of matchers to validate if a request applies to this rule.
      */
-    private ?array $matchers;
-    private ?array $matchersConfig;
+    protected ?array $matchers;
+    protected ?array $matchersConfig;
 
     /**
      * @var string|null Optional name for the rule.
      */
-    private ?string $name;
-
-    /**
-     * Constructs a Rule.
-     *
-     * @param array $attributes Associative array with keys:
-     *   - 'handler': RequestHandler, the handler to process requests that match this rule.
-     *   - 'matchers': array of RequestMatcher, optional list of matchers to validate requests.
-     *   - 'name': string|null, optional name for the rule.
-     */
-    public function __construct(array $attributes)
-    {
-        $this->handler = $attributes['handler'] ?? null;
-        $this->handlerConfig = $attributes['handlerConfig'] ?? [];
-        $this->matchers = $attributes['matchers'] ?? null;
-        $this->matchersConfig = $attributes['matchersConfig'] ?? [];
-        $this->name = $attributes['name'] ?? null;
-    }
+    protected ?string $name;
 
     /**
      * Returns the name of the rule, or null if not set.
