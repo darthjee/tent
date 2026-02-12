@@ -91,7 +91,7 @@ class FileCacheMiddleware extends Middleware
                 trigger_error('Deprecation warning: The "httpCodes" attribute is deprecated. Use "matchers" instead.', E_USER_DEPRECATED);
             }
             $matchers = ResponseMatcher::buildMatchers($attributes['matchers']);
-        } else if (isset($attributes['httpCodes'])) {
+        } elseif (isset($attributes['httpCodes'])) {
             trigger_error('Deprecation warning: The "httpCodes" attribute is deprecated. Use "matchers" instead.', E_USER_DEPRECATED);
             $httpCodes = $attributes['httpCodes'] ?? [200];
             $matchers = [new StatusCodeMatcher($httpCodes)];
