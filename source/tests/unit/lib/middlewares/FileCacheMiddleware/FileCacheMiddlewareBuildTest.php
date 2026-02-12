@@ -20,15 +20,15 @@ class FileCacheMiddlewareBuildTest extends TestCase
     {
         $middleware = FileCacheMiddleware::build(['location' => '/tmp/cache']);
         $reflection = new \ReflectionClass($middleware);
-        $matchersProp = $reflection->getProperty('matchers');
-        $matchersProp->setAccessible(true);
-        $matchers = $matchersProp->getValue($middleware);
-        $this->assertCount(1, $matchers);
-        $matcher = $matchers[0];
+        $filtersProp = $reflection->getProperty('filters');
+        $filtersProp->setAccessible(true);
+        $filters = $filtersProp->getValue($middleware);
+        $this->assertCount(1, $filters);
+        $filter = $filters[0];
         $response = new \Tent\Models\Response(['httpCode' => 200]);
-        $this->assertTrue($matcher->match($response));
+        $this->assertTrue($filter->matchResponse($response));
         $response = new \Tent\Models\Response(['httpCode' => 201]);
-        $this->assertFalse($matcher->match($response));
+        $this->assertFalse($filter->matchResponse($response));
     }
 
     public function testBuildWithMatchersOverridesHttpCodes()
@@ -43,14 +43,14 @@ class FileCacheMiddlewareBuildTest extends TestCase
             ]
         ]);
         $reflection = new \ReflectionClass($middleware);
-        $matchersProp = $reflection->getProperty('matchers');
-        $matchersProp->setAccessible(true);
-        $matchers = $matchersProp->getValue($middleware);
-        $this->assertCount(1, $matchers);
-        $matcher = $matchers[0];
+        $filtersProp = $reflection->getProperty('filters');
+        $filtersProp->setAccessible(true);
+        $filters = $filtersProp->getValue($middleware);
+        $this->assertCount(1, $filters);
+        $filter = $filters[0];
         $response = new \Tent\Models\Response(['httpCode' => 201]);
-        $this->assertTrue($matcher->match($response));
+        $this->assertTrue($filter->matchResponse($response));
         $response = new \Tent\Models\Response(['httpCode' => 200]);
-        $this->assertFalse($matcher->match($response));
+        $this->assertFalse($filter->matchResponse($response));
     }
 }
