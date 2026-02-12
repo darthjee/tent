@@ -2,13 +2,13 @@
 
 namespace Tent\Utils;
 
-class Logger
+class Logger implements LoggerInterface
 {
     static private $instance;
 
     public static function deprecate(string $message): void
     {
-        trigger_error($message, E_USER_DEPRECATED);
+        self::getInstance()->logDeprecation($message);
     }
 
     public static function getInstance(): LoggerInterface
@@ -22,5 +22,10 @@ class Logger
     public static function setInstance(LoggerInterface $logger): void
     {
         self::$instance = $logger;
+    }
+
+    public function logDeprecation(string $message): void
+    {
+        trigger_error($message, E_USER_DEPRECATED);
     }
 }
