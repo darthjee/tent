@@ -4,5 +4,5 @@ namespace Tent\Utils;
 
 interface LoggerInterface
 {
-    public static function deprecate(string $message): void;
+    public function logDeprecation(string $message): void;
 }

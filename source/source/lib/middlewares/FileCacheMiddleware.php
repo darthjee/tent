@@ -10,6 +10,7 @@ use Tent\Service\ResponseContentReader;
 use Tent\Matchers\ResponseMatcher;
 use Tent\Matchers\StatusCodeMatcher;
 use Tent\Service\ResponseCacher;
+use Tent\Utils\Logger;
 
 /**
  * Middleware for caching responses to files.
@@ -94,11 +95,11 @@ class FileCacheMiddleware extends Middleware
 
         if (isset($attributes['matchers'])) {
             if (isset($attributes['httpCodes'])) {
-                trigger_error(self::DEPRECATION_HTTP_CODES_MSG, E_USER_DEPRECATED);
+                Logger::deprecate(self::DEPRECATION_HTTP_CODES_MSG);
             }
             $matchers = ResponseMatcher::buildMatchers($attributes['matchers']);
         } elseif (isset($attributes['httpCodes'])) {
-            trigger_error(self::DEPRECATION_HTTP_CODES_MSG, E_USER_DEPRECATED);
+            Logger::deprecate(self::DEPRECATION_HTTP_CODES_MSG);
             $httpCodes = $attributes['httpCodes'] ?? [200];
             $matchers = [new StatusCodeMatcher($httpCodes)];
         } else {
