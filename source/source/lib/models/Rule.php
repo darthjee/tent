@@ -5,6 +5,7 @@ namespace Tent\Models;
 use Tent\RequestHandlers\RequestHandler;
 use Tent\Matchers\RequestMatcher;
 use Tent\Middlewares\Middleware;
+use Tent\Common\SimpleModel;
 
 /**
  * Represents a routing rule for processing HTTP requests.
@@ -12,36 +13,35 @@ use Tent\Middlewares\Middleware;
  * A Rule contains multiple RequestMatchers to validate if a request applies to this rule.
  * When a request matches, the Rule provides the RequestHandler to process the request.
  */
-class Rule
+class Rule extends SimpleModel
 {
     /**
-     * @var RequestHandler The handler used to process matching requests.
+     * Default values for response attributes.
      */
-    private RequestHandler $handler;
+    protected const DEFAULT_ATTRIBUTES = [
+        'handler' => null,
+        'handlerConfig' => [],
+        'matchers' => null,
+        'matchersConfig' => [],
+        'name' => null
+    ];
 
     /**
-     * @var RequestMatcher[] List of matchers to validate if a request applies to this rule.
+     * @var RequestHandler|null The handler used to process matching requests.
      */
-    private array $matchers;
+    protected ?RequestHandler $handler;
+    protected array $handlerConfig;
+
+    /**
+     * @var RequestMatcher[]|null List of matchers to validate if a request applies to this rule.
+     */
+    protected ?array $matchers;
+    protected ?array $matchersConfig;
 
     /**
      * @var string|null Optional name for the rule.
      */
-    private ?string $name;
-
-    /**
-     * Constructs a Rule.
-     *
-     * @param RequestHandler   $handler  The handler to process requests that match this rule.
-     * @param RequestMatcher[] $matchers Array of matchers to validate requests.
-     * @param string|null      $name     Optional name for the rule.
-     */
-    public function __construct(RequestHandler $handler, array $matchers = [], ?string $name = null)
-    {
-        $this->handler = $handler;
-        $this->matchers = $matchers;
-        $this->name = $name;
-    }
+    protected ?string $name;
 
     /**
      * Returns the name of the rule, or null if not set.
@@ -60,7 +60,23 @@ class Rule
      */
     public function handler(): RequestHandler
     {
+        if (!isset($this->handler) && isset($this->handlerConfig)) {
+            $this->handler = RequestHandler::build($this->handlerConfig);
+        }
         return $this->handler;
+    }
+
+    /**
+     * Returns the list of RequestMatchers for this rule.
+     *
+     * @return RequestMatcher[]
+     */
+    private function matchers(): array
+    {
+        if (!isset($this->matchers) && isset($this->matchersConfig)) {
+            $this->matchers = RequestMatcher::buildMatchers($this->matchersConfig);
+        }
+        return $this->matchers;
     }
 
     /**
@@ -82,29 +98,14 @@ class Rule
      */
     public static function build(array $params): self
     {
-        $handler = RequestHandler::build($params['handler'] ?? []);
-        $name = $params['name'] ?? null;
+        $handlerParams = $params['handler'];
+        $handlerParams['middlewares'] = $params['middlewares'] ?? [];
 
-        $rule = new self(
-            $handler,
-            RequestMatcher::buildMatchers($params['matchers'] ?? []),
-            $name
-        );
-
-        $rule->buildMiddlewares($params['middlewares'] ?? []);
-
-        return $rule;
-    }
-
-    /**
-     * Builds and adds multiple Middlewares to the rule.
-     *
-     * @param array $attributes Array of associative arrays, each with keys for Middleware::build.
-     * @return array all Middlewares.
-     */
-    protected function buildMiddlewares(array $attributes): array
-    {
-        return $this->handler()->buildMiddlewares($attributes);
+        return new self([
+            'handlerConfig' => $handlerParams,
+            'matchersConfig' => $params['matchers'] ?? [],
+            'name' => $params['name'] ?? null
+        ]);
     }
 
     /**
@@ -115,7 +116,7 @@ class Rule
      */
     public function match(RequestInterface $request): bool
     {
-        foreach ($this->matchers as $matcher) {
+        foreach ($this->matchers() as $matcher) {
             if ($matcher->matches($request)) {
                 return true;
             }

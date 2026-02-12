@@ -2,6 +2,8 @@
 
 namespace Tent\Models;
 
+use Tent\Common\SimpleModel;
+
 /**
  * Represents an HTTP response returned by a RequestHandler or the application.
  *
@@ -14,44 +16,37 @@ namespace Tent\Models;
  *     'headerLines' => ['Content-Type: text/html']
  *   ]);
  */
-class Response
+class Response extends SimpleModel
 {
+    /**
+     * Default values for response attributes.
+     */
+    protected const DEFAULT_ATTRIBUTES = [
+        'body' => '',
+        'httpCode' => 200,
+        'headers' => [],
+        'request' => null
+    ];
+
     /**
      * @var string Response body content
      */
-    private string $body;
+    protected string $body;
 
     /**
      * @var int HTTP status code (e.g., 200, 404)
      */
-    private int $httpCode;
+    protected int $httpCode;
 
     /**
      * @var array List of HTTP header lines (e.g., ['Content-Type: text/html'])
      */
-    private array $headerLines;
+    protected array $headers;
 
     /**
-     * @var RequestInterface The original request associated with this response (optional).
+     * @var RequestInterface|null The original request associated with this response (optional).
      */
-    private RequestInterface $request;
-
-    /**
-     * Constructs a Response object.
-     *
-     * @param array $data Associative array with possible keys:
-     *   - body: string (response body content)
-     *   - httpCode: int (HTTP status code)
-     *   - headers: array (list of HTTP header lines)
-     *   - request: RequestInterface (the original request associated with this response).
-     */
-    public function __construct(array $data)
-    {
-        $this->body = $data['body'] ?? '';
-        $this->httpCode = $data['httpCode'] ?? 200;
-        $this->headerLines = $data['headers'] ?? [];
-        $this->request = $data['request'] ?? new Request();
-    }
+    protected ?RequestInterface $request;
 
     /**
      * Returns the response body content.
@@ -78,9 +73,9 @@ class Response
      *
      * @return array
      */
-    public function headerLines(): array
+    public function headers(): array
     {
-        return $this->headerLines;
+        return $this->headers;
     }
 
     /**
@@ -90,6 +85,9 @@ class Response
      */
     public function request()
     {
+        if ($this->request === null) {
+            return new Request();
+        }
         return $this->request;
     }
 
@@ -118,11 +116,11 @@ class Response
     /**
      * Sets the list of HTTP header lines.
      *
-     * @param array $headerLines The new list of HTTP header lines.
+     * @param array $headers The new list of HTTP header lines.
      * @return array
      */
-    public function setHeaderLines(array $headerLines): array
+    public function setHeaders(array $headers): array
     {
-        return $this->headerLines = $headerLines;
+        return $this->headers = $headers;
     }
 }

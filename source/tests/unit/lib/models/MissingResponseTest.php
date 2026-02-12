@@ -30,7 +30,7 @@ class MissingResponseTest extends TestCase
         $request = new Request([]);
         $response = new MissingResponse($request);
 
-        $this->assertEquals(['Content-Type: text/plain'], $response->headerLines());
+        $this->assertEquals(['Content-Type: text/plain'], $response->headers());
     }
 
     public function testExtendsResponse()

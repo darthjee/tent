@@ -24,8 +24,11 @@ class RequestProcessorTest extends TestCase
         $staticLocation = new FolderLocation($this->staticPath);
 
         Configuration::addRule(
-            new Rule(new StaticFileHandler($staticLocation), [
-                new RequestMatcher('GET', '/index.html', 'exact')
+            new Rule([
+                'handler' => new StaticFileHandler($staticLocation),
+                'matchers' => [
+                    new RequestMatcher('GET', '/index.html', 'exact')
+                ]
             ])
         );
     }
@@ -35,8 +38,11 @@ class RequestProcessorTest extends TestCase
         $server = new Server('http://httpbin');
 
         Configuration::addRule(
-            new Rule(new ProxyRequestHandler($server), [
-                new RequestMatcher('GET', '/get', 'exact')
+            new Rule([
+                'handler' => new ProxyRequestHandler($server),
+                'matchers' => [
+                    new RequestMatcher('GET', '/get', 'exact')
+                ]
             ])
         );
     }
@@ -63,7 +69,7 @@ class RequestProcessorTest extends TestCase
         $this->assertInstanceOf(Response::class, $response);
         $this->assertEquals(200, $response->httpCode());
         $this->assertEquals($expectedContent, $response->body());
-        $this->assertStringContainsString('Content-Type: text/html', implode("\n", $response->headerLines()));
+        $this->assertStringContainsString('Content-Type: text/html', implode("\n", $response->headers()));
     }
 
     public function testProxyRequestHandlerForwardsToHttpbin()

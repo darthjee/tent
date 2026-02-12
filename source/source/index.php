@@ -20,7 +20,7 @@ if (file_exists($configFile)) {
 function send_response(Response $response)
 {
     http_response_code($response->httpCode());
-    foreach ($response->headerLines() as $header) {
+    foreach ($response->headers() as $header) {
         header($header);
     }
     echo $response->body();

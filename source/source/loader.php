@@ -4,6 +4,7 @@
 
 require_once __DIR__ . '/lib/request_handlers/RequestHandler.php';
 require_once __DIR__ . '/lib/http/HttpClientInterface.php';
+require_once __DIR__ . '/lib/common/SimpleModel.php';
 require_once __DIR__ . '/lib/models/Response.php';
 require_once __DIR__ . '/lib/models/RequestInterface.php';
 require_once __DIR__ . '/lib/utils/LoggerInterface.php';
