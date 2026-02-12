@@ -2,7 +2,7 @@
 
 namespace Tent\Tests\Matchers;
 
-require_once __DIR__ . '/../../../support/loader.php';
+require_once __DIR__ . '/../../../../support/loader.php';
 
 use PHPUnit\Framework\TestCase;
 use Tent\Matchers\ResponseMatcher;
