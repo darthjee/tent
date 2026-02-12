@@ -2,7 +2,8 @@
 
 namespace Tent\Tests\Middlewares\FileCacheMiddleware;
 
-require_once __DIR__ . '/../../../../support/utils/FileSystemUtils.php';
+require_once __DIR__ . '/../../../../support/loader.php';
+
 
 use PHPUnit\Framework\TestCase;
 use Tent\Middlewares\FileCacheMiddleware;

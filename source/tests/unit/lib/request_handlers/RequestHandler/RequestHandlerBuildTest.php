@@ -2,8 +2,8 @@
 
 namespace Tent\Tests\RequestHandlers\RequestHandler;
 
-require_once __DIR__ . '/../../../../support/handlers/RequestToBodyHandler.php';
-require_once __DIR__ . '/../../../../support/middlewares/DummyRequestMiddleware.php';
+require_once __DIR__ . '/../../../../support/loader.php';
+
 
 use PHPUnit\Framework\TestCase;
 use Tent\RequestHandlers\RequestHandler;
