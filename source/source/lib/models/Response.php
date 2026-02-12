@@ -59,12 +59,12 @@ class Response
     {
         foreach (self::DEFAULT_ATTRIBUTES as $key => $default) {
             $value = $data[$key] ?? $default;
-            
+
             // Special handling for request: instantiate default Request if null
             if ($key === 'request' && $value === null) {
                 $value = new Request();
             }
-            
+
             $this->$key = $value;
         }
     }
@@ -134,7 +134,7 @@ class Response
     /**
      * Sets the list of HTTP header lines.
      *
-     * @param array $header The new list of HTTP header lines.
+     * @param array $headers The new list of HTTP header lines.
      * @return array
      */
     public function setHeaders(array $headers): array
