@@ -65,14 +65,14 @@ class FileCacheMiddleware extends Middleware
      * @param FolderLocation $location       The base folder location for caching.
      * @param array|null     $httpCodes      Array of HTTP status codes to cache. Defaults to [200].
      * @param array|null     $requestMethods Array of HTTP request methods to cache. Defaults to ['GET'].
+     * @param array          $matchers       Array of custom matchers for cacheability.
      */
-    public function __construct(FolderLocation $location, ?array $httpCodes = null, ?array $requestMethods = null)
+    public function __construct(FolderLocation $location, ?array $requestMethods = null, array $matchers = [])
     {
         $this->location = $location;
         $this->requestMethods = $requestMethods ?? ['GET'];
 
-        $httpCodes = $httpCodes ?? [200];
-        $this->matchers = [new StatusCodeMatcher($httpCodes)];
+        $this->matchers = $matchers;
     }
 
     /**
@@ -84,9 +84,10 @@ class FileCacheMiddleware extends Middleware
     public static function build(array $attributes): FileCacheMiddleware
     {
         $location = new FolderLocation($attributes['location']);
-        $httpCodes = $attributes['httpCodes'] ?? null;
+        $httpCodes = $attributes['httpCodes'] ?? [200];
         $requestMethods = $attributes['requestMethods'] ?? null;
-        return new self($location, $httpCodes, $requestMethods);
+        $matchers = [new StatusCodeMatcher($httpCodes)];
+        return new self($location, $requestMethods, $matchers);
     }
 
     /**
