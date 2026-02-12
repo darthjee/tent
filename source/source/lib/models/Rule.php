@@ -83,7 +83,9 @@ class Rule
      */
     public static function build(array $params): self
     {
-        $handler = RequestHandler::build($params['handler']);
+        $handlerParams = $params['handler'];
+        $handlerParams['middlewares'] = $params['middlewares'] ?? [];
+        $handler = RequestHandler::build($handlerParams);
         $name = $params['name'] ?? null;
 
         $rule = new self([
@@ -91,8 +93,6 @@ class Rule
             'matchers' => RequestMatcher::buildMatchers($params['matchers'] ?? []),
             'name' => $name
         ]);
-
-        $rule->buildMiddlewares($params['middlewares'] ?? []);
 
         return $rule;
     }
