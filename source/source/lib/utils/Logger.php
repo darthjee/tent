@@ -2,7 +2,7 @@
 
 namespace Tent\Utils;
 
-class Logger
+class Logger implements LoggerInterface
 {
     public static function deprecate(string $message): void
     {
