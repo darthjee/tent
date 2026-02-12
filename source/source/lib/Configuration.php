@@ -96,7 +96,8 @@ use Tent\Models\Rule;
  * ```
  *
  * @note
- *   When defining middlewares or other components in the params array for buildRule, you can specify the class to use via the 'class' key:
+ *   When defining middlewares or other components in the params array for buildRule
+ *   you can specify the class to use via the 'class' key:
  *   Example:
  *   ```php
  *   'middlewares' => [
