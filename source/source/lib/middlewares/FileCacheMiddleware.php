@@ -7,6 +7,7 @@ use Tent\Models\FolderLocation;
 use Tent\Content\FileCache;
 use Tent\Models\Response;
 use Tent\Service\ResponseContentReader;
+use Tent\Matchers\ResponseMatcher;
 use Tent\Matchers\StatusCodeMatcher;
 use Tent\Service\ResponseCacher;
 
@@ -86,7 +87,7 @@ class FileCacheMiddleware extends Middleware
         $requestMethods = $attributes['requestMethods'] ?? null;
 
         if (isset($attributes['matchers'])) {
-            if (!is_array($attributes['httpCodes'])) {
+            if (isset($attributes['httpCodes'])) {
                 trigger_error('Deprecation warning: The "httpCodes" attribute is deprecated. Use "matchers" instead.', E_USER_DEPRECATED);
             }
             $matchers = ResponseMatcher::buildMatchers($attributes['matchers']);
