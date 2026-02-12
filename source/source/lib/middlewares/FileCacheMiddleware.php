@@ -7,6 +7,7 @@ use Tent\Models\FolderLocation;
 use Tent\Content\FileCache;
 use Tent\Models\Response;
 use Tent\Service\ResponseContentReader;
+use Tent\Matchers\Filter;
 use Tent\Matchers\ResponseMatcher;
 use Tent\Matchers\StatusCodeMatcher;
 use Tent\Service\ResponseCacher;
@@ -50,7 +51,7 @@ class FileCacheMiddleware extends Middleware
      * Deprecation warning message for httpCodes attribute.
      */
     private const DEPRECATION_HTTP_CODES_MSG =
-      'Deprecation warning: The "httpCodes" attribute is deprecated. Use "matchers" instead.';
+      'Deprecation warning: The "httpCodes" attribute is deprecated. Use "matchers" with Filter instead.';
 
     /**
      * @var FolderLocation The base folder location for caching.
@@ -63,23 +64,23 @@ class FileCacheMiddleware extends Middleware
     private array $requestMethods;
 
     /**
-     * @var array The list of response matchers to determine cacheability.
+     * @var array The list of filters to determine cacheability.
      */
-    private array $matchers;
+    private array $filters;
 
     /**
      * Constructs a FileCacheMiddleware instance.
      *
      * @param FolderLocation $location       The base folder location for caching.
      * @param array|null     $requestMethods Array of HTTP request methods to cache. Defaults to ['GET'].
-     * @param array          $matchers       Array of custom matchers for cacheability.
+     * @param array          $filters        Array of Filter instances for cacheability.
      */
-    public function __construct(FolderLocation $location, ?array $requestMethods = null, array $matchers = [])
+    public function __construct(FolderLocation $location, ?array $requestMethods = null, array $filters = [])
     {
         $this->location = $location;
         $this->requestMethods = $requestMethods ?? ['GET'];
 
-        $this->matchers = $matchers;
+        $this->filters = $filters;
     }
 
     /**
@@ -87,7 +88,7 @@ class FileCacheMiddleware extends Middleware
      *
      * @param array $attributes The attributes to build the middleware.
      * @return FileCacheMiddleware The constructed FileCacheMiddleware instance.
-     * @deprecated The 'httpCodes' attribute is deprecated. Use 'matchers' instead.
+     * @deprecated The 'httpCodes' attribute is deprecated. Use 'matchers' with Filter instead.
      */
     public static function build(array $attributes): FileCacheMiddleware
     {
@@ -99,22 +100,25 @@ class FileCacheMiddleware extends Middleware
         }
 
         if (isset($attributes['matchers'])) {
-            $matchers = ResponseMatcher::buildMatchers($attributes['matchers']);
+            // Use new Filter::buildFilters for new configuration style
+            $filters = Filter::buildFilters($attributes['matchers']);
         } elseif (isset($attributes['httpCodes'])) {
+            // Backward compatibility: use deprecated ResponseMatcher::buildMatchers
             $httpCodes = $attributes['httpCodes'] ?? [200];
-            $matchers = [new StatusCodeMatcher($httpCodes)];
+            $filters = [new StatusCodeMatcher($httpCodes)];
         } else {
-            $matchers = [new StatusCodeMatcher([200])];
+            $filters = [new StatusCodeMatcher([200])];
         }
 
-        return new self($location, $requestMethods, $matchers);
+        return new self($location, $requestMethods, $filters);
     }
 
     /**
      * Processes the incoming request.
      *
      * Only attempts to read from cache if the request method is included in the configured
-     * requestMethods filter. If the method is not allowed, the request is returned unmodified.
+     * requestMethods filter AND all filters match the request. If the filters don't match,
+     * the request is returned unmodified.
      *
      * If a cached response exists for the request path, it is loaded and set on the request.
      *
@@ -124,6 +128,10 @@ class FileCacheMiddleware extends Middleware
     public function processRequest(ProcessingRequest $request): ProcessingRequest
     {
         if (!in_array($request->requestMethod(), $this->requestMethods, true)) {
+            return $request;
+        }
+
+        if (!$this->matchesRequest($request)) {
             return $request;
         }
 
@@ -141,7 +149,7 @@ class FileCacheMiddleware extends Middleware
     /**
      * Caches the response to a file.
      *
-     * Only stores the response if it matches all configured matchers.
+     * Only stores the response if it matches all configured filters.
      *
      * @param Response $response The response to cache.
      * @return Response The original response.
@@ -150,21 +158,37 @@ class FileCacheMiddleware extends Middleware
     {
         if ($this->isCacheable($response)) {
             $cache = new FileCache($response->request(), $this->location);
-            new ResponseCacher($cache, $response)->process();
+            (new ResponseCacher($cache, $response))->process();
         }
         return $response;
     }
 
     /**
-     * Check if the response is cacheable based on the configured matchers.
+     * Check if the request matches all configured filters.
+     *
+     * @param ProcessingRequest $request The request to check.
+     * @return boolean True if the request matches all filters, false otherwise.
+     */
+    private function matchesRequest(ProcessingRequest $request): bool
+    {
+        foreach ($this->filters as $filter) {
+            if (!$filter->matchRequest($request)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Check if the response is cacheable based on the configured filters.
      *
      * @param Response $response The response to check.
      * @return boolean True if the response is storable, false otherwise.
      */
     private function isCacheable(Response $response): bool
     {
-        foreach ($this->matchers as $matcher) {
-            if (!$matcher->match($response)) {
+        foreach ($this->filters as $filter) {
+            if (!$filter->matchResponse($response)) {
                 return false;
             }
         }
