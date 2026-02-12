@@ -53,4 +53,36 @@ class FileCacheMiddlewareBuildTest extends TestCase
         $response = new \Tent\Models\Response(['httpCode' => 200]);
         $this->assertFalse($matcher->match($response));
     }
+
+    public function testBuildWithRequestMethodsTriggersDeprecationWarning()
+    {
+        // Create a custom logger to capture deprecation warnings
+        $warnings = [];
+        $testLogger = new class($warnings) implements \Tent\Utils\LoggerInterface {
+            private $warnings;
+            public function __construct(&$warnings) {
+                $this->warnings = &$warnings;
+            }
+            public function logDeprecation(string $message): void {
+                $this->warnings[] = $message;
+            }
+        };
+
+        // Set the custom logger
+        $originalLogger = \Tent\Utils\Logger::getInstance();
+        \Tent\Utils\Logger::setInstance($testLogger);
+
+        $middleware = FileCacheMiddleware::build([
+            'location' => '/tmp/cache',
+            'requestMethods' => ['GET', 'POST']
+        ]);
+
+        // Verify deprecation warning was logged
+        $this->assertCount(1, $warnings);
+        $this->assertStringContainsString('requestMethods', $warnings[0]);
+        $this->assertStringContainsString('deprecated', $warnings[0]);
+
+        // Restore original logger
+        \Tent\Utils\Logger::setInstance($originalLogger);
+    }
 }
