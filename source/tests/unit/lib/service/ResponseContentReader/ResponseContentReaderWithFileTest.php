@@ -51,7 +51,7 @@ class ResponseContentReaderWithFileTest extends TestCase
         $this->assertInstanceOf(Response::class, $response);
         $this->assertEquals(200, $response->httpCode());
         $this->assertEquals('Hello World', $response->body());
-        $this->assertContains('Content-Type: text/plain', $response->headerLines());
+        $this->assertContains('Content-Type: text/plain', $response->headers());
     }
 
     public function testReadFileToResponseThrowsFileNotFoundException()

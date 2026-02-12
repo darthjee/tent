@@ -54,7 +54,7 @@ class StaticFileHandlerGeneralTest extends TestCase
 
         $this->assertEquals(200, $response->httpCode());
         $this->assertEquals('Hello World', $response->body());
-        $this->assertContains('Content-Type: text/plain', $response->headerLines());
+        $this->assertContains('Content-Type: text/plain', $response->headers());
     }
 
     public function testHandleRequestReturnsMissingResponseWhenFileDoesNotExist()
@@ -86,8 +86,8 @@ class StaticFileHandlerGeneralTest extends TestCase
         $response = $handler->handleRequest($processingRequest);
 
         $this->assertEquals(200, $response->httpCode());
-        $this->assertCount(2, $response->headerLines());
-        $this->assertMatchesRegularExpression('/Content-Type: text\/html/', $response->headerLines()[0]);
+        $this->assertCount(2, $response->headers());
+        $this->assertMatchesRegularExpression('/Content-Type: text\/html/', $response->headers()[0]);
     }
 
     public function testHandleRequestReturnsCorrectContentTypeForCss()
@@ -104,8 +104,8 @@ class StaticFileHandlerGeneralTest extends TestCase
         $response = $handler->handleRequest($processingRequest);
 
         $this->assertEquals(200, $response->httpCode());
-        $this->assertCount(2, $response->headerLines());
-        $this->assertMatchesRegularExpression('/Content-Type: text\/css/', $response->headerLines()[0]);
+        $this->assertCount(2, $response->headers());
+        $this->assertMatchesRegularExpression('/Content-Type: text\/css/', $response->headers()[0]);
     }
 
     public function testHandleRequestReturnsCorrectContentTypeForJs()
@@ -122,8 +122,8 @@ class StaticFileHandlerGeneralTest extends TestCase
         $response = $handler->handleRequest($processingRequest);
 
         $this->assertEquals(200, $response->httpCode());
-        $this->assertCount(2, $response->headerLines());
-        $this->assertMatchesRegularExpression('/Content-Type: application\/javascript/', $response->headerLines()[0]);
+        $this->assertCount(2, $response->headers());
+        $this->assertMatchesRegularExpression('/Content-Type: application\/javascript/', $response->headers()[0]);
     }
 
     public function testHandleRequestReturnsCorrectContentTypeForJson()
@@ -140,8 +140,8 @@ class StaticFileHandlerGeneralTest extends TestCase
         $response = $handler->handleRequest($processingRequest);
 
         $this->assertEquals(200, $response->httpCode());
-        $this->assertCount(2, $response->headerLines());
-        $this->assertMatchesRegularExpression('/Content-Type: application\/json/', $response->headerLines()[0]);
+        $this->assertCount(2, $response->headers());
+        $this->assertMatchesRegularExpression('/Content-Type: application\/json/', $response->headers()[0]);
     }
 
     public function testHandleRequestReturnsCorrectContentTypeForPng()
@@ -158,8 +158,8 @@ class StaticFileHandlerGeneralTest extends TestCase
         $response = $handler->handleRequest($processingRequest);
 
         $this->assertEquals(200, $response->httpCode());
-        $this->assertCount(2, $response->headerLines());
-        $this->assertMatchesRegularExpression('/Content-Type: image\/png/', $response->headerLines()[0]);
+        $this->assertCount(2, $response->headers());
+        $this->assertMatchesRegularExpression('/Content-Type: image\/png/', $response->headers()[0]);
     }
 
     public function testHandleRequestReturnsCorrectContentTypeForJpg()
@@ -176,8 +176,8 @@ class StaticFileHandlerGeneralTest extends TestCase
         $response = $handler->handleRequest($processingRequest);
 
         $this->assertEquals(200, $response->httpCode());
-        $this->assertCount(2, $response->headerLines());
-        $this->assertMatchesRegularExpression('/Content-Type: image\/jpeg/', $response->headerLines()[0]);
+        $this->assertCount(2, $response->headers());
+        $this->assertMatchesRegularExpression('/Content-Type: image\/jpeg/', $response->headers()[0]);
     }
 
     public function testHandleRequestReturnsMissingResponseForDirectory()

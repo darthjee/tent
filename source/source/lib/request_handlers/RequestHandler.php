@@ -110,7 +110,9 @@ abstract class RequestHandler
             throw new InvalidArgumentException('Missing handler type');
         }
 
-        return self::handlerClass($params)::build($params);
+        $handler = self::handlerClass($params)::build($params);
+        $handler->buildMiddlewares($params['middlewares'] ?? []);
+        return $handler;
     }
 
     /**
