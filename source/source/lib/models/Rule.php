@@ -85,13 +85,11 @@ class Rule
     {
         $handlerParams = $params['handler'];
         $handlerParams['middlewares'] = $params['middlewares'] ?? [];
-        $handler = RequestHandler::build($handlerParams);
-        $name = $params['name'] ?? null;
 
         $rule = new self([
-            'handler' => $handler,
+            'handler' => RequestHandler::build($handlerParams),
             'matchers' => RequestMatcher::buildMatchers($params['matchers'] ?? []),
-            'name' => $name
+            'name' => $params['name'] ?? null
         ]);
 
         return $rule;
