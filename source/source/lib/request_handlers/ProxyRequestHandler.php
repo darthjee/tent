@@ -51,7 +51,7 @@ class ProxyRequestHandler extends RequestHandler
     public static function build(array $params): self
     {
         $server = new Server($params['host'] ?? '');
-        return $handler = new self($server);
+        return new self($server);
     }
 
     /**
