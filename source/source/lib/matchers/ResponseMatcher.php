@@ -30,6 +30,12 @@ abstract class ResponseMatcher
         return $class::build($params);
     }
 
+    /**
+     * Builds an array of ResponseMatchers from the given attributes.
+     *
+     * @param array $attributes The array of attributes for building matchers.
+     * @return ResponseMatcher[] The array of constructed ResponseMatchers.
+     */
     public static function buildMatchers(array $attributes): array
     {
         $matchers = [];
