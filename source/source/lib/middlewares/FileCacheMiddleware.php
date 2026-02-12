@@ -46,6 +46,12 @@ use Tent\Service\ResponseCacher;
 class FileCacheMiddleware extends Middleware
 {
     /**
+     * Deprecation warning message for httpCodes attribute.
+     */
+    private const DEPRECATION_HTTP_CODES_MSG =
+      'Deprecation warning: The "httpCodes" attribute is deprecated. Use "matchers" instead.';
+
+    /**
      * @var FolderLocation The base folder location for caching.
      */
     private FolderLocation $location;
@@ -88,11 +94,11 @@ class FileCacheMiddleware extends Middleware
 
         if (isset($attributes['matchers'])) {
             if (isset($attributes['httpCodes'])) {
-                trigger_error('Deprecation warning: The "httpCodes" attribute is deprecated. Use "matchers" instead.', E_USER_DEPRECATED);
+                trigger_error(self::DEPRECATION_HTTP_CODES_MSG, E_USER_DEPRECATED);
             }
             $matchers = ResponseMatcher::buildMatchers($attributes['matchers']);
         } elseif (isset($attributes['httpCodes'])) {
-            trigger_error('Deprecation warning: The "httpCodes" attribute is deprecated. Use "matchers" instead.', E_USER_DEPRECATED);
+            trigger_error(self::DEPRECATION_HTTP_CODES_MSG, E_USER_DEPRECATED);
             $httpCodes = $attributes['httpCodes'] ?? [200];
             $matchers = [new StatusCodeMatcher($httpCodes)];
         } else {
