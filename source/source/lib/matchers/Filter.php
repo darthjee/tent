@@ -63,8 +63,8 @@ abstract class Filter
     public static function buildFilters(array $attributes): array
     {
         $filters = [];
-        foreach ($attributes as $attributes) {
-            $filters[] = self::build($attributes);
+        foreach ($attributes as $filterConfig) {
+            $filters[] = self::build($filterConfig);
         }
         return $filters;
     }

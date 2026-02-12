@@ -55,8 +55,8 @@ abstract class ResponseMatcher extends Filter
     public static function buildMatchers(array $attributes): array
     {
         $matchers = [];
-        foreach ($attributes as $attributes) {
-            $matchers[] = self::build($attributes);
+        foreach ($attributes as $matcherConfig) {
+            $matchers[] = self::build($matcherConfig);
         }
         return $matchers;
     }
