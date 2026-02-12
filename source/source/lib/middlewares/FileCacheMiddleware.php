@@ -85,11 +85,14 @@ class FileCacheMiddleware extends Middleware
         $location = new FolderLocation($attributes['location']);
         $requestMethods = $attributes['requestMethods'] ?? null;
 
-        if (!isset($attributes['matchers'])) {
+        if (isset($attributes['matchers'])) {
+            if (!is_array($attributes['httpCodes'])) {
+                // add deprecation warning
+            }
+            $matchers = ResponseMatcher::buildMatchers($attributes['matchers']);
+        } else {
             $httpCodes = $attributes['httpCodes'] ?? [200];
             $matchers = [new StatusCodeMatcher($httpCodes)];
-        } else {
-            $matchers = ResponseMatcher::buildMatchers($attributes['matchers']);
         }
 
         return new self($location, $requestMethods, $matchers);
