@@ -2,6 +2,8 @@
 
 namespace Tent\Tests\Matchers\RequestMatcher;
 
+require_once __DIR__ . '/../../../../support/loader.php';
+
 use PHPUnit\Framework\TestCase;
 use Tent\Matchers\RequestMatcher;
 use Tent\Models\Request;

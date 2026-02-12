@@ -2,6 +2,8 @@
 
 namespace Tent\Tests\Middlewares\SetPathMiddleware;
 
+require_once __DIR__ . '/../../../../support/loader.php';
+
 use PHPUnit\Framework\TestCase;
 use Tent\Middlewares\SetPathMiddleware;
 use Tent\Models\ProcessingRequest;
