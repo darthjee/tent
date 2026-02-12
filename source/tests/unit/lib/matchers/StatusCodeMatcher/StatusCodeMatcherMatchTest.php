@@ -2,11 +2,13 @@
 
 namespace Tent\Tests\Matchers;
 
+require_once __DIR__ . '/../../../../support/loader.php';
+
 use PHPUnit\Framework\TestCase;
 use Tent\Matchers\StatusCodeMatcher;
 use Tent\Models\Response;
 
-class StatusCodeMatcherTest extends TestCase
+class StatusCodeMatcherMatchTest extends TestCase
 {
     private function mockResponse($code)
     {

@@ -7,8 +7,10 @@ use Tent\Models\FolderLocation;
 use Tent\Content\FileCache;
 use Tent\Models\Response;
 use Tent\Service\ResponseContentReader;
+use Tent\Matchers\ResponseMatcher;
 use Tent\Matchers\StatusCodeMatcher;
 use Tent\Service\ResponseCacher;
+use Tent\Utils\Logger;
 
 /**
  * Middleware for caching responses to files.
@@ -45,6 +47,12 @@ use Tent\Service\ResponseCacher;
 class FileCacheMiddleware extends Middleware
 {
     /**
+     * Deprecation warning message for httpCodes attribute.
+     */
+    private const DEPRECATION_HTTP_CODES_MSG =
+      'Deprecation warning: The "httpCodes" attribute is deprecated. Use "matchers" instead.';
+
+    /**
      * @var FolderLocation The base folder location for caching.
      */
     private FolderLocation $location;
@@ -63,16 +71,15 @@ class FileCacheMiddleware extends Middleware
      * Constructs a FileCacheMiddleware instance.
      *
      * @param FolderLocation $location       The base folder location for caching.
-     * @param array|null     $httpCodes      Array of HTTP status codes to cache. Defaults to [200].
      * @param array|null     $requestMethods Array of HTTP request methods to cache. Defaults to ['GET'].
+     * @param array          $matchers       Array of custom matchers for cacheability.
      */
-    public function __construct(FolderLocation $location, ?array $httpCodes = null, ?array $requestMethods = null)
+    public function __construct(FolderLocation $location, ?array $requestMethods = null, array $matchers = [])
     {
         $this->location = $location;
         $this->requestMethods = $requestMethods ?? ['GET'];
 
-        $httpCodes = $httpCodes ?? [200];
-        $this->matchers = [new StatusCodeMatcher($httpCodes)];
+        $this->matchers = $matchers;
     }
 
     /**
@@ -80,13 +87,27 @@ class FileCacheMiddleware extends Middleware
      *
      * @param array $attributes The attributes to build the middleware.
      * @return FileCacheMiddleware The constructed FileCacheMiddleware instance.
+     * @deprecated The 'httpCodes' attribute is deprecated. Use 'matchers' instead.
      */
     public static function build(array $attributes): FileCacheMiddleware
     {
         $location = new FolderLocation($attributes['location']);
-        $httpCodes = $attributes['httpCodes'] ?? null;
         $requestMethods = $attributes['requestMethods'] ?? null;
-        return new self($location, $httpCodes, $requestMethods);
+
+        if (isset($attributes['httpCodes'])) {
+            Logger::deprecate(self::DEPRECATION_HTTP_CODES_MSG);
+        }
+
+        if (isset($attributes['matchers'])) {
+            $matchers = ResponseMatcher::buildMatchers($attributes['matchers']);
+        } elseif (isset($attributes['httpCodes'])) {
+            $httpCodes = $attributes['httpCodes'] ?? [200];
+            $matchers = [new StatusCodeMatcher($httpCodes)];
+        } else {
+            $matchers = [new StatusCodeMatcher([200])];
+        }
+
+        return new self($location, $requestMethods, $matchers);
     }
 
     /**

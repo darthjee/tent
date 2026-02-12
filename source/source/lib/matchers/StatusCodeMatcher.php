@@ -8,7 +8,7 @@ use Tent\Utils\HttpCodeMatcher;
 /**
  * Matcher for HTTP status codes in responses.
  */
-class StatusCodeMatcher implements ResponseMatcher
+class StatusCodeMatcher extends ResponseMatcher
 {
     /**
      * @var array The list of HTTP status codes or patterns to match against.
@@ -41,5 +41,17 @@ class StatusCodeMatcher implements ResponseMatcher
             }
         }
         return false;
+    }
+
+    /**
+     * Builds a StatusCodeMatcher from the given attributes.
+     *
+     * @param array $attributes The attributes for building the matcher.
+     * @return StatusCodeMatcher The constructed StatusCodeMatcher.
+     */
+    public static function build(array $attributes): StatusCodeMatcher
+    {
+        $httpCodes = $attributes['httpCodes'] ?? [200];
+        return new self($httpCodes);
     }
 }

@@ -94,6 +94,21 @@ use Tent\Models\Rule;
  *     ]
  * ]);
  * ```
+ *
+ * @note
+ *   When defining middlewares or other components in the params array for buildRule
+ *   you can specify the class to use via the 'class' key:
+ *   Example:
+ *   ```php
+ *   'middlewares' => [
+ *     [
+ *       'class' => 'Tent\\Middlewares\\FileCacheMiddleware',
+ *       'location' => './cache',
+ *       'httpCodes' => [200]
+ *     ]
+ *   ]
+ *   ```
+ *   The 'class' key is required to indicate which middleware or handler implementation should be used.
  */
 class Configuration
 {

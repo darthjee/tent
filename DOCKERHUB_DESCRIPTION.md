@@ -61,7 +61,12 @@ Configuration::buildRule([
     [
       'class' => 'Tent\Middlewares\FileCacheMiddleware',
       'location' => "./cache",
-      'httpCodes' => ["2xx"]
+      'matchers' => [
+        [
+          'class' => 'Tent\\Matchers\\StatusCodeMatcher',
+          'httpCodes' => ["2xx"]
+        ]
+      ]
     ],
     [
       'class' => 'Tent\Middlewares\SetHeadersMiddleware',
@@ -191,7 +196,7 @@ Handler   Handler         Handler
 
 Tent includes a flexible middleware system for request/response processing. Built-in middlewares include:
 
-- **FileCacheMiddleware**: Caches responses to files based on HTTP status codes
+- **FileCacheMiddleware**: Caches responses to files based on HTTP status codes (now configured via 'matchers'; 'httpCodes' is deprecated)
 - **SetHeadersMiddleware**: Sets or overrides request headers
 - **SetPathMiddleware**: Changes the request path (useful for serving index.html on root requests)
 

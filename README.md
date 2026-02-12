@@ -124,11 +124,16 @@ Configuration::buildRule([
         ['method' => 'GET', 'uri' => '/api/', 'type' => 'begins_with']
     ],
     "middlewares" => [
-        [
-            'class' => 'Tent\Middlewares\FileCacheMiddleware',
-            'location' => "./cache",
-            'httpCodes' => ["2xx"]
-        ],
+      [
+         'class' => 'Tent\Middlewares\FileCacheMiddleware',
+         'location' => "./cache",
+         'matchers' => [
+            [
+               'class' => 'Tent\\Matchers\\StatusCodeMatcher',
+               'httpCodes' => ["2xx"]
+            ]
+         ]
+      ],
         [
             'class' => 'Tent\Middlewares\SetHeadersMiddleware',
             'headers' => [
@@ -143,7 +148,7 @@ Configuration::buildRule([
 
 - **SetHeadersMiddleware**: Sets or overrides request headers (e.g., Host, X-Test).
 - **SetPathMiddleware**: Changes the request path, useful for serving a fixed file with StaticFileHandler.
-- **FileCacheMiddleware**: Caches responses matching configured HTTP codes.
+**FileCacheMiddleware**: Caches responses matching configured HTTP codes (now configured via 'matchers'; 'httpCodes' is deprecated).
 
 All built-in and custom middlewares must extend the `Tent\Middlewares\Middleware` base class (not `RequestMiddleware`).
 
