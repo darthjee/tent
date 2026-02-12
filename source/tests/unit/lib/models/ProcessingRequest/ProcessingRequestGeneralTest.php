@@ -2,6 +2,8 @@
 
 namespace Tent\Tests\Models\ProcessingRequest;
 
+require_once __DIR__ . '/../../../../support/loader.php';
+
 use PHPUnit\Framework\TestCase;
 use Tent\Models\ProcessingRequest;
 use Tent\Models\Request;

@@ -2,6 +2,8 @@
 
 namespace Tent\Tests\Service\ResponseContentReader;
 
+require_once __DIR__ . '/../../../../support/loader.php';
+
 use PHPUnit\Framework\TestCase;
 use Tent\Service\ResponseContentReader;
 use Tent\Content\File;

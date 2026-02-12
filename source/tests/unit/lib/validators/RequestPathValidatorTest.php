@@ -2,6 +2,8 @@
 
 namespace Tent\Tests\Validators;
 
+require_once __DIR__ . '/../../../support/loader.php';
+
 use PHPUnit\Framework\TestCase;
 use Tent\Validators\RequestPathValidator;
 

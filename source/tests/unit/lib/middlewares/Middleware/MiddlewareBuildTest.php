@@ -2,6 +2,8 @@
 
 namespace Tent\Tests\Middlewares\Middleware;
 
+require_once __DIR__ . '/../../../../support/loader.php';
+
 use PHPUnit\Framework\TestCase;
 use Tent\Middlewares\Middleware;
 use Tent\Tests\Support\Middlewares\DummyRequestMiddleware;

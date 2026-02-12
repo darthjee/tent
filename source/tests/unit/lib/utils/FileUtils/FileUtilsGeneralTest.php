@@ -2,6 +2,8 @@
 
 namespace Tent\Tests\Utils\FileUtils;
 
+require_once __DIR__ . '/../../../../support/loader.php';
+
 use PHPUnit\Framework\TestCase;
 use Tent\Utils\FileUtils;
 
