@@ -109,17 +109,6 @@ class Rule
     }
 
     /**
-     * Builds and adds multiple Middlewares to the rule.
-     *
-     * @param array $attributes Array of associative arrays, each with keys for Middleware::build.
-     * @return array all Middlewares.
-     */
-    protected function buildMiddlewares(array $attributes): array
-    {
-        return $this->handler()->buildMiddlewares($attributes);
-    }
-
-    /**
      * Checks if the given request matches any of the rule's matchers.
      *
      * @param RequestInterface $request The incoming HTTP request.
