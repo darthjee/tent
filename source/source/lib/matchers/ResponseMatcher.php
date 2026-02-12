@@ -17,11 +17,16 @@ abstract class ResponseMatcher
      */
     abstract public function match(Response $response): bool;
 
-    // TODO implement it later
+    /** */
+     * Builds a ResponseMatcher from the given parameters.
+     *
+     * @param array $params The parameters for building the matcher.
+     * @return ResponseMatcher The constructed ResponseMatcher.
+     */
     public static function build(array $params): self
     {
         $class = $params['class'];
 
-        return new $class();
+        return $class::build($params);
     }
 }
