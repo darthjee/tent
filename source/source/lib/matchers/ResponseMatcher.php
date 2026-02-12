@@ -7,7 +7,7 @@ use Tent\Models\Response;
 /**
  * Matcher that checks if a Response matches certain criteria.
  */
-interface ResponseMatcher
+abstract class ResponseMatcher
 {
     /**
      * Checks if the given response matches the criteria.
@@ -15,5 +15,5 @@ interface ResponseMatcher
      * @param Response $response The response to check.
      * @return boolean True if the response matches, false otherwise.
      */
-    public function match(Response $response): bool;
+    abstract public function match(Response $response): bool;
 }

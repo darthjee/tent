@@ -8,7 +8,7 @@ use Tent\Utils\HttpCodeMatcher;
 /**
  * Matcher for HTTP status codes in responses.
  */
-class StatusCodeMatcher implements ResponseMatcher
+class StatusCodeMatcher extends ResponseMatcher
 {
     /**
      * @var array The list of HTTP status codes or patterns to match against.
