@@ -42,4 +42,16 @@ class StatusCodeMatcher extends ResponseMatcher
         }
         return false;
     }
+
+    /**
+     * Builds a StatusCodeMatcher from the given attributes.
+     *
+     * @param array $attributes The attributes for building the matcher.
+     * @return StatusCodeMatcher The constructed StatusCodeMatcher.
+     */
+    public static function build(array $attributes): StatusCodeMatcher
+    {
+        $httpCodes = $attributes['httpCodes'] ?? [200];
+        return new self($httpCodes);
+    }
 }
