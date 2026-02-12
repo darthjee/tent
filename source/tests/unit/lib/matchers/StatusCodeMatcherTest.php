@@ -84,4 +84,20 @@ class StatusCodeMatcherTest extends TestCase
         $this->assertFalse($matcher->match($this->mockResponse(600)));
         $this->assertFalse($matcher->match($this->mockResponse(499)));
     }
+
+    //////// Build tests
+    public function testBuildCreatesMatcherWithGivenCodes()
+    {
+        $matcher = StatusCodeMatcher::build(['httpCodes' => [201, 202]]);
+        $this->assertTrue($matcher->match($this->mockResponse(201)));
+        $this->assertTrue($matcher->match($this->mockResponse(202)));
+        $this->assertFalse($matcher->match($this->mockResponse(200)));
+    }
+
+    public function testBuildDefaultsTo200()
+    {
+        $matcher = StatusCodeMatcher::build([]);
+        $this->assertTrue($matcher->match($this->mockResponse(200)));
+        $this->assertFalse($matcher->match($this->mockResponse(201)));
+    }
 }
