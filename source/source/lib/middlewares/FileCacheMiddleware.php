@@ -120,11 +120,20 @@ class FileCacheMiddleware extends Middleware
 
         if (isset($attributes['matchers'])) {
             $matchers = ResponseMatcher::buildMatchers($attributes['matchers']);
-        } elseif (isset($attributes['httpCodes'])) {
-            $httpCodes = $attributes['httpCodes'] ?? [200];
-            $matchers = [new StatusCodeMatcher($httpCodes)];
         } else {
-            $matchers = [new StatusCodeMatcher([200])];
+            if (isset($attributes['httpCodes'])) {
+                $httpCodes = $attributes['httpCodes'] ?? [200];
+                $matchers = [new StatusCodeMatcher($httpCodes)];
+            } else {
+                $matchers = [new StatusCodeMatcher([200])];
+            }
+
+            if (isset($attributes['requestMethods'])) {
+                $requestMethods = $attributes['requestMethods'] ?? ['GET'];
+                $matchers[] = new RequestMethodMatcher($requestMethods);
+            } else {
+                $matchers[] = new RequestMethodMatcher(['GET']);
+            }
         }
 
         return new self($location, $requestMethods, $matchers);
