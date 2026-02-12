@@ -85,27 +85,32 @@ docker compose exec frontend_dev npm test
 Rules are defined declaratively using `Configuration::buildRule()`:
 ```php
 Configuration::buildRule([
-    'handler' => [
-        'type' => 'proxy',        // or 'static'
-        'host' => 'http://api:80' // for proxy type
-    ],
-    'matchers' => [
-        ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact']
-        // type: 'exact', 'begins_with'
-    ],
-      'middlewares' => [
+  'handler' => [
+    'type' => 'proxy',        // or 'static'
+    'host' => 'http://api:80' // for proxy type
+  ],
+  'matchers' => [
+    ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact']
+    // type: 'exact', 'begins_with'
+  ],
+  'middlewares' => [
+    [
+      'class' => 'Tent\\Middlewares\\FileCacheMiddleware',
+      'location' => './cache',
+      'matchers' => [
         [
-          'class' => 'Tent\Middlewares\FileCacheMiddleware',
-          'location' => "./cache",
+          'class' => 'Tent\\Matchers\\StatusCodeMatcher',
           'httpCodes' => [200]
-        ],
-        [
-          'class' => 'Tent\Middlewares\SetHeadersMiddleware',
-          'headers' => [
-            'Host' => 'backend.local'
-          ]
         ]
+      ]
+    ],
+    [
+      'class' => 'Tent\\Middlewares\\SetHeadersMiddleware',
+      'headers' => [
+        'Host' => 'backend.local'
+      ]
     ]
+  ]
 ]);
 ```
 
@@ -115,9 +120,35 @@ Middlewares implement `processRequest(ProcessingRequest): ProcessingRequest` and
 
 Examples:
 
-- `FileCacheMiddleware`: Caches responses matching HTTP codes
+- `FileCacheMiddleware`: Caches responses matching HTTP codes (now configured via `matchers`; `httpCodes` is deprecated)
 - `SetHeadersMiddleware`: Overrides request headers
 - `SetPathMiddleware`: Changes request path (e.g., `/` → `/index.html`)
+## Matcher Configuration Migration
+
+The old `httpCodes` attribute for configuring matchers in middlewares (especially `FileCacheMiddleware`) is deprecated. Use the new `matchers` array for more dynamic and robust configuration:
+
+```php
+// Old (deprecated)
+[
+  'class' => 'Tent\\Middlewares\\FileCacheMiddleware',
+  'location' => './cache',
+  'httpCodes' => [200]
+]
+
+// New (recommended)
+[
+  'class' => 'Tent\\Middlewares\\FileCacheMiddleware',
+  'location' => './cache',
+  'matchers' => [
+    [
+      'class' => 'Tent\\Matchers\\StatusCodeMatcher',
+      'httpCodes' => [200]
+    ]
+  ]
+]
+```
+
+All documentation and examples should use the new `matchers` pattern. Using `httpCodes` will trigger a deprecation warning in logs.
 
 ### Testing Standards
 
