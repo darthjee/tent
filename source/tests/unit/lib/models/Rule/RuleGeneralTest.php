@@ -21,7 +21,7 @@ class RuleGeneralTest extends TestCase
         $matcher1 = new RequestMatcher('POST', '/test', 'exact');
         $matcher2 = new RequestMatcher('GET', '/test', 'exact');
 
-        $rule = new Rule($handler, [$matcher1, $matcher2]);
+        $rule = new Rule(['handler' => $handler, 'matchers' => [$matcher1, $matcher2]]);
 
         $this->assertTrue($rule->match($request));
     }
@@ -37,7 +37,7 @@ class RuleGeneralTest extends TestCase
         $matcher1 = new RequestMatcher('POST', '/test', 'exact');
         $matcher2 = new RequestMatcher('PUT', '/test', 'exact');
 
-        $rule = new Rule($handler, [$matcher1, $matcher2]);
+        $rule = new Rule(['handler' => $handler, 'matchers' => [$matcher1, $matcher2]]);
 
         $this->assertFalse($rule->match($request));
     }
@@ -47,7 +47,7 @@ class RuleGeneralTest extends TestCase
         $request = $this->createMock(Request::class);
         $handler = $this->createMock(RequestHandler::class);
 
-        $rule = new Rule($handler, []);
+        $rule = new Rule(['handler' => $handler, 'matchers' => []]);
 
         $this->assertFalse($rule->match($request));
     }
@@ -57,7 +57,7 @@ class RuleGeneralTest extends TestCase
         $request = $this->createMock(Request::class);
         $handler = $this->createMock(RequestHandler::class);
 
-        $rule = new Rule($handler);
+        $rule = new Rule(['handler' => $handler]);
 
         $this->assertFalse($rule->match($request));
     }
@@ -73,7 +73,7 @@ class RuleGeneralTest extends TestCase
         $matcher1 = new RequestMatcher('GET', '/test', 'exact');
         $matcher2 = new RequestMatcher('GET', '/other', 'exact');
 
-        $rule = new Rule($handler, [$matcher1, $matcher2]);
+        $rule = new Rule(['handler' => $handler, 'matchers' => [$matcher1, $matcher2]]);
 
         $this->assertTrue($rule->match($request));
     }
@@ -82,7 +82,7 @@ class RuleGeneralTest extends TestCase
     {
         $handler = $this->createMock(RequestHandler::class);
 
-        $rule = new Rule($handler);
+        $rule = new Rule(['handler' => $handler]);
 
         $this->assertSame($handler, $rule->handler());
     }

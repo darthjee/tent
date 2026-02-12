@@ -32,15 +32,16 @@ class Rule
     /**
      * Constructs a Rule.
      *
-     * @param RequestHandler   $handler  The handler to process requests that match this rule.
-     * @param RequestMatcher[] $matchers Array of matchers to validate requests.
-     * @param string|null      $name     Optional name for the rule.
+     * @param array $attributes Associative array with keys:
+     *   - 'handler': RequestHandler, the handler to process requests that match this rule.
+     *   - 'matchers': array of RequestMatcher, optional list of matchers to validate requests.
+     *   - 'name': string|null, optional name for the rule.
      */
-    public function __construct(RequestHandler $handler, array $matchers = [], ?string $name = null)
+    public function __construct(array $attributes)
     {
-        $this->handler = $handler;
-        $this->matchers = $matchers;
-        $this->name = $name;
+        $this->handler = $attributes['handler'];
+        $this->matchers = $attributes['matchers'] ?? [];
+        $this->name = $attributes['name'] ?? null;
     }
 
     /**
@@ -85,11 +86,11 @@ class Rule
         $handler = RequestHandler::build($params['handler'] ?? []);
         $name = $params['name'] ?? null;
 
-        $rule = new self(
-            $handler,
-            RequestMatcher::buildMatchers($params['matchers'] ?? []),
-            $name
-        );
+        $rule = new self([
+            'handler' => $handler,
+            'matchers' => RequestMatcher::buildMatchers($params['matchers'] ?? []),
+            'name' => $name
+        ]);
 
         $rule->buildMiddlewares($params['middlewares'] ?? []);
 
