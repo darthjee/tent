@@ -9,6 +9,7 @@ use Tent\Models\Response;
 use Tent\Service\ResponseContentReader;
 use Tent\Matchers\ResponseMatcher;
 use Tent\Matchers\StatusCodeMatcher;
+use Tent\Matchers\RequestMethodMatcher;
 use Tent\Service\ResponseCacher;
 use Tent\Utils\Logger;
 
@@ -30,19 +31,28 @@ use Tent\Utils\Logger;
  *         [
  *             'class' => 'Tent\\Middlewares\\FileCacheMiddleware',
  *             'location' => './cache',
- *             'httpCodes' => [200], // or ["2xx"] for all 2xx codes
- *             // 'requestMethods' => ['GET'] // optional, defaults to ['GET']
+ *             'matchers' => [
+ *                 [
+ *                     'class' => 'Tent\\Matchers\\StatusCodeMatcher',
+ *                     'httpCodes' => [200] // or ["2xx"] for all 2xx codes
+ *                 ],
+ *                 [
+ *                     'class' => 'Tent\\Matchers\\RequestMethodMatcher',
+ *                     'requestMethods' => ['GET', 'POST']
+ *                 ]
+ *             ]
  *         ]
  *     ]
  * ]);
  * ```
  *
  * - `location`: Directory where cached responses are stored (required).
- * - `httpCodes`: Array of HTTP status codes to cache (e.g., [200], ["2xx"]).
- * - `requestMethods`: Array of HTTP methods to cache (default: ['GET']).
+ * - `matchers`: Array of matcher configurations to determine cacheability.
+ * - `httpCodes`: (DEPRECATED) Array of HTTP status codes to cache. Use `matchers` instead.
+ * - `requestMethods`: (DEPRECATED) Array of HTTP methods to cache. Use `matchers` instead.
  *
- * This middleware will cache responses matching the specified codes and
- * methods, and serve them from cache on subsequent requests.
+ * This middleware will cache responses matching all configured matchers,
+ * and serve them from cache on subsequent requests.
  */
 class FileCacheMiddleware extends Middleware
 {
@@ -51,6 +61,12 @@ class FileCacheMiddleware extends Middleware
      */
     private const DEPRECATION_HTTP_CODES_MSG =
       'Deprecation warning: The "httpCodes" attribute is deprecated. Use "matchers" instead.';
+
+    /**
+     * Deprecation warning message for requestMethods attribute.
+     */
+    private const DEPRECATION_REQUEST_METHODS_MSG =
+      'Deprecation warning: The "requestMethods" attribute is deprecated. Use "matchers" instead.';
 
     /**
      * @var FolderLocation The base folder location for caching.
@@ -96,6 +112,10 @@ class FileCacheMiddleware extends Middleware
 
         if (isset($attributes['httpCodes'])) {
             Logger::deprecate(self::DEPRECATION_HTTP_CODES_MSG);
+        }
+
+        if (isset($attributes['requestMethods'])) {
+            Logger::deprecate(self::DEPRECATION_REQUEST_METHODS_MSG);
         }
 
         if (isset($attributes['matchers'])) {
