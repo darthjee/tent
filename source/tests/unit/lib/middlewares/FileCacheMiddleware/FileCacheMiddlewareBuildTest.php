@@ -26,9 +26,9 @@ class FileCacheMiddlewareBuildTest extends TestCase
         $this->assertCount(2, $matchers);
         $matcher = $matchers[0];
         $response = new \Tent\Models\Response(['httpCode' => 200]);
-        $this->assertTrue($matcher->match($response));
+        $this->assertTrue($matcher->matchResponse($response));
         $response = new \Tent\Models\Response(['httpCode' => 201]);
-        $this->assertFalse($matcher->match($response));
+        $this->assertFalse($matcher->matchResponse($response));
     }
 
     public function testBuildWithMatchersOverridesHttpCodes()
@@ -49,9 +49,9 @@ class FileCacheMiddlewareBuildTest extends TestCase
         $this->assertCount(1, $matchers);
         $matcher = $matchers[0];
         $response = new \Tent\Models\Response(['httpCode' => 201]);
-        $this->assertTrue($matcher->match($response));
+        $this->assertTrue($matcher->matchResponse($response));
         $response = new \Tent\Models\Response(['httpCode' => 200]);
-        $this->assertFalse($matcher->match($response));
+        $this->assertFalse($matcher->matchResponse($response));
     }
 
     public function testBuildWithRequestMethodsTriggersDeprecationWarning()
