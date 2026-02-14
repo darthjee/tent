@@ -2,12 +2,12 @@
 
 namespace Tent\Matchers;
 
-use Tent\Models\Response;
+use Tent\Models\RequestInterface;
 
 /**
  * Matcher for HTTP request methods associated with responses.
  */
-class RequestMethodMatcher extends ResponseMatcher
+class RequestMethodMatcher extends RequestResponseMatcher
 {
     /**
      * @var array The list of HTTP request methods to match against.
@@ -25,14 +25,13 @@ class RequestMethodMatcher extends ResponseMatcher
     }
 
     /**
-     * Checks if the response's associated request method matches any of the configured methods.
+     * Checks if the request's method matches any of the configured methods.
      *
-     * @param Response $response The response to check.
+     * @param RequestInterface $request The request to check.
      * @return boolean True if the request method matches, false otherwise.
      */
-    public function match(Response $response): bool
+    public function matchRequest(RequestInterface $request): bool
     {
-        $request = $response->request();
         $method = strtoupper($request->requestMethod());
 
         return in_array($method, $this->requestMethods);
