@@ -58,12 +58,14 @@ class FileCacheMiddlewareBuildTest extends TestCase
     {
         // Create a custom logger to capture deprecation warnings
         $warnings = [];
-        $testLogger = new class($warnings) implements \Tent\Utils\LoggerInterface {
+        $testLogger = new class ($warnings) implements \Tent\Utils\LoggerInterface {
             private $warnings;
-            public function __construct(&$warnings) {
+            public function __construct(&$warnings)
+            {
                 $this->warnings = &$warnings;
             }
-            public function logDeprecation(string $message): void {
+            public function logDeprecation(string $message): void
+            {
                 $this->warnings[] = $message;
             }
         };
