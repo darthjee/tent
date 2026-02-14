@@ -15,8 +15,13 @@ class RequestResponseMatcherBuildTest extends TestCase
 {
     private function mockResponse($code, $method = 'GET')
     {
-        $request = new Request(['requestMethod' => $method]);
+        $request = $this->mockRequest($method);
         return new Response(['httpCode' => $code, 'request' => $request]);
+    }
+
+    private function mockRequest($method = 'GET')
+    {
+        return new Request(['requestMethod' => $method]);
     }
 
     public function testBuildCreatesStatusCodeMatcher()
@@ -54,34 +59,34 @@ class RequestResponseMatcherBuildTest extends TestCase
 
     public function testBuildCreatesRequestMethodMatcher()
     {
-        $matcher = ResponseMatcher::build([
+        $matcher = RequestResponseMatcher::build([
             'class' => RequestMethodMatcher::class,
             'requestMethods' => ['POST', 'PUT']
         ]);
         $this->assertInstanceOf(RequestMethodMatcher::class, $matcher);
-        $this->assertTrue($matcher->match($this->mockResponse(200, 'POST')));
-        $this->assertTrue($matcher->match($this->mockResponse(200, 'PUT')));
-        $this->assertFalse($matcher->match($this->mockResponse(200, 'GET')));
+        $this->assertTrue($matcher->matchRequest($this->mockRequest('POST')));
+        $this->assertTrue($matcher->matchRequest($this->mockRequest('PUT')));
+        $this->assertFalse($matcher->matchRequest($this->mockRequest('GET')));
     }
 
     public function testBuildCreatesRequestMethodMatcherByString()
     {
-        $matcher = ResponseMatcher::build([
+        $matcher = RequestResponseMatcher::build([
             'class' => "Tent\Matchers\RequestMethodMatcher",
             'requestMethods' => ['POST', 'PUT']
         ]);
         $this->assertInstanceOf(RequestMethodMatcher::class, $matcher);
-        $this->assertTrue($matcher->match($this->mockResponse(200, 'POST')));
-        $this->assertTrue($matcher->match($this->mockResponse(200, 'PUT')));
-        $this->assertFalse($matcher->match($this->mockResponse(200, 'GET')));
+        $this->assertTrue($matcher->matchRequest($this->mockRequest('POST')));
+        $this->assertTrue($matcher->matchRequest($this->mockRequest('PUT')));
+        $this->assertFalse($matcher->matchRequest($this->mockRequest('GET')));
     }
 
     public function testBuildRequestMethodMatcherDefaultsToGet()
     {
-        $matcher = ResponseMatcher::build([
+        $matcher = RequestResponseMatcher::build([
             'class' => RequestMethodMatcher::class
         ]);
-        $this->assertTrue($matcher->match($this->mockResponse(200, 'GET')));
-        $this->assertFalse($matcher->match($this->mockResponse(200, 'POST')));
+        $this->assertTrue($matcher->matchRequest($this->mockRequest('GET')));
+        $this->assertFalse($matcher->matchRequest($this->mockRequest('POST')));
     }
 }
