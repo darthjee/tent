@@ -11,24 +11,23 @@ use Tent\Models\Request;
 
 class RequestMethodMatcherBuildTest extends TestCase
 {
-    private function mockResponse($method)
+    private function mockRequest($method)
     {
-        $request = new Request(['requestMethod' => $method]);
-        return new Response(['httpCode' => 200, 'request' => $request]);
+        return new Request(['requestMethod' => $method]);
     }
 
     public function testBuildCreatesMatcherWithGivenMethods()
     {
         $matcher = RequestMethodMatcher::build(['requestMethods' => ['POST', 'PUT']]);
-        $this->assertTrue($matcher->match($this->mockResponse('POST')));
-        $this->assertTrue($matcher->match($this->mockResponse('PUT')));
-        $this->assertFalse($matcher->match($this->mockResponse('GET')));
+        $this->assertTrue($matcher->matchRequest($this->mockRequest('POST')));
+        $this->assertTrue($matcher->matchRequest($this->mockRequest('PUT')));
+        $this->assertFalse($matcher->matchRequest($this->mockRequest('GET')));
     }
 
     public function testBuildDefaultsToGet()
     {
         $matcher = RequestMethodMatcher::build([]);
-        $this->assertTrue($matcher->match($this->mockResponse('GET')));
-        $this->assertFalse($matcher->match($this->mockResponse('POST')));
+        $this->assertTrue($matcher->matchRequest($this->mockRequest('GET')));
+        $this->assertFalse($matcher->matchRequest($this->mockRequest('POST')));
     }
 }
