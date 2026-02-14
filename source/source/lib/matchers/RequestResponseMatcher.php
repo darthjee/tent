@@ -12,20 +12,29 @@ abstract class RequestResponseMatcher
 {
     /**
      * Checks if the given response matches the criteria.
+     * 
+     * By default, response matching is not constrained for request matchers, so this method returns true.
      *
      * @param Response $response The response to check.
      * @return boolean True if the response matches, false otherwise.
      */
-    abstract public function matchResponse(Response $response): bool;
+    public function matchResponse(Response $response): bool
+    {
+        return true;
+    }
 
     /**
      * Checks if the given request matches the criteria.
+     * 
+     * By default, request matching is not constrained for response matchers, so this method returns true.
      *
      * @param RequestInterface $request The request to check.
      * @return boolean True if the request matches, false otherwise.
      */
-    abstract public function matchRequest(RequestInterface $request): bool;
-
+    public function matchRequest(RequestInterface $request): bool
+    {
+        return true;
+    }
     /**
      * Builds a RequestResponseMatcher from the given parameters.
      *

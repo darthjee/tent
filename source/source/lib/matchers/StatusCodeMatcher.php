@@ -45,17 +45,6 @@ class StatusCodeMatcher extends RequestResponseMatcher
     }
 
     /**
-     * Request matching is not constrained for status code matchers.
-     *
-     * @param RequestInterface $request The request to check.
-     * @return boolean Always true.
-     */
-    public function matchRequest(RequestInterface $request): bool
-    {
-        return true;
-    }
-
-    /**
      * Builds a StatusCodeMatcher from the given attributes.
      *
      * @param array $attributes The attributes for building the matcher.
