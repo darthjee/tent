@@ -11,43 +11,42 @@ use Tent\Models\Request;
 
 class RequestMethodMatcherMatchTest extends TestCase
 {
-    private function mockResponse($method)
+    private function mockRequest($method)
     {
-        $request = new Request(['requestMethod' => $method]);
-        return new Response(['httpCode' => 200, 'request' => $request]);
+        return new Request(['requestMethod' => $method]);
     }
 
     public function testMatchReturnsTrueWhenMethodIsInList()
     {
         $matcher = new RequestMethodMatcher(['GET']);
-        $this->assertTrue($matcher->match($this->mockResponse('GET')));
+        $this->assertTrue($matcher->matchRequest($this->mockRequest('GET')));
 
         $matcher = new RequestMethodMatcher(['POST']);
-        $this->assertTrue($matcher->match($this->mockResponse('POST')));
+        $this->assertTrue($matcher->matchRequest($this->mockRequest('POST')));
     }
 
     public function testMatchReturnsFalseWhenMethodIsNotInList()
     {
         $matcher = new RequestMethodMatcher(['GET']);
-        $this->assertFalse($matcher->match($this->mockResponse('POST')));
+        $this->assertFalse($matcher->matchRequest($this->mockRequest('POST')));
 
         $matcher = new RequestMethodMatcher(['POST']);
-        $this->assertFalse($matcher->match($this->mockResponse('GET')));
+        $this->assertFalse($matcher->matchRequest($this->mockRequest('GET')));
     }
 
     public function testMatchIsCaseInsensitive()
     {
         $matcher = new RequestMethodMatcher(['GET']);
-        $this->assertTrue($matcher->match($this->mockResponse('get')));
-        $this->assertTrue($matcher->match($this->mockResponse('Get')));
-        $this->assertTrue($matcher->match($this->mockResponse('GET')));
+        $this->assertTrue($matcher->matchRequest($this->mockRequest('get')));
+        $this->assertTrue($matcher->matchRequest($this->mockRequest('Get')));
+        $this->assertTrue($matcher->matchRequest($this->mockRequest('GET')));
     }
 
     public function testMatchWithMultipleMethods()
     {
         $matcher = new RequestMethodMatcher(['GET', 'POST']);
-        $this->assertTrue($matcher->match($this->mockResponse('GET')));
-        $this->assertTrue($matcher->match($this->mockResponse('POST')));
-        $this->assertFalse($matcher->match($this->mockResponse('PUT')));
+        $this->assertTrue($matcher->matchRequest($this->mockRequest('GET')));
+        $this->assertTrue($matcher->matchRequest($this->mockRequest('POST')));
+        $this->assertFalse($matcher->matchRequest($this->mockRequest('PUT')));
     }
 }
