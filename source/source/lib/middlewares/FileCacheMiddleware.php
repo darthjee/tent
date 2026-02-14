@@ -146,10 +146,6 @@ class FileCacheMiddleware extends Middleware
      */
     public function processRequest(ProcessingRequest $request): ProcessingRequest
     {
-        if (!in_array($request->requestMethod(), $this->requestMethods, true)) {
-            return $request;
-        }
-
         foreach ($this->matchers as $matcher) {
             if (!$matcher->matchRequest($request)) {
                 return $request;
