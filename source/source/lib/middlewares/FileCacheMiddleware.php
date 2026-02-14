@@ -7,7 +7,7 @@ use Tent\Models\FolderLocation;
 use Tent\Content\FileCache;
 use Tent\Models\Response;
 use Tent\Service\ResponseContentReader;
-use Tent\Matchers\ResponseMatcher;
+use Tent\Matchers\RequestResponseMatcher;
 use Tent\Matchers\StatusCodeMatcher;
 use Tent\Service\ResponseCacher;
 use Tent\Utils\Logger;
@@ -99,7 +99,7 @@ class FileCacheMiddleware extends Middleware
         }
 
         if (isset($attributes['matchers'])) {
-            $matchers = ResponseMatcher::buildMatchers($attributes['matchers']);
+            $matchers = RequestResponseMatcher::buildMatchers($attributes['matchers']);
         } elseif (isset($attributes['httpCodes'])) {
             $httpCodes = $attributes['httpCodes'] ?? [200];
             $matchers = [new StatusCodeMatcher($httpCodes)];
@@ -113,8 +113,9 @@ class FileCacheMiddleware extends Middleware
     /**
      * Processes the incoming request.
      *
-     * Only attempts to read from cache if the request method is included in the configured
-     * requestMethods filter. If the method is not allowed, the request is returned unmodified.
+    * Only attempts to read from cache if the request method is included in the configured
+    * requestMethods filter and matches all configured matchers. If not allowed, the request
+    * is returned unmodified.
      *
      * If a cached response exists for the request path, it is loaded and set on the request.
      *
@@ -125,6 +126,12 @@ class FileCacheMiddleware extends Middleware
     {
         if (!in_array($request->requestMethod(), $this->requestMethods, true)) {
             return $request;
+        }
+
+        foreach ($this->matchers as $matcher) {
+            if (!$matcher->matchRequest($request)) {
+                return $request;
+            }
         }
 
         $cache = new FileCache($request, $this->location);
@@ -164,7 +171,7 @@ class FileCacheMiddleware extends Middleware
     private function isCacheable(Response $response): bool
     {
         foreach ($this->matchers as $matcher) {
-            if (!$matcher->match($response)) {
+            if (!$matcher->matchResponse($response)) {
                 return false;
             }
         }

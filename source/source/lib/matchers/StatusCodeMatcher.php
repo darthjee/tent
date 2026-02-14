@@ -2,13 +2,14 @@
 
 namespace Tent\Matchers;
 
+use Tent\Models\RequestInterface;
 use Tent\Models\Response;
 use Tent\Utils\HttpCodeMatcher;
 
 /**
  * Matcher for HTTP status codes in responses.
  */
-class StatusCodeMatcher extends ResponseMatcher
+class StatusCodeMatcher extends RequestResponseMatcher
 {
     /**
      * @var array The list of HTTP status codes or patterns to match against.
@@ -31,7 +32,7 @@ class StatusCodeMatcher extends ResponseMatcher
      * @param Response $response The response to check.
      * @return boolean True if the response's status code matches, false otherwise.
      */
-    public function match(Response $response): bool
+    public function matchResponse(Response $response): bool
     {
         $target = $response->httpCode();
 
@@ -41,6 +42,17 @@ class StatusCodeMatcher extends ResponseMatcher
             }
         }
         return false;
+    }
+
+    /**
+     * Request matching is not constrained for status code matchers.
+     *
+     * @param RequestInterface $request The request to check.
+     * @return boolean Always true.
+     */
+    public function matchRequest(RequestInterface $request): bool
+    {
+        return true;
     }
 
     /**
