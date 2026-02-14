@@ -12,7 +12,7 @@ abstract class RequestResponseMatcher
 {
     /**
      * Checks if the given response matches the criteria.
-     * 
+     *
      * By default, response matching is not constrained for request matchers, so this method returns true.
      *
      * @param Response $response The response to check.
@@ -25,7 +25,7 @@ abstract class RequestResponseMatcher
 
     /**
      * Checks if the given request matches the criteria.
-     * 
+     *
      * By default, request matching is not constrained for response matchers, so this method returns true.
      *
      * @param RequestInterface $request The request to check.
