@@ -34,6 +34,8 @@ class RequestResponseMatchersBuilder
      */
     private array $attributes;
 
+    private array $matchers = [];
+
     /**
      * Constructs a RequestResponseMatchersBuilder instance with the given attributes.
      * @param array $attributes The configuration attributes for building matchers.
@@ -67,34 +69,39 @@ class RequestResponseMatchersBuilder
      */
     public function build(): array
     {
+        $this->triggerWarnings();
+
         $attributes = $this->attributes;
 
+        if (isset($attributes['matchers'])) {
+            return RequestResponseMatcher::buildMatchers($attributes['matchers']);
+        }
+        
         if (isset($attributes['httpCodes'])) {
-            Logger::deprecate(self::DEPRECATION_HTTP_CODES_MSG);
+            $httpCodes = $attributes['httpCodes'] ?? [200];
+            $this->matchers[] = new StatusCodeMatcher($httpCodes);
+        } else {
+            $this->matchers[] = new StatusCodeMatcher([200]);
         }
 
         if (isset($attributes['requestMethods'])) {
+            $requestMethods = $attributes['requestMethods'] ?? ['GET'];
+            $this->matchers[] = new RequestMethodMatcher($requestMethods);
+        } else {
+            $this->matchers[] = new RequestMethodMatcher(['GET']);
+        }
+
+        return $this->matchers;
+    }
+
+    function triggerWarnings(): void
+    {
+        if (isset($this->attributes['httpCodes'])) {
+            Logger::deprecate(self::DEPRECATION_HTTP_CODES_MSG);
+        }
+
+        if (isset($this->attributes['requestMethods'])) {
             Logger::deprecate(self::DEPRECATION_REQUEST_METHODS_MSG);
         }
-
-        if (isset($attributes['matchers'])) {
-            $matchers = RequestResponseMatcher::buildMatchers($attributes['matchers']);
-        } else {
-            if (isset($attributes['httpCodes'])) {
-                $httpCodes = $attributes['httpCodes'] ?? [200];
-                $matchers = [new StatusCodeMatcher($httpCodes)];
-            } else {
-                $matchers = [new StatusCodeMatcher([200])];
-            }
-
-            if (isset($attributes['requestMethods'])) {
-                $requestMethods = $attributes['requestMethods'] ?? ['GET'];
-                $matchers[] = new RequestMethodMatcher($requestMethods);
-            } else {
-                $matchers[] = new RequestMethodMatcher(['GET']);
-            }
-        }
-
-        return $matchers;
     }
 }
