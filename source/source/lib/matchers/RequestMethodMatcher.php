@@ -32,9 +32,7 @@ class RequestMethodMatcher extends RequestResponseMatcher
      */
     public function matchRequest(RequestInterface $request): bool
     {
-        $method = strtoupper($request->requestMethod());
-
-        return in_array($method, $this->requestMethods);
+        return $this->match($request);
     }
 
     /**
@@ -47,5 +45,12 @@ class RequestMethodMatcher extends RequestResponseMatcher
     {
         $requestMethods = $attributes['requestMethods'] ?? ['GET'];
         return new self($requestMethods);
+    }
+
+    private function match(RequestInterface $request): bool
+    {
+        $method = strtoupper($request->requestMethod());
+
+        return in_array($method, $this->requestMethods);
     }
 }
