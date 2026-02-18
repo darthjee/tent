@@ -11,6 +11,7 @@ use Tent\Matchers\RequestResponseMatcher;
 use Tent\Matchers\StatusCodeMatcher;
 use Tent\Service\ResponseCacher;
 use Tent\Utils\Logger;
+use Tent\Matchers\RequestResponseMatchersBuilder;
 
 /**
  * Middleware for caching responses to files.
@@ -46,12 +47,6 @@ use Tent\Utils\Logger;
  */
 class FileCacheMiddleware extends Middleware
 {
-    /**
-     * Deprecation warning message for httpCodes attribute.
-     */
-    private const DEPRECATION_HTTP_CODES_MSG =
-      'Deprecation warning: The "httpCodes" attribute is deprecated. Use "matchers" instead.';
-
     /**
      * @var FolderLocation The base folder location for caching.
      */
@@ -94,18 +89,7 @@ class FileCacheMiddleware extends Middleware
         $location = new FolderLocation($attributes['location']);
         $requestMethods = $attributes['requestMethods'] ?? null;
 
-        if (isset($attributes['httpCodes'])) {
-            Logger::deprecate(self::DEPRECATION_HTTP_CODES_MSG);
-        }
-
-        if (isset($attributes['matchers'])) {
-            $matchers = RequestResponseMatcher::buildMatchers($attributes['matchers']);
-        } elseif (isset($attributes['httpCodes'])) {
-            $httpCodes = $attributes['httpCodes'] ?? [200];
-            $matchers = [new StatusCodeMatcher($httpCodes)];
-        } else {
-            $matchers = [new StatusCodeMatcher([200])];
-        }
+        $matchers = (new RequestResponseMatchersBuilder())->build($attributes);
 
         return new self($location, $requestMethods, $matchers);
     }
