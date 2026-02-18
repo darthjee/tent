@@ -107,7 +107,7 @@ class RequestResponseMatchersBuilder
 
     function ensureStatusCodeMatcherExists(): void
     {
-        if (!$this->hasStatusCodeMatcher()) {
+        if (!$this->hasMatcher('Tent\\Matchers\\StatusCodeMatcher')) {
             $httpCodes = $this->attributes['httpCodes'] ?? [200];
             $this->matcherConfig[] = [
                 'class' => 'Tent\\Matchers\\StatusCodeMatcher',
@@ -116,10 +116,10 @@ class RequestResponseMatchersBuilder
         }
     }
 
-    function hasStatusCodeMatcher(): bool
+    function hasMatcher($class): bool
     {
         foreach ($this->matcherConfig as $matcherConfig) {
-            if (($matcherConfig['class'] ?? null) === 'Tent\\Matchers\\StatusCodeMatcher') {
+            if (($matcherConfig['class'] ?? null) === $class) {
                 return true;
             }
         }
