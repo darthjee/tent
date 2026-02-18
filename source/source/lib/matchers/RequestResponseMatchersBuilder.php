@@ -74,8 +74,35 @@ class RequestResponseMatchersBuilder
         $attributes = $this->attributes;
 
         if (isset($attributes['matchers'])) {
-            return RequestResponseMatcher::buildMatchers($attributes['matchers']);
+            return $this->buildFromMatchers();
         }
+
+        $this->buildFromAttributes();
+
+        return $this->matchers;
+    }
+
+    function triggerWarnings(): void
+    {
+        if (isset($this->attributes['httpCodes'])) {
+            Logger::deprecate(self::DEPRECATION_HTTP_CODES_MSG);
+        }
+
+        if (isset($this->attributes['requestMethods'])) {
+            Logger::deprecate(self::DEPRECATION_REQUEST_METHODS_MSG);
+        }
+    }
+
+    function buildFromMatchers(): array
+    {
+        $attributes = $this->attributes;
+
+        return RequestResponseMatcher::buildMatchers($attributes['matchers']);
+    }
+
+    function buildFromAttributes(): void
+    {
+        $attributes = $this->attributes;
         
         if (isset($attributes['httpCodes'])) {
             $httpCodes = $attributes['httpCodes'] ?? [200];
@@ -89,19 +116,6 @@ class RequestResponseMatchersBuilder
             $this->matchers[] = new RequestMethodMatcher($requestMethods);
         } else {
             $this->matchers[] = new RequestMethodMatcher(['GET']);
-        }
-
-        return $this->matchers;
-    }
-
-    function triggerWarnings(): void
-    {
-        if (isset($this->attributes['httpCodes'])) {
-            Logger::deprecate(self::DEPRECATION_HTTP_CODES_MSG);
-        }
-
-        if (isset($this->attributes['requestMethods'])) {
-            Logger::deprecate(self::DEPRECATION_REQUEST_METHODS_MSG);
         }
     }
 }
