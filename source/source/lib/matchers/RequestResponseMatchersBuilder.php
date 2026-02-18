@@ -37,6 +37,28 @@ class RequestResponseMatchersBuilder
         $this->attributes = $attributes;
     }
 
+    /**
+     * Builds an array of request-response matchers based on the provided attributes.
+     *
+     * This method checks for the presence of the 'matchers' attribute to build custom matchers.
+     * If 'matchers' is not provided, it falls back to the deprecated 'httpCodes' attribute to create
+     * a StatusCodeMatcher. If neither is provided, it defaults to caching responses with a 200 status code.
+     *
+     * Example usage:
+     * ```php
+     * $attributes = [
+     *   'matchers' => [
+     *     [
+     *       'class' => 'StatusCodeMatcher',
+     *       'httpCodes' => [200, 201]
+     *     ]
+     *   ]
+     * ];
+     * $matchers = (new RequestResponseMatchersBuilder($attributes))->build();
+     * ```
+     *
+     * @return array The array of constructed matchers.
+     */
     public function build(): array
     {
         if (isset($this->attributes['httpCodes'])) {
