@@ -59,6 +59,10 @@ class RequestResponseMatchersBuilder
      *     [
      *       'class' => 'StatusCodeMatcher',
      *       'httpCodes' => [200, 201]
+     *     ],
+     *     [
+     *       'class' => 'RequestMethodMatcher',
+     *       'requestMethods' => ['GET', 'POST']
      *     ]
      *   ]
      * ];
@@ -79,7 +83,11 @@ class RequestResponseMatchersBuilder
         return RequestResponseMatcher::buildMatchers($this->matchers);
     }
 
-    function triggerWarnings(): void
+    /**
+     * Triggers deprecation warnings if deprecated attributes are used in the configuration.
+     * @return void
+     */
+    private function triggerWarnings(): void
     {
         if (isset($this->attributes['httpCodes'])) {
             Logger::deprecate(self::DEPRECATION_HTTP_CODES_MSG);
@@ -90,7 +98,11 @@ class RequestResponseMatchersBuilder
         }
     }
 
-    function ensureRequestMethodMatcher(): void
+    /**
+     * Ensures that a RequestMethodMatcher is included in the matchers array if requestMethods attribute is present
+     * @return void
+     */
+    private function ensureRequestMethodMatcher(): void
     {
         if (!$this->hasMatcher('Tent\\Matchers\\RequestMethodMatcher')) {
             $requestMethods = $this->attributes['requestMethods'] ?? ['GET'];
@@ -102,7 +114,12 @@ class RequestResponseMatchersBuilder
         }
     }
 
-    function ensureStatusCodeMatcherExists(): void
+    /**
+     * Ensures that a StatusCodeMatcher is included in the matchers array if
+     *   httpCodes attribute is present or if no matchers are defined
+     * @return void
+     */
+    private function ensureStatusCodeMatcherExists(): void
     {
         if (!$this->hasMatcher('Tent\\Matchers\\StatusCodeMatcher')) {
             $httpCodes = $this->attributes['httpCodes'] ?? [200];
@@ -113,7 +130,12 @@ class RequestResponseMatchersBuilder
         }
     }
 
-    function hasMatcher($class): bool
+    /**
+     * Checks if a matcher of the specified class already exists in the matchers array.
+     * @param string $class The fully qualified class name of the matcher to check for.
+     * @return boolean True if a matcher of the specified class exists, false otherwise.
+     */
+    private function hasMatcher(string $class): bool
     {
         foreach ($this->matchers as $matcher) {
             if (($matcher['class'] ?? null) === $class) {
