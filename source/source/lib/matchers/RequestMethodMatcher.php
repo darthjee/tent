@@ -36,6 +36,11 @@ class RequestMethodMatcher extends RequestResponseMatcher
         return $this->match($request);
     }
 
+    /**
+     * Checks if the request associated with the response matches any of the configured methods.
+     * @param Response $response The response whose associated request is to be checked.
+     * @return boolean True if the request method matches, false otherwise.
+     */
     public function matchResponse(Response $response): bool
     {
         return $this->match($response->request());
@@ -54,6 +59,12 @@ class RequestMethodMatcher extends RequestResponseMatcher
         return new self($requestMethods);
     }
 
+    /**
+     * Checks if the request's method matches any of the configured methods.
+     *
+     * @param RequestInterface $request The request to check.
+     * @return boolean True if the request method matches, false otherwise.
+     */
     private function match(RequestInterface $request): bool
     {
         $method = strtoupper($request->requestMethod());
