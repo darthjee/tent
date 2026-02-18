@@ -101,8 +101,21 @@ class RequestResponseMatchersBuilder
         $this->matcherConfig = $attributes['matchers'] ?? [];
 
         $this->ensureStatusCodeMatcherExists();
+        $this->ensureRequestMethodMatcher();
 
         return RequestResponseMatcher::buildMatchers($this->matcherConfig);
+    }
+
+    function ensureRequestMethodMatcher(): void
+    {
+        if (!$this->hasMatcher('Tent\\Matchers\\RequestMethodMatcher')) {
+            $requestMethods = $attributes['requestMethods'] ?? ['GET'];
+
+            $this->matcherConfig[] = [
+                'class' => 'Tent\\Matchers\\RequestMethodMatcher',
+                'requestMethods' => $requestMethods
+            ];
+        }
     }
 
     function ensureStatusCodeMatcherExists(): void

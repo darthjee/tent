@@ -106,7 +106,8 @@ class RequestResponseMatchersBuilderTest extends TestCase
 
         // When matchers is present, httpCodes is ignored and requestMethods is not added
         $this->assertIsArray($matchers);
-        $this->assertCount(1, $matchers);
+        $this->assertCount(2, $matchers);
         $this->assertInstanceOf(StatusCodeMatcher::class, $matchers[0]);
+        $this->assertInstanceOf(RequestMethodMatcher::class, $matchers[1]);
     }
 }
