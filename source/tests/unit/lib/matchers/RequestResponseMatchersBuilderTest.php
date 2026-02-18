@@ -21,9 +21,7 @@ class RequestResponseMatchersBuilderTest extends TestCase
     private function mockRequest($method = 'GET')
     {
         return new Request(
-            ['REQUEST_METHOD' => $method, 'REQUEST_URI' => '/'],
-            [],
-            []
+            ['requestMethod' => $method, 'requestUrl' => '/']
         );
     }
 
