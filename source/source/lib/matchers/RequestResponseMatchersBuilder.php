@@ -68,7 +68,7 @@ class RequestResponseMatchersBuilder
     public function build(): array
     {
         $attributes = $this->attributes;
-        
+
         if (isset($attributes['httpCodes'])) {
             Logger::deprecate(self::DEPRECATION_HTTP_CODES_MSG);
         }

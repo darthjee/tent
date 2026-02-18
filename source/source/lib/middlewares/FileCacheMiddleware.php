@@ -76,9 +76,8 @@ class FileCacheMiddleware extends Middleware
     /**
      * Constructs a FileCacheMiddleware instance.
      *
-     * @param FolderLocation $location       The base folder location for caching.
-     * @param array|null     $requestMethods Array of HTTP request methods to cache. Defaults to ['GET'].
-     * @param array          $matchers       Array of custom matchers for cacheability.
+     * @param FolderLocation $location The base folder location for caching.
+     * @param array          $matchers Array of custom matchers for cacheability.
      */
     public function __construct(FolderLocation $location, array $matchers = [])
     {
