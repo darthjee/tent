@@ -36,8 +36,6 @@ class RequestResponseMatchersBuilder
 
     private array $matchers = [];
 
-    private array $matcherConfig = [];
-
     /**
      * Constructs a RequestResponseMatchersBuilder instance with the given attributes.
      * @param array $attributes The configuration attributes for building matchers.
@@ -73,9 +71,12 @@ class RequestResponseMatchersBuilder
     {
         $this->triggerWarnings();
 
-        $attributes = $this->attributes;
+        $this->matchers = $this->attributes['matchers'] ?? [];
 
-        return $this->buildFromMatchers();
+        $this->ensureStatusCodeMatcherExists();
+        $this->ensureRequestMethodMatcher();
+
+        return RequestResponseMatcher::buildMatchers($this->matchers);
     }
 
     function triggerWarnings(): void
@@ -89,23 +90,12 @@ class RequestResponseMatchersBuilder
         }
     }
 
-    function buildFromMatchers(): array
-    {
-        $attributes = $this->attributes;
-        $this->matcherConfig = $attributes['matchers'] ?? [];
-
-        $this->ensureStatusCodeMatcherExists();
-        $this->ensureRequestMethodMatcher();
-
-        return RequestResponseMatcher::buildMatchers($this->matcherConfig);
-    }
-
     function ensureRequestMethodMatcher(): void
     {
         if (!$this->hasMatcher('Tent\\Matchers\\RequestMethodMatcher')) {
             $requestMethods = $this->attributes['requestMethods'] ?? ['GET'];
 
-            $this->matcherConfig[] = [
+            $this->matchers[] = [
                 'class' => 'Tent\\Matchers\\RequestMethodMatcher',
                 'requestMethods' => $requestMethods
             ];
@@ -116,7 +106,7 @@ class RequestResponseMatchersBuilder
     {
         if (!$this->hasMatcher('Tent\\Matchers\\StatusCodeMatcher')) {
             $httpCodes = $this->attributes['httpCodes'] ?? [200];
-            $this->matcherConfig[] = [
+            $this->matchers[] = [
                 'class' => 'Tent\\Matchers\\StatusCodeMatcher',
                 'httpCodes' => $httpCodes
             ];
@@ -125,30 +115,11 @@ class RequestResponseMatchersBuilder
 
     function hasMatcher($class): bool
     {
-        foreach ($this->matcherConfig as $matcherConfig) {
-            if (($matcherConfig['class'] ?? null) === $class) {
+        foreach ($this->matchers as $matcher) {
+            if (($matcher['class'] ?? null) === $class) {
                 return true;
             }
         }
         return false;
-    }
-
-    function buildFromAttributes(): void
-    {
-        $attributes = $this->attributes;
-        
-        if (isset($attributes['httpCodes'])) {
-            $httpCodes = $attributes['httpCodes'] ?? [200];
-            $this->matchers[] = new StatusCodeMatcher($httpCodes);
-        } else {
-            $this->matchers[] = new StatusCodeMatcher([200]);
-        }
-
-        if (isset($attributes['requestMethods'])) {
-            $requestMethods = $attributes['requestMethods'] ?? ['GET'];
-            $this->matchers[] = new RequestMethodMatcher($requestMethods);
-        } else {
-            $this->matchers[] = new RequestMethodMatcher(['GET']);
-        }
     }
 }
