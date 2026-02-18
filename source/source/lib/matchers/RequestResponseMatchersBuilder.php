@@ -99,16 +99,8 @@ class RequestResponseMatchersBuilder
     {
         $attributes = $this->attributes;
         $this->matcherConfig = $attributes['matchers'] ?? [];
-        $hasStatusCodeMatcher = false;
 
-        foreach ($this->matcherConfig as $matcherConfig) {
-            if (($matcherConfig['class'] ?? null) === 'Tent\\Matchers\\StatusCodeMatcher') {
-                $hasStatusCodeMatcher = true;
-                break;
-            }
-        }
-
-        if (!$hasStatusCodeMatcher) {
+        if (!$this->hasStatusCodeMatcher()) {
             $httpCodes = $attributes['httpCodes'] ?? [200];
             $this->matcherConfig[] = [
                 'class' => 'Tent\\Matchers\\StatusCodeMatcher',
@@ -117,6 +109,16 @@ class RequestResponseMatchersBuilder
         }
 
         return RequestResponseMatcher::buildMatchers($this->matcherConfig);
+    }
+
+    function hasStatusCodeMatcher(): bool
+    {
+        foreach ($this->matcherConfig as $matcherConfig) {
+            if (($matcherConfig['class'] ?? null) === 'Tent\\Matchers\\StatusCodeMatcher') {
+                return true;
+            }
+        }
+        return false;
     }
 
     function buildFromAttributes(): void
