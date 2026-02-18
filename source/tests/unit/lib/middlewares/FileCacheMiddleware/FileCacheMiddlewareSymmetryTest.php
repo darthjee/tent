@@ -17,12 +17,15 @@ class FileCacheMiddlewareSymmetryTest extends TestCase
 {
     private $cacheDir;
     private $location;
+    private $path;
 
     protected function setUp(): void
     {
         $this->cacheDir = sys_get_temp_dir() . '/filecache_middleware_test_' . uniqid();
         mkdir($this->cacheDir);
         $this->location = new FolderLocation($this->cacheDir);
+
+        $this->path = '/api/users';
     }
 
     protected function tearDown(): void
@@ -36,21 +39,13 @@ class FileCacheMiddlewareSymmetryTest extends TestCase
      */
     public function testProcessRequestBlocksCacheReadWhenMethodNotInMatchers()
     {
-        $path = '/api/users';
-        $request = new ProcessingRequest([
-            'requestPath' => $path,
-            'requestMethod' => 'DELETE'  // Method not in allowed list
-        ]);
+        $request = $this->buildRequest('DELETE');
 
         // Create cache that would match if the request was allowed
-        $this->createCacheFile($path, 'cached body', ['Content-Type: application/json'], 'DELETE');
+        $this->createCacheFile($this->path, 'cached body', ['Content-Type: application/json'], 'DELETE');
 
         // Middleware only allows GET and POST
-        $middleware = FileCacheMiddleware::build([
-            'location' => $this->cacheDir,
-            'requestMethods' => ['GET', 'POST'],
-            'httpCodes' => [200]
-        ]);
+        $middleware = $this->buildMiddleware(['GET', 'POST'], [200]);
 
         $result = $middleware->processRequest($request);
 
@@ -64,11 +59,7 @@ class FileCacheMiddlewareSymmetryTest extends TestCase
      */
     public function testProcessResponseDoesNotSaveCacheWhenRequestMethodNotInMatchers()
     {
-        $path = '/api/users';
-        $request = new ProcessingRequest([
-            'requestPath' => $path,
-            'requestMethod' => 'DELETE'  // Method not in allowed list
-        ]);
+        $request = $this->buildRequest('DELETE');
 
         $response = new Response([
             'body' => 'response body',
@@ -78,11 +69,7 @@ class FileCacheMiddlewareSymmetryTest extends TestCase
         ]);
 
         // Middleware only allows GET and POST
-        $middleware = FileCacheMiddleware::build([
-            'location' => $this->cacheDir,
-            'requestMethods' => ['GET', 'POST'],
-            'httpCodes' => [200]
-        ]);
+        $middleware = $this->buildMiddleware(['GET', 'POST'], [200]);
 
         $middleware->processResponse($response);
 
@@ -96,22 +83,14 @@ class FileCacheMiddlewareSymmetryTest extends TestCase
      */
     public function testSymmetryWhenRequestMethodMatches()
     {
-        $path = '/api/users';
         $method = 'POST';
-        $request = new ProcessingRequest([
-            'requestPath' => $path,
-            'requestMethod' => $method
-        ]);
+        $request = $this->buildRequest($method);
 
         // Create cache first
-        $this->createCacheFile($path, 'cached body', ['Content-Type: application/json'], $method);
+        $this->createCacheFile($this->path, 'cached body', ['Content-Type: application/json'], $method);
 
         // Middleware allows POST
-        $middleware = FileCacheMiddleware::build([
-            'location' => $this->cacheDir,
-            'requestMethods' => ['POST'],
-            'httpCodes' => [200]
-        ]);
+        $middleware = $this->buildMiddleware(['POST'], [200]);
 
         // Part 1: Cache should be read
         $cachedRequest = $middleware->processRequest($request);
@@ -136,21 +115,13 @@ class FileCacheMiddlewareSymmetryTest extends TestCase
      */
     public function testProcessRequestBlocksWhenStatusCodeWouldNotMatch()
     {
-        $path = '/api/users';
-        $request = new ProcessingRequest([
-            'requestPath' => $path,
-            'requestMethod' => 'GET'  // Method will match
-        ]);
+        $request = $this->buildRequest('GET');
 
         // Create cache
-        $this->createCacheFile($path, 'cached body', ['Content-Type: application/json'], 'GET');
+        $this->createCacheFile($this->path, 'cached body', ['Content-Type: application/json'], 'GET');
 
         // Middleware allows GET + 201 status code (not 200)
-        $middleware = FileCacheMiddleware::build([
-            'location' => $this->cacheDir,
-            'requestMethods' => ['GET'],
-            'httpCodes' => [201]  // This would be mismatch in isCacheable
-        ]);
+        $middleware = $this->buildMiddleware(['GET'], [201]);  // This would be mismatch in isCacheable
 
         $result = $middleware->processRequest($request);
 
@@ -165,11 +136,7 @@ class FileCacheMiddlewareSymmetryTest extends TestCase
      */
     public function testProcessResponseDoesNotSaveWhenStatusCodeDoesNotMatch()
     {
-        $path = '/api/users';
-        $request = new ProcessingRequest([
-            'requestPath' => $path,
-            'requestMethod' => 'GET'
-        ]);
+        $request = $this->buildRequest('GET');
 
         $response = new Response([
             'body' => 'response body',
@@ -178,11 +145,7 @@ class FileCacheMiddlewareSymmetryTest extends TestCase
             'request' => $request
         ]);
 
-        $middleware = FileCacheMiddleware::build([
-            'location' => $this->cacheDir,
-            'requestMethods' => ['GET'],
-            'httpCodes' => [200]
-        ]);
+        $middleware = $this->buildMiddleware(['GET'], [200]);
 
         $middleware->processResponse($response);
 
@@ -197,13 +160,8 @@ class FileCacheMiddlewareSymmetryTest extends TestCase
      */
     public function testRequestMethodMatcherChecksResponseRequest()
     {
-        $path = '/api/users';
-        
         // Original request with method that matches
-        $originalRequest = new ProcessingRequest([
-            'requestPath' => $path,
-            'requestMethod' => 'POST'
-        ]);
+        $originalRequest = $this->buildRequest('POST');
 
         // Response with the same request
         $response = new Response([
@@ -213,16 +171,22 @@ class FileCacheMiddlewareSymmetryTest extends TestCase
             'request' => $originalRequest
         ]);
 
-        $middleware = FileCacheMiddleware::build([
-            'location' => $this->cacheDir,
-            'requestMethods' => ['POST'],
-            'httpCodes' => [200]
-        ]);
+        $middleware = $this->buildMiddleware(['POST'], [200]);
+
 
         // Response should be cacheable because its request method matches
         $middleware->processResponse($response);
         $cache = new FileCache($originalRequest, $this->location);
         $this->assertTrue($cache->exists());
+    }
+
+
+    private function buildRequest(string $method)
+    {
+        return new ProcessingRequest([
+            'requestPath' => $this->path,
+            'requestMethod' => $method  // Method not in allowed list
+        ]);
     }
 
     /**
@@ -237,5 +201,14 @@ class FileCacheMiddlewareSymmetryTest extends TestCase
 
         file_put_contents($bodyFile, $body);
         file_put_contents($metaFile, json_encode(['headers' => $headers]));
+    }
+
+    private function buildMiddleware(array $requestMethods, array $httpCodes): FileCacheMiddleware
+    {
+        return FileCacheMiddleware::build([
+            'location' => $this->cacheDir,
+            'requestMethods' => $requestMethods,
+            'httpCodes' => $httpCodes
+        ]);
     }
 }
