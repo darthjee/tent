@@ -4,6 +4,17 @@ namespace Tent\Matchers;
 
 use Tent\Utils\Logger;
 
+/**
+ * Builder class for constructing request-response matchers based on configuration attributes.
+ *
+ * ⚠️ TEMPORARY CLASS - This class exists only to support the transition from the deprecated 'httpCodes'
+ * attribute to the new 'matchers' attribute. Once all deprecated code is removed and users have migrated
+ * to using 'matchers', this entire class will be deleted. Once that happens, we won't need this extra
+ * complication - matcher instantiation will be straightforward and direct.
+ *
+ * Currently handles both the deprecated 'httpCodes' attribute and the new 'matchers' attribute
+ * to allow for a smooth transition while providing flexibility in defining matchers.
+ */
 class RequestResponseMatchersBuilder
 {
     /**
@@ -12,9 +23,16 @@ class RequestResponseMatchersBuilder
     private const DEPRECATION_HTTP_CODES_MSG =
       'Deprecation warning: The "httpCodes" attribute is deprecated. Use "matchers" instead.';
 
+    /**
+     * The configuration attributes for building matchers.
+     */
     private array $attributes;
 
-    public function __construct($attributes)
+    /**
+     * Constructs a RequestResponseMatchersBuilder instance with the given attributes.
+     * @param array $attributes The configuration attributes for building matchers.
+     */
+    public function __construct(array $attributes)
     {
         $this->attributes = $attributes;
     }
