@@ -9,6 +9,7 @@ use Tent\Middlewares\FileCacheMiddleware;
 use Tent\Models\FolderLocation;
 use Tent\Models\Response;
 use Tent\Models\ProcessingRequest;
+use Tent\Models\RequestInterface;
 use Tent\Content\FileCache;
 use Tent\Tests\Support\Utils\FileSystemUtils;
 use Tent\Utils\CacheFilePath;
@@ -53,6 +54,16 @@ class FileCacheMiddlewareSymmetryTest extends TestCase
         $this->assertFalse($result->hasResponse());
     }
 
+    private function buildResponse(int $httpCode, RequestInterface $request): Response
+    {
+        return new Response([
+            'body' => 'response body',
+            'httpCode' => $httpCode,
+            'headers' => ['Content-Type: application/json'],
+            'request' => $request
+        ]);
+    }
+
     /**
      * Tests that cache is NOT saved when response's request method doesn't match.
      * Validates the second part of the symmetry: isCacheable() blocks based on method.
@@ -61,12 +72,7 @@ class FileCacheMiddlewareSymmetryTest extends TestCase
     {
         $request = $this->buildRequest('DELETE');
 
-        $response = new Response([
-            'body' => 'response body',
-            'httpCode' => 200,  // Status code that would normally be cached
-            'headers' => ['Content-Type: application/json'],
-            'request' => $request
-        ]);
+        $response = $this->buildResponse(200, $request);
 
         // Middleware only allows GET and POST
         $middleware = $this->buildMiddleware(['GET', 'POST'], [200]);
@@ -97,12 +103,7 @@ class FileCacheMiddlewareSymmetryTest extends TestCase
         $this->assertTrue($cachedRequest->hasResponse());
 
         // Part 2: Cache should be saveable
-        $response = new Response([
-            'body' => 'new response body',
-            'httpCode' => 200,
-            'headers' => ['Content-Type: application/json'],
-            'request' => $request
-        ]);
+        $response = $this->buildResponse(200, $request);
 
         $middleware->processResponse($response);
         $cache = new FileCache($request, $this->location);
