@@ -12,6 +12,7 @@ use Tent\Matchers\StatusCodeMatcher;
 use Tent\Matchers\RequestMethodMatcher;
 use Tent\Service\ResponseCacher;
 use Tent\Utils\Logger;
+use Tent\Matchers\RequestResponseMatchersBuilder;
 
 /**
  * Middleware for caching responses to files.
@@ -57,13 +58,7 @@ use Tent\Utils\Logger;
 class FileCacheMiddleware extends Middleware
 {
     /**
-     * Deprecation warning message for httpCodes attribute.
-     */
-    private const DEPRECATION_HTTP_CODES_MSG =
-      'Deprecation warning: The "httpCodes" attribute is deprecated. Use "matchers" instead.';
-
-    /**
-     * Deprecation warning message for requestMethods attribute.
+     * @var Deprecation warning message for requestMethods attribute.
      */
     private const DEPRECATION_REQUEST_METHODS_MSG =
       'Deprecation warning: The "requestMethods" attribute is deprecated. Use "matchers" instead.';
