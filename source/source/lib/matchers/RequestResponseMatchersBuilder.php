@@ -24,9 +24,17 @@ class RequestResponseMatchersBuilder
       'Deprecation warning: The "httpCodes" attribute is deprecated. Use "matchers" instead.';
 
     /**
+     * @var Deprecation warning message for requestMethods attribute.
+     */
+    private const DEPRECATION_REQUEST_METHODS_MSG =
+      'Deprecation warning: The "requestMethods" attribute is deprecated. Use "matchers" instead.';
+
+    /**
      * The configuration attributes for building matchers.
      */
     private array $attributes;
+
+    private array $matchers = [];
 
     /**
      * Constructs a RequestResponseMatchersBuilder instance with the given attributes.
@@ -51,6 +59,10 @@ class RequestResponseMatchersBuilder
      *     [
      *       'class' => 'StatusCodeMatcher',
      *       'httpCodes' => [200, 201]
+     *     ],
+     *     [
+     *       'class' => 'RequestMethodMatcher',
+     *       'requestMethods' => ['GET', 'POST']
      *     ]
      *   ]
      * ];
@@ -61,19 +73,75 @@ class RequestResponseMatchersBuilder
      */
     public function build(): array
     {
+        $this->triggerWarnings();
+
+        $this->matchers = $this->attributes['matchers'] ?? [];
+
+        $this->ensureStatusCodeMatcherExists();
+        $this->ensureRequestMethodMatcher();
+
+        return RequestResponseMatcher::buildMatchers($this->matchers);
+    }
+
+    /**
+     * Triggers deprecation warnings if deprecated attributes are used in the configuration.
+     * @return void
+     */
+    private function triggerWarnings(): void
+    {
         if (isset($this->attributes['httpCodes'])) {
             Logger::deprecate(self::DEPRECATION_HTTP_CODES_MSG);
         }
 
-        if (isset($this->attributes['matchers'])) {
-            $matchers = RequestResponseMatcher::buildMatchers($this->attributes['matchers']);
-        } elseif (isset($this->attributes['httpCodes'])) {
-            $httpCodes = $this->attributes['httpCodes'] ?? [200];
-            $matchers = [new StatusCodeMatcher($httpCodes)];
-        } else {
-            $matchers = [new StatusCodeMatcher([200])];
+        if (isset($this->attributes['requestMethods'])) {
+            Logger::deprecate(self::DEPRECATION_REQUEST_METHODS_MSG);
         }
+    }
 
-        return $matchers;
+    /**
+     * Ensures that a RequestMethodMatcher is included in the matchers array if requestMethods attribute is present
+     * @return void
+     */
+    private function ensureRequestMethodMatcher(): void
+    {
+        if (!$this->hasMatcher('Tent\\Matchers\\RequestMethodMatcher')) {
+            $requestMethods = $this->attributes['requestMethods'] ?? ['GET'];
+
+            $this->matchers[] = [
+                'class' => 'Tent\\Matchers\\RequestMethodMatcher',
+                'requestMethods' => $requestMethods
+            ];
+        }
+    }
+
+    /**
+     * Ensures that a StatusCodeMatcher is included in the matchers array if
+     *   httpCodes attribute is present or if no matchers are defined
+     * @return void
+     */
+    private function ensureStatusCodeMatcherExists(): void
+    {
+        if (!$this->hasMatcher('Tent\\Matchers\\StatusCodeMatcher')) {
+            $httpCodes = $this->attributes['httpCodes'] ?? [200];
+            $this->matchers[] = [
+                'class' => 'Tent\\Matchers\\StatusCodeMatcher',
+                'httpCodes' => $httpCodes
+            ];
+        }
+    }
+
+    /**
+     * Checks if a matcher of the specified class already exists in the matchers array.
+     * @param string $class The fully qualified class name of the matcher to check for.
+     * @return boolean True if a matcher of the specified class exists, false otherwise.
+     */
+    private function hasMatcher(string $class): bool
+    {
+        foreach ($this->matchers as $matcher) {
+            if (($matcher['class'] ?? null) === $class) {
+                return true;
+            }
+        }
+        return false;
     }
 }
