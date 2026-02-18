@@ -75,13 +75,7 @@ class RequestResponseMatchersBuilder
 
         $attributes = $this->attributes;
 
-        if (isset($attributes['matchers'])) {
-            return $this->buildFromMatchers();
-        }
-
-        $this->buildFromAttributes();
-
-        return $this->matchers;
+        return $this->buildFromMatchers();
     }
 
     function triggerWarnings(): void
@@ -109,7 +103,7 @@ class RequestResponseMatchersBuilder
     function ensureRequestMethodMatcher(): void
     {
         if (!$this->hasMatcher('Tent\\Matchers\\RequestMethodMatcher')) {
-            $requestMethods = $attributes['requestMethods'] ?? ['GET'];
+            $requestMethods = $this->attributes['requestMethods'] ?? ['GET'];
 
             $this->matcherConfig[] = [
                 'class' => 'Tent\\Matchers\\RequestMethodMatcher',
