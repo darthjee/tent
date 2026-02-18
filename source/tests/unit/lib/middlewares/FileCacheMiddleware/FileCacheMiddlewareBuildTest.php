@@ -6,6 +6,7 @@ require_once __DIR__ . '/../../../../support/loader.php';
 
 use PHPUnit\Framework\TestCase;
 use Tent\Middlewares\FileCacheMiddleware;
+use Tent\Utils\Logger;
 
 class FileCacheMiddlewareBuildTest extends TestCase
 {
@@ -71,10 +72,10 @@ class FileCacheMiddlewareBuildTest extends TestCase
         };
 
         // Set the custom logger
-        $originalLogger = \Tent\Utils\Logger::getInstance();
-        \Tent\Utils\Logger::setInstance($testLogger);
+        $originalLogger = Logger::getInstance();
+        Logger::setInstance($testLogger);
 
-        $middleware = FileCacheMiddleware::build([
+        FileCacheMiddleware::build([
             'location' => '/tmp/cache',
             'requestMethods' => ['GET', 'POST']
         ]);
@@ -85,6 +86,6 @@ class FileCacheMiddlewareBuildTest extends TestCase
         $this->assertStringContainsString('deprecated', $warnings[0]);
 
         // Restore original logger
-        \Tent\Utils\Logger::setInstance($originalLogger);
+        Logger::setInstance($originalLogger);
     }
 }
