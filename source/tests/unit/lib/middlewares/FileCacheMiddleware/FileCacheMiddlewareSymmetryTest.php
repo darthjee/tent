@@ -230,7 +230,7 @@ class FileCacheMiddlewareSymmetryTest extends TestCase
      */
     private function createCacheFile(string $path, string $body, array $headers, string $method): void
     {
-        $fullPath = $this->cacheDir . "/" . $method . $path;
+        $fullPath = $this->cacheDir . $path . "/" . $method;
         $bodyFile = CacheFilePath::path('body', $fullPath, '');
         $metaFile = CacheFilePath::path('meta', $fullPath, '');
         mkdir(dirname($bodyFile), 0777, true);
