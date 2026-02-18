@@ -8,9 +8,23 @@ use PHPUnit\Framework\TestCase;
 use Tent\Matchers\RequestResponseMatchersBuilder;
 use Tent\Matchers\StatusCodeMatcher;
 use Tent\Matchers\RequestMethodMatcher;
+use Tent\Models\Response;
+use Tent\Models\Request;
 
 class RequestResponseMatchersBuilderTest extends TestCase
 {
+    private function mockResponse($code)
+    {
+        return new Response(['httpCode' => $code]);
+    }
+
+    private function mockRequest($method = 'GET')
+    {
+        return new Request(
+            ['requestMethod' => $method, 'requestUrl' => '/']
+        );
+    }
+
     public function testBuildWithMatchersAttribute()
     {
         $attributes = [
@@ -109,5 +123,85 @@ class RequestResponseMatchersBuilderTest extends TestCase
         $this->assertCount(2, $matchers);
         $this->assertInstanceOf(StatusCodeMatcher::class, $matchers[0]);
         $this->assertInstanceOf(RequestMethodMatcher::class, $matchers[1]);
+    }
+
+    public function testMatchResponseWithDeprecatedHttpCodes()
+    {
+        $attributes = [
+            'httpCodes' => [200, 201]
+        ];
+
+        $builder = new RequestResponseMatchersBuilder($attributes);
+        $matchers = $builder->build();
+
+        // Status code matcher should match 200 and 201
+        $this->assertTrue($matchers[0]->matchResponse($this->mockResponse(200)));
+        $this->assertTrue($matchers[0]->matchResponse($this->mockResponse(201)));
+        $this->assertFalse($matchers[0]->matchResponse($this->mockResponse(500)));
+    }
+
+    public function testMatchRequestWithRequest()
+    {
+        $attributes = [
+            'requestMethods' => ['POST', 'PUT']
+        ];
+
+        $builder = new RequestResponseMatchersBuilder($attributes);
+        $matchers = $builder->build();
+
+        // Request method matcher should match POST and PUT
+        $this->assertTrue($matchers[1]->matchRequest($this->mockRequest('POST')));
+        $this->assertTrue($matchers[1]->matchRequest($this->mockRequest('PUT')));
+        $this->assertFalse($matchers[1]->matchRequest($this->mockRequest('GET')));
+    }
+
+    public function testMatchResponseDefaultTo200()
+    {
+        $attributes = [];
+
+        $builder = new RequestResponseMatchersBuilder($attributes);
+        $matchers = $builder->build();
+
+        // Default should match only 200
+        $this->assertTrue($matchers[0]->matchResponse($this->mockResponse(200)));
+        $this->assertFalse($matchers[0]->matchResponse($this->mockResponse(201)));
+    }
+
+    public function testMatchRequestDefaultToGet()
+    {
+        $attributes = [];
+
+        $builder = new RequestResponseMatchersBuilder($attributes);
+        $matchers = $builder->build();
+
+        // Default should match only GET
+        $this->assertTrue($matchers[1]->matchRequest($this->mockRequest('GET')));
+        $this->assertFalse($matchers[1]->matchRequest($this->mockRequest('POST')));
+    }
+
+    public function testAddStatusCodeMatcherWhenMissing()
+    {
+        $attributes = [
+            'matchers' => [
+                [
+                    'class' => 'Tent\Matchers\RequestMethodMatcher',
+                    'methods' => ['POST']
+                ]
+            ],
+            'httpCodes' => [201, 202]
+        ];
+
+        $builder = new RequestResponseMatchersBuilder($attributes);
+        $matchers = $builder->build();
+
+        // Should have 2 matchers: one from config, one added for StatusCode
+        $this->assertCount(2, $matchers);
+        // First should be RequestMethodMatcher
+        $this->assertInstanceOf(RequestMethodMatcher::class, $matchers[0]);
+        // Second should be StatusCodeMatcher with httpCodes from attributes
+        $this->assertInstanceOf(StatusCodeMatcher::class, $matchers[1]);
+        $this->assertTrue($matchers[1]->matchResponse($this->mockResponse(201)));
+        $this->assertTrue($matchers[1]->matchResponse($this->mockResponse(202)));
+        $this->assertFalse($matchers[1]->matchResponse($this->mockResponse(200)));
     }
 }

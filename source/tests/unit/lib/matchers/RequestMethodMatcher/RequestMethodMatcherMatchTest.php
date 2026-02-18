@@ -11,11 +11,6 @@ use Tent\Models\Request;
 
 class RequestMethodMatcherMatchTest extends TestCase
 {
-    private function mockRequest($method)
-    {
-        return new Request(['requestMethod' => $method]);
-    }
-
     public function testMatchReturnsTrueWhenMethodIsInList()
     {
         $matcher = new RequestMethodMatcher(['GET']);
@@ -48,5 +43,36 @@ class RequestMethodMatcherMatchTest extends TestCase
         $this->assertTrue($matcher->matchRequest($this->mockRequest('GET')));
         $this->assertTrue($matcher->matchRequest($this->mockRequest('POST')));
         $this->assertFalse($matcher->matchRequest($this->mockRequest('PUT')));
+    }
+
+    public function testMatchResponseAlwaysReturnsTrue()
+    {
+        $matcher = new RequestMethodMatcher(['GET']);
+        $response = $this->mockResponse(200, 'GET');
+
+        // RequestMethodMatcher should always return true for response matching
+        // as it only cares about request methods
+        $this->assertTrue($matcher->matchResponse($response));
+    }
+
+    public function testMatchResponseReturnsTrueForAnyStatusCode()
+    {
+        $matcher = new RequestMethodMatcher(['POST', 'PUT']);
+
+        // Should return true for any status code
+        $this->assertTrue($matcher->matchResponse($this->mockResponse(200, 'POST')));
+        $this->assertTrue($matcher->matchResponse($this->mockResponse(201, 'PUT')));
+        $this->assertTrue($matcher->matchResponse($this->mockResponse(500, 'POST')));
+        $this->assertTrue($matcher->matchResponse($this->mockResponse(404, 'PUT')));
+    }
+
+    private function mockRequest($method)
+    {
+        return new Request(['requestMethod' => $method]);
+    }
+
+    private function mockResponse($httpCode, $method)
+    {
+        return new Response(['httpCode' => $httpCode, 'request' => $this->mockRequest($method)]);
     }
 }
