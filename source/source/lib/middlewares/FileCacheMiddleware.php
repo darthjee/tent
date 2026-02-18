@@ -89,7 +89,7 @@ class FileCacheMiddleware extends Middleware
         $location = new FolderLocation($attributes['location']);
         $requestMethods = $attributes['requestMethods'] ?? null;
 
-        $matchers = (new RequestResponseMatchersBuilder())->build($attributes);
+        $matchers = (new RequestResponseMatchersBuilder($attributes))->build();
 
         return new self($location, $requestMethods, $matchers);
     }
