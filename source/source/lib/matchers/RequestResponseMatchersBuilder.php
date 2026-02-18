@@ -24,6 +24,12 @@ class RequestResponseMatchersBuilder
       'Deprecation warning: The "httpCodes" attribute is deprecated. Use "matchers" instead.';
 
     /**
+     * @var Deprecation warning message for requestMethods attribute.
+     */
+    private const DEPRECATION_REQUEST_METHODS_MSG =
+      'Deprecation warning: The "requestMethods" attribute is deprecated. Use "matchers" instead.';
+
+    /**
      * The configuration attributes for building matchers.
      */
     private array $attributes;
@@ -61,17 +67,32 @@ class RequestResponseMatchersBuilder
      */
     public function build(): array
     {
-        if (isset($this->attributes['httpCodes'])) {
+        $attributes = $this->attributes;
+        
+        if (isset($attributes['httpCodes'])) {
             Logger::deprecate(self::DEPRECATION_HTTP_CODES_MSG);
         }
 
-        if (isset($this->attributes['matchers'])) {
-            $matchers = RequestResponseMatcher::buildMatchers($this->attributes['matchers']);
-        } elseif (isset($this->attributes['httpCodes'])) {
-            $httpCodes = $this->attributes['httpCodes'] ?? [200];
-            $matchers = [new StatusCodeMatcher($httpCodes)];
+        if (isset($attributes['requestMethods'])) {
+            Logger::deprecate(self::DEPRECATION_REQUEST_METHODS_MSG);
+        }
+
+        if (isset($attributes['matchers'])) {
+            $matchers = RequestResponseMatcher::buildMatchers($attributes['matchers']);
         } else {
-            $matchers = [new StatusCodeMatcher([200])];
+            if (isset($attributes['httpCodes'])) {
+                $httpCodes = $attributes['httpCodes'] ?? [200];
+                $matchers = [new StatusCodeMatcher($httpCodes)];
+            } else {
+                $matchers = [new StatusCodeMatcher([200])];
+            }
+
+            if (isset($attributes['requestMethods'])) {
+                $requestMethods = $attributes['requestMethods'] ?? ['GET'];
+                $matchers[] = new RequestMethodMatcher($requestMethods);
+            } else {
+                $matchers[] = new RequestMethodMatcher(['GET']);
+            }
         }
 
         return $matchers;

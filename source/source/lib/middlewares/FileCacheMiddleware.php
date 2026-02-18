@@ -97,32 +97,7 @@ class FileCacheMiddleware extends Middleware
     public static function build(array $attributes): FileCacheMiddleware
     {
         $location = new FolderLocation($attributes['location']);
-
-        if (isset($attributes['httpCodes'])) {
-            Logger::deprecate(self::DEPRECATION_HTTP_CODES_MSG);
-        }
-
-        if (isset($attributes['requestMethods'])) {
-            Logger::deprecate(self::DEPRECATION_REQUEST_METHODS_MSG);
-        }
-
-        if (isset($attributes['matchers'])) {
-            $matchers = RequestResponseMatcher::buildMatchers($attributes['matchers']);
-        } else {
-            if (isset($attributes['httpCodes'])) {
-                $httpCodes = $attributes['httpCodes'] ?? [200];
-                $matchers = [new StatusCodeMatcher($httpCodes)];
-            } else {
-                $matchers = [new StatusCodeMatcher([200])];
-            }
-
-            if (isset($attributes['requestMethods'])) {
-                $requestMethods = $attributes['requestMethods'] ?? ['GET'];
-                $matchers[] = new RequestMethodMatcher($requestMethods);
-            } else {
-                $matchers[] = new RequestMethodMatcher(['GET']);
-            }
-        }
+        $matchers = (new RequestResponseMatchersBuilder($attributes))->build();
 
         return new self($location, $matchers);
     }
