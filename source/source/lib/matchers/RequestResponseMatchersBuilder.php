@@ -100,15 +100,20 @@ class RequestResponseMatchersBuilder
         $attributes = $this->attributes;
         $this->matcherConfig = $attributes['matchers'] ?? [];
 
+        $this->ensureStatusCodeMatcherExists();
+
+        return RequestResponseMatcher::buildMatchers($this->matcherConfig);
+    }
+
+    function ensureStatusCodeMatcherExists(): void
+    {
         if (!$this->hasStatusCodeMatcher()) {
-            $httpCodes = $attributes['httpCodes'] ?? [200];
+            $httpCodes = $this->attributes['httpCodes'] ?? [200];
             $this->matcherConfig[] = [
                 'class' => 'Tent\\Matchers\\StatusCodeMatcher',
                 'httpCodes' => $httpCodes
             ];
         }
-
-        return RequestResponseMatcher::buildMatchers($this->matcherConfig);
     }
 
     function hasStatusCodeMatcher(): bool
