@@ -3,6 +3,7 @@
 namespace Tent\Matchers;
 
 use Tent\Models\RequestInterface;
+use Tent\Models\Response;
 
 /**
  * Matcher for HTTP request methods associated with responses.
@@ -34,6 +35,12 @@ class RequestMethodMatcher extends RequestResponseMatcher
     {
         return $this->match($request);
     }
+
+    public function matchResponse(Response $response): bool
+    {
+        return $this->match($response->request());
+    }
+
 
     /**
      * Builds a RequestMethodMatcher from the given attributes.
