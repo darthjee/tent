@@ -36,6 +36,8 @@ class RequestResponseMatchersBuilder
 
     private array $matchers = [];
 
+    private array $matcherConfig = [];
+
     /**
      * Constructs a RequestResponseMatchersBuilder instance with the given attributes.
      * @param array $attributes The configuration attributes for building matchers.
@@ -96,8 +98,25 @@ class RequestResponseMatchersBuilder
     function buildFromMatchers(): array
     {
         $attributes = $this->attributes;
+        $this->matcherConfig = $attributes['matchers'] ?? [];
+        $hasStatusCodeMatcher = false;
 
-        return RequestResponseMatcher::buildMatchers($attributes['matchers']);
+        foreach ($this->matcherConfig as $matcherConfig) {
+            if (($matcherConfig['class'] ?? null) === 'Tent\\Matchers\\StatusCodeMatcher') {
+                $hasStatusCodeMatcher = true;
+                break;
+            }
+        }
+
+        if (!$hasStatusCodeMatcher) {
+            $httpCodes = $attributes['httpCodes'] ?? [200];
+            $this->matcherConfig[] = [
+                'class' => 'Tent\\Matchers\\StatusCodeMatcher',
+                'httpCodes' => $httpCodes
+            ];
+        }
+
+        return RequestResponseMatcher::buildMatchers($this->matcherConfig);
     }
 
     function buildFromAttributes(): void
