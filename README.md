@@ -41,13 +41,15 @@ Tent is available as a Docker image: `darthjee/tent`
 
 Tent is in active development. Currently implemented:
 
-- ✅ Basic proxy functionality
+- ⚠️ Basic proxy functionality (currently supports GET and POST only)
 - ✅ Request routing and matching
 - ✅ Header forwarding
 - ✅ Static file serving (serves files from a directory)
 - ✅ Middleware system
-- ✅ Configuration system
+- ⏳ Initial Configuration system (planned)
 - ✅ Response caching
+- ❌ Support for other HTTP methods (PUT, PATCH, DELETE, etc.) is not available yet
+- ❌ File transfer handling (upload/download proxying) is not available yet
 
 ### Error Responses (403/404)
 
