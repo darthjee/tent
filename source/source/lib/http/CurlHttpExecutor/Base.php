@@ -88,7 +88,6 @@ abstract class Base
 
         curl_setopt($this->curlHandle, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->curlHandle, CURLOPT_HEADER, true);
-        curl_setopt($this->curlHandle, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($this->curlHandle, CURLOPT_HTTPHEADER, $headerLines);
     }
 
