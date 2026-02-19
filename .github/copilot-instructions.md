@@ -4,7 +4,7 @@ Tent is a PHP-based intelligent proxy server that routes requests to backend ser
 
 ## Architecture Overview
 
-**Request Flow**: Apache rewrites all requests to [source/source/index.php](source/source/index.php) → `RequestProcessor` evaluates configured `Rule` objects → Middlewares process the request → `RequestHandler` executes (proxy/static/cache) → Middlewares process response → Response sent.
+**Request Flow**: Apache rewrites all requests to `source/source/index.php` → `RequestProcessor` evaluates configured `Rule` objects → Middlewares process the request → `RequestHandler` executes (proxy/static/cache) → Middlewares process response → Response sent.
 
 **Key Components**:
 
@@ -310,10 +310,12 @@ See [dev/frontend/README.md](dev/frontend/README.md) for comprehensive documenta
 ```
 source/source/               # Core Tent application
   ├── lib/
-  │   ├── handlers/          # ProxyRequestHandler, StaticFileHandler, etc.
+  │   ├── request_handlers/  # ProxyRequestHandler, StaticFileHandler, etc.
   │   ├── middlewares/       # Request/response middleware implementations
   │   ├── models/            # Request, Response, Rule, Server, etc.
   │   ├── service/           # RequestProcessor (main routing engine)
+  │   ├── matchers/          # StatusCodeMatcher and other matcher classes
+  │   ├── utils/             # Utility classes (HttpCodeMatcher, etc.)
   │   └── Configuration.php  # Static rule registry
   └── index.php              # Entry point (processes all HTTP requests)
 
@@ -364,7 +366,7 @@ dev/
 ## Key Files to Reference
 
 - [source/source/lib/service/RequestProcessor.php](source/source/lib/service/RequestProcessor.php): Main request routing logic
-- [source/source/lib/handlers/RequestHandler.php](source/source/lib/handlers/RequestHandler.php): Handler base class with middleware application
+- [source/source/lib/request_handlers/RequestHandler.php](source/source/lib/request_handlers/RequestHandler.php): Handler base class with middleware application
 - [source/source/lib/Configuration.php](source/source/lib/Configuration.php): Rule registry and builder
 - [docker_volumes/configuration/rules/backend.php](docker_volumes/configuration/rules/backend.php): Example backend proxy rule
 - [docker_volumes/configuration/rules/frontend.php](docker_volumes/configuration/rules/frontend.php): Example frontend rules (dev vs prod)

@@ -23,7 +23,7 @@ Tent uses Apache with PHP to process all incoming requests through a centralized
 2. **Request Processing**: The PHP application analyzes the request and configuration
 3. **Action Selection**: Based on configuration, Tent will:
    - **Proxy Mode**: Forward requests to configured backend servers
-   - **Static Mode**: Serve static files directly (future feature)
+   - **Static Mode**: Serve static files directly
 
 ## Docker Image
 
@@ -148,7 +148,7 @@ Configuration::buildRule([
 
 - **SetHeadersMiddleware**: Sets or overrides request headers (e.g., Host, X-Test).
 - **SetPathMiddleware**: Changes the request path, useful for serving a fixed file with StaticFileHandler.
-**FileCacheMiddleware**: Caches responses matching configured HTTP codes (now configured via 'matchers'; 'httpCodes' is deprecated).
+- **FileCacheMiddleware**: Caches responses matching configured HTTP codes (now configured via 'matchers'; 'httpCodes' is deprecated).
 
 All built-in and custom middlewares must extend the `Tent\Middlewares\Middleware` base class (not `RequestMiddleware`).
 
@@ -227,23 +227,23 @@ Middlewares make Tent highly customizable, enabling advanced routing, header man
 **Running Tests:**
 ```bash
 # Tent proxy (PHP) tests
-docker compose run tent_tests composer tests           # All tests
-docker compose run tent_tests composer tests:unit      # Unit tests only
-docker compose run tent_tests composer tests:integration  # Integration tests only
+docker compose run --rm tent_tests composer tests           # All tests
+docker compose run --rm tent_tests composer tests:unit      # Unit tests only
+docker compose run --rm tent_tests composer tests:integration  # Integration tests only
 
 # Frontend tests (for dev frontend app)
-docker compose exec frontend_dev npm test
+docker compose run --rm frontend_dev npm test
 ```
 
 **Linting:**
 ```bash
 # PHP code
-docker compose run tent_tests composer lint
-docker compose run tent_tests composer lint:fix
+docker compose run --rm tent_tests composer lint
+docker compose run --rm tent_tests composer lint:fix
 
 # Frontend code
-docker compose exec frontend_dev npm run lint
-docker compose exec frontend_dev npm run lint_fix
+docker compose run --rm frontend_dev npm run lint
+docker compose run --rm frontend_dev npm run lint_fix
 ```
 
 **Development Commands:**
