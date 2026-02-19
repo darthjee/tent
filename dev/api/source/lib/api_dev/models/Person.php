@@ -1,9 +1,6 @@
 <?php
 
 namespace ApiDev\Models;
-
-use ApiDev\Mysql\ModelConnection;
-use ApiDev\Mysql\Configuration;
 use ApiDev\Models\BaseModel;
 
 /**
