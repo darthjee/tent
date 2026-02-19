@@ -37,8 +37,8 @@ Tent is in active development. Currently implemented:
 - ✅ Request routing and matching
 - ✅ Header forwarding
 - ✅ Static file serving (serves files from a directory)
-- ✅ Middleware system (ready)
-- ⏳ Initial Configuration system (in progress)
+- ✅ Middleware system
+- ✅ Configuration system
 - ✅ Response caching
 
 ### Error Responses (403/404)
