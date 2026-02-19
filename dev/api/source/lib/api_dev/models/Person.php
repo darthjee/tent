@@ -1,6 +1,7 @@
 <?php
 
 namespace ApiDev\Models;
+
 use ApiDev\Models\BaseModel;
 
 /**

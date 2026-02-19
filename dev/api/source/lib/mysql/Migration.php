@@ -1,6 +1,7 @@
 <?php
 
 namespace ApiDev\Mysql;
+
 use Exception;
 
 /**
