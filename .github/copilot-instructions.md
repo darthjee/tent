@@ -240,7 +240,7 @@ export default MyComponent;
 **Adding API Clients:**
 
 1. Create client in `assets/js/clients/`:
-2. 
+
 ```javascript
 const MyClient = {
   async fetchAll() {

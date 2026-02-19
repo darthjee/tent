@@ -199,7 +199,7 @@ Middlewares make Tent highly customizable, enabling advanced routing, header man
    ```
 
 2. **Configure environment variables:**
-   
+
    A sample `.env` file is included with default values. Modify if needed, especially `FRONTEND_DEV_MODE`:
    - `FRONTEND_DEV_MODE=true`: Proxies frontend requests to Vite dev server (hot reload)
    - `FRONTEND_DEV_MODE=false`: Serves frontend from static build at `dev/frontend/dist/`
@@ -208,7 +208,7 @@ Middlewares make Tent highly customizable, enabling advanced routing, header man
    ```bash
    # Build and start all services
    make build && docker compose up
-   
+
    # Or use separate commands
    docker compose build base_build
    docker compose up
