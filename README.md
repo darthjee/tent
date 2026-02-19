@@ -23,7 +23,7 @@ Tent uses Apache with PHP to process all incoming requests through a centralized
 2. **Request Processing**: The PHP application analyzes the request and configuration
 3. **Action Selection**: Based on configuration, Tent will:
    - **Proxy Mode**: Forward requests to configured backend servers
-   - **Static Mode**: Serve static files directly (future feature)
+   - **Static Mode**: Serve static files directly
 
 ## Docker Image
 
@@ -37,8 +37,8 @@ Tent is in active development. Currently implemented:
 - ✅ Request routing and matching
 - ✅ Header forwarding
 - ✅ Static file serving (serves files from a directory)
-- ✅ Middleware system (ready)
-- ⏳ Initial Configuration system (in progress)
+- ✅ Middleware system
+- ✅ Configuration system
 - ✅ Response caching
 
 ### Error Responses (403/404)
@@ -148,7 +148,7 @@ Configuration::buildRule([
 
 - **SetHeadersMiddleware**: Sets or overrides request headers (e.g., Host, X-Test).
 - **SetPathMiddleware**: Changes the request path, useful for serving a fixed file with StaticFileHandler.
-**FileCacheMiddleware**: Caches responses matching configured HTTP codes (now configured via 'matchers'; 'httpCodes' is deprecated).
+- **FileCacheMiddleware**: Caches responses matching configured HTTP codes (now configured via 'matchers'; 'httpCodes' is deprecated).
 
 All built-in and custom middlewares must extend the `Tent\Middlewares\Middleware` base class (not `RequestMiddleware`).
 
@@ -199,7 +199,7 @@ Middlewares make Tent highly customizable, enabling advanced routing, header man
    ```
 
 2. **Configure environment variables:**
-   
+
    A sample `.env` file is included with default values. Modify if needed, especially `FRONTEND_DEV_MODE`:
    - `FRONTEND_DEV_MODE=true`: Proxies frontend requests to Vite dev server (hot reload)
    - `FRONTEND_DEV_MODE=false`: Serves frontend from static build at `dev/frontend/dist/`
@@ -208,7 +208,7 @@ Middlewares make Tent highly customizable, enabling advanced routing, header man
    ```bash
    # Build and start all services
    make build && docker compose up
-   
+
    # Or use separate commands
    docker compose build base_build
    docker compose up
@@ -227,23 +227,23 @@ Middlewares make Tent highly customizable, enabling advanced routing, header man
 **Running Tests:**
 ```bash
 # Tent proxy (PHP) tests
-docker compose run tent_tests composer tests           # All tests
-docker compose run tent_tests composer tests:unit      # Unit tests only
-docker compose run tent_tests composer tests:integration  # Integration tests only
+docker compose run --rm tent_tests composer tests           # All tests
+docker compose run --rm tent_tests composer tests:unit      # Unit tests only
+docker compose run --rm tent_tests composer tests:integration  # Integration tests only
 
 # Frontend tests (for dev frontend app)
-docker compose exec frontend_dev npm test
+docker compose run --rm frontend_dev npm test
 ```
 
 **Linting:**
 ```bash
 # PHP code
-docker compose run tent_tests composer lint
-docker compose run tent_tests composer lint:fix
+docker compose run --rm tent_tests composer lint
+docker compose run --rm tent_tests composer lint:fix
 
 # Frontend code
-docker compose exec frontend_dev npm run lint
-docker compose exec frontend_dev npm run lint_fix
+docker compose run --rm frontend_dev npm run lint
+docker compose run --rm frontend_dev npm run lint_fix
 ```
 
 **Development Commands:**
