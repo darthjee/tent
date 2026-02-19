@@ -1,6 +1,7 @@
 <?php
 
 namespace Tent\Http;
+
 use Tent\Http\CurlHttpExecutor\Get;
 use Tent\Http\CurlHttpExecutor\Post;
 

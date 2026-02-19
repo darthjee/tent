@@ -1,6 +1,7 @@
 <?php
 
 namespace Tent\Matchers;
+
 use Tent\Models\Response;
 use Tent\Utils\HttpCodeMatcher;
 
