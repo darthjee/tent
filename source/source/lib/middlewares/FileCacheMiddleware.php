@@ -7,11 +7,7 @@ use Tent\Models\FolderLocation;
 use Tent\Content\FileCache;
 use Tent\Models\Response;
 use Tent\Service\ResponseContentReader;
-use Tent\Matchers\RequestResponseMatcher;
-use Tent\Matchers\StatusCodeMatcher;
-use Tent\Matchers\RequestMethodMatcher;
 use Tent\Service\ResponseCacher;
-use Tent\Utils\Logger;
 use Tent\Matchers\RequestResponseMatchersBuilder;
 
 /**

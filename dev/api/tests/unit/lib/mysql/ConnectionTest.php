@@ -4,7 +4,6 @@ namespace ApiDev\Tests;
 
 use PHPUnit\Framework\TestCase;
 use ApiDev\Mysql\Configuration;
-use ApiDev\Mysql\Connection;
 
 class ConnectionTest extends TestCase
 {

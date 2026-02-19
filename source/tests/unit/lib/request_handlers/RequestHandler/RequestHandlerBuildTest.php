@@ -7,7 +7,6 @@ require_once __DIR__ . '/../../../../support/loader.php';
 
 use PHPUnit\Framework\TestCase;
 use Tent\RequestHandlers\RequestHandler;
-use Tent\Tests\Support\Handlers\RequestToBodyHandler;
 
 class RequestHandlerBuildTest extends TestCase
 {

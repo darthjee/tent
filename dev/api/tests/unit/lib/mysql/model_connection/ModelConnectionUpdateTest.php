@@ -3,7 +3,6 @@
 namespace ApiDev\Tests;
 
 use PHPUnit\Framework\TestCase;
-use ApiDev\Mysql\Connection;
 use ApiDev\Mysql\ModelConnection;
 
 class ModelConnectionUpdateTest extends TestCase

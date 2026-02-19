@@ -5,7 +5,6 @@ namespace Tent\Tests\RequestHandlers\RequestHandler;
 require_once __DIR__ . '/../../../../support/loader.php';
 
 use PHPUnit\Framework\TestCase;
-use Tent\RequestHandlers\RequestHandler;
 use Tent\Middlewares\SetHeadersMiddleware;
 use Tent\Tests\Support\Handlers\RequestToBodyHandler;
 use Tent\Models\ProcessingRequest;
