@@ -32,6 +32,7 @@ All middlewares extend the abstract `Tent\Middlewares\Middleware` base class and
 ### `processRequest(ProcessingRequest $request): ProcessingRequest`
 
 Called before the request reaches the handler. Use this to:
+
 - Modify request headers
 - Rewrite the request path
 - Read from cache and short-circuit the chain
@@ -47,6 +48,7 @@ public function processRequest(ProcessingRequest $request): ProcessingRequest
 ### `processResponse(Response $response): Response`
 
 Called after the handler produces a response. Use this to:
+
 - Add or modify response headers
 - Cache the response to disk
 - Transform the response body
