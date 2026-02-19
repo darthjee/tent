@@ -4,7 +4,6 @@ namespace Tent\Models;
 
 use Tent\RequestHandlers\RequestHandler;
 use Tent\Matchers\RequestMatcher;
-use Tent\Middlewares\Middleware;
 use Tent\Common\SimpleModel;
 
 /**

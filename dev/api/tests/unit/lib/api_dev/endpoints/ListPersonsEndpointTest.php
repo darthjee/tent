@@ -3,7 +3,6 @@
 namespace ApiDev\Tests;
 
 use PHPUnit\Framework\TestCase;
-use ApiDev\Models\Person;
 use ApiDev\Mysql\Configuration;
 use ApiDev\ListPersonsEndpoint;
 use ApiDev\Request;

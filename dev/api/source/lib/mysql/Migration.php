@@ -1,8 +1,6 @@
 <?php
 
 namespace ApiDev\Mysql;
-
-use PDO;
 use Exception;
 
 /**

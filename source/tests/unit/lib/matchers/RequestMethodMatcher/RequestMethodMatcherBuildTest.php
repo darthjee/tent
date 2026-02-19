@@ -6,7 +6,6 @@ require_once __DIR__ . '/../../../../support/loader.php';
 
 use PHPUnit\Framework\TestCase;
 use Tent\Matchers\RequestMethodMatcher;
-use Tent\Models\Response;
 use Tent\Models\Request;
 
 class RequestMethodMatcherBuildTest extends TestCase
