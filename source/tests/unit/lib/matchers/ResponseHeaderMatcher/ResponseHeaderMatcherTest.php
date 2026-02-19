@@ -15,34 +15,55 @@ class ResponseHeaderMatcherTest extends TestCase
         return new Response(['headers' => $headers]);
     }
 
-    public function testMatchResponseReturnsTrueWhenHeaderExists()
+    public function testMatchResponseReturnsTrueWhenHeaderExistsWithMatchingValue()
     {
-        $matcher = new ResponseHeaderMatcher(['X-SaveCache']);
+        $matcher = new ResponseHeaderMatcher(['X-SaveCache' => 'true']);
         $response = $this->mockResponse(['X-SaveCache: true', 'Content-Type: text/html']);
         $this->assertTrue($matcher->matchResponse($response));
     }
 
     public function testMatchResponseReturnsFalseWhenHeaderDoesNotExist()
     {
-        $matcher = new ResponseHeaderMatcher(['X-SaveCache']);
+        $matcher = new ResponseHeaderMatcher(['X-SaveCache' => 'true']);
         $response = $this->mockResponse(['Content-Type: text/html']);
         $this->assertFalse($matcher->matchResponse($response));
     }
 
-    public function testMatchResponseIsCaseInsensitive()
+    public function testMatchResponseReturnsFalseWhenHeaderExistsWithNonMatchingValue()
     {
-        $matcher = new ResponseHeaderMatcher(['x-savecache']);
+        $matcher = new ResponseHeaderMatcher(['X-SaveCache' => 'true']);
+        $response = $this->mockResponse(['X-SaveCache: false', 'Content-Type: text/html']);
+        $this->assertFalse($matcher->matchResponse($response));
+    }
+
+    public function testMatchResponseHeaderNameIsCaseInsensitive()
+    {
+        $matcher = new ResponseHeaderMatcher(['x-savecache' => 'true']);
         $response = $this->mockResponse(['X-SaveCache: true']);
         $this->assertTrue($matcher->matchResponse($response));
 
-        $matcher = new ResponseHeaderMatcher(['X-SaveCache']);
+        $matcher = new ResponseHeaderMatcher(['X-SaveCache' => 'true']);
         $response = $this->mockResponse(['x-savecache: true']);
         $this->assertTrue($matcher->matchResponse($response));
     }
 
-    public function testMatchResponseWithMultipleHeaders()
+    public function testMatchResponseHeaderValueIsCaseSensitive()
     {
-        $matcher = new ResponseHeaderMatcher(['X-SaveCache', 'X-Cache-This']);
+        $matcher = new ResponseHeaderMatcher(['X-SaveCache' => 'true']);
+        $response = $this->mockResponse(['X-SaveCache: True']);
+        $this->assertFalse($matcher->matchResponse($response));
+    }
+
+    public function testMatchResponseTrimsWhitespaceFromValues()
+    {
+        $matcher = new ResponseHeaderMatcher(['X-SaveCache' => 'true']);
+        $response = $this->mockResponse(['X-SaveCache:  true ']);
+        $this->assertTrue($matcher->matchResponse($response));
+    }
+
+    public function testMatchResponseWithMultipleConfiguredHeadersReturnsTrueIfOneMatches()
+    {
+        $matcher = new ResponseHeaderMatcher(['X-SaveCache' => 'true', 'X-Cache-This' => 'yes']);
         $response = $this->mockResponse(['X-Cache-This: yes']);
         $this->assertTrue($matcher->matchResponse($response));
 
@@ -53,7 +74,7 @@ class ResponseHeaderMatcherTest extends TestCase
         $this->assertFalse($matcher->matchResponse($response));
     }
 
-    public function testMatchResponseWithEmptyHeaderNames()
+    public function testMatchResponseWithEmptyHeaders()
     {
         $matcher = new ResponseHeaderMatcher([]);
         $response = $this->mockResponse(['X-SaveCache: true', 'Content-Type: text/html']);
@@ -62,8 +83,9 @@ class ResponseHeaderMatcherTest extends TestCase
 
     public function testBuildCreatesMatcherWithGivenHeaders()
     {
-        $matcher = ResponseHeaderMatcher::build(['headerNames' => ['X-SaveCache']]);
+        $matcher = ResponseHeaderMatcher::build(['headers' => ['X-SaveCache' => 'true']]);
         $this->assertTrue($matcher->matchResponse($this->mockResponse(['X-SaveCache: true'])));
+        $this->assertFalse($matcher->matchResponse($this->mockResponse(['X-SaveCache: false'])));
         $this->assertFalse($matcher->matchResponse($this->mockResponse(['Content-Type: text/html'])));
     }
 
