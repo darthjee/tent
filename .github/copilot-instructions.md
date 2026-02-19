@@ -373,6 +373,14 @@ dev/
 - [dev/api/README.md](dev/api/README.md): Dev API documentation (adding endpoints, migrations)
 - [dev/frontend/README.md](dev/frontend/README.md): Dev Frontend documentation (adding components, API clients, testing)
 
+## Documentation Resources
+
+For detailed implementation guides, refer to:
+
+- [Creating Middlewares](../docs/creating-middlewares.md) - Complete guide for building custom middlewares
+- [FileCacheMiddleware Matchers](../docs/file-cache-middleware-matchers.md) - Matcher configuration for caching
+- [Full Documentation Index](../docs/README.md) - Overview and links to all documentation
+
 ## Language Guidelines
 
 All code, comments, and documentation must be in **English**.
