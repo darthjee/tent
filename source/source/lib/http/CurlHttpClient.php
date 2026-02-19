@@ -2,8 +2,6 @@
 
 namespace Tent\Http;
 
-use Tent\Utils\CurlUtils;
-use Tent\Http\CurlHttpExecutor;
 use Tent\Http\CurlHttpExecutor\Get;
 use Tent\Http\CurlHttpExecutor\Post;
 

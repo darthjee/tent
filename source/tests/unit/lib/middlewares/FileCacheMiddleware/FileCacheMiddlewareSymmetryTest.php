@@ -11,7 +11,6 @@ use Tent\Models\Response;
 use Tent\Models\ProcessingRequest;
 use Tent\Models\RequestInterface;
 use Tent\Content\FileCache;
-use Tent\Tests\Support\Utils\FileSystemUtils;
 use Tent\Utils\CacheFilePath;
 
 class FileCacheMiddlewareSymmetryTest extends TestCase

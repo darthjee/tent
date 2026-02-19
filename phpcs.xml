@@ -18,4 +18,11 @@
     <rule ref="SlevomatCodingStandard.Classes.StaticAccess">
         <exclude-pattern>*</exclude-pattern>
     </rule>
+    
+    <!-- Detect and remove unused use statements -->
+    <rule ref="SlevomatCodingStandard.Namespaces.UnusedUses">
+        <properties>
+            <property name="searchAnnotations" value="true"/>
+        </properties>
+    </rule>
 </ruleset>
