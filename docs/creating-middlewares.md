@@ -113,7 +113,7 @@ Use `processRequest()` to modify the incoming request. The `ProcessingRequest` o
 - `$request->setRequestPath(string $path)` — Change the request path
 - `$request->setResponse(Response $response)` — Short-circuit the chain with a pre-built response
 
-**Example: Prepend a path prefix**
+#### Example: Prepend a path prefix
 
 ```php
 public function processRequest(ProcessingRequest $request): ProcessingRequest
