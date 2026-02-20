@@ -3,6 +3,7 @@
 namespace Tent\Matchers;
 
 use Tent\Models\Response;
+use Tent\Utils\CurlUtils;
 
 /**
  * Matcher for HTTP response headers.
@@ -38,15 +39,7 @@ class ResponseHeaderMatcher extends RequestResponseMatcher
      */
     public function matchResponse(Response $response): bool
     {
-        $responseHeaders = [];
-        foreach ($response->headers() as $header) {
-            $parts = explode(':', $header, 2);
-            if (count($parts) === 2) {
-                $name = strtolower(trim($parts[0]));
-                $value = trim($parts[1]);
-                $responseHeaders[$name] = $value;
-            }
-        }
+        $responseHeaders = CurlUtils::mapHeaderLines($response->headers());
 
         foreach ($this->headers as $name => $expectedValue) {
             $lowerName = strtolower($name);

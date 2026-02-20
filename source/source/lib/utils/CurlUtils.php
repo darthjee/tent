@@ -43,4 +43,28 @@ class CurlUtils
         });
         return $headerLines;
     }
+
+    /**
+     * Converts header lines in "Name: Value" format to an associative array.
+     *
+     * Header names are normalized to lowercase and values are trimmed.
+     * Invalid header lines (without a colon separator) are ignored.
+     *
+     * @param string[] $headerLines Array of header lines.
+     * @return array Associative array where key is lowercase header name and value is header value.
+     */
+    public static function mapHeaderLines(array $headerLines): array
+    {
+        $headers = [];
+        foreach ($headerLines as $headerLine) {
+            $parts = explode(':', $headerLine, 2);
+            if (count($parts) === 2) {
+                $name = strtolower(trim($parts[0]));
+                $value = trim($parts[1]);
+                $headers[$name] = $value;
+            }
+        }
+
+        return $headers;
+    }
 }

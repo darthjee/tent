@@ -156,4 +156,41 @@ class CurlUtilsTest extends TestCase
 
         $this->assertEquals($expected, $result);
     }
+
+    public function testMapHeaderLinesParsesAndNormalizesHeaders()
+    {
+        $headerLines = [
+            'X-SaveCache: true',
+            'Content-Type: application/json',
+            '  X-Trace-Id :  abc-123  '
+        ];
+
+        $result = CurlUtils::mapHeaderLines($headerLines);
+
+        $expected = [
+            'x-savecache' => 'true',
+            'content-type' => 'application/json',
+            'x-trace-id' => 'abc-123'
+        ];
+
+        $this->assertEquals($expected, $result);
+    }
+
+    public function testMapHeaderLinesIgnoresInvalidLines()
+    {
+        $headerLines = [
+            'X-SaveCache: true',
+            'Invalid Header Line',
+            'Another-Header: value:with:colon'
+        ];
+
+        $result = CurlUtils::mapHeaderLines($headerLines);
+
+        $expected = [
+            'x-savecache' => 'true',
+            'another-header' => 'value:with:colon'
+        ];
+
+        $this->assertEquals($expected, $result);
+    }
 }
