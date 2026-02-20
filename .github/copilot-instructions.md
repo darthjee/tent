@@ -156,6 +156,24 @@ All documentation and examples should use the new `matchers` pattern. Using `htt
 - **Frontend**: Jasmine specs in `dev/frontend/spec/`. Run with `npm test`.
 - Always test handler behavior via `Rule::match()` and handler execution separately.
 
+### Class Loading (`loader.php`)
+
+This project uses explicit `require_once` includes in `loader.php` files (no Composer PSR-4 autoload for runtime classes in these apps).
+
+**Main Tent app (`source/source/loader.php`)**
+
+- Add every new class file explicitly using `require_once __DIR__ . '/lib/...';`
+- Keep one `require_once` per file and use absolute-from-loader paths via `__DIR__`
+- Preserve dependency-first ordering (interfaces/base classes before concrete implementations)
+- Place the new include in the matching domain block when possible (`middlewares`, `models`, `matchers`, `service`, etc.)
+
+**Dev API (`dev/api/source/loader.php`)**
+
+- Add every new API class explicitly using `require_once __DIR__ . '/lib/api_dev/...';`
+- Keep includes grouped by area (`endpoints`, `exceptions`, `models`, core classes)
+- For a new endpoint, add its `require_once` in `loader.php`, then register the route in `dev/api/source/index.php`
+- If needed in `index.php` by short class name, also add the corresponding `use ApiDev\...;` import
+
 ### Dev API Application
 
 The `dev/api` directory contains a dummy backend application used for testing the Tent proxy. Key characteristics:
@@ -171,7 +189,7 @@ The `dev/api` directory contains a dummy backend application used for testing th
 
 1. Create endpoint class in `dev/api/source/lib/api_dev/endpoints/` extending `Endpoint`
 2. Implement `handle()` method to return a `Response` with body, status code, and headers
-3. Include the endpoint file with `require_once` in `index.php`
+3. Include the endpoint file with `require_once` in `dev/api/source/loader.php`
 4. Register the route: `Configuration::add('GET', '/my-path', MyEndpoint::class)`
 
 **Database Migrations:**
