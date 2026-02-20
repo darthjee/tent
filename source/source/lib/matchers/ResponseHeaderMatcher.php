@@ -42,8 +42,7 @@ class ResponseHeaderMatcher extends RequestResponseMatcher
         $responseHeaders = CurlUtils::mapHeaderLines($response->headers());
 
         foreach ($this->headers as $name => $expectedValue) {
-            $lowerName = strtolower($name);
-            if (isset($responseHeaders[$lowerName]) && $responseHeaders[$lowerName] === $expectedValue) {
+            if ($this->headerMatches($name, $expectedValue, $responseHeaders)) {
                 return true;
             }
         }
@@ -60,5 +59,19 @@ class ResponseHeaderMatcher extends RequestResponseMatcher
     {
         $headers = $attributes['headers'] ?? [];
         return new self($headers);
+    }
+
+    /**
+     * Checks if a configured header matches a response header map.
+     *
+     * @param string $name            Header name.
+     * @param string $expectedValue   Expected header value.
+     * @param array  $responseHeaders Response headers map (lowercase name => value).
+     * @return boolean
+     */
+    private function headerMatches(string $name, string $expectedValue, array $responseHeaders): bool
+    {
+        $lowerName = strtolower($name);
+        return isset($responseHeaders[$lowerName]) && $responseHeaders[$lowerName] === $expectedValue;
     }
 }
