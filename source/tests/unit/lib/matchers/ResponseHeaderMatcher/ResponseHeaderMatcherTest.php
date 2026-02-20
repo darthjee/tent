@@ -89,6 +89,16 @@ class ResponseHeaderMatcherTest extends TestCase
         $this->assertFalse($matcher->matchResponse($this->mockResponse(['Content-Type: text/html'])));
     }
 
+    public function testBuildCreatesMatcherWithMultipleHeadersUsingOrLogic()
+    {
+        $matcher = ResponseHeaderMatcher::build([
+            'headers' => ['X-SaveCache' => 'true', 'X-Cache-This' => 'some_other_value']
+        ]);
+        $this->assertTrue($matcher->matchResponse($this->mockResponse(['X-SaveCache: true'])));
+        $this->assertTrue($matcher->matchResponse($this->mockResponse(['X-Cache-This: some_other_value'])));
+        $this->assertFalse($matcher->matchResponse($this->mockResponse(['Content-Type: text/html'])));
+    }
+
     public function testBuildDefaultsToEmptyArray()
     {
         $matcher = ResponseHeaderMatcher::build([]);

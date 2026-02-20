@@ -152,6 +152,29 @@ Configuration::buildRule([
 
 All built-in and custom middlewares must extend the `Tent\Middlewares\Middleware` base class (not `RequestMiddleware`).
 
+### Built-in Matchers
+
+Matchers can be used in the `matchers` array of `FileCacheMiddleware` (and other middlewares) to control when caching or other behavior applies.
+
+- **StatusCodeMatcher**: Matches responses by HTTP status code. Supports exact codes (e.g., `200`) and wildcard patterns (e.g., `"2xx"`).
+- **RequestMethodMatcher**: Matches requests by HTTP method (e.g., `GET`, `POST`).
+- **ResponseHeaderMatcher**: Matches responses that contain any of the specified header name+value pairs. Header names are case-insensitive; values are case-sensitive.
+
+  Example usage with `FileCacheMiddleware`:
+  ```php
+  [
+      'class' => 'Tent\Middlewares\FileCacheMiddleware',
+      'location' => './cache',
+      'matchers' => [
+          [
+              'class' => 'Tent\Matchers\ResponseHeaderMatcher',
+              'headers' => ['X-SaveCache' => 'true', 'X-Cache-This' => 'some_other_value']
+          ]
+      ]
+  ]
+  ```
+  If the response contains **any** of the specified header+value pairs (e.g., `X-SaveCache: true` OR `X-Cache-This: some_other_value`), the matcher returns true.
+
 #### Implementing a Custom Middleware
 
 To create your own middleware, extend the `Middleware` base class and override `processRequest()` and/or `processResponse()` as needed:
