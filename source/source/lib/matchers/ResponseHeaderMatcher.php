@@ -7,40 +7,50 @@ use Tent\Models\Response;
 /**
  * Matcher for HTTP response headers.
  *
- * Checks if a response contains any of the specified headers.
+ * Checks if a response contains any of the specified headers with matching values.
  * Useful for conditional caching based on response headers.
  */
 class ResponseHeaderMatcher extends RequestResponseMatcher
 {
     /**
-     * @var array The list of header names to match against (lowercase).
+     * @var array Associative array of header name => expected value to match against.
      */
-    private array $headerNames;
+    private array $headers;
 
     /**
-     * Constructs a ResponseHeaderMatcher with the given list of header names.
+     * Constructs a ResponseHeaderMatcher with the given header name => value pairs.
      *
-     * @param array $headerNames The list of header names to match against.
+     * @param array $headers Associative array of header name => expected value.
      */
-    public function __construct(array $headerNames)
+    public function __construct(array $headers)
     {
-        $this->headerNames = array_map('strtolower', $headerNames);
+        $this->headers = $headers;
     }
 
     /**
-     * Checks if the response contains any of the configured header names.
+     * Checks if the response contains any of the configured headers with matching values.
+     *
+     * Header name matching is case-insensitive; value matching is case-sensitive.
+     * Whitespace is trimmed from header values when comparing.
      *
      * @param Response $response The response to check.
-     * @return boolean True if the response contains any matching header, false otherwise.
+     * @return boolean True if the response contains any matching header and value, false otherwise.
      */
     public function matchResponse(Response $response): bool
     {
-        $responseHeaderNames = array_map(function ($header) {
-            return strtolower(explode(':', $header, 2)[0]);
-        }, $response->headers());
+        $responseHeaders = [];
+        foreach ($response->headers() as $header) {
+            $parts = explode(':', $header, 2);
+            if (count($parts) === 2) {
+                $name = strtolower(trim($parts[0]));
+                $value = trim($parts[1]);
+                $responseHeaders[$name] = $value;
+            }
+        }
 
-        foreach ($this->headerNames as $name) {
-            if (in_array($name, $responseHeaderNames)) {
+        foreach ($this->headers as $name => $expectedValue) {
+            $lowerName = strtolower($name);
+            if (isset($responseHeaders[$lowerName]) && $responseHeaders[$lowerName] === $expectedValue) {
                 return true;
             }
         }
@@ -55,7 +65,7 @@ class ResponseHeaderMatcher extends RequestResponseMatcher
      */
     public static function build(array $attributes): ResponseHeaderMatcher
     {
-        $headerNames = $attributes['headerNames'] ?? [];
-        return new self($headerNames);
+        $headers = $attributes['headers'] ?? [];
+        return new self($headers);
     }
 }
