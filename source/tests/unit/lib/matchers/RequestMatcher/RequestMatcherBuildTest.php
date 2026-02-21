@@ -6,6 +6,8 @@ require_once __DIR__ . '/../../../../support/loader.php';
 
 use PHPUnit\Framework\TestCase;
 use Tent\Matchers\RequestMatcher;
+use Tent\Matchers\ExactRequestMatcher;
+use Tent\Matchers\BeginsWithRequestMatcher;
 use Tent\Models\Request;
 
 class RequestMatcherBuildTest extends TestCase
@@ -50,21 +52,18 @@ class RequestMatcherBuildTest extends TestCase
         $matchers = RequestMatcher::buildMatchers($attributes);
 
         $this->assertCount(3, $matchers);
-        $this->assertInstanceOf(RequestMatcher::class, $matchers[0]);
-        $this->assertInstanceOf(RequestMatcher::class, $matchers[1]);
-        $this->assertInstanceOf(RequestMatcher::class, $matchers[2]);
+        $this->assertInstanceOf(ExactRequestMatcher::class, $matchers[0]);
+        $this->assertInstanceOf(BeginsWithRequestMatcher::class, $matchers[1]);
+        $this->assertInstanceOf(ExactRequestMatcher::class, $matchers[2]);
 
         $this->assertEquals('GET', $this->getPrivateProperty($matchers[0], 'requestMethod'));
         $this->assertEquals('/users', $this->getPrivateProperty($matchers[0], 'requestUri'));
-        $this->assertEquals('exact', $this->getPrivateProperty($matchers[0], 'matchType'));
 
         $this->assertEquals('POST', $this->getPrivateProperty($matchers[1], 'requestMethod'));
         $this->assertEquals('/users', $this->getPrivateProperty($matchers[1], 'requestUri'));
-        $this->assertEquals('begins_with', $this->getPrivateProperty($matchers[1], 'matchType'));
 
         $this->assertNull($this->getPrivateProperty($matchers[2], 'requestMethod'));
         $this->assertEquals('/admin', $this->getPrivateProperty($matchers[2], 'requestUri'));
-        $this->assertEquals('exact', $this->getPrivateProperty($matchers[2], 'matchType'));
     }
 
     private function getPrivateProperty($object, $property)

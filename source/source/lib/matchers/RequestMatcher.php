@@ -5,47 +5,50 @@ namespace Tent\Matchers;
 use Tent\Models\RequestInterface;
 
 /**
- * Matches an incoming Request against method and URI criteria.
+ * Abstract base class for matching an incoming Request against method and URI criteria.
  *
  * RequestMatcher is used by Rule to determine if a given Request should be handled by a specific RequestHandler.
- * A Rule can have multiple RequestMatchers and one RequestHandler. Matching can be exact or prefix-based.
+ * A Rule can have multiple RequestMatchers and one RequestHandler.
+ *
+ * Subclasses implement the URI matching strategy (exact, begins_with, etc.).
  */
-class RequestMatcher
+abstract class RequestMatcher
 {
-    private $requestMethod;
-    private $requestUri;
-    private $matchType;
+    protected $requestMethod;
+    protected $requestUri;
 
     /**
      * @param string|null $requestMethod HTTP method to match (e.g., GET, POST), or null for any.
      * @param string|null $requestUri    URI to match, or null for any.
-     * @param string      $matchType     URI match type:
-     *            - 'exact': the request URI must be exactly equal to $requestUri.
-     *            - 'begins_with': the request URI must start with $requestUri (prefix match).
      */
-    public function __construct(?string $requestMethod = null, ?string $requestUri = null, string $matchType = 'exact')
+    public function __construct(?string $requestMethod = null, ?string $requestUri = null)
     {
         $this->requestMethod = $requestMethod;
         $this->requestUri = $requestUri;
-        $this->matchType = $matchType;
     }
 
     /**
      * Builds a RequestMatcher from an associative array.
      *
+     * Instantiates the appropriate subclass based on the 'type' parameter.
+     * Defaults to 'exact' if 'type' is not provided.
+     *
      * Example:
      *   RequestMatcher::build(['method' => 'GET', 'uri' => '/users', 'type' => 'exact'])
+     *   RequestMatcher::build(['method' => 'GET', 'uri' => '/assets/', 'type' => 'begins_with'])
      *
      * @param array $params Associative array with keys 'method', 'uri', 'type'.
      * @return RequestMatcher
      */
     public static function build(array $params): self
     {
-        return new self(
-            $params['method'] ?? null,
-            $params['uri'] ?? null,
-            $params['type'] ?? 'exact'
-        );
+        $type = $params['type'] ?? 'exact';
+
+        if ($type === 'begins_with') {
+            return BeginsWithRequestMatcher::build($params);
+        }
+
+        return ExactRequestMatcher::build($params);
     }
 
     /**
@@ -87,29 +90,12 @@ class RequestMatcher
     }
 
     /**
-     * Checks if the request URI matches according to matchType.
+     * Checks if the request URI matches.
      *
-     * Available matchType values:
-     *   - 'exact': requires the request URI to be exactly equal to $requestUri.
-     *   - 'begins_with': requires the request URI to start with $requestUri (prefix match).
+     * Subclasses implement this method to define the URI matching strategy.
      *
      * @param RequestInterface $request The incoming HTTP request.
      * @return boolean True if the request matches URI criteria.
      */
-    private function matchRequestUri(RequestInterface $request)
-    {
-        if ($this->requestUri == null) {
-            return true;
-        }
-
-        $requestPath = $request->requestPath();
-
-        if ($this->matchType === 'exact') {
-            return $requestPath === $this->requestUri;
-        } elseif ($this->matchType === 'begins_with') {
-            return strpos($requestPath, $this->requestUri) === 0;
-        }
-
-        return false;
-    }
+    abstract protected function matchRequestUri(RequestInterface $request);
 }
