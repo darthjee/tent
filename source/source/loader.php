@@ -34,6 +34,8 @@ require_once __DIR__ . '/lib/models/MissingResponse.php';
 require_once __DIR__ . '/lib/models/ProcessingRequest.php';
 require_once __DIR__ . '/lib/models/Request.php';
 require_once __DIR__ . '/lib/matchers/RequestMatcher.php';
+require_once __DIR__ . '/lib/matchers/ExactRequestMatcher.php';
+require_once __DIR__ . '/lib/matchers/BeginsWithRequestMatcher.php';
 require_once __DIR__ . '/lib/matchers/RequestResponseMatcher.php';
 require_once __DIR__ . '/lib/matchers/RequestResponseMatchersBuilder.php';
 require_once __DIR__ . '/lib/matchers/RequestMethodMatcher.php';

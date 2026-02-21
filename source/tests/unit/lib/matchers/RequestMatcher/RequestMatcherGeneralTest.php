@@ -6,6 +6,8 @@ require_once __DIR__ . '/../../../../support/loader.php';
 
 use PHPUnit\Framework\TestCase;
 use Tent\Matchers\RequestMatcher;
+use Tent\Matchers\ExactRequestMatcher;
+use Tent\Matchers\BeginsWithRequestMatcher;
 use Tent\Models\Request;
 
 class RequestMatcherGeneralTest extends TestCase
@@ -13,7 +15,7 @@ class RequestMatcherGeneralTest extends TestCase
     public function testMatchesWithExactMatch()
     {
         $request = $this->createMockRequest('GET', '/home');
-        $matcher = new RequestMatcher('GET', '/home', 'exact');
+        $matcher = new ExactRequestMatcher('GET', '/home');
 
         $this->assertTrue($matcher->matches($request));
     }
@@ -21,7 +23,7 @@ class RequestMatcherGeneralTest extends TestCase
     public function testDoesNotMatchWithDifferentMethod()
     {
         $request = $this->createMockRequest('POST', '/home');
-        $matcher = new RequestMatcher('GET', '/home', 'exact');
+        $matcher = new ExactRequestMatcher('GET', '/home');
 
         $this->assertFalse($matcher->matches($request));
     }
@@ -29,7 +31,7 @@ class RequestMatcherGeneralTest extends TestCase
     public function testDoesNotMatchWithDifferentUrlExact()
     {
         $request = $this->createMockRequest('GET', '/home');
-        $matcher = new RequestMatcher('GET', '/about', 'exact');
+        $matcher = new ExactRequestMatcher('GET', '/about');
 
         $this->assertFalse($matcher->matches($request));
     }
@@ -37,7 +39,7 @@ class RequestMatcherGeneralTest extends TestCase
     public function testMatchesWithBeginsWithPattern()
     {
         $request = $this->createMockRequest('GET', '/assets/js/main.js');
-        $matcher = new RequestMatcher('GET', '/assets/js/', 'begins_with');
+        $matcher = new BeginsWithRequestMatcher('GET', '/assets/js/');
 
         $this->assertTrue($matcher->matches($request));
     }
@@ -45,7 +47,7 @@ class RequestMatcherGeneralTest extends TestCase
     public function testDoesNotMatchWithBeginsWithWhenNotStarting()
     {
         $request = $this->createMockRequest('GET', '/home/assets/js/main.js');
-        $matcher = new RequestMatcher('GET', '/assets/js/', 'begins_with');
+        $matcher = new BeginsWithRequestMatcher('GET', '/assets/js/');
 
         $this->assertFalse($matcher->matches($request));
     }
@@ -53,23 +55,15 @@ class RequestMatcherGeneralTest extends TestCase
     public function testDefaultMatchTypeIsExact()
     {
         $request = $this->createMockRequest('GET', '/home');
-        $matcher = new RequestMatcher('GET', '/home');
+        $matcher = new ExactRequestMatcher('GET', '/home');
 
         $this->assertTrue($matcher->matches($request));
-    }
-
-    public function testDoesNotMatchWithInvalidMatchType()
-    {
-        $request = $this->createMockRequest('GET', '/home');
-        $matcher = new RequestMatcher('GET', '/home', 'invalid_type');
-
-        $this->assertFalse($matcher->matches($request));
     }
 
     public function testMatchesRootPathExactly()
     {
         $request = $this->createMockRequest('GET', '/');
-        $matcher = new RequestMatcher('GET', '/', 'exact');
+        $matcher = new ExactRequestMatcher('GET', '/');
 
         $this->assertTrue($matcher->matches($request));
     }
@@ -77,7 +71,7 @@ class RequestMatcherGeneralTest extends TestCase
     public function testDoesNotMatchRootWithBeginsWithForDifferentPath()
     {
         $request = $this->createMockRequest('GET', '/home');
-        $matcher = new RequestMatcher('GET', '/', 'begins_with');
+        $matcher = new BeginsWithRequestMatcher('GET', '/');
 
         $this->assertTrue($matcher->matches($request)); // All paths begin with '/'
     }
@@ -85,7 +79,7 @@ class RequestMatcherGeneralTest extends TestCase
     public function testMatchesPathOnlyWhenMethodIsNull()
     {
         $request = $this->createMockRequest('POST', '/home');
-        $matcher = new RequestMatcher(null, '/home', 'exact');
+        $matcher = new ExactRequestMatcher(null, '/home');
 
         $this->assertTrue($matcher->matches($request));
     }
@@ -93,7 +87,7 @@ class RequestMatcherGeneralTest extends TestCase
     public function testMatchesPathOnlyWithBeginsWithWhenMethodIsNull()
     {
         $request = $this->createMockRequest('DELETE', '/assets/js/main.js');
-        $matcher = new RequestMatcher(null, '/assets/js/', 'begins_with');
+        $matcher = new BeginsWithRequestMatcher(null, '/assets/js/');
 
         $this->assertTrue($matcher->matches($request));
     }
@@ -101,7 +95,7 @@ class RequestMatcherGeneralTest extends TestCase
     public function testDoesNotMatchWhenMethodIsNullAndPathDifferent()
     {
         $request = $this->createMockRequest('PUT', '/about');
-        $matcher = new RequestMatcher(null, '/home', 'exact');
+        $matcher = new ExactRequestMatcher(null, '/home');
 
         $this->assertFalse($matcher->matches($request));
     }
@@ -109,7 +103,7 @@ class RequestMatcherGeneralTest extends TestCase
     public function testMatchesMethodOnlyWhenUriIsNull()
     {
         $request = $this->createMockRequest('GET', '/any/path');
-        $matcher = new RequestMatcher('GET', null);
+        $matcher = new ExactRequestMatcher('GET', null);
 
         $this->assertTrue($matcher->matches($request));
     }
@@ -117,7 +111,7 @@ class RequestMatcherGeneralTest extends TestCase
     public function testMatchesMethodOnlyWithDifferentPathsWhenUriIsNull()
     {
         $request = $this->createMockRequest('POST', '/completely/different');
-        $matcher = new RequestMatcher('POST', null);
+        $matcher = new ExactRequestMatcher('POST', null);
 
         $this->assertTrue($matcher->matches($request));
     }
@@ -125,7 +119,7 @@ class RequestMatcherGeneralTest extends TestCase
     public function testDoesNotMatchWhenUriIsNullAndMethodDifferent()
     {
         $request = $this->createMockRequest('DELETE', '/home');
-        $matcher = new RequestMatcher('GET', null);
+        $matcher = new ExactRequestMatcher('GET', null);
 
         $this->assertFalse($matcher->matches($request));
     }
