@@ -7,6 +7,7 @@ require_once __DIR__ . '/../../../../support/loader.php';
 use PHPUnit\Framework\TestCase;
 use Tent\Matchers\ExactRequestMatcher;
 use Tent\Matchers\BeginsWithRequestMatcher;
+use Tent\Matchers\EndsWithRequestMatcher;
 use Tent\Models\Request;
 
 class RequestMatcherGeneralTest extends TestCase
@@ -121,6 +122,38 @@ class RequestMatcherGeneralTest extends TestCase
         $matcher = new ExactRequestMatcher('GET', null);
 
         $this->assertFalse($matcher->matches($request));
+    }
+
+    public function testMatchesWithEndsWithPattern()
+    {
+        $request = $this->createMockRequest('GET', '/assets/js/main.js');
+        $matcher = new EndsWithRequestMatcher('GET', '.js');
+
+        $this->assertTrue($matcher->matches($request));
+    }
+
+    public function testDoesNotMatchWithEndsWithWhenNotEnding()
+    {
+        $request = $this->createMockRequest('GET', '/assets/js/main.js');
+        $matcher = new EndsWithRequestMatcher('GET', '.css');
+
+        $this->assertFalse($matcher->matches($request));
+    }
+
+    public function testMatchesPathOnlyWithEndsWithWhenMethodIsNull()
+    {
+        $request = $this->createMockRequest('DELETE', '/assets/js/main.js');
+        $matcher = new EndsWithRequestMatcher(null, '.js');
+
+        $this->assertTrue($matcher->matches($request));
+    }
+
+    public function testEndsWithNullUriMatchesAnyPath()
+    {
+        $request = $this->createMockRequest('GET', '/anything');
+        $matcher = new EndsWithRequestMatcher('GET', null);
+
+        $this->assertTrue($matcher->matches($request));
     }
 
     private function createMockRequest($method, $url)

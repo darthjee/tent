@@ -162,6 +162,27 @@ Configuration::buildRule([
 
 All built-in and custom middlewares must extend the `Tent\Middlewares\Middleware` base class (not `RequestMiddleware`).
 
+### Rule Matcher Types
+
+The `type` field in rule `matchers` controls how the URI is matched:
+
+- **`exact`** *(default)*: The request URI must exactly match the configured `uri`.
+- **`begins_with`**: The request URI must start with the configured `uri`.
+- **`ends_with`**: The request URI must end with the configured `uri`.
+
+Example using `ends_with`:
+```php
+Configuration::buildRule([
+    'handler' => [
+        'type' => 'proxy',
+        'host' => 'http://api:80'
+    ],
+    'matchers' => [
+        ['method' => 'GET', 'uri' => '.json', 'type' => 'ends_with']
+    ],
+]);
+```
+
 ### Built-in Matchers
 
 Matchers can be used in the `matchers` array of `FileCacheMiddleware` (and other middlewares) to control when caching or other behavior applies.

@@ -10,7 +10,7 @@ use Tent\Models\RequestInterface;
  * RequestMatcher is used by Rule to determine if a given Request should be handled by a specific RequestHandler.
  * A Rule can have multiple RequestMatchers and one RequestHandler.
  *
- * Subclasses implement the URI matching strategy (exact, begins_with, etc.).
+ * Subclasses implement the URI matching strategy (exact, begins_with, ends_with, etc.).
  */
 abstract class RequestMatcher
 {
@@ -36,6 +36,7 @@ abstract class RequestMatcher
      * Example:
      *   RequestMatcher::build(['method' => 'GET', 'uri' => '/users', 'type' => 'exact'])
      *   RequestMatcher::build(['method' => 'GET', 'uri' => '/assets/', 'type' => 'begins_with'])
+     *   RequestMatcher::build(['method' => 'GET', 'uri' => '.json', 'type' => 'ends_with'])
      *
      * @param array $params Associative array with keys 'method', 'uri', 'type'.
      * @return RequestMatcher
@@ -46,6 +47,10 @@ abstract class RequestMatcher
 
         if ($type === 'begins_with') {
             return BeginsWithRequestMatcher::build($params);
+        }
+
+        if ($type === 'ends_with') {
+            return EndsWithRequestMatcher::build($params);
         }
 
         return ExactRequestMatcher::build($params);
