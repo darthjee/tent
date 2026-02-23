@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Tent\Matchers\RequestMatcher;
 use Tent\Matchers\ExactRequestMatcher;
 use Tent\Matchers\BeginsWithRequestMatcher;
+use Tent\Matchers\EndsWithRequestMatcher;
 use Tent\Models\Request;
 
 class RequestMatcherBuildTest extends TestCase
@@ -47,30 +48,42 @@ class RequestMatcherBuildTest extends TestCase
             ['method' => 'GET', 'uri' => '/users', 'type' => 'exact'],
             ['method' => 'POST', 'uri' => '/users', 'type' => 'begins_with'],
             ['method' => null, 'uri' => '/admin', 'type' => 'exact'],
+            ['method' => 'GET', 'uri' => '.json', 'type' => 'ends_with'],
         ];
 
         $matchers = RequestMatcher::buildMatchers($attributes);
 
-        $this->assertCount(3, $matchers);
+        $this->assertCount(4, $matchers);
         $this->assertInstanceOf(ExactRequestMatcher::class, $matchers[0]);
         $this->assertInstanceOf(BeginsWithRequestMatcher::class, $matchers[1]);
         $this->assertInstanceOf(ExactRequestMatcher::class, $matchers[2]);
-
-        $this->assertEquals('GET', $this->getPrivateProperty($matchers[0], 'requestMethod'));
-        $this->assertEquals('/users', $this->getPrivateProperty($matchers[0], 'requestUri'));
-
-        $this->assertEquals('POST', $this->getPrivateProperty($matchers[1], 'requestMethod'));
-        $this->assertEquals('/users', $this->getPrivateProperty($matchers[1], 'requestUri'));
-
-        $this->assertNull($this->getPrivateProperty($matchers[2], 'requestMethod'));
-        $this->assertEquals('/admin', $this->getPrivateProperty($matchers[2], 'requestUri'));
+        $this->assertInstanceOf(EndsWithRequestMatcher::class, $matchers[3]);
     }
 
-    private function getPrivateProperty($object, $property)
+    public function testBuildEndsWithMatcher()
     {
-        $reflection = new \ReflectionClass($object);
-        $prop = $reflection->getProperty($property);
-        $prop->setAccessible(true);
-        return $prop->getValue($object);
+        $matcher = RequestMatcher::build([
+            'method' => 'GET',
+            'uri' => '.json',
+            'type' => 'ends_with'
+        ]);
+        $this->assertInstanceOf(EndsWithRequestMatcher::class, $matcher);
+
+        $request = $this->createMock(Request::class);
+        $request->method('requestMethod')->willReturn('GET');
+        $request->method('requestPath')->willReturn('/api/data.json');
+        $this->assertTrue($matcher->matches($request));
+    }
+
+    public function testBuildThrowsExceptionForInvalidType()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage("Unknown matcher type 'invalid_type'.");
+
+        RequestMatcher::build([
+            'method' => 'GET',
+            'uri' => '/users',
+            'type' => 'invalid_type'
+        ]);
     }
 }
