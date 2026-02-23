@@ -6,7 +6,7 @@ require_once __DIR__ . '/../../../../support/loader.php';
 
 use PHPUnit\Framework\TestCase;
 use Tent\Models\Rule;
-use Tent\Matchers\RequestMatcher;
+use Tent\Matchers\ExactRequestMatcher;
 use Tent\Models\Request;
 use Tent\RequestHandlers\RequestHandler;
 
@@ -20,8 +20,8 @@ class RuleGeneralTest extends TestCase
 
         $handler = $this->createMock(RequestHandler::class);
 
-        $matcher1 = new RequestMatcher('POST', '/test', 'exact');
-        $matcher2 = new RequestMatcher('GET', '/test', 'exact');
+        $matcher1 = new ExactRequestMatcher('POST', '/test');
+        $matcher2 = new ExactRequestMatcher('GET', '/test');
 
         $rule = new Rule(['handler' => $handler, 'matchers' => [$matcher1, $matcher2]]);
 
@@ -36,8 +36,8 @@ class RuleGeneralTest extends TestCase
 
         $handler = $this->createMock(RequestHandler::class);
 
-        $matcher1 = new RequestMatcher('POST', '/test', 'exact');
-        $matcher2 = new RequestMatcher('PUT', '/test', 'exact');
+        $matcher1 = new ExactRequestMatcher('POST', '/test');
+        $matcher2 = new ExactRequestMatcher('PUT', '/test');
 
         $rule = new Rule(['handler' => $handler, 'matchers' => [$matcher1, $matcher2]]);
 
@@ -72,8 +72,8 @@ class RuleGeneralTest extends TestCase
 
         $handler = $this->createMock(RequestHandler::class);
 
-        $matcher1 = new RequestMatcher('GET', '/test', 'exact');
-        $matcher2 = new RequestMatcher('GET', '/other', 'exact');
+        $matcher1 = new ExactRequestMatcher('GET', '/test');
+        $matcher2 = new ExactRequestMatcher('GET', '/other');
 
         $rule = new Rule(['handler' => $handler, 'matchers' => [$matcher1, $matcher2]]);
 

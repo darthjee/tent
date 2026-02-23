@@ -13,7 +13,7 @@ use Tent\RequestHandlers\StaticFileHandler;
 use Tent\Models\FolderLocation;
 use Tent\Models\Request;
 use Tent\Models\Response;
-use Tent\Matchers\RequestMatcher;
+use Tent\Matchers\ExactRequestMatcher;
 use Tent\Models\Server;
 
 class RequestProcessorTest extends TestCase
@@ -29,7 +29,7 @@ class RequestProcessorTest extends TestCase
             new Rule([
                 'handler' => new StaticFileHandler($staticLocation),
                 'matchers' => [
-                    new RequestMatcher('GET', '/index.html', 'exact')
+                    new ExactRequestMatcher('GET', '/index.html')
                 ]
             ])
         );
@@ -43,7 +43,7 @@ class RequestProcessorTest extends TestCase
             new Rule([
                 'handler' => new ProxyRequestHandler($server),
                 'matchers' => [
-                    new RequestMatcher('GET', '/get', 'exact')
+                    new ExactRequestMatcher('GET', '/get')
                 ]
             ])
         );
