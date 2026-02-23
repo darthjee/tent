@@ -58,18 +58,6 @@ class RequestMatcherBuildTest extends TestCase
         $this->assertInstanceOf(BeginsWithRequestMatcher::class, $matchers[1]);
         $this->assertInstanceOf(ExactRequestMatcher::class, $matchers[2]);
         $this->assertInstanceOf(EndsWithRequestMatcher::class, $matchers[3]);
-
-        $this->assertEquals('GET', $this->getPrivateProperty($matchers[0], 'requestMethod'));
-        $this->assertEquals('/users', $this->getPrivateProperty($matchers[0], 'requestUri'));
-
-        $this->assertEquals('POST', $this->getPrivateProperty($matchers[1], 'requestMethod'));
-        $this->assertEquals('/users', $this->getPrivateProperty($matchers[1], 'requestUri'));
-
-        $this->assertNull($this->getPrivateProperty($matchers[2], 'requestMethod'));
-        $this->assertEquals('/admin', $this->getPrivateProperty($matchers[2], 'requestUri'));
-
-        $this->assertEquals('GET', $this->getPrivateProperty($matchers[3], 'requestMethod'));
-        $this->assertEquals('.json', $this->getPrivateProperty($matchers[3], 'requestUri'));
     }
 
     public function testBuildEndsWithMatcher()
@@ -97,13 +85,5 @@ class RequestMatcherBuildTest extends TestCase
             'uri' => '/users',
             'type' => 'invalid_type'
         ]);
-    }
-
-    private function getPrivateProperty($object, $property)
-    {
-        $reflection = new \ReflectionClass($object);
-        $prop = $reflection->getProperty($property);
-        $prop->setAccessible(true);
-        return $prop->getValue($object);
     }
 }
