@@ -103,5 +103,4 @@ abstract class RequestMatcher
      * @return boolean True if the request matches URI criteria.
      */
     abstract protected function matchRequestUri(RequestInterface $request);
-
 }
