@@ -41,7 +41,7 @@ abstract class RequestMatcher
      *
      * @param array $params Associative array with keys 'method', 'uri', 'type'.
      * @return RequestMatcher
-     * @throws InvalidArgumentException when 'type' does not map to a valid RequestMatcher class.
+     * @throws InvalidArgumentException When 'type' does not map to a valid RequestMatcher class.
      */
     public static function build(array $params): self
     {
