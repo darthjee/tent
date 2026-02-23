@@ -4,6 +4,7 @@ namespace Tent\Matchers;
 
 use InvalidArgumentException;
 use Tent\Models\RequestInterface;
+use Tent\Utils\StringUtils;
 
 /**
  * Abstract base class for matching an incoming Request against method and URI criteria.
@@ -46,7 +47,7 @@ abstract class RequestMatcher
     public static function build(array $params): self
     {
         $type = $params['type'] ?? 'exact';
-        $matcherClass = __NAMESPACE__ . '\\' . self::toStudlyCase($type) . 'RequestMatcher';
+        $matcherClass = __NAMESPACE__ . '\\' . StringUtils::toStudlyCase($type) . 'RequestMatcher';
 
         if (class_exists($matcherClass) && is_subclass_of($matcherClass, self::class)) {
             return $matcherClass::build($params);
@@ -103,9 +104,4 @@ abstract class RequestMatcher
      */
     abstract protected function matchRequestUri(RequestInterface $request);
 
-    private static function toStudlyCase(string $value): string
-    {
-        $parts = preg_split('/[^a-z0-9]+/i', $value, -1, PREG_SPLIT_NO_EMPTY);
-        return implode('', array_map('ucfirst', array_map('strtolower', $parts)));
-    }
 }

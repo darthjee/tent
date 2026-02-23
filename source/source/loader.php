@@ -53,4 +53,5 @@ require_once __DIR__ . '/lib/utils/CurlUtils.php';
 require_once __DIR__ . '/lib/utils/ContentType.php';
 require_once __DIR__ . '/lib/utils/FileUtils.php';
 require_once __DIR__ . '/lib/utils/HttpCodeMatcher.php';
+require_once __DIR__ . '/lib/utils/StringUtils.php';
 require_once __DIR__ . '/lib/validators/RequestPathValidator.php';
