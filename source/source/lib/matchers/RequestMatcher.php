@@ -2,7 +2,9 @@
 
 namespace Tent\Matchers;
 
+use InvalidArgumentException;
 use Tent\Models\RequestInterface;
+use Tent\Utils\StringUtils;
 
 /**
  * Abstract base class for matching an incoming Request against method and URI criteria.
@@ -10,7 +12,7 @@ use Tent\Models\RequestInterface;
  * RequestMatcher is used by Rule to determine if a given Request should be handled by a specific RequestHandler.
  * A Rule can have multiple RequestMatchers and one RequestHandler.
  *
- * Subclasses implement the URI matching strategy (exact, begins_with, etc.).
+ * Subclasses implement the URI matching strategy (exact, begins_with, ends_with, etc.).
  */
 abstract class RequestMatcher
 {
@@ -36,19 +38,22 @@ abstract class RequestMatcher
      * Example:
      *   RequestMatcher::build(['method' => 'GET', 'uri' => '/users', 'type' => 'exact'])
      *   RequestMatcher::build(['method' => 'GET', 'uri' => '/assets/', 'type' => 'begins_with'])
+     *   RequestMatcher::build(['method' => 'GET', 'uri' => '.json', 'type' => 'ends_with'])
      *
      * @param array $params Associative array with keys 'method', 'uri', 'type'.
      * @return RequestMatcher
+     * @throws InvalidArgumentException When 'type' does not map to a valid RequestMatcher class.
      */
     public static function build(array $params): self
     {
         $type = $params['type'] ?? 'exact';
+        $matcherClass = __NAMESPACE__ . '\\' . StringUtils::toStudlyCase($type) . 'RequestMatcher';
 
-        if ($type === 'begins_with') {
-            return BeginsWithRequestMatcher::build($params);
+        if (class_exists($matcherClass) && is_subclass_of($matcherClass, self::class)) {
+            return $matcherClass::build($params);
         }
 
-        return ExactRequestMatcher::build($params);
+        throw new InvalidArgumentException(sprintf("Unknown matcher type '%s'.", $type));
     }
 
     /**
