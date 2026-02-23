@@ -44,16 +44,19 @@ abstract class RequestMatcher
     public static function build(array $params): self
     {
         $type = $params['type'] ?? 'exact';
+        $matcherClass = __NAMESPACE__ . '\\' . self::toStudlyCase($type) . 'RequestMatcher';
 
-        if ($type === 'begins_with') {
-            return BeginsWithRequestMatcher::build($params);
-        }
-
-        if ($type === 'ends_with') {
-            return EndsWithRequestMatcher::build($params);
+        if (class_exists($matcherClass) && is_subclass_of($matcherClass, self::class)) {
+            return $matcherClass::build($params);
         }
 
         return ExactRequestMatcher::build($params);
+    }
+
+    private static function toStudlyCase(string $value): string
+    {
+        $parts = preg_split('/[^a-z0-9]+/i', $value, -1, PREG_SPLIT_NO_EMPTY);
+        return implode('', array_map('ucfirst', array_map('strtolower', $parts)));
     }
 
     /**
