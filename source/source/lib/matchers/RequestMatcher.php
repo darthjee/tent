@@ -2,6 +2,7 @@
 
 namespace Tent\Matchers;
 
+use InvalidArgumentException;
 use Tent\Models\RequestInterface;
 
 /**
@@ -40,6 +41,7 @@ abstract class RequestMatcher
      *
      * @param array $params Associative array with keys 'method', 'uri', 'type'.
      * @return RequestMatcher
+     * @throws InvalidArgumentException when 'type' does not map to a valid RequestMatcher class.
      */
     public static function build(array $params): self
     {
@@ -50,7 +52,7 @@ abstract class RequestMatcher
             return $matcherClass::build($params);
         }
 
-        return ExactRequestMatcher::build($params);
+        throw new InvalidArgumentException(sprintf("Unknown matcher type '%s'.", $type));
     }
 
     private static function toStudlyCase(string $value): string
