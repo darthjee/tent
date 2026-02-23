@@ -87,6 +87,18 @@ class RequestMatcherBuildTest extends TestCase
         $this->assertTrue($matcher->matches($request));
     }
 
+    public function testBuildThrowsExceptionForInvalidType()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage("Unknown matcher type 'invalid_type'.");
+
+        RequestMatcher::build([
+            'method' => 'GET',
+            'uri' => '/users',
+            'type' => 'invalid_type'
+        ]);
+    }
+
     private function getPrivateProperty($object, $property)
     {
         $reflection = new \ReflectionClass($object);
