@@ -55,12 +55,6 @@ abstract class RequestMatcher
         throw new InvalidArgumentException(sprintf("Unknown matcher type '%s'.", $type));
     }
 
-    private static function toStudlyCase(string $value): string
-    {
-        $parts = preg_split('/[^a-z0-9]+/i', $value, -1, PREG_SPLIT_NO_EMPTY);
-        return implode('', array_map('ucfirst', array_map('strtolower', $parts)));
-    }
-
     /**
      * Builds several RequestMatchers.
      *
@@ -108,4 +102,10 @@ abstract class RequestMatcher
      * @return boolean True if the request matches URI criteria.
      */
     abstract protected function matchRequestUri(RequestInterface $request);
+
+    private static function toStudlyCase(string $value): string
+    {
+        $parts = preg_split('/[^a-z0-9]+/i', $value, -1, PREG_SPLIT_NO_EMPTY);
+        return implode('', array_map('ucfirst', array_map('strtolower', $parts)));
+    }
 }
