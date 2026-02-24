@@ -17,7 +17,7 @@ class ContentType
      * @param string $filePath Path to the file.
      * @return string The MIME type for the file (e.g., 'text/html', 'application/json').
      */
-    public static function getContentType(string $filePath)
+    public static function getContentType(string $filePath): string
     {
         $mimeType = mime_content_type($filePath);
 

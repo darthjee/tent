@@ -24,7 +24,7 @@ class FolderLocation
      *
      * @return string The base path for static files.
      */
-    public function basePath()
+    public function basePath(): string
     {
         return $this->basePath;
     }

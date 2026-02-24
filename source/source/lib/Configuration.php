@@ -123,7 +123,7 @@ class Configuration
      * @param Rule $rule The rule to add.
      * @return Rule
      */
-    public static function addRule(Rule $rule)
+    public static function addRule(Rule $rule): Rule
     {
         self::$rules[] = $rule;
         return $rule;
@@ -161,7 +161,7 @@ class Configuration
      *
      * @return Rule[] Array of rules for request processing.
      */
-    public static function getRules()
+    public static function getRules(): array
     {
         return array_merge(
             self::$rules,

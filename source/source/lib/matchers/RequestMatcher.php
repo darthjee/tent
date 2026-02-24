@@ -78,7 +78,7 @@ abstract class RequestMatcher
      * @param RequestInterface $request The incoming HTTP request.
      * @return boolean True if the request matches method and URI criteria.
      */
-    public function matches(RequestInterface $request)
+    public function matches(RequestInterface $request): bool
     {
         return $this->matchRequestMethod($request) && $this->matchRequestUri($request);
     }
@@ -89,7 +89,7 @@ abstract class RequestMatcher
      * @param RequestInterface $request The incoming HTTP request.
      * @return boolean True if the request matches http method criteria.
      */
-    private function matchRequestMethod(RequestInterface $request)
+    private function matchRequestMethod(RequestInterface $request): bool
     {
         return $this->requestMethod == null || $request->requestMethod() == $this->requestMethod;
     }
@@ -102,5 +102,5 @@ abstract class RequestMatcher
      * @param RequestInterface $request The incoming HTTP request.
      * @return boolean True if the request matches URI criteria.
      */
-    abstract protected function matchRequestUri(RequestInterface $request);
+    abstract protected function matchRequestUri(RequestInterface $request): bool;
 }

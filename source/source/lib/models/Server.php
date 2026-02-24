@@ -30,7 +30,7 @@ class Server
      *
      * @return string
      */
-    public function targetHost()
+    public function targetHost(): string
     {
         return $this->targetHost;
     }
