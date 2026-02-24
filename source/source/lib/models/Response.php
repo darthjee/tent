@@ -83,7 +83,7 @@ class Response extends SimpleModel
      *
      * @return RequestInterface
      */
-    public function request()
+    public function request(): RequestInterface
     {
         if ($this->request === null) {
             return new Request();

@@ -81,7 +81,7 @@ class Request implements RequestInterface
      *
      * @see RequestInterface::requestPath()
      */
-    public function requestPath()
+    public function requestPath(): string
     {
         if (isset($this->options['requestPath'])) {
             return $this->options['requestPath'];

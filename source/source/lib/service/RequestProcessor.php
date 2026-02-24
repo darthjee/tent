@@ -3,9 +3,11 @@
 namespace Tent\Service;
 
 use Tent\RequestHandlers\MissingRequestHandler;
+use Tent\RequestHandlers\RequestHandler;
 use Tent\Configuration;
 use Tent\Models\Request;
 use Tent\Models\ProcessingRequest;
+use Tent\Models\Response;
 
 /**
  * Main engine for processing incoming HTTP requests.
@@ -37,7 +39,7 @@ class RequestProcessor
      * @param Request $request The incoming HTTP request.
      * @return Response The processed response.
      */
-    public static function handleRequest(Request $request)
+    public static function handleRequest(Request $request): Response
     {
         return (new RequestProcessor($request))->handle();
     }
@@ -49,7 +51,7 @@ class RequestProcessor
      *
      * @return Response
      */
-    public function handle()
+    public function handle(): Response
     {
         $handler = $this->getRequestHandler();
 
@@ -64,7 +66,7 @@ class RequestProcessor
      *
      * @return RequestHandler|MissingRequestHandler
      */
-    private function getRequestHandler()
+    private function getRequestHandler(): RequestHandler
     {
         $rules = Configuration::getRules();
 

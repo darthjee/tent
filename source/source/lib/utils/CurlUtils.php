@@ -17,7 +17,7 @@ class CurlUtils
      * @param array $headers Associative array of headers.
      * @return string[] Array of header lines in "Key: Value" format.
      */
-    public static function buildHeaderLines(array $headers)
+    public static function buildHeaderLines(array $headers): array
     {
         $headerLines = [];
         foreach ($headers as $name => $value) {
@@ -34,7 +34,7 @@ class CurlUtils
      * @param string $headers Raw headers string from cURL response.
      * @return string[] Array of header lines in "Key: Value" format.
      */
-    public static function parseResponseHeaders(string $headers)
+    public static function parseResponseHeaders(string $headers): array
     {
         $headerLines = explode("\n", $headers);
         $headerLines = array_map('trim', $headerLines);
