@@ -192,7 +192,7 @@ class ProcessingRequest implements RequestInterface
      *
      * @see RequestInterface::requestPath()
      */
-    public function requestPath()
+    public function requestPath(): string
     {
         if ($this->requestPath === null && $this->request) {
             $this->requestPath = $this->request->requestPath();

@@ -31,7 +31,7 @@ class ExactRequestMatcher extends RequestMatcher
      * @param RequestInterface $request The incoming HTTP request.
      * @return boolean True if the request URI exactly equals the configured URI (or URI is null).
      */
-    protected function matchRequestUri(RequestInterface $request)
+    protected function matchRequestUri(RequestInterface $request): bool
     {
         if ($this->requestUri == null) {
             return true;
