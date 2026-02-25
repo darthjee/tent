@@ -2,6 +2,7 @@
 
 namespace Tent\Http;
 
+use Tent\Http\CurlHttpExecutor\Delete;
 use Tent\Http\CurlHttpExecutor\Get;
 use Tent\Http\CurlHttpExecutor\Patch;
 use Tent\Http\CurlHttpExecutor\Post;
@@ -39,6 +40,7 @@ class CurlHttpClient implements HttpClientInterface
             'POST' => Post::class,
             'PUT' => Put::class,
             'PATCH' => Patch::class,
+            'DELETE' => Delete::class,
             default => throw new InvalidArgumentException("Unsupported HTTP method: $method"),
         };
 
