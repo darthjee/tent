@@ -5,6 +5,7 @@ namespace Tent\Http;
 use Tent\Http\CurlHttpExecutor\Get;
 use Tent\Http\CurlHttpExecutor\Patch;
 use Tent\Http\CurlHttpExecutor\Post;
+use Tent\Http\CurlHttpExecutor\Put;
 
 /**
  * HTTP client for proxying requests using cURL.
@@ -36,6 +37,7 @@ class CurlHttpClient implements HttpClientInterface
         $executorClass = match (strtoupper($method)) {
             'GET' => Get::class,
             'POST' => Post::class,
+            'PUT' => Put::class,
             'PATCH' => Patch::class,
             default => throw new InvalidArgumentException("Unsupported HTTP method: $method"),
         };
