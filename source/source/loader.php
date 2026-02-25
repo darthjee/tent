@@ -18,6 +18,7 @@ require_once __DIR__ . '/lib/request_handlers/ProxyRequestHandler.php';
 require_once __DIR__ . '/lib/request_handlers/StaticFileHandler.php';
 require_once __DIR__ . '/lib/http/CurlHttpClient.php';
 require_once __DIR__ . '/lib/http/CurlHttpExecutor/Base.php';
+require_once __DIR__ . '/lib/http/CurlHttpExecutor/Delete.php';
 require_once __DIR__ . '/lib/http/CurlHttpExecutor/Get.php';
 require_once __DIR__ . '/lib/http/CurlHttpExecutor/Patch.php';
 require_once __DIR__ . '/lib/http/CurlHttpExecutor/Post.php';
