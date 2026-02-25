@@ -3,6 +3,7 @@
 namespace Tent\Http;
 
 use Tent\Http\CurlHttpExecutor\Get;
+use Tent\Http\CurlHttpExecutor\Patch;
 use Tent\Http\CurlHttpExecutor\Post;
 
 /**
@@ -35,6 +36,7 @@ class CurlHttpClient implements HttpClientInterface
         $executorClass = match (strtoupper($method)) {
             'GET' => Get::class,
             'POST' => Post::class,
+            'PATCH' => Patch::class,
             default => throw new InvalidArgumentException("Unsupported HTTP method: $method"),
         };
 
