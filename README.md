@@ -41,14 +41,14 @@ Tent is available as a Docker image: `darthjee/tent`
 
 Tent is in active development. Currently implemented:
 
-- ⚠️ Basic proxy functionality (currently supports GET and POST only)
+- ✅ Basic proxy functionality (supports GET, POST, PUT, PATCH)
 - ✅ Request routing and matching
 - ✅ Header forwarding
 - ✅ Static file serving (serves files from a directory)
 - ✅ Middleware system
-- ⏳ Initial Configuration system (planned)
 - ✅ Response caching
-- ❌ Support for other HTTP methods (PUT, PATCH, DELETE, etc.) is not available yet
+- ❌ Initial Configuration system (planned)
+- ❌ Support for other HTTP methods (DELETE, etc.) is not available yet
 - ❌ File transfer handling (upload/download proxying) is not available yet
 
 ### Error Responses (403/404)
@@ -179,6 +179,20 @@ Configuration::buildRule([
     ],
     'matchers' => [
         ['method' => 'GET', 'uri' => '.json', 'type' => 'ends_with']
+    ],
+]);
+```
+
+Example with PUT and PATCH (update operations):
+```php
+Configuration::buildRule([
+    'handler' => [
+        'type' => 'proxy',
+        'host' => 'http://api:80'
+    ],
+    'matchers' => [
+        ['method' => 'PUT', 'uri' => '/api/persons/', 'type' => 'begins_with'],
+        ['method' => 'PATCH', 'uri' => '/api/persons/', 'type' => 'begins_with'],
     ],
 ]);
 ```

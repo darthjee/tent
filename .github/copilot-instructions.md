@@ -90,8 +90,9 @@ Configuration::buildRule([
     'host' => 'http://api:80' // for proxy type
   ],
   'matchers' => [
-    ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact']
+    ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact'],
     // type: 'exact', 'begins_with'
+    // method: any HTTP method is supported, e.g. 'GET', 'POST', 'PUT', 'PATCH'
   ],
   'middlewares' => [
     [
