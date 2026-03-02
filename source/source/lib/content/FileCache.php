@@ -128,12 +128,21 @@ class FileCache implements Cache
     /**
      * Returns HTTP headers for the cached response.
      *
+     * Includes an `X-CACHE-TIME` header derived from the stored `timestamp`
+     * when the timestamp is present in the metadata.
+     *
      * @return array Array of HTTP header strings.
      */
     public function headers(): array
     {
         $meta = $this->readMeta();
-        return $meta['headers'] ?? [];
+        $headers = $meta['headers'] ?? [];
+
+        if (isset($meta['timestamp'])) {
+            $headers[] = 'X-CACHE-TIME: ' . gmdate('Y-m-d H:i:s', $meta['timestamp']);
+        }
+
+        return $headers;
     }
 
     /**
@@ -204,6 +213,8 @@ class FileCache implements Cache
     /**
      * Builds the metadata array for the cached response.
      *
+     * Includes a `timestamp` field with the current Unix timestamp.
+     *
      * @param Response $response The response to build metadata from.
      * @return array The metadata array.
      */
@@ -211,7 +222,8 @@ class FileCache implements Cache
     {
         return [
             'headers' => $response->headers(),
-            'httpCode' => $response->httpCode()
+            'httpCode' => $response->httpCode(),
+            'timestamp' => time()
         ];
     }
 

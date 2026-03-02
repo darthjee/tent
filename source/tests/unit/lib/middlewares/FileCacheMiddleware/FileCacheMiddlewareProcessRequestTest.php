@@ -47,7 +47,9 @@ class FileCacheMiddlewareProcessRequestTest extends TestCase
         $this->assertTrue($result->hasResponse());
         $this->assertNotNull($result->response());
         $this->assertEquals('cached body', $result->response()->body());
-        $this->assertEquals($this->headers, $result->response()->headers());
+        foreach ($this->headers as $header) {
+            $this->assertContains($header, $result->response()->headers());
+        }
     }
 
     public function testProcessRequestReturnsRequestWhenCacheDoesNotExist()

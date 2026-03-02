@@ -45,7 +45,9 @@ class ResponseCacherTest extends TestCase
 
         $this->assertTrue($cache->exists());
         $this->assertEquals('cached body', $cache->content());
-        $this->assertEquals($this->headers, $cache->headers());
+        foreach ($this->headers as $header) {
+            $this->assertContains($header, $cache->headers());
+        }
     }
 
     public function testProcessDoesNotStoreCacheForWrongCode()
