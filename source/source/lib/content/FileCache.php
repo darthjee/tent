@@ -139,7 +139,7 @@ class FileCache implements Cache
         $headers = $meta['headers'] ?? [];
 
         if (isset($meta['timestamp'])) {
-            $headers[] = 'X-CACHE-TIME: ' . gmdate('Y-m-d H:i:s', $meta['timestamp']);
+            $headers[] = 'X-Cache-Time: ' . gmdate('Y-m-d H:i:s', $meta['timestamp']);
         }
 
         return $headers;

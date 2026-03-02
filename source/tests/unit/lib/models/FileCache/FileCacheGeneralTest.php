@@ -126,7 +126,7 @@ class FileCacheGeneralTest extends TestCase
         $cache = new FileCache($this->request, $this->location);
         $headers = $cache->headers();
 
-        $this->assertContains('X-CACHE-TIME: ' . gmdate('Y-m-d H:i:s', $timestamp), $headers);
+        $this->assertContains('X-Cache-Time: ' . gmdate('Y-m-d H:i:s', $timestamp), $headers);
     }
 
     public function testHeadersDoesNotIncludeCacheTimeWhenTimestampMissing()
