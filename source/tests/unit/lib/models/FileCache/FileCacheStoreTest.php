@@ -45,7 +45,9 @@ class FileCacheStoreTest extends TestCase
 
         $this->assertTrue($cache->exists());
         $this->assertEquals('cached body', $cache->content());
-        $this->assertEquals(['Content-Type: text/plain', 'Content-Length: 11'], $cache->headers());
+        $headers = $cache->headers();
+        $this->assertContains('Content-Type: text/plain', $headers);
+        $this->assertContains('Content-Length: 11', $headers);
     }
 
     public function testStoreCreatesDirectories()
@@ -76,7 +78,9 @@ class FileCacheStoreTest extends TestCase
         $this->assertTrue(is_dir($fullPath));
         $this->assertTrue($cache->exists());
         $this->assertEquals('some body', $cache->content());
-        $this->assertEquals($this->headers, $cache->headers());
+        foreach ($this->headers as $header) {
+            $this->assertContains($header, $cache->headers());
+        }
     }
 
     public function testStoreFileContents()
@@ -96,10 +100,28 @@ class FileCacheStoreTest extends TestCase
 
         $this->assertEquals('cached body', file_get_contents($bodyPath));
         $meta = json_decode(file_get_contents($metaPath), true);
-        $this->assertEquals([
-            'headers' => $this->headers,
-            'httpCode' => 200
-        ], $meta);
+        $this->assertEquals($this->headers, $meta['headers']);
+        $this->assertEquals(200, $meta['httpCode']);
+    }
+
+    public function testStoreIncludesTimestampInMeta()
+    {
+        $path = '/path/file.txt';
+        $before = time();
+        $response = $this->buildResponse($path, 200, 'cached body');
+
+        $cache = new FileCache($this->request, $this->location);
+        $cache->store($response);
+
+        $basePath = $this->cacheDir . '/path/file.txt/GET';
+        $metaPath = CacheFilePath::path('meta', $basePath, $this->request->query());
+        $meta = json_decode(file_get_contents($metaPath), true);
+        $after = time();
+
+        $this->assertArrayHasKey('timestamp', $meta);
+        $storedTime = new \DateTimeImmutable($meta['timestamp']);
+        $this->assertGreaterThanOrEqual($before, $storedTime->getTimestamp());
+        $this->assertLessThanOrEqual($after, $storedTime->getTimestamp());
     }
 
     private function buildResponse(string $path, int $httpCode, string $body)

@@ -113,4 +113,23 @@ class FileCacheGeneralTest extends TestCase
         $cache = new FileCache($this->request, $this->location);
         $this->assertEquals(200, $cache->httpCode());
     }
+
+    public function testHeadersIncludesXCacheTimeWhenTimestampIsPresent()
+    {
+        $timestamp = '2024-06-15T12:00:00+00:00';
+        $metaWithTimestamp = array_merge($this->meta, ['timestamp' => $timestamp]);
+        file_put_contents(CacheFilePath::path('meta', $this->fullPath, ''), json_encode($metaWithTimestamp));
+
+        $cache = new FileCache($this->request, $this->location);
+        $this->assertContains('X-CACHE-TIME: ' . $timestamp, $cache->headers());
+    }
+
+    public function testHeadersDoesNotIncludeXCacheTimeWhenTimestampIsMissing()
+    {
+        $cache = new FileCache($this->request, $this->location);
+        $headers = $cache->headers();
+        foreach ($headers as $header) {
+            $this->assertStringStartsNotWith('X-CACHE-TIME', $header);
+        }
+    }
 }
