@@ -45,7 +45,9 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
         $this->cache = new FileCache($this->request, $this->location);
         $this->assertTrue($this->cache->exists());
         $this->assertEquals('cached body', $this->cache->content());
-        $this->assertEquals($this->headers, $this->cache->headers());
+        foreach ($this->headers as $header) {
+            $this->assertContains($header, $this->cache->headers());
+        }
     }
 
     public function testProcessResponseWrongCode()
