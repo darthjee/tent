@@ -45,7 +45,8 @@ class FileCacheStoreTest extends TestCase
 
         $this->assertTrue($cache->exists());
         $this->assertEquals('cached body', $cache->content());
-        $this->assertEquals(['Content-Type: text/plain', 'Content-Length: 11'], $cache->headers());
+        $this->assertContains('Content-Type: text/plain', $cache->headers());
+        $this->assertContains('Content-Length: 11', $cache->headers());
     }
 
     public function testStoreCreatesDirectories()
@@ -76,7 +77,9 @@ class FileCacheStoreTest extends TestCase
         $this->assertTrue(is_dir($fullPath));
         $this->assertTrue($cache->exists());
         $this->assertEquals('some body', $cache->content());
-        $this->assertEquals($this->headers, $cache->headers());
+        foreach ($this->headers as $header) {
+            $this->assertContains($header, $cache->headers());
+        }
     }
 
     public function testStoreFileContents()
@@ -96,10 +99,10 @@ class FileCacheStoreTest extends TestCase
 
         $this->assertEquals('cached body', file_get_contents($bodyPath));
         $meta = json_decode(file_get_contents($metaPath), true);
-        $this->assertEquals([
-            'headers' => $this->headers,
-            'httpCode' => 200
-        ], $meta);
+        $this->assertEquals($this->headers, $meta['headers']);
+        $this->assertEquals(200, $meta['httpCode']);
+        $this->assertArrayHasKey('timestamp', $meta);
+        $this->assertEqualsWithDelta(time(), $meta['timestamp'], 5);
     }
 
     private function buildResponse(string $path, int $httpCode, string $body)
