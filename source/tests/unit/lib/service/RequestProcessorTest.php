@@ -14,7 +14,6 @@ use Tent\Models\FolderLocation;
 use Tent\Models\Request;
 use Tent\Models\Response;
 use Tent\Matchers\ExactRequestMatcher;
-use Tent\Models\Server;
 
 class RequestProcessorTest extends TestCase
 {

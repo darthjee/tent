@@ -8,7 +8,6 @@ use PHPUnit\Framework\TestCase;
 use Tent\RequestHandlers\ProxyRequestHandler;
 use Tent\Models\Response;
 use Tent\Models\ProcessingRequest;
-use Tent\Models\Server;
 use Tent\Http\HttpClientInterface;
 
 class ProxyRequestHandlerGeneralTest extends TestCase

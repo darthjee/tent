@@ -2,7 +2,6 @@
 
 namespace Tent\RequestHandlers;
 
-use Tent\Models\Server;
 use Tent\Http\HttpClientInterface;
 use Tent\Middlewares\RenameHeaderMiddleware;
 use Tent\Middlewares\SetHeadersMiddleware;
