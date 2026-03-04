@@ -18,9 +18,14 @@ use Tent\Http\CurlHttpClient;
 class ProxyRequestHandler extends RequestHandler
 {
     /**
+     * @var string The target host to which requests will be proxied.
+     */
+    protected string $host;
+
+    /**
      * @var Server The target server to which requests are proxied.
      */
-    private Server $server;
+    private ?Server $server = null;
 
     /**
      * @var HttpClientInterface The HTTP client used to make requests to the target server.
@@ -30,12 +35,12 @@ class ProxyRequestHandler extends RequestHandler
     /**
      * Constructs a ProxyRequestHandler.
      *
-     * @param Server                   $server     The target server to which requests will be proxied.
+     * @param string                   $host       The target host to which requests will be proxied.
      * @param HttpClientInterface|null $httpClient Optional HTTP client to use for requests. Defaults to CurlHttpClient.
      */
-    public function __construct(Server $server, ?HttpClientInterface $httpClient = null)
+    public function __construct(string $host, ?HttpClientInterface $httpClient = null)
     {
-        $this->server = $server;
+        $this->host = $host;
         $this->httpClient = $httpClient ?? new CurlHttpClient();
     }
 
@@ -50,8 +55,8 @@ class ProxyRequestHandler extends RequestHandler
      */
     public static function build(array $params): self
     {
-        $server = new Server($params['host'] ?? '');
-        return new self($server);
+        $host = $params['host'] ?? '';
+        return new self($host);
     }
 
     /**
@@ -63,7 +68,7 @@ class ProxyRequestHandler extends RequestHandler
     protected function processsRequest(RequestInterface $request): Response
     {
         // Build full URL from target host and request path
-        $url = $this->server->targetHost() . $request->requestPath();
+        $url = $this->server()->targetHost() . $request->requestPath();
         if ($request->query()) {
             $url .= '?' . $request->query();
         }
@@ -72,5 +77,18 @@ class ProxyRequestHandler extends RequestHandler
         $response['request'] = $request;
 
         return new Response($response);
+    }
+
+    /**
+     * Lazily initializes and returns the Server instance for the target host.
+     *
+     * @return Server The Server instance representing the target server.
+     */
+    private function server(): Server
+    {
+        if (!$this->server) {
+            $this->server = new Server($this->host ?? '');
+        }
+        return $this->server;
     }
 }
