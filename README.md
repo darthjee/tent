@@ -121,7 +121,31 @@ Configuration::buildRule([
 ]);
 ```
 
-**Example of api proxing:**
+**Example of api proxying (using `DefaultProxyRequestHandler`):**
+
+```php
+use Tent\RequestHandlers\DefaultProxyRequestHandler;
+
+Configuration::buildRule([
+    'handler' => [
+        'class' => DefaultProxyRequestHandler::class,
+        'host'  => 'http://api.com:80',
+        // 'cache' => './cache',       // optional, defaults to './cache'
+        // 'cacheCodes' => ['2xx'],    // optional, defaults to ['2xx']
+        // 'cache' => false,           // set to false to disable caching
+    ],
+    'matchers' => [
+        ['method' => 'GET', 'uri' => '/api/', 'type' => 'begins_with']
+    ],
+]);
+```
+
+`DefaultProxyRequestHandler` automatically:
+1. Renames the incoming `Host` header to `X-Forwarded-Host`.
+2. Sets the `Host` header to the configured host value.
+3. Caches responses with 2xx status codes (when `cache !== false`).
+
+**Equivalent manual configuration:**
 
 ```php
 Configuration::buildRule([
@@ -133,22 +157,27 @@ Configuration::buildRule([
         ['method' => 'GET', 'uri' => '/api/', 'type' => 'begins_with']
     ],
     "middlewares" => [
-      [
-         'class' => 'Tent\Middlewares\FileCacheMiddleware',
-         'location' => "./cache",
-         'matchers' => [
-            [
-               'class' => 'Tent\\Matchers\\StatusCodeMatcher',
-               'httpCodes' => ["2xx"]
-            ]
-         ]
-      ],
+        [
+            'class' => 'Tent\Middlewares\RenameHeaderMiddleware',
+            'from'  => 'Host',
+            'to'    => 'X-Forwarded-Host'
+        ],
         [
             'class' => 'Tent\Middlewares\SetHeadersMiddleware',
             'headers' => [
-                'Host' => 'api.com'
+                'Host' => 'http://api.com:80'
             ]
-        ]
+        ],
+        [
+            'class' => 'Tent\Middlewares\FileCacheMiddleware',
+            'location' => "./cache",
+            'matchers' => [
+                [
+                    'class' => 'Tent\\Matchers\\StatusCodeMatcher',
+                    'httpCodes' => ["2xx"]
+                ]
+            ]
+        ],
     ]
 ]);
 ```
