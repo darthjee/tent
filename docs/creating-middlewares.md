@@ -243,6 +243,20 @@ Sets or overrides request headers before the request is forwarded.
 
 **When to use**: When the backend service expects a specific `Host` header, or when you need to inject custom headers for authentication or routing.
 
+### `RenameHeaderMiddleware`
+
+Renames a request header by copying its value to a new header name and removing the original.
+
+```php
+[
+    'class' => 'Tent\\Middlewares\\RenameHeaderMiddleware',
+    'from'  => 'Host',
+    'to'    => 'X-Original-Host'
+]
+```
+
+**When to use**: When you need to preserve the original value of a header under a different name before overriding it (e.g., saving the original `Host` as `X-Original-Host`).
+
 ### `SetPathMiddleware`
 
 Rewrites the request path before it is processed by the handler.
