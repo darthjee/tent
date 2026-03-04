@@ -65,7 +65,7 @@ jobs:
           command: composer install
       - run:
           name: Tests
-          command: composer tests
+          command: composer coverage
       - run:
           name: Upload coverage to Codacy
           command: bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r coverage/clover.xml
