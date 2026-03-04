@@ -10,7 +10,7 @@ use Tent\Models\ProcessingRequest;
 use Tent\Models\Response;
 use Tent\Http\HttpClientInterface;
 
-class DefaultProxyRequestHandlerTest extends TestCase
+class DefaultProxyRequestHandlerNoCacheTest extends TestCase
 {
     private ?string $host = null;
     private ?ProcessingRequest $request = null;
