@@ -17,12 +17,15 @@ use Tent\Http\CurlHttpClient;
  */
 class ProxyRequestHandler extends RequestHandler
 {
-    private ?string $host;
+    /**
+     * @var string The target host to which requests will be proxied.
+     */
+    private string $host;
 
     /**
      * @var Server The target server to which requests are proxied.
      */
-    private Server $serverr;
+    private ?Server $server = null;
 
     /**
      * @var HttpClientInterface The HTTP client used to make requests to the target server.
@@ -32,12 +35,11 @@ class ProxyRequestHandler extends RequestHandler
     /**
      * Constructs a ProxyRequestHandler.
      *
-     * @param Server                   $server     The target server to which requests will be proxied.
+     * @param string                   $host       The target host to which requests will be proxied.
      * @param HttpClientInterface|null $httpClient Optional HTTP client to use for requests. Defaults to CurlHttpClient.
      */
     public function __construct(string $host, ?HttpClientInterface $httpClient = null)
     {
-        $this->serverr = new Server($host);
         $this->host = $host;
         $this->httpClient = $httpClient ?? new CurlHttpClient();
     }
@@ -77,11 +79,16 @@ class ProxyRequestHandler extends RequestHandler
         return new Response($response);
     }
 
+    /**
+     * Lazily initializes and returns the Server instance for the target host.
+     *
+     * @return Server The Server instance representing the target server.
+     */
     private function server(): Server
     {
-        if (!$this->serverr) {
-            $this->serverr = new Server($this->host ?? '');
+        if (!$this->server) {
+            $this->server = new Server($this->host ?? '');
         }
-        return $this->serverr;
+        return $this->server;
     }
 }
