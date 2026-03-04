@@ -24,7 +24,6 @@ class ProxyRequestHandlerGeneralTest extends TestCase
     {
         $this->initVariables();
         $this->createMockHttpClient(
-            $this->host . $this->requestPath,
             ['body' => 'response body', 'httpCode' => 200, 'headers' => []]
         );
 
@@ -38,7 +37,6 @@ class ProxyRequestHandlerGeneralTest extends TestCase
     {
         $this->initVariables(['requestQuery' => 'page=1&limit=10']);
         $this->createMockHttpClient(
-            $this->host . $this->requestPath . '?' . $this->requestQuery,
             ['body' => 'response body', 'httpCode' => 200, 'headers' => []]
         );
 
@@ -58,7 +56,6 @@ class ProxyRequestHandlerGeneralTest extends TestCase
         ]);
 
         $this->createMockHttpClient(
-            $this->host . $this->requestPath,
             ['body' => 'created', 'httpCode' => 201, 'headers' => ['Location: /api/users/1']]
         );
 
@@ -72,12 +69,7 @@ class ProxyRequestHandlerGeneralTest extends TestCase
     {
         $this->initVariables();
         $this->createMockHttpClient(
-            $this->host . $this->requestPath,
-            [
-                'body' => '{"users": []}',
-                'httpCode' => 200,
-                'headers' => ['Content-Type: application/json']
-            ]
+            ['body' => '{"users": []}', 'httpCode' => 200, 'headers' => ['Content-Type: application/json']]
         );
 
         $handler = new ProxyRequestHandler($this->host, $this->httpClient);
@@ -92,7 +84,6 @@ class ProxyRequestHandlerGeneralTest extends TestCase
     {
         $this->initVariables();
         $this->createMockHttpClient(
-            $this->host . $this->requestPath,
             ['body' => 'response', 'httpCode' => 200, 'headers' => []]
         );
 
@@ -106,7 +97,6 @@ class ProxyRequestHandlerGeneralTest extends TestCase
     {
         $this->initVariables();
         $this->createMockHttpClient(
-            $this->host . $this->requestPath,
             ['body' => 'response', 'httpCode' => 200, 'headers' => []]
         );
 
@@ -116,9 +106,10 @@ class ProxyRequestHandlerGeneralTest extends TestCase
         $this->assertInstanceOf(Response::class, $response);
     }
 
-    private function createMockHttpClient($expectedUrl, $returnValue): void
+    private function createMockHttpClient($returnValue): void
     {
         $this->httpClient = $this->createMock(HttpClientInterface::class);
+        $expectedUrl = $this->host . $this->requestPath . ($this->requestQuery ? '?' . $this->requestQuery : '');
 
         $this->httpClient->expects($this->once())
             ->method('request')
