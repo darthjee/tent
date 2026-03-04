@@ -20,7 +20,7 @@ class ProxyRequestHandler extends RequestHandler
     /**
      * @var string The target host to which requests will be proxied.
      */
-    private string $host;
+    protected string $host;
 
     /**
      * @var Server The target server to which requests are proxied.

@@ -40,10 +40,6 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
      * @var array HTTP status codes eligible for caching
      */
     private array $cacheCodes;
-    /**
-     * @var string Target host to proxy requests to
-     */
-    private string $host;
 
     /**
      * Constructs a DefaultProxyRequestHandler.
