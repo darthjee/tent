@@ -15,6 +15,7 @@ require_once __DIR__ . '/lib/exceptions/FileNotFoundException.php';
 require_once __DIR__ . '/lib/exceptions/InvalidFilePathException.php';
 require_once __DIR__ . '/lib/request_handlers/MissingRequestHandler.php';
 require_once __DIR__ . '/lib/request_handlers/ProxyRequestHandler.php';
+require_once __DIR__ . '/lib/request_handlers/DefaultProxyRequestHandler.php';
 require_once __DIR__ . '/lib/request_handlers/StaticFileHandler.php';
 require_once __DIR__ . '/lib/http/CurlHttpClient.php';
 require_once __DIR__ . '/lib/http/CurlHttpExecutor/Base.php';
