@@ -33,6 +33,10 @@ use Tent\Matchers\StatusCodeMatcher;
  */
 class DefaultProxyRequestHandler extends ProxyRequestHandler
 {
+    private string|false $cache;
+    private array $cacheCodes;
+    private string $host;
+
     /**
      * Constructs a DefaultProxyRequestHandler.
      *
@@ -48,14 +52,21 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
         ?HttpClientInterface $httpClient = null
     ) {
         parent::__construct(new Server($host), $httpClient);
+        $this->host = $host;
+        $this->cache = $cache;
+        $this->cacheCodes = $cacheCodes;
+        $this->initializeMiddlewares();
+    }
 
+    private function initializeMiddlewares(): void
+    {
         $this->addMiddleware(new RenameHeaderMiddleware('Host', 'X-Forwarded-Host'));
-        $this->addMiddleware(new SetHeadersMiddleware(['Host' => $host]));
+        $this->addMiddleware(new SetHeadersMiddleware(['Host' => $this->host]));
 
-        if ($cache !== false) {
+        if ($this->cache !== false) {
             $this->addMiddleware(new FileCacheMiddleware(
-                new FolderLocation($cache),
-                [new StatusCodeMatcher($cacheCodes)]
+                new FolderLocation($this->cache),
+                [new StatusCodeMatcher($this->cacheCodes)]
             ));
         }
     }
