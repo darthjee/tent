@@ -73,11 +73,8 @@ class DefaultProxyRequestHandlerTest extends TestCase
             ->with(
                 'GET',
                 'http://api:80/test',
-                $this->callback(function ($headers) {
-                    return isset($headers['X-Forwarded-Host'])
-                        && $headers['X-Forwarded-Host'] === 'original.host'
-                        && !isset($headers['Host']);
-                })
+                ['X-Forwarded-Host' => 'original.host', 'Host' => 'http://api:80'],
+                null
             )
             ->willReturn(['body' => '', 'httpCode' => 200, 'headers' => []]);
 
