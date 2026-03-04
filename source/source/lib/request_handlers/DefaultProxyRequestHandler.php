@@ -33,8 +33,17 @@ use Tent\Matchers\StatusCodeMatcher;
  */
 class DefaultProxyRequestHandler extends ProxyRequestHandler
 {
+    /**
+     * @var string|false Cache directory or false to disable caching
+     */
     private string|false $cache;
+    /**
+     * @var array HTTP status codes eligible for caching
+     */
     private array $cacheCodes;
+    /**
+     * @var string Target host to proxy requests to
+     */
     private string $host;
 
     /**
@@ -58,19 +67,6 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
         $this->initializeMiddlewares();
     }
 
-    private function initializeMiddlewares(): void
-    {
-        $this->addMiddleware(new RenameHeaderMiddleware('Host', 'X-Forwarded-Host'));
-        $this->addMiddleware(new SetHeadersMiddleware(['Host' => $this->host]));
-
-        if ($this->cache !== false) {
-            $this->addMiddleware(new FileCacheMiddleware(
-                new FolderLocation($this->cache),
-                [new StatusCodeMatcher($this->cacheCodes)]
-            ));
-        }
-    }
-
     /**
      * Builds a DefaultProxyRequestHandler from an associative array of parameters.
      *
@@ -90,5 +86,22 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
         $cache = array_key_exists('cache', $params) ? $params['cache'] : './cache';
         $cacheCodes = $params['cacheCodes'] ?? ['2xx'];
         return new self($host, $cache, $cacheCodes);
+    }
+
+    /**
+     * Initializes the middleware stack in the correct order.
+     * @return void
+     */
+    private function initializeMiddlewares(): void
+    {
+        $this->addMiddleware(new RenameHeaderMiddleware('Host', 'X-Forwarded-Host'));
+        $this->addMiddleware(new SetHeadersMiddleware(['Host' => $this->host]));
+
+        if ($this->cache !== false) {
+            $this->addMiddleware(new FileCacheMiddleware(
+                new FolderLocation($this->cache),
+                [new StatusCodeMatcher($this->cacheCodes)]
+            ));
+        }
     }
 }
