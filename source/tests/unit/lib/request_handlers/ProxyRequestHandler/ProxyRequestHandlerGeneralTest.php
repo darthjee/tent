@@ -41,7 +41,6 @@ class ProxyRequestHandlerGeneralTest extends TestCase
         $this->initVariables();
         $this->createMockHttpClient(
             $this->host . $this->requestPath,
-            $this->requestHeaders,
             ['body' => 'response body', 'httpCode' => 200, 'headers' => []]
         );
 
@@ -56,7 +55,6 @@ class ProxyRequestHandlerGeneralTest extends TestCase
         $this->initVariables(['requestQuery' => 'page=1&limit=10']);
         $this->createMockHttpClient(
             $this->host . $this->requestPath . '?' . $this->requestQuery,
-            $this->requestHeaders,
             ['body' => 'response body', 'httpCode' => 200, 'headers' => []]
         );
 
@@ -77,7 +75,6 @@ class ProxyRequestHandlerGeneralTest extends TestCase
 
         $this->createMockHttpClient(
             $this->host . $this->requestPath,
-            $this->requestHeaders,
             ['body' => 'created', 'httpCode' => 201, 'headers' => ['Location: /api/users/1']]
         );
 
@@ -92,7 +89,6 @@ class ProxyRequestHandlerGeneralTest extends TestCase
         $this->initVariables();
         $this->createMockHttpClient(
             $this->host . $this->requestPath,
-            $this->requestHeaders,
             [
                 'body' => '{"users": []}',
                 'httpCode' => 200,
@@ -113,7 +109,6 @@ class ProxyRequestHandlerGeneralTest extends TestCase
         $this->initVariables();
         $this->createMockHttpClient(
             $this->host . $this->requestPath,
-            $this->requestHeaders,
             ['body' => 'response', 'httpCode' => 200, 'headers' => []]
         );
 
@@ -128,7 +123,6 @@ class ProxyRequestHandlerGeneralTest extends TestCase
         $this->initVariables();
         $this->createMockHttpClient(
             $this->host . $this->requestPath,
-            $this->requestHeaders,
             ['body' => 'response', 'httpCode' => 200, 'headers' => []]
         );
 
@@ -138,13 +132,13 @@ class ProxyRequestHandlerGeneralTest extends TestCase
         $this->assertInstanceOf(Response::class, $response);
     }
 
-    private function createMockHttpClient($expectedUrl, $expectedHeaders, $returnValue): void
+    private function createMockHttpClient($expectedUrl, $returnValue): void
     {
         $this->httpClient = $this->createMock(HttpClientInterface::class);
 
         $this->httpClient->expects($this->once())
             ->method('request')
-            ->with($this->requestMethod, $expectedUrl, $expectedHeaders)
+            ->with($this->requestMethod, $expectedUrl, $this->requestHeaders)
             ->willReturn($returnValue);
     }
 }
