@@ -25,6 +25,7 @@ require_once __DIR__ . '/lib/http/CurlHttpExecutor/Post.php';
 require_once __DIR__ . '/lib/http/CurlHttpExecutor/Put.php';
 require_once __DIR__ . '/lib/middlewares/Middleware.php';
 require_once __DIR__ . '/lib/middlewares/FileCacheMiddleware.php';
+require_once __DIR__ . '/lib/middlewares/RenameHeaderMiddleware.php';
 require_once __DIR__ . '/lib/middlewares/SetHeadersMiddleware.php';
 require_once __DIR__ . '/lib/middlewares/SetPathMiddleware.php';
 require_once __DIR__ . '/lib/models/FolderLocation.php';

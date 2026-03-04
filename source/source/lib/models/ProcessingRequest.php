@@ -172,6 +172,22 @@ class ProcessingRequest implements RequestInterface
     }
 
     /**
+     * Removes a header from the cached headers array.
+     *
+     * If the header does not exist, this method does nothing.
+     *
+     * @param string $name The header name to remove.
+     *
+     * @return void
+     */
+    public function removeHeader(string $name): void
+    {
+        $this->headers();
+
+        unset($this->headers[$name]);
+    }
+
+    /**
      * Sets the request path value.
      *
      * This method allows you to override or set the path portion of the request URL
