@@ -20,22 +20,6 @@ class ProxyRequestHandlerGeneralTest extends TestCase
     private ?string $requestQuery = null;
     private ?array $requestHeaders = null;
 
-    private function initVariables($overrides = []): void
-    {
-        $this->requestMethod = $overrides['requestMethod'] ?? 'GET';
-        $this->requestPath = $overrides['requestPath'] ?? '/api/users';
-        $this->requestQuery = $overrides['requestQuery'] ?? '';
-        $this->requestHeaders = $overrides['requestHeaders'] ?? [];
-        $this->host = $overrides['host'] ?? 'http://backend:8080';
-
-        $this->request = new ProcessingRequest([
-            'requestMethod' => $this->requestMethod,
-            'headers' => $this->requestHeaders,
-            'requestPath' => $this->requestPath,
-            'query' => $this->requestQuery
-        ]);
-    }
-
     public function testHandleRequestBuildsCorrectUrl()
     {
         $this->initVariables();
@@ -140,5 +124,26 @@ class ProxyRequestHandlerGeneralTest extends TestCase
             ->method('request')
             ->with($this->requestMethod, $expectedUrl, $this->requestHeaders)
             ->willReturn($returnValue);
+    }
+
+    private function initVariables($overrides = []): void
+    {
+        $this->requestMethod = $overrides['requestMethod'] ?? 'GET';
+        $this->requestPath = $overrides['requestPath'] ?? '/api/users';
+        $this->requestQuery = $overrides['requestQuery'] ?? '';
+        $this->requestHeaders = $overrides['requestHeaders'] ?? [];
+        $this->host = $overrides['host'] ?? 'http://backend:8080';
+
+        $this->request = $this->buildProcessingRequest();
+    }
+
+    private function buildProcessingRequest(): ProcessingRequest
+    {
+        return new ProcessingRequest([
+            'requestMethod' => $this->requestMethod,
+            'headers' => $this->requestHeaders,
+            'requestPath' => $this->requestPath,
+            'query' => $this->requestQuery
+        ]);
     }
 }
