@@ -36,9 +36,9 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
     /**
      * Constructs a DefaultProxyRequestHandler.
      *
-     * @param string               $host       The target host to proxy requests to.
-     * @param string|false         $cache      Cache directory, or false to disable caching. Defaults to './cache'.
-     * @param array                $cacheCodes HTTP status codes eligible for caching. Defaults to ['2xx'].
+     * @param string                   $host       The target host to proxy requests to.
+     * @param string|false             $cache      Cache directory, or false to disable caching. Defaults to './cache'.
+     * @param array                    $cacheCodes HTTP status codes eligible for caching. Defaults to ['2xx'].
      * @param HttpClientInterface|null $httpClient Optional HTTP client.
      */
     public function __construct(
