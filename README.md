@@ -156,6 +156,7 @@ Configuration::buildRule([
 ### Built-in Middlewares
 
 - **SetHeadersMiddleware**: Sets or overrides request headers (e.g., Host, X-Test).
+- **RenameHeaderMiddleware**: Renames a request header by copying its value to a new name and removing the original.
 - **SetPathMiddleware**: Changes the request path, useful for serving a fixed file with StaticFileHandler.
 - **FileCacheMiddleware**: Caches responses matching configured HTTP codes (now configured via 'matchers'; 'httpCodes' is deprecated).
 
