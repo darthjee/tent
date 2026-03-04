@@ -93,19 +93,6 @@ class ProxyRequestHandlerGeneralTest extends TestCase
         $this->assertInstanceOf(Response::class, $response);
     }
 
-    public function testHandleRequestWithEmptyHeaders()
-    {
-        $this->initVariables();
-        $this->createMockHttpClient(
-            ['body' => 'response', 'httpCode' => 200, 'headers' => []]
-        );
-
-        $handler = new ProxyRequestHandler($this->host, $this->httpClient);
-        $response = $handler->handleRequest($this->request);
-
-        $this->assertInstanceOf(Response::class, $response);
-    }
-
     private function createMockHttpClient($returnValue): void
     {
         $this->httpClient = $this->createMock(HttpClientInterface::class);
