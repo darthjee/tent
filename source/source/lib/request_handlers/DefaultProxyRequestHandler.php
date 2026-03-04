@@ -60,7 +60,7 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
         array $cacheCodes = ['2xx'],
         ?HttpClientInterface $httpClient = null
     ) {
-        parent::__construct(new Server($host), $httpClient);
+        parent::__construct($host, $httpClient);
         $this->host = $host;
         $this->cache = $cache;
         $this->cacheCodes = $cacheCodes;

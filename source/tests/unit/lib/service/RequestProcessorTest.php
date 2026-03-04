@@ -37,11 +37,11 @@ class RequestProcessorTest extends TestCase
 
     protected function setupProxy()
     {
-        $server = new Server('http://httpbin');
+        $host = 'http://httpbin';
 
         Configuration::addRule(
             new Rule([
-                'handler' => new ProxyRequestHandler($server),
+                'handler' => new ProxyRequestHandler($host),
                 'matchers' => [
                     new ExactRequestMatcher('GET', '/get')
                 ]
