@@ -10,6 +10,8 @@ use Tent\Models\ProcessingRequest;
 use Tent\Models\Response;
 use Tent\Http\HttpClientInterface;
 use Tent\Tests\Support\Utils\FileSystemUtils;
+use Tent\Models\FolderLocation;
+use Tent\Content\FileCache;
 
 class DefaultProxyRequestHandlerCachedTest extends TestCase
 {
@@ -22,6 +24,7 @@ class DefaultProxyRequestHandlerCachedTest extends TestCase
     private ?array $requestHeaders = null;
     private ?string $requestBody = null;
     private ?string $cacheDir = null;
+    private ?string $cachedBody = null;
 
     protected function setUp(): void
     {
@@ -34,30 +37,27 @@ class DefaultProxyRequestHandlerCachedTest extends TestCase
         FileSystemUtils::removeDirRecursive($this->cacheDir);
     }
 
-    public function testHandleRequestBuildsCorrectUrlWithoutCache()
+    public function testHandleRequestBuildsCorrectUrlWithCache()
     {
         $this->initVariables();
-        $this->createMockHttpClient(
-            ['body' => 'response body', 'httpCode' => 200, 'headers' => []]
-        );
+        $this->buildCache();
 
-        $handler = new DefaultProxyRequestHandler($this->host, $this->cacheDir, ['2xx'], $this->httpClient);
+        $handler = new DefaultProxyRequestHandler($this->host, $this->cacheDir, ['2xx']);
         $response = $handler->handleRequest($this->request);
 
         $this->assertInstanceOf(Response::class, $response);
+        $this->assertSame($this->cachedBody, $response->body());
     }
 
     public function testHandleRequestAppendsQueryStringWithoutCache()
     {
         $this->initVariables(['requestQuery' => 'page=1&limit=10']);
-        $this->createMockHttpClient(
-            ['body' => 'response body', 'httpCode' => 200, 'headers' => []]
-        );
+        $this->buildCache();
 
-        $handler = new DefaultProxyRequestHandler($this->host, $this->cacheDir, ['2xx'], $this->httpClient);
+        $handler = new DefaultProxyRequestHandler($this->host, $this->cacheDir, ['2xx']);
         $response = $handler->handleRequest($this->request);
 
-        $this->assertInstanceOf(Response::class, $response);
+        $this->assertSame($this->cachedBody, $response->body());
     }
 
     public function testHandleRequestAppliesDefaultHeaderMiddlewares()
@@ -68,49 +68,23 @@ class DefaultProxyRequestHandlerCachedTest extends TestCase
                 'Authorization' => 'Bearer token123'
             ]
         ]);
+        $this->buildCache();
 
-        $this->createMockHttpClient(
-            ['body' => 'created', 'httpCode' => 201, 'headers' => ['Location: /api/users/1']]
-        );
-
-        $handler = new DefaultProxyRequestHandler($this->host, $this->cacheDir, ['2xx'], $this->httpClient);
+        $handler = new DefaultProxyRequestHandler($this->host, $this->cacheDir, ['2xx']);
         $response = $handler->handleRequest($this->request);
 
-        $this->assertInstanceOf(Response::class, $response);
+        $this->assertSame($this->cachedBody, $response->body());
     }
 
     public function testHandleRequestReturnsResponseWithCorrectData()
     {
         $this->initVariables();
-        $this->createMockHttpClient(
-            ['body' => '{"users": []}', 'httpCode' => 200, 'headers' => ['Content-Type: application/json']]
-        );
+        $this->buildCache();
 
-        $handler = new DefaultProxyRequestHandler($this->host, $this->cacheDir, ['2xx'], $this->httpClient);
+        $handler = new DefaultProxyRequestHandler($this->host, $this->cacheDir, ['2xx']);
         $response = $handler->handleRequest($this->request);
 
-        $this->assertEquals('{"users": []}', $response->body());
-        $this->assertEquals(200, $response->httpCode());
-        $this->assertEquals(['Content-Type: application/json'], $response->headers());
-    }
-
-    private function createMockHttpClient(array $returnValue): void
-    {
-        $this->httpClient = $this->createMock(HttpClientInterface::class);
-        $expectedUrl = $this->host . $this->requestPath . ($this->requestQuery ? '?' . $this->requestQuery : '');
-        $expectedHeaders = $this->expectedHeadersAfterDefaultMiddlewares();
-
-        $this->httpClient->expects($this->once())
-            ->method('request')
-            ->with(
-                $this->requestMethod,
-                $expectedUrl,
-                $this->callback(function (array $headers) use ($expectedHeaders) {
-                    return $headers == $expectedHeaders;
-                }),
-                $this->requestBody
-            )
-            ->willReturn($returnValue);
+        $this->assertSame($this->cachedBody, $response->body());
     }
 
     private function expectedHeadersAfterDefaultMiddlewares(): array
@@ -135,13 +109,9 @@ class DefaultProxyRequestHandlerCachedTest extends TestCase
         $this->requestHeaders = $overrides['requestHeaders'] ?? [];
         $this->requestBody = $overrides['requestBody'] ?? null;
         $this->host = $overrides['host'] ?? 'http://backend:8080';
+        $this->cachedBody = $overrides['cachedBody'] ?? 'cached body';
 
         $this->request = $this->buildProcessingRequest();
-    }
-
-    private function initCache(): void
-    {
-        
     }
 
     private function buildProcessingRequest(): ProcessingRequest
@@ -159,13 +129,13 @@ class DefaultProxyRequestHandlerCachedTest extends TestCase
     {
         $responseHeaders = ['Content-Type: text/plain', 'Content-Length: 11'];
         $location = new FolderLocation($this->cacheDir);
-        $this->response = new Response([
-            'body' => 'cached body',
+        $response = new Response([
+            'body' => $this->cachedBody,
             'httpCode' => 200,
             'headers' => $responseHeaders,
             'request' => $this->request
         ]);
         $cache = new FileCache($this->request, $location);
-        $cache->store($this->response);
+        $cache->store($response);
     }
 }
