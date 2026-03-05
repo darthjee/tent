@@ -11,6 +11,7 @@ use Tent\Models\Request;
 use Tent\Models\MissingResponse;
 use Tent\Models\ForbiddenResponse;
 use Tent\Models\ProcessingRequest;
+use Tent\Tests\Support\Utils\FileSystemUtils;
 
 class StaticFileHandlerGeneralTest extends TestCase
 {
@@ -24,21 +25,7 @@ class StaticFileHandlerGeneralTest extends TestCase
 
     protected function tearDown(): void
     {
-        $this->removeDirectory($this->testDir);
-    }
-
-    private function removeDirectory($dir)
-    {
-        if (!file_exists($dir)) {
-            return;
-        }
-
-        $files = array_diff(scandir($dir), ['.', '..']);
-        foreach ($files as $file) {
-            $path = "$dir/$file";
-            is_dir($path) ? $this->removeDirectory($path) : unlink($path);
-        }
-        rmdir($dir);
+        FileSystemUtils::removeDirRecursive($this->testDir);
     }
 
     public function testHandleRequestReturnsFileContent()

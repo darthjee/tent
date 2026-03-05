@@ -9,6 +9,7 @@ use Tent\Content\FileCache;
 use Tent\Models\FolderLocation;
 use Tent\Models\Request;
 use Tent\Utils\CacheFilePath;
+use Tent\Tests\Support\Utils\FileSystemUtils;
 
 class FileCacheGeneralTest extends TestCase
 {
@@ -41,11 +42,7 @@ class FileCacheGeneralTest extends TestCase
 
     public function tearDown(): void
     {
-        @unlink(CacheFilePath::path('body', $this->fullPath, ''));
-        @unlink(CacheFilePath::path('meta', $this->fullPath, ''));
-        @rmdir($this->fullPath);
-        @rmdir($this->basePath . '/' . $this->path);
-        @rmdir($this->basePath);
+        FileSystemUtils::removeDirRecursive($this->basePath);
     }
 
     public function testContentReadsCacheBodyFile()

@@ -12,6 +12,7 @@ use Tent\Models\ProcessingRequest;
 use Tent\Models\RequestInterface;
 use Tent\Content\FileCache;
 use Tent\Utils\CacheFilePath;
+use Tent\Tests\Support\Utils\FileSystemUtils;
 
 class FileCacheMiddlewareSymmetryTest extends TestCase
 {
@@ -30,7 +31,7 @@ class FileCacheMiddlewareSymmetryTest extends TestCase
 
     protected function tearDown(): void
     {
-        //FileSystemUtils::removeDirRecursive($this->cacheDir);
+        FileSystemUtils::removeDirRecursive($this->cacheDir);
     }
 
     /**
