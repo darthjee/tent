@@ -129,6 +129,8 @@ abstract class RequestHandler
         }
 
         switch ($params['type']) {
+            case 'default_proxy':
+                return DefaultProxyRequestHandler::class;
             case 'proxy':
                 return ProxyRequestHandler::class;
             case 'static':
