@@ -1,16 +1,16 @@
 <?php
 
-namespace Tent\Tests\RequestHandlers\ProxyRequestHandler;
+namespace Tent\Tests\RequestHandlers\DefaultProxyRequestHandler;
 
 require_once __DIR__ . '/../../../../support/loader.php';
 
 use PHPUnit\Framework\TestCase;
-use Tent\RequestHandlers\ProxyRequestHandler;
-use Tent\Models\Response;
+use Tent\RequestHandlers\DefaultProxyRequestHandler;
 use Tent\Models\ProcessingRequest;
+use Tent\Models\Response;
 use Tent\Http\HttpClientInterface;
 
-class ProxyRequestHandlerGeneralTest extends TestCase
+class DefaultProxyRequestHandlerNoCacheTest extends TestCase
 {
     private ?string $host = null;
     private ?ProcessingRequest $request = null;
@@ -19,38 +19,39 @@ class ProxyRequestHandlerGeneralTest extends TestCase
     private ?string $requestPath = null;
     private ?string $requestQuery = null;
     private ?array $requestHeaders = null;
+    private ?string $requestBody = null;
 
-    public function testHandleRequestBuildsCorrectUrl()
+    public function testHandleRequestBuildsCorrectUrlWithoutCache()
     {
         $this->initVariables();
         $this->createMockHttpClient(
             ['body' => 'response body', 'httpCode' => 200, 'headers' => []]
         );
 
-        $handler = new ProxyRequestHandler($this->host, $this->httpClient);
+        $handler = new DefaultProxyRequestHandler($this->host, false, ['2xx'], $this->httpClient);
         $response = $handler->handleRequest($this->request);
 
         $this->assertInstanceOf(Response::class, $response);
     }
 
-    public function testHandleRequestAppendsQueryString()
+    public function testHandleRequestAppendsQueryStringWithoutCache()
     {
         $this->initVariables(['requestQuery' => 'page=1&limit=10']);
         $this->createMockHttpClient(
             ['body' => 'response body', 'httpCode' => 200, 'headers' => []]
         );
 
-        $handler = new ProxyRequestHandler($this->host, $this->httpClient);
+        $handler = new DefaultProxyRequestHandler($this->host, false, ['2xx'], $this->httpClient);
         $response = $handler->handleRequest($this->request);
 
         $this->assertInstanceOf(Response::class, $response);
     }
 
-    public function testHandleRequestForwardsHeaders()
+    public function testHandleRequestAppliesDefaultHeaderMiddlewares()
     {
         $this->initVariables([
             'requestHeaders' => [
-                'Content-Type' => 'application/json',
+                'Host' => 'frontend.local:8080',
                 'Authorization' => 'Bearer token123'
             ]
         ]);
@@ -59,7 +60,7 @@ class ProxyRequestHandlerGeneralTest extends TestCase
             ['body' => 'created', 'httpCode' => 201, 'headers' => ['Location: /api/users/1']]
         );
 
-        $handler = new ProxyRequestHandler($this->host, $this->httpClient);
+        $handler = new DefaultProxyRequestHandler($this->host, false, ['2xx'], $this->httpClient);
         $response = $handler->handleRequest($this->request);
 
         $this->assertInstanceOf(Response::class, $response);
@@ -72,7 +73,7 @@ class ProxyRequestHandlerGeneralTest extends TestCase
             ['body' => '{"users": []}', 'httpCode' => 200, 'headers' => ['Content-Type: application/json']]
         );
 
-        $handler = new ProxyRequestHandler($this->host, $this->httpClient);
+        $handler = new DefaultProxyRequestHandler($this->host, false, ['2xx'], $this->httpClient);
         $response = $handler->handleRequest($this->request);
 
         $this->assertEquals('{"users": []}', $response->body());
@@ -80,36 +81,46 @@ class ProxyRequestHandlerGeneralTest extends TestCase
         $this->assertEquals(['Content-Type: application/json'], $response->headers());
     }
 
-    public function testHandleRequestWithNoQueryString()
-    {
-        $this->initVariables();
-        $this->createMockHttpClient(
-            ['body' => 'response', 'httpCode' => 200, 'headers' => []]
-        );
-
-        $handler = new ProxyRequestHandler($this->host, $this->httpClient);
-        $response = $handler->handleRequest($this->request);
-
-        $this->assertInstanceOf(Response::class, $response);
-    }
-
-    private function createMockHttpClient($returnValue): void
+    private function createMockHttpClient(array $returnValue): void
     {
         $this->httpClient = $this->createMock(HttpClientInterface::class);
         $expectedUrl = $this->host . $this->requestPath . ($this->requestQuery ? '?' . $this->requestQuery : '');
+        $expectedHeaders = $this->expectedHeadersAfterDefaultMiddlewares();
 
         $this->httpClient->expects($this->once())
             ->method('request')
-            ->with($this->requestMethod, $expectedUrl, $this->requestHeaders)
+            ->with(
+                $this->requestMethod,
+                $expectedUrl,
+                $this->callback(function (array $headers) use ($expectedHeaders) {
+                    return $headers == $expectedHeaders;
+                }),
+                $this->requestBody
+            )
             ->willReturn($returnValue);
     }
 
-    private function initVariables($overrides = []): void
+    private function expectedHeadersAfterDefaultMiddlewares(): array
+    {
+        $headers = $this->requestHeaders ?? [];
+
+        if (array_key_exists('Host', $headers)) {
+            $headers['X-Forwarded-Host'] = $headers['Host'];
+            unset($headers['Host']);
+        }
+
+        $headers['Host'] = $this->host;
+
+        return $headers;
+    }
+
+    private function initVariables(array $overrides = []): void
     {
         $this->requestMethod = $overrides['requestMethod'] ?? 'GET';
         $this->requestPath = $overrides['requestPath'] ?? '/api/users';
         $this->requestQuery = $overrides['requestQuery'] ?? '';
         $this->requestHeaders = $overrides['requestHeaders'] ?? [];
+        $this->requestBody = $overrides['requestBody'] ?? null;
         $this->host = $overrides['host'] ?? 'http://backend:8080';
 
         $this->request = $this->buildProcessingRequest();
@@ -119,6 +130,7 @@ class ProxyRequestHandlerGeneralTest extends TestCase
     {
         return new ProcessingRequest([
             'requestMethod' => $this->requestMethod,
+            'body' => $this->requestBody,
             'headers' => $this->requestHeaders,
             'requestPath' => $this->requestPath,
             'query' => $this->requestQuery

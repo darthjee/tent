@@ -51,8 +51,8 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
      */
     public function __construct(
         string $host,
-        string|false $cache = './cache',
-        array $cacheCodes = ['2xx'],
+        string|false $cache,
+        array $cacheCodes,
         ?HttpClientInterface $httpClient = null
     ) {
         parent::__construct($host, $httpClient);
