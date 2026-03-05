@@ -10,6 +10,7 @@ use Tent\Models\Response;
 use Tent\Models\Request;
 use Tent\Models\FolderLocation;
 use Tent\Utils\CacheFilePath;
+use Tent\Tests\Support\Utils\FileSystemUtils;
 
 class FileCacheStoreTest extends TestCase
 {
@@ -27,11 +28,7 @@ class FileCacheStoreTest extends TestCase
 
     protected function tearDown(): void
     {
-        array_map('unlink', glob($this->cacheDir . '/*/*/*/*'));
-        array_map('rmdir', glob($this->cacheDir . '/*/*/*'));
-        array_map('rmdir', glob($this->cacheDir . '/*/*'));
-        array_map('rmdir', glob($this->cacheDir . '/*'));
-        rmdir($this->cacheDir);
+        FileSystemUtils::removeDirRecursive($this->cacheDir);
     }
 
     public function testStoreBodyAndHeaders()

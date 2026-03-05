@@ -12,6 +12,7 @@ use Tent\Models\FolderLocation;
 use Tent\Models\Response;
 use Tent\Exceptions\FileNotFoundException;
 use Tent\Exceptions\InvalidFilePathException;
+use Tent\Tests\Support\Utils\FileSystemUtils;
 
 class ResponseContentReaderWithFileTest extends TestCase
 {
@@ -25,20 +26,7 @@ class ResponseContentReaderWithFileTest extends TestCase
 
     protected function tearDown(): void
     {
-        $this->removeDirectory($this->testDir);
-    }
-
-    private function removeDirectory($dir)
-    {
-        if (!file_exists($dir)) {
-            return;
-        }
-        $files = array_diff(scandir($dir), ['.', '..']);
-        foreach ($files as $file) {
-            $path = "$dir/$file";
-            is_dir($path) ? $this->removeDirectory($path) : unlink($path);
-        }
-        rmdir($dir);
+        FileSystemUtils::removeDirRecursive($this->testDir);
     }
 
     public function testReadFileToResponseReturnsFileContent()
