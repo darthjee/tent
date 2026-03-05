@@ -41,7 +41,7 @@ class DefaultProxyRequestHandlerCachedTest extends TestCase
             ['body' => 'response body', 'httpCode' => 200, 'headers' => []]
         );
 
-        $handler = new DefaultProxyRequestHandler($this->host, false, ['2xx'], $this->httpClient);
+        $handler = new DefaultProxyRequestHandler($this->host, $this->cacheDir, ['2xx'], $this->httpClient);
         $response = $handler->handleRequest($this->request);
 
         $this->assertInstanceOf(Response::class, $response);
@@ -54,7 +54,7 @@ class DefaultProxyRequestHandlerCachedTest extends TestCase
             ['body' => 'response body', 'httpCode' => 200, 'headers' => []]
         );
 
-        $handler = new DefaultProxyRequestHandler($this->host, false, ['2xx'], $this->httpClient);
+        $handler = new DefaultProxyRequestHandler($this->host, $this->cacheDir, ['2xx'], $this->httpClient);
         $response = $handler->handleRequest($this->request);
 
         $this->assertInstanceOf(Response::class, $response);
@@ -73,7 +73,7 @@ class DefaultProxyRequestHandlerCachedTest extends TestCase
             ['body' => 'created', 'httpCode' => 201, 'headers' => ['Location: /api/users/1']]
         );
 
-        $handler = new DefaultProxyRequestHandler($this->host, false, ['2xx'], $this->httpClient);
+        $handler = new DefaultProxyRequestHandler($this->host, $this->cacheDir, ['2xx'], $this->httpClient);
         $response = $handler->handleRequest($this->request);
 
         $this->assertInstanceOf(Response::class, $response);
@@ -86,7 +86,7 @@ class DefaultProxyRequestHandlerCachedTest extends TestCase
             ['body' => '{"users": []}', 'httpCode' => 200, 'headers' => ['Content-Type: application/json']]
         );
 
-        $handler = new DefaultProxyRequestHandler($this->host, false, ['2xx'], $this->httpClient);
+        $handler = new DefaultProxyRequestHandler($this->host, $this->cacheDir, ['2xx'], $this->httpClient);
         $response = $handler->handleRequest($this->request);
 
         $this->assertEquals('{"users": []}', $response->body());
@@ -153,5 +153,19 @@ class DefaultProxyRequestHandlerCachedTest extends TestCase
             'requestPath' => $this->requestPath,
             'query' => $this->requestQuery
         ]);
+    }
+
+    private function buildCache(): void
+    {
+        $responseHeaders = ['Content-Type: text/plain', 'Content-Length: 11'];
+        $location = new FolderLocation($this->cacheDir);
+        $this->response = new Response([
+            'body' => 'cached body',
+            'httpCode' => 200,
+            'headers' => $responseHeaders,
+            'request' => $this->request
+        ]);
+        $cache = new FileCache($this->request, $location);
+        $cache->store($this->response);
     }
 }
