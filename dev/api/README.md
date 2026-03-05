@@ -432,20 +432,16 @@ The Dev API is configured as a backend service in Tent's configuration. Requests
 // Example Tent configuration (docker_volumes/configuration/rules/backend.php)
 Configuration::buildRule([
     'handler' => [
-        'type' => 'proxy',
+        'type' => 'default_proxy',
         'host' => 'http://api:80'  // Points to api_dev container
     ],
     'matchers' => [
         ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact']
-    ],
-    'middlewares' => [
-        [
-            'class' => 'Tent\Middlewares\SetHeadersMiddleware',
-            'headers' => ['Host' => 'backend.local']
-        ]
     ]
 ]);
 ```
+
+`default_proxy` is the recommended default for backend proxying. Use `proxy` only when you need a fully custom middleware stack.
 
 This setup allows you to:
 

@@ -38,6 +38,16 @@ class RequestHandlerBuildTest extends TestCase
         $this->assertInstanceOf(\Tent\RequestHandlers\ProxyRequestHandler::class, $handler);
     }
 
+    public function testBuildWithTypeDefaultProxy()
+    {
+        $handler = RequestHandler::build([
+            'type' => 'default_proxy',
+            'host' => 'http://api.com'
+        ]);
+
+        $this->assertInstanceOf(\Tent\RequestHandlers\DefaultProxyRequestHandler::class, $handler);
+    }
+
     public function testBuildWithTypeStatic()
     {
         $handler = RequestHandler::build([

@@ -200,7 +200,7 @@ Each middleware is defined as an associative array with a `class` key pointing t
 ```php
 Configuration::buildRule([
     'handler' => [
-        'type' => 'proxy',
+        'type' => 'default_proxy',
         'host' => 'http://api:80'
     ],
     'matchers' => [
