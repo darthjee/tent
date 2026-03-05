@@ -170,6 +170,7 @@ Tent uses Apache with PHP to process all incoming requests through a centralized
 1. **Request Routing**: Apache's `.htaccess` rewrites all requests to `index.php`
 2. **Request Processing**: The PHP application analyzes the request and configuration
 3. **Action Selection**: Based on configuration, Tent will:
+
   - **Default Proxy Mode**: Forward requests to configured backend servers with default middleware behavior
   - **Static Mode**: Serve static files directly
 
