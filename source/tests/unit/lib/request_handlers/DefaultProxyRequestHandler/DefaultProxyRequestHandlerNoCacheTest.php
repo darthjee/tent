@@ -20,6 +20,7 @@ class DefaultProxyRequestHandlerNoCacheTest extends TestCase
     private ?string $requestQuery = null;
     private ?array $requestHeaders = null;
     private ?string $requestBody = null;
+    private ?string $baseUrl = null;
 
     public function testHandleRequestBuildsCorrectUrlWithoutCache()
     {
@@ -28,7 +29,7 @@ class DefaultProxyRequestHandlerNoCacheTest extends TestCase
             ['body' => 'response body', 'httpCode' => 200, 'headers' => []]
         );
 
-        $handler = new DefaultProxyRequestHandler($this->host, false, ['2xx'], $this->httpClient);
+        $handler = new DefaultProxyRequestHandler($this->baseUrl, false, ['2xx'], $this->httpClient);
         $response = $handler->handleRequest($this->request);
 
         $this->assertInstanceOf(Response::class, $response);
@@ -41,7 +42,7 @@ class DefaultProxyRequestHandlerNoCacheTest extends TestCase
             ['body' => 'response body', 'httpCode' => 200, 'headers' => []]
         );
 
-        $handler = new DefaultProxyRequestHandler($this->host, false, ['2xx'], $this->httpClient);
+        $handler = new DefaultProxyRequestHandler($this->baseUrl, false, ['2xx'], $this->httpClient);
         $response = $handler->handleRequest($this->request);
 
         $this->assertInstanceOf(Response::class, $response);
@@ -60,7 +61,7 @@ class DefaultProxyRequestHandlerNoCacheTest extends TestCase
             ['body' => 'created', 'httpCode' => 201, 'headers' => ['Location: /api/users/1']]
         );
 
-        $handler = new DefaultProxyRequestHandler($this->host, false, ['2xx'], $this->httpClient);
+        $handler = new DefaultProxyRequestHandler($this->baseUrl, false, ['2xx'], $this->httpClient);
         $response = $handler->handleRequest($this->request);
 
         $this->assertInstanceOf(Response::class, $response);
@@ -73,7 +74,7 @@ class DefaultProxyRequestHandlerNoCacheTest extends TestCase
             ['body' => '{"users": []}', 'httpCode' => 200, 'headers' => ['Content-Type: application/json']]
         );
 
-        $handler = new DefaultProxyRequestHandler($this->host, false, ['2xx'], $this->httpClient);
+        $handler = new DefaultProxyRequestHandler($this->baseUrl, false, ['2xx'], $this->httpClient);
         $response = $handler->handleRequest($this->request);
 
         $this->assertEquals('{"users": []}', $response->body());
@@ -84,7 +85,7 @@ class DefaultProxyRequestHandlerNoCacheTest extends TestCase
     private function createMockHttpClient(array $returnValue): void
     {
         $this->httpClient = $this->createMock(HttpClientInterface::class);
-        $expectedUrl = $this->host . $this->requestPath . ($this->requestQuery ? '?' . $this->requestQuery : '');
+        $expectedUrl = $this->baseUrl . $this->requestPath . ($this->requestQuery ? '?' . $this->requestQuery : '');
         $expectedHeaders = $this->expectedHeadersAfterDefaultMiddlewares();
 
         $this->httpClient->expects($this->once())
@@ -121,7 +122,8 @@ class DefaultProxyRequestHandlerNoCacheTest extends TestCase
         $this->requestQuery = $overrides['requestQuery'] ?? '';
         $this->requestHeaders = $overrides['requestHeaders'] ?? [];
         $this->requestBody = $overrides['requestBody'] ?? null;
-        $this->host = $overrides['host'] ?? 'http://backend:8080';
+        $this->host = $overrides['host'] ?? 'backend:8080';
+        $this->baseUrl = $overrides['baseUrl'] ?? 'http://' . $this->host;
 
         $this->request = $this->buildProcessingRequest();
     }

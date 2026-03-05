@@ -18,14 +18,9 @@ use Tent\Http\CurlHttpClient;
 class ProxyRequestHandler extends RequestHandler
 {
     /**
-     * @var string The target host to which requests will be proxied.
-     */
-    protected string $host;
-
-    /**
      * @var Server The target server to which requests are proxied.
      */
-    private ?Server $server = null;
+    private Server $server;
 
     /**
      * @var HttpClientInterface The HTTP client used to make requests to the target server.
@@ -40,7 +35,7 @@ class ProxyRequestHandler extends RequestHandler
      */
     public function __construct(string $host, ?HttpClientInterface $httpClient = null)
     {
-        $this->host = $host;
+        $this->server = new Server($host);
         $this->httpClient = $httpClient ?? new CurlHttpClient();
     }
 
@@ -68,10 +63,7 @@ class ProxyRequestHandler extends RequestHandler
     protected function processsRequest(RequestInterface $request): Response
     {
         // Build full URL from target host and request path
-        $url = $this->server()->targetHost() . $request->requestPath();
-        if ($request->query()) {
-            $url .= '?' . $request->query();
-        }
+        $url = $this->server()->fullUrl($request->requestPath(), $request->query());
 
         $response = $this->httpClient->request($request->requestMethod(), $url, $request->headers(), $request->body());
         $response['request'] = $request;
@@ -86,9 +78,16 @@ class ProxyRequestHandler extends RequestHandler
      */
     private function server(): Server
     {
-        if (!$this->server) {
-            $this->server = new Server($this->host ?? '');
-        }
         return $this->server;
+    }
+
+    /**
+     * Returns the host component of the target server, including port if specified.
+     *
+     * @return string
+     */
+    protected function host(): string
+    {
+        return $this->server()->host();
     }
 }

@@ -56,7 +56,6 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
         ?HttpClientInterface $httpClient = null
     ) {
         parent::__construct($host, $httpClient);
-        $this->host = $host;
         $this->cache = $cache;
         $this->cacheCodes = $cacheCodes;
         $this->initializeMiddlewares();
@@ -90,7 +89,7 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
     private function initializeMiddlewares(): void
     {
         $this->addMiddleware(new RenameHeaderMiddleware('Host', 'X-Forwarded-Host'));
-        $this->addMiddleware(new SetHeadersMiddleware(['Host' => $this->host]));
+        $this->addMiddleware(new SetHeadersMiddleware(['Host' => $this->host()]));
 
         if ($this->cache !== false) {
             $this->addMiddleware(new FileCacheMiddleware(
