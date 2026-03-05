@@ -39,9 +39,10 @@ class Server
      * Builds a full URL by combining the target host with a given path and optional query string.
      * Ensures that slashes are properly handled to avoid malformed URLs.
      * Example:
-     *   If targetHost is 'http://api.example.com' and path is '/persons', the result will be 'http://api.example.com/persons'.
-     * 
-     * @param string $path The path to append to the target host.
+     *   If targetHost is 'http://api.example.com' and path is '/persons',
+     *   the result will be 'http://api.example.com/persons'.
+     *
+     * @param string      $path  The path to append to the target host.
      * @param string|null $query Optional query string to append to the URL.
      * @return string The full URL combining the target host, path, and query string.
      */
