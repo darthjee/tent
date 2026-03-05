@@ -14,6 +14,55 @@ use Tent\Http\CurlHttpClient;
  * This handler builds a new request based on the incoming request and forwards it
  * to the configured target server using an HTTP client. The response from the target
  * server is then returned as a Response object.
+ *
+ * @example Basic proxy configuration:
+ * ```php
+ * Configuration::buildRule([
+ *     'handler' => [
+ *         'type' => 'proxy',
+ *         'host' => 'http://api:80'
+ *     ],
+ *     'matchers' => [
+ *         ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact']
+ *     ]
+ * ]);
+ * ```
+ *
+ * @example Proxy configuration with Custom headers and cache
+ * ```php
+ * Configuration::buildRule([
+ *     'handler' => [
+ *         'type' => 'proxy',
+ *         'host' => 'http://api:80'
+ *     ],
+ *     'matchers' => [
+ *          ['method' => 'GET', 'uri' => '.json', 'type' => 'ends_with']
+ *     ],
+ *     "middlewares" => [
+ *         [
+ *              'class' => 'Tent\Middlewares\FileCacheMiddleware',
+ *              'location' => "./cache",
+ *              'matchers' => [
+ *                  [
+ *                      'class'     => 'Tent\Matchers\StatusCodeMatcher',
+ *                      'httpCodes' => ["2xx", "3xx"]
+ *                  ]
+ *              ]
+ *          ],
+ *          [
+ *              'class' => 'Tent\Middlewares\RenameHeaderMiddleware',
+ *              'from'  => 'Host',
+ *              'to'    => 'X-Forwarded-Host'
+ *          ],
+ *          [
+ *              'class' => 'Tent\Middlewares\SetHeadersMiddleware',
+ *              'headers' => [
+ *                  'Host' => 'api:80'
+ *              ]
+ *          ]
+ *      ]
+ * ]);
+ * ```
  */
 class ProxyRequestHandler extends RequestHandler
 {
