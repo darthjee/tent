@@ -25,6 +25,7 @@ class DefaultProxyRequestHandlerCachedTest extends TestCase
     private ?string $requestBody = null;
     private ?string $cacheDir = null;
     private ?string $cachedBody = null;
+    private ?string $baseUrl = null;
 
     protected function setUp(): void
     {
@@ -42,7 +43,7 @@ class DefaultProxyRequestHandlerCachedTest extends TestCase
         $this->initVariables();
         $this->buildCache();
 
-        $handler = new DefaultProxyRequestHandler($this->host, $this->cacheDir, ['2xx']);
+        $handler = new DefaultProxyRequestHandler($this->baseUrl, $this->cacheDir, ['2xx']);
         $response = $handler->handleRequest($this->request);
 
         $this->assertInstanceOf(Response::class, $response);
@@ -54,7 +55,7 @@ class DefaultProxyRequestHandlerCachedTest extends TestCase
         $this->initVariables(['requestQuery' => 'page=1&limit=10']);
         $this->buildCache();
 
-        $handler = new DefaultProxyRequestHandler($this->host, $this->cacheDir, ['2xx']);
+        $handler = new DefaultProxyRequestHandler($this->baseUrl, $this->cacheDir, ['2xx']);
         $response = $handler->handleRequest($this->request);
 
         $this->assertSame($this->cachedBody, $response->body());
@@ -70,7 +71,7 @@ class DefaultProxyRequestHandlerCachedTest extends TestCase
         ]);
         $this->buildCache();
 
-        $handler = new DefaultProxyRequestHandler($this->host, $this->cacheDir, ['2xx']);
+        $handler = new DefaultProxyRequestHandler($this->baseUrl, $this->cacheDir, ['2xx']);
         $response = $handler->handleRequest($this->request);
 
         $this->assertSame($this->cachedBody, $response->body());
@@ -81,7 +82,7 @@ class DefaultProxyRequestHandlerCachedTest extends TestCase
         $this->initVariables();
         $this->buildCache();
 
-        $handler = new DefaultProxyRequestHandler($this->host, $this->cacheDir, ['2xx']);
+        $handler = new DefaultProxyRequestHandler($this->baseUrl, $this->cacheDir, ['2xx']);
         $response = $handler->handleRequest($this->request);
 
         $this->assertSame($this->cachedBody, $response->body());
@@ -108,7 +109,8 @@ class DefaultProxyRequestHandlerCachedTest extends TestCase
         $this->requestQuery = $overrides['requestQuery'] ?? '';
         $this->requestHeaders = $overrides['requestHeaders'] ?? [];
         $this->requestBody = $overrides['requestBody'] ?? null;
-        $this->host = $overrides['host'] ?? 'http://backend:8080';
+        $this->host = $overrides['host'] ?? 'backend:8080';
+        $this->baseUrl = $overrides['baseUrl'] ?? 'http://' . $this->host;
         $this->cachedBody = $overrides['cachedBody'] ?? 'cached body';
 
         $this->request = $this->buildProcessingRequest();
