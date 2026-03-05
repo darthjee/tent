@@ -19,15 +19,46 @@ use Tent\Matchers\StatusCodeMatcher;
  *
  * ## Usage Example
  *
+ * @example Basic proxy configuration:
  * ```php
- * // With caching enabled (default):
- * $handler = new DefaultProxyRequestHandler('http://api:80');
+ * Configuration::buildRule([
+ *     'handler' => [
+ *         'type' => 'default_proxy',
+ *         'host' => 'http://api:80'
+ *     ],
+ *     'matchers' => [
+ *          ['method' => 'GET', 'uri' => '.json', 'type' => 'ends_with']
+ *     ]
+ * ]);
+ * ```
  *
- * // With a custom cache directory and codes:
- * $handler = new DefaultProxyRequestHandler('http://api:80', './my-cache', ['2xx']);
+ * @example Configuration without cache
+ * ```php
+ * Configuration::buildRule([
+ *     'handler' => [
+ *         'type' => 'default_proxy',
+ *         'host' => 'http://api:80',
+ *         'cache' => false
+ *     ],
+ *     'matchers' => [
+ *          ['method' => 'GET', 'uri' => '.json', 'type' => 'ends_with']
+ *     ]
+ * ]);
+ * ```
  *
- * // With caching disabled:
- * $handler = new DefaultProxyRequestHandler('http://api:80', false);
+ * @example Configuration with custom cache and cache codes
+ * ```php
+ * Configuration::buildRule([
+ *     'handler' => [
+ *         'type' => 'default_proxy',
+ *         'host' => 'http://api:80',
+ *         'cache' => './custom_cache',
+ *         'cacheCodes' => ['2xx', '302']
+ *     ],
+ *     'matchers' => [
+ *          ['method' => 'GET', 'uri' => '.json', 'type' => 'ends_with']
+ *     ]
+ * ]);
  * ```
  */
 class DefaultProxyRequestHandler extends ProxyRequestHandler

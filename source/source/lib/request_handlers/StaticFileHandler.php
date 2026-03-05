@@ -18,6 +18,38 @@ use Tent\Service\ResponseContentReader;
  * This handler returns the contents of a file located by combining the base directory
  * (provided by FolderLocation) and the requestPath from the incoming request. It is
  * typically used to serve static assets such as HTML, CSS, JS, images, etc.
+ *
+ * @example Serving index.html for root path:
+ * ```php
+ * Configuration::buildRule([
+ *     'handler' => [
+ *         'type' => 'static',
+ *         'location' => '/var/www/html/static/'
+ *     ],
+ *     'matchers' => [
+ *         ['method' => 'GET', 'uri' => '/', 'type' => 'exact']
+ *     ],
+ *     'middlewares' => [
+ *         [
+ *             'class' => 'Tent\Middlewares\SetPathMiddleware',
+ *             'path' => '/index.html'
+ *         ]
+ *     ]
+ * ]);
+ * ```
+ *
+ * @example Serving static files from a folder:
+ * ```php
+ * Configuration::buildRule([
+ *     'handler' => [
+ *         'type' => 'static',
+ *         'location' => '/var/www/html/static'
+ *     ],
+ *     'matchers' => [
+ *         ['method' => 'GET', 'uri' => '/assets', 'type' => 'begins_with']
+ *     ]
+ * ]);
+ * ```
  */
 class StaticFileHandler extends RequestHandler
 {
