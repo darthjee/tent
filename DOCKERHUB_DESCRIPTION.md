@@ -159,8 +159,7 @@ services:
 
 ## More Information
 
-- Project repository: https://github.com/darthjee/tent
-- See the [README](https://github.com/darthjee/tent) for development instructions and advanced configuration.
+- See the [README](<https://github.com/darthjee/tent>) for development instructions and advanced configuration.
 - Issues and contributions are welcome!
 
 
