@@ -7,6 +7,7 @@ Welcome to the Tent documentation. This index provides an overview of all availa
 ### Configuration
 
 - **[Main README](../README.md)** — Getting started, architecture overview, and setup instructions
+- **[Request Handlers](request-handlers.md)** — Differences between `default_proxy`, `proxy`, and `static`, including options and examples
 - Prefer `DefaultProxyRequestHandler` (`'type' => 'default_proxy'`) for standard proxy rules
 - Use `ProxyRequestHandler` (`'type' => 'proxy'`) only for custom middleware stacks
 
