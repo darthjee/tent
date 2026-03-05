@@ -35,6 +35,18 @@ class Server
         return $this->targetHost;
     }
 
+    public function domain(): string
+    {
+        $parsedUrl = parse_url($this->targetHost);
+        $host = $parsedUrl['host'] ?? '';
+
+        if (isset($parsedUrl['port'])) {
+            return $host . ':' . $parsedUrl['port'];
+        }
+
+        return $host;
+    }
+
     /**
      * Builds a full URL by combining the target host with a given path and optional query string.
      * Ensures that slashes are properly handled to avoid malformed URLs.
