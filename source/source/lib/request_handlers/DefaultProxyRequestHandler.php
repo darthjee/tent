@@ -89,7 +89,7 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
     private function initializeMiddlewares(): void
     {
         $this->addMiddleware(new RenameHeaderMiddleware('Host', 'X-Forwarded-Host'));
-        $this->addMiddleware(new SetHeadersMiddleware(['Host' => $this->domain()]));
+        $this->addMiddleware(new SetHeadersMiddleware(['Host' => $this->host()]));
 
         if ($this->cache !== false) {
             $this->addMiddleware(new FileCacheMiddleware(

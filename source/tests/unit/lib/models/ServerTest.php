@@ -13,28 +13,28 @@ class ServerTest extends TestCase
     {
         $server = new Server('http://api.example.com:8080');
 
-        $this->assertEquals('http://api.example.com:8080', $server->targetHost());
+        $this->assertEquals('http://api.example.com:8080', $server->baseUrl());
     }
 
     public function testConstructorAcceptsTargetHost()
     {
         $server = new Server('http://backend:80');
 
-        $this->assertEquals('http://backend:80', $server->targetHost());
+        $this->assertEquals('http://backend:80', $server->baseUrl());
     }
 
     public function testDomainReturnsHostWithoutPort()
     {
         $server = new Server('http://localhost.api');
 
-        $this->assertEquals('localhost.api', $server->domain());
+        $this->assertEquals('localhost.api', $server->host());
     }
 
     public function testDomainReturnsHostWithPort()
     {
         $server = new Server('http://localhost.api:8080');
 
-        $this->assertEquals('localhost.api:8080', $server->domain());
+        $this->assertEquals('localhost.api:8080', $server->host());
     }
 
     public function testFullUrlBuildsUrlWithPathOnly()

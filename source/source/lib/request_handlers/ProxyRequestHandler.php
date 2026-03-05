@@ -81,13 +81,8 @@ class ProxyRequestHandler extends RequestHandler
         return $this->server;
     }
 
-    protected function domain(): string
-    {
-        return $this->server()->domain();
-    }
-
     protected function host(): string
     {
-        return $this->server()->targetHost();
+        return $this->server()->host();
     }
 }

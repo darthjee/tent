@@ -13,16 +13,16 @@ class Server
     /**
      * @var string The base address (host) for proxy requests.
      */
-    private $targetHost;
+    private $baseUrl;
 
     /**
      * Constructs a Server model.
      *
-     * @param string $targetHost The base address for proxy requests.
+     * @param string $baseUrl The base address for proxy requests.
      */
-    public function __construct(string $targetHost)
+    public function __construct(string $baseUrl)
     {
-        $this->targetHost = $targetHost;
+        $this->baseUrl = $baseUrl;
     }
 
     /**
@@ -30,14 +30,14 @@ class Server
      *
      * @return string
      */
-    public function targetHost(): string
+    public function baseUrl(): string
     {
-        return $this->targetHost;
+        return $this->baseUrl;
     }
 
-    public function domain(): string
+    public function host(): string
     {
-        $parsedUrl = parse_url($this->targetHost);
+        $parsedUrl = parse_url($this->baseUrl);
         $host = $parsedUrl['host'] ?? '';
 
         if (isset($parsedUrl['port'])) {
@@ -48,19 +48,19 @@ class Server
     }
 
     /**
-     * Builds a full URL by combining the target host with a given path and optional query string.
+     * Builds a full URL by combining the base URL with a given path and optional query string.
      * Ensures that slashes are properly handled to avoid malformed URLs.
      * Example:
-     *   If targetHost is 'http://api.example.com' and path is '/persons',
+     *   If baseUrl is 'http://api.example.com' and path is '/persons',
      *   the result will be 'http://api.example.com/persons'.
      *
-     * @param string      $path  The path to append to the target host.
+     * @param string      $path  The path to append to the base URL.
      * @param string|null $query Optional query string to append to the URL.
-     * @return string The full URL combining the target host, path, and query string.
+     * @return string The full URL combining the base URL, path, and query string.
      */
     public function fullUrl(string $path, ?string $query = null): string
     {
-        $url = rtrim($this->targetHost, '/') . '/' . ltrim($path, '/');
+        $url = rtrim($this->baseUrl, '/') . '/' . ltrim($path, '/');
         if ($query) {
             $url .= '?' . ltrim($query, '?');
         }
