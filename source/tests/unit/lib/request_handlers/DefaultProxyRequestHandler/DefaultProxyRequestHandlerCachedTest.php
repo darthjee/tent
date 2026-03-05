@@ -9,6 +9,7 @@ use Tent\RequestHandlers\DefaultProxyRequestHandler;
 use Tent\Models\ProcessingRequest;
 use Tent\Models\Response;
 use Tent\Http\HttpClientInterface;
+use Tent\Tests\Support\Utils\FileSystemUtils;
 
 class DefaultProxyRequestHandlerCachedTest extends TestCase
 {
@@ -20,6 +21,18 @@ class DefaultProxyRequestHandlerCachedTest extends TestCase
     private ?string $requestQuery = null;
     private ?array $requestHeaders = null;
     private ?string $requestBody = null;
+    private ?string $cacheDir = null;
+
+    protected function setUp(): void
+    {
+        $this->cacheDir = sys_get_temp_dir() . '/default_proxy_handler_test_' . uniqid();
+        mkdir($this->cacheDir);
+    }
+
+    protected function tearDown(): void
+    {
+        FileSystemUtils::removeDirRecursive($this->cacheDir);
+    }
 
     public function testHandleRequestBuildsCorrectUrlWithoutCache()
     {
@@ -124,6 +137,11 @@ class DefaultProxyRequestHandlerCachedTest extends TestCase
         $this->host = $overrides['host'] ?? 'http://backend:8080';
 
         $this->request = $this->buildProcessingRequest();
+    }
+
+    private function initCache(): void
+    {
+        
     }
 
     private function buildProcessingRequest(): ProcessingRequest
