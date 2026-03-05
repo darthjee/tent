@@ -10,6 +10,7 @@ use Tent\Models\FolderLocation;
 use Tent\Models\Response;
 use Tent\Models\ProcessingRequest;
 use Tent\Content\FileCache;
+use Tent\Tests\Support\Utils\FileSystemUtils;
 
 class FileCacheMiddlewareProcessRequestTest extends TestCase
 {
@@ -29,10 +30,7 @@ class FileCacheMiddlewareProcessRequestTest extends TestCase
 
     protected function tearDown(): void
     {
-        array_map('unlink', glob($this->cacheDir . '/*/*/*'));
-        array_map('rmdir', glob($this->cacheDir . '/*/*'));
-        array_map('rmdir', glob($this->cacheDir . '/*'));
-        rmdir($this->cacheDir);
+        FileSystemUtils::removeDirRecursive($this->cacheDir);
     }
 
     public function testProcessRequestReturnsCachedResponseWhenExists()
