@@ -9,7 +9,7 @@
 
 An intelligent PHP-based proxy server for routing, static file serving, and middleware—fully configurable via PHP files.
 
-Project repository: https://github.com/darthjee/tent
+Project repository: <https://github.com/darthjee/tent>
 
 ## Quick Start
 
