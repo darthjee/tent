@@ -13,6 +13,10 @@ Welcome to the Tent documentation. This index provides an overview of all availa
 
 ### Middlewares
 
+- **[Built-in Middlewares](built-in-middlewares.md)** — Overview, options, and examples for all built-in middlewares
+  - `SetHeadersMiddleware`, `SetPathMiddleware`, `RenameHeaderMiddleware` (quick reference)
+  - Link to dedicated `FileCacheMiddleware` documentation
+
 - **[Creating Middlewares](creating-middlewares.md)** — Learn how to build custom middlewares to process requests and responses
   - What middlewares are and how they work
   - The `processRequest` and `processResponse` interface
@@ -23,6 +27,7 @@ Welcome to the Tent documentation. This index provides an overview of all availa
   - Best practices and performance tips
 
 - **[FileCacheMiddleware Matchers](file-cache-middleware-matchers.md)** — Configure response caching with matchers
+  - Detailed reference for `FileCacheMiddleware`
   - Overview of `FileCacheMiddleware`
   - Migration from deprecated `httpCodes` to the new `matchers` array
   - Available matcher types: `StatusCodeMatcher`, `RequestMethodMatcher`
