@@ -25,12 +25,7 @@ class StaticFileHandlerGeneralTest extends TestCase
 
     protected function tearDown(): void
     {
-        $this->removeDirectory($this->testDir);
-    }
-
-    private function removeDirectory($dir)
-    {
-        FileSystemUtils::removeDirRecursive($dir);
+        FileSystemUtils::removeDirRecursive($this->testDir);
     }
 
     public function testHandleRequestReturnsFileContent()
