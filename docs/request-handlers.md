@@ -55,7 +55,7 @@ It automatically adds:
 |---|---|---|---|---|
 | `host` | `string` | Yes | — | Backend host used for proxying |
 | `cache` | `string \| false` | No | `'./cache'` | Cache directory, or `false` to disable cache |
-| `cacheCodes` | `array` | No | `['2xx']` | Status codes/patterns used by `StatusCodeMatcher` |
+| `cacheCodes` | `array` | No | `['2xx']` | Status codes/patterns used by `StatusCodeMatcher` in cache middleware |
 
 ### Example: Default proxy with built-in cache
 
