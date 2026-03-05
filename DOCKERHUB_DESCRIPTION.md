@@ -3,10 +3,13 @@
 
 [![Build Status](https://circleci.com/gh/darthjee/tent.svg?style=shield)](https://circleci.com/gh/darthjee/tent)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/c8849c295a394af4ba34adaf979f811d)](https://app.codacy.com/gh/darthjee/tent/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/c8849c295a394af4ba34adaf979f811d)](https://app.codacy.com/gh/darthjee/tent/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
 
 ![tent](https://raw.githubusercontent.com/darthjee/tent/master/tent.png)
 
 An intelligent PHP-based proxy server for routing, static file serving, and middleware—fully configurable via PHP files.
+
+Project repository: <https://github.com/darthjee/tent>
 
 ## Quick Start
 
@@ -27,6 +30,20 @@ services:
 
 - **/var/www/html/configuration/** (required): Mount your PHP configuration files here. These files define proxy rules, static file handling, and middleware. See below for configuration examples.
 - **/var/www/html/static/** (optional): Mount static files here if your configuration serves static content.
+
+## How to Use (Step-by-Step)
+
+1. Create a `configuration/` folder in your host machine.
+2. Add `configure.php` and rule files (`rules/backend.php`, `rules/frontend.php`).
+3. Mount that folder into `/var/www/html/configuration/`.
+4. Start the container with Docker Compose.
+5. Send requests to `http://localhost:8080` (or your mapped port).
+
+Example test command:
+
+```bash
+curl http://localhost:8080/persons
+```
 
 ## Configuration
 
@@ -103,6 +120,17 @@ if (getenv('FRONTEND_DEV_MODE') === 'true') {
 }
 ```
 
+### Environment Variables
+
+`FRONTEND_DEV_MODE` in the example above is **development-specific** (from this repository's dev setup).
+
+For production usage of the Docker image, this variable is usually **not required**. You can define your own rules in `configuration/` without using `FRONTEND_DEV_MODE`.
+
+If you do use the same dev/prod split pattern:
+
+- `FRONTEND_DEV_MODE=true`: proxies frontend requests to a frontend dev server (example above uses `http://frontend:8080`).
+- `FRONTEND_DEV_MODE=false`: serves frontend files from `/var/www/html/static` using static rules.
+
 ## Exposed Port
 
 - **80**: The HTTP server listens on port 80 inside the container. Map this to your desired host port (e.g., `8080:80`).
@@ -131,7 +159,7 @@ services:
 
 ## More Information
 
-- See the [README](https://github.com/darthjee/tent) for development instructions and advanced configuration.
+- See the [README](<https://github.com/darthjee/tent>) for development instructions and advanced configuration.
 - Issues and contributions are welcome!
 
 
@@ -142,8 +170,9 @@ Tent uses Apache with PHP to process all incoming requests through a centralized
 1. **Request Routing**: Apache's `.htaccess` rewrites all requests to `index.php`
 2. **Request Processing**: The PHP application analyzes the request and configuration
 3. **Action Selection**: Based on configuration, Tent will:
+
   - **Default Proxy Mode**: Forward requests to configured backend servers with default middleware behavior
-   - **Static Mode**: Serve static files directly
+  - **Static Mode**: Serve static files directly
 
 ## Architecture
 
