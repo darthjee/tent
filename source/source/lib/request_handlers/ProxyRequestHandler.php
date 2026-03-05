@@ -81,6 +81,11 @@ class ProxyRequestHandler extends RequestHandler
         return $this->server;
     }
 
+    /**
+     * Returns the host component of the target server, including port if specified.
+     *
+     * @return string
+     */
     protected function host(): string
     {
         return $this->server()->host();

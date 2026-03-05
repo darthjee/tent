@@ -35,6 +35,11 @@ class Server
         return $this->baseUrl;
     }
 
+    /**
+     * Returns the host component of the base URL, including port if specified.
+     *
+     * @return string
+     */
     public function host(): string
     {
         $parsedUrl = parse_url($this->baseUrl);
