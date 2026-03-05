@@ -303,7 +303,7 @@ The frontend is integrated with Tent through configuration rules. When `FRONTEND
 // Example Tent configuration (docker_volumes/configuration/rules/frontend.php)
 Configuration::buildRule([
     'handler' => [
-        'type' => 'proxy',
+    'type' => 'proxy', // custom proxy setup for Vite dev server (no default caching)
         'host' => 'http://frontend_dev:8080'  // Points to Vite dev server
     ],
     'matchers' => [
@@ -317,6 +317,8 @@ Configuration::buildRule([
     ]
 ]);
 ```
+
+For regular backend proxy rules, prefer `default_proxy`. Use `proxy` when you need custom behavior like this development setup.
 
 When `FRONTEND_DEV_MODE=false`, Tent serves static files from the `dist/` directory:
 

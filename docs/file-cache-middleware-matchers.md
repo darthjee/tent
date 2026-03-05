@@ -21,12 +21,14 @@
 1. **On request** (`processRequest`): Checks whether a cached file exists for the incoming request path. If found, the cached response is loaded and returned immediately, skipping the backend.
 2. **On response** (`processResponse`): After the handler returns a response, checks whether it should be cached. If all configured matchers pass, the response is written to disk.
 
+For standard proxying, prefer `DefaultProxyRequestHandler` (`'type' => 'default_proxy'`). Use `ProxyRequestHandler` (`'type' => 'proxy'`) when you need to configure `FileCacheMiddleware` explicitly as part of a custom middleware stack.
+
 The middleware is placed in the `middlewares` array of a rule configuration:
 
 ```php
 Configuration::buildRule([
     'handler' => [
-        'type' => 'proxy',
+        'type' => 'proxy', // custom stack with explicit FileCacheMiddleware
         'host' => 'http://api:80'
     ],
     'matchers' => [
@@ -253,7 +255,7 @@ This means matchers apply symmetrically: the same conditions that determine whet
 ```php
 Configuration::buildRule([
     'handler' => [
-        'type' => 'proxy',
+        'type' => 'proxy', // custom stack with explicit cache/header middlewares
         'host' => 'http://api.com:80'
     ],
     'matchers' => [

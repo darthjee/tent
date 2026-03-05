@@ -51,32 +51,16 @@ require_once __DIR__ . '/rules/backend.php';
 use Tent\Configuration;
 Configuration::buildRule([
   'handler' => [
-    'type' => 'proxy',
+    'type' => 'default_proxy',
     'host' => 'http://api.com:80'
   ],
   'matchers' => [
     ['method' => 'GET', 'uri' => '/api/', 'type' => 'begins_with']
-  ],
-  "middlewares" => [
-    [
-      'class' => 'Tent\Middlewares\FileCacheMiddleware',
-      'location' => "./cache",
-      'matchers' => [
-        [
-          'class' => 'Tent\\Matchers\\StatusCodeMatcher',
-          'httpCodes' => ["2xx"]
-        ]
-      ]
-    ],
-    [
-      'class' => 'Tent\Middlewares\SetHeadersMiddleware',
-      'headers' => [
-        'Host' => 'api.com'
-      ]
-    ]
   ]
 ]);
 ```
+
+`default_proxy` is the recommended default for proxying. Use `'type' => 'proxy'` only when you need a fully custom middleware stack.
 
 #### Example: Frontend rule (frontend.php)
 
@@ -87,7 +71,7 @@ use Tent\Configuration;
 if (getenv('FRONTEND_DEV_MODE') === 'true') {
   Configuration::buildRule([
     'handler' => [
-      'type' => 'proxy',
+      'type' => 'proxy', // custom proxy setup for Vite dev server
       'host' => 'http://frontend:8080'
     ],
     'matchers' => [
@@ -158,7 +142,7 @@ Tent uses Apache with PHP to process all incoming requests through a centralized
 1. **Request Routing**: Apache's `.htaccess` rewrites all requests to `index.php`
 2. **Request Processing**: The PHP application analyzes the request and configuration
 3. **Action Selection**: Based on configuration, Tent will:
-   - **Proxy Mode**: Forward requests to configured backend servers
+  - **Default Proxy Mode**: Forward requests to configured backend servers with default middleware behavior
    - **Static Mode**: Serve static files directly
 
 ## Architecture

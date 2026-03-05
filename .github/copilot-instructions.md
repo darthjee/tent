@@ -11,7 +11,7 @@ Tent is a PHP-based intelligent proxy server that routes requests to backend ser
 - **Configuration System**: Rules defined in `docker_volumes/configuration/configure.php` and loaded at runtime
 - **Rule Matching**: Each `Rule` has matchers (URI patterns, HTTP methods) and a handler
 - **Middleware Chain**: Middlewares modify requests/responses (headers, paths, caching)
-- **Handlers**: `ProxyRequestHandler` (forwards to backends), `StaticFileHandler` (serves files), `MissingRequestHandler` (404 fallback)
+- **Handlers**: `DefaultProxyRequestHandler` (default backend proxying), `ProxyRequestHandler` (custom proxy behavior), `StaticFileHandler` (serves files), `MissingRequestHandler` (404 fallback)
 
 ## Critical Developer Workflows
 
@@ -86,8 +86,8 @@ Rules are defined declaratively using `Configuration::buildRule()`:
 ```php
 Configuration::buildRule([
   'handler' => [
-    'type' => 'proxy',        // or 'static'
-    'host' => 'http://api:80' // for proxy type
+    'type' => 'default_proxy', // preferred for proxy rules; or 'static'
+    'host' => 'http://api:80'  // for default_proxy/proxy types
   ],
   'matchers' => [
     ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact'],
@@ -329,7 +329,7 @@ See [dev/frontend/README.md](dev/frontend/README.md) for comprehensive documenta
 ```
 source/source/               # Core Tent application
   ├── lib/
-  │   ├── request_handlers/  # ProxyRequestHandler, StaticFileHandler, etc.
+  │   ├── request_handlers/  # DefaultProxyRequestHandler, ProxyRequestHandler, StaticFileHandler, etc.
   │   ├── middlewares/       # Request/response middleware implementations
   │   ├── models/            # Request, Response, Rule, Server, etc.
   │   ├── service/           # RequestProcessor (main routing engine)
@@ -365,7 +365,7 @@ dev/
 
 ## Integration Points
 
-- **Backend API**: Communicates via HTTP proxy through Tent. Tent sets `Host` header via `SetHeadersMiddleware`.
+- **Backend API**: Communicates via HTTP proxy through Tent. Prefer `default_proxy` for standard proxying; use `proxy` for custom middleware stacks.
   - The `api_dev` service is a lightweight PHP application that demonstrates typical REST API patterns
   - All requests are routed through `index.php` to a `RequestHandler` that matches routes to endpoint classes
   - See [dev/api/README.md](dev/api/README.md) for details on adding endpoints and running migrations

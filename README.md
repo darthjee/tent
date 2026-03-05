@@ -31,7 +31,7 @@ Tent uses Apache with PHP to process all incoming requests through a centralized
 1. **Request Routing**: Apache's `.htaccess` rewrites all requests to `index.php`
 2. **Request Processing**: The PHP application analyzes the request and configuration
 3. **Action Selection**: Based on configuration, Tent will:
-   - **Proxy Mode**: Forward requests to configured backend servers
+    - **Default Proxy Mode**: Forward requests to configured backend servers with default middleware behavior
    - **Static Mode**: Serve static files directly
 
 ## Docker Image
@@ -146,7 +146,9 @@ Configuration::buildRule([
 2. Sets the `Host` header to the configured host value.
 3. Caches responses with 2xx status codes (when `cache !== false`).
 
-**Equivalent manual configuration:**
+Use `'type' => 'default_proxy'` for standard proxy rules. Use `'type' => 'proxy'` only when you need a fully custom middleware stack.
+
+**Equivalent custom configuration (`ProxyRequestHandler`):**
 
 ```php
 Configuration::buildRule([
@@ -204,7 +206,7 @@ Example using `ends_with`:
 ```php
 Configuration::buildRule([
     'handler' => [
-        'type' => 'proxy',
+        'type' => 'default_proxy',
         'host' => 'http://api:80'
     ],
     'matchers' => [
@@ -217,7 +219,7 @@ Example with PUT and PATCH (update operations):
 ```php
 Configuration::buildRule([
     'handler' => [
-        'type' => 'proxy',
+        'type' => 'default_proxy',
         'host' => 'http://api:80'
     ],
     'matchers' => [
@@ -231,7 +233,7 @@ Example with DELETE (delete operations):
 ```php
 Configuration::buildRule([
     'handler' => [
-        'type' => 'proxy',
+        'type' => 'default_proxy',
         'host' => 'http://api:80'
     ],
     'matchers' => [

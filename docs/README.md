@@ -7,6 +7,8 @@ Welcome to the Tent documentation. This index provides an overview of all availa
 ### Configuration
 
 - **[Main README](../README.md)** — Getting started, architecture overview, and setup instructions
+- Prefer `DefaultProxyRequestHandler` (`'type' => 'default_proxy'`) for standard proxy rules
+- Use `ProxyRequestHandler` (`'type' => 'proxy'`) only for custom middleware stacks
 
 ### Middlewares
 
@@ -49,27 +51,11 @@ Welcome to the Tent documentation. This index provides an overview of all availa
 ```php
 Configuration::buildRule([
     'handler' => [
-        'type' => 'proxy',
+        'type' => 'default_proxy',
         'host' => 'http://api:80'
     ],
     'matchers' => [
         ['method' => 'GET', 'uri' => '/api/', 'type' => 'begins_with']
-    ],
-    'middlewares' => [
-        [
-            'class' => 'Tent\\Middlewares\\FileCacheMiddleware',
-            'location' => './cache',
-            'matchers' => [
-                [
-                    'class' => 'Tent\\Matchers\\StatusCodeMatcher',
-                    'httpCodes' => [200]
-                ]
-            ]
-        ],
-        [
-            'class' => 'Tent\\Middlewares\\SetHeadersMiddleware',
-            'headers' => ['Host' => 'api.internal']
-        ]
     ]
 ]);
 ```
