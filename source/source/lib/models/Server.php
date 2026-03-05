@@ -34,4 +34,13 @@ class Server
     {
         return $this->targetHost;
     }
+
+    public function fullUrl(string $path, ?string $query = null): string
+    {
+        $url = rtrim($this->targetHost, '/') . '/' . ltrim($path, '/');
+        if ($query) {
+            $url .= '?' . ltrim($query, '?');
+        }
+        return $url;
+    }
 }
