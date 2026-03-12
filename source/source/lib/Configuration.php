@@ -141,19 +141,52 @@ class Configuration
     }
 
     /**
-     * Returns the first Rule with the given name, or null if not found.
+     * Adds a matcher to an existing rule identified by name.
+     *
+     * Locates the rule with the given name and adds the specified matcher to it.
+     *
+     * @example
+     * ```php
+     * Configuration::addMatcher([
+     *     'rule'    => 'api-persons',
+     *     'matcher' => ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact'],
+     * ]);
+     * ```
+     *
+     * @param array $params Associative array with keys:
+     *   - 'rule'   (string): Name of the existing rule to add the matcher to.
+     *   - 'matcher' (array):  Matcher parameters accepted by RequestMatcher::build
+     *                         (keys: 'method', 'uri', 'type').
+     * @return void
+     * @throws \InvalidArgumentException If 'matcher' key is missing or not an array,
+     *                                   or the named rule does not exist.
+     */
+    public static function addMatcher(array $params): void
+    {
+        if (!isset($params['matcher']) || !is_array($params['matcher'])) {
+            throw new \InvalidArgumentException(
+                "Configuration::addMatcher requires a 'matcher' key with an array value."
+            );
+        }
+
+        self::getRule($params['rule'] ?? '')->addMatcher($params['matcher']);
+    }
+
+    /**
+     * Returns the first Rule with the given name.
      *
      * @param string $name The name of the rule to find.
-     * @return Rule|null
+     * @return Rule
+     * @throws \InvalidArgumentException If no rule with the given name exists.
      */
-    public static function getRule(string $name): ?Rule
+    public static function getRule(string $name): Rule
     {
         foreach (self::getRules() as $rule) {
             if (method_exists($rule, 'name') && $rule->name() === $name) {
                 return $rule;
             }
         }
-        return null;
+        throw new \InvalidArgumentException(sprintf("Rule '%s' not found.", $name));
     }
 
     /**

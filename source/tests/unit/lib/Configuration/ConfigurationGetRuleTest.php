@@ -43,7 +43,7 @@ class ConfigurationGetRuleTest extends TestCase
         $this->assertEquals('api-users', $found->name());
     }
 
-    public function testGetRuleReturnsNullIfNotFound()
+    public function testGetRuleThrowsIfNotFound()
     {
         Configuration::buildRule([
             'name' => 'api-index',
@@ -55,6 +55,8 @@ class ConfigurationGetRuleTest extends TestCase
                 ['method' => 'GET', 'uri' => '/index.html', 'type' => 'exact']
             ]
         ]);
-        $this->assertNull(Configuration::getRule('not-exist'));
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage("Rule 'not-exist' not found.");
+        Configuration::getRule('not-exist');
     }
 }
