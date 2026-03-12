@@ -141,6 +141,53 @@ class Configuration
     }
 
     /**
+     * Adds a matcher to an existing rule identified by name.
+     *
+     * Locates the rule with the given name and adds the specified matcher to it.
+     *
+     * @example
+     * ```php
+     * Configuration::addMatcher([
+     *     'rule'    => 'api-persons',
+     *     'matcher' => ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact'],
+     * ]);
+     * ```
+     *
+     * @param array $params Associative array with keys:
+     *   - 'rule'   (string): Name of the existing rule to add the matcher to.
+     *   - 'matcher' (array):  Matcher parameters accepted by RequestMatcher::build
+     *                         (keys: 'method', 'uri', 'type').
+     * @return void
+     * @throws \InvalidArgumentException If 'rule' or 'matcher' keys are missing,
+     *                                   'matcher' is not an array, or the named rule
+     *                                   does not exist.
+     */
+    public static function addMatcher(array $params): void
+    {
+        if (!isset($params['rule']) || !is_string($params['rule'])) {
+            throw new \InvalidArgumentException(
+                "Configuration::addMatcher requires a 'rule' key with a string value."
+            );
+        }
+
+        if (!isset($params['matcher']) || !is_array($params['matcher'])) {
+            throw new \InvalidArgumentException(
+                "Configuration::addMatcher requires a 'matcher' key with an array value."
+            );
+        }
+
+        $rule = self::getRule($params['rule']);
+
+        if ($rule === null) {
+            throw new \InvalidArgumentException(
+                sprintf("Rule '%s' not found.", $params['rule'])
+            );
+        }
+
+        $rule->addMatcher($params['matcher']);
+    }
+
+    /**
      * Returns the first Rule with the given name, or null if not found.
      *
      * @param string $name The name of the rule to find.

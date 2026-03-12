@@ -108,6 +108,18 @@ class Rule extends SimpleModel
     }
 
     /**
+     * Adds a new matcher to the rule from an array of parameters.
+     *
+     * @param array $params Associative array with keys 'method', 'uri', 'type' (see RequestMatcher::build).
+     * @return void
+     */
+    public function addMatcher(array $params): void
+    {
+        $this->matchers = $this->matchers();
+        $this->matchers[] = RequestMatcher::build($params);
+    }
+
+    /**
      * Checks if the given request matches any of the rule's matchers.
      *
      * @param RequestInterface $request The incoming HTTP request.
