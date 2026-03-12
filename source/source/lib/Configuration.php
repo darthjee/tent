@@ -173,6 +173,43 @@ class Configuration
     }
 
     /**
+     * Adds a middleware to an existing rule identified by name.
+     *
+     * Locates the rule with the given name, builds the middleware, and adds it to the rule's handler.
+     *
+     * @example
+     * ```php
+     * Configuration::addMiddleware([
+     *     'rule'       => 'api-persons',
+     *     'middleware' => [
+     *         'class' => 'Tent\\Middlewares\\SetHeadersMiddleware',
+     *         'headers' => ['Host' => 'backend.local']
+     *     ],
+     * ]);
+     * ```
+     *
+     * @param array $params Associative array with keys:
+     *   - 'rule'       (string): Name of the existing rule to add the middleware to.
+     *   - 'middleware' (array):  Middleware parameters accepted by Middleware::build
+     *                            (must include 'class' key and any additional config).
+     * @return void
+     * @throws \InvalidArgumentException If 'middleware' key is missing or not an array,
+     *                                   or the named rule does not exist.
+     */
+    public static function addMiddleware(array $params): void
+    {
+        if (!isset($params['middleware']) || !is_array($params['middleware'])) {
+            throw new \InvalidArgumentException(
+                "Configuration::addMiddleware requires a 'middleware' key with an array value."
+            );
+        }
+
+        $rule = self::getRule($params['rule'] ?? '');
+        $handler = $rule->handler();
+        $handler->buildMiddleware($params['middleware']);
+    }
+
+    /**
      * Returns the first Rule with the given name.
      *
      * @param string $name The name of the rule to find.
