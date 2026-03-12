@@ -19,9 +19,7 @@ class RuleAddMatcherTest extends TestCase
         $matcher = new ExactRequestMatcher('GET', '/persons');
         $rule = new Rule(['handler' => $handler, 'matchers' => [$matcher]]);
 
-        $request = $this->createMock(Request::class);
-        $request->method('requestMethod')->willReturn('POST');
-        $request->method('requestPath')->willReturn('/persons');
+        $request = new Request(['requestMethod' => 'POST', 'requestPath' => '/persons']);
 
         $this->assertFalse($rule->match($request));
 
@@ -39,13 +37,8 @@ class RuleAddMatcherTest extends TestCase
 
         $rule->addMatcher(['method' => 'POST', 'uri' => '/persons', 'type' => 'exact']);
 
-        $getRequest = $this->createMock(Request::class);
-        $getRequest->method('requestMethod')->willReturn('GET');
-        $getRequest->method('requestPath')->willReturn('/persons');
-
-        $postRequest = $this->createMock(Request::class);
-        $postRequest->method('requestMethod')->willReturn('POST');
-        $postRequest->method('requestPath')->willReturn('/persons');
+        $getRequest = new Request(['requestMethod' => 'GET', 'requestPath' => '/persons']);
+        $postRequest = new Request(['requestMethod' => 'POST', 'requestPath' => '/persons']);
 
         $this->assertTrue($rule->match($getRequest));
         $this->assertTrue($rule->match($postRequest));
@@ -59,9 +52,7 @@ class RuleAddMatcherTest extends TestCase
 
         $rule->addMatcher(['method' => 'GET', 'uri' => '/health', 'type' => 'exact']);
 
-        $request = $this->createMock(Request::class);
-        $request->method('requestMethod')->willReturn('GET');
-        $request->method('requestPath')->willReturn('/health');
+        $request = new Request(['requestMethod' => 'GET', 'requestPath' => '/health']);
 
         $this->assertTrue($rule->match($request));
     }
