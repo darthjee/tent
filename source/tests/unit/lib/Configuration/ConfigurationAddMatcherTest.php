@@ -58,7 +58,7 @@ class ConfigurationAddMatcherTest extends TestCase
     public function testAddMatcherThrowsWhenRuleKeyMissing()
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage("'rule'");
+        $this->expectExceptionMessage("Rule '' not found.");
 
         Configuration::addMatcher([
             'matcher' => ['method' => 'GET', 'uri' => '/test', 'type' => 'exact'],

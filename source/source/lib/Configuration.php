@@ -158,49 +158,35 @@ class Configuration
      *   - 'matcher' (array):  Matcher parameters accepted by RequestMatcher::build
      *                         (keys: 'method', 'uri', 'type').
      * @return void
-     * @throws \InvalidArgumentException If 'rule' or 'matcher' keys are missing,
-     *                                   'matcher' is not an array, or the named rule
-     *                                   does not exist.
+     * @throws \InvalidArgumentException If 'matcher' key is missing or not an array,
+     *                                   or the named rule does not exist.
      */
     public static function addMatcher(array $params): void
     {
-        if (!isset($params['rule']) || !is_string($params['rule'])) {
-            throw new \InvalidArgumentException(
-                "Configuration::addMatcher requires a 'rule' key with a string value."
-            );
-        }
-
         if (!isset($params['matcher']) || !is_array($params['matcher'])) {
             throw new \InvalidArgumentException(
                 "Configuration::addMatcher requires a 'matcher' key with an array value."
             );
         }
 
-        $rule = self::getRule($params['rule']);
-
-        if ($rule === null) {
-            throw new \InvalidArgumentException(
-                sprintf("Rule '%s' not found.", $params['rule'])
-            );
-        }
-
-        $rule->addMatcher($params['matcher']);
+        self::getRule($params['rule'] ?? '')->addMatcher($params['matcher']);
     }
 
     /**
-     * Returns the first Rule with the given name, or null if not found.
+     * Returns the first Rule with the given name.
      *
      * @param string $name The name of the rule to find.
-     * @return Rule|null
+     * @return Rule
+     * @throws \InvalidArgumentException If no rule with the given name exists.
      */
-    public static function getRule(string $name): ?Rule
+    public static function getRule(string $name): Rule
     {
         foreach (self::getRules() as $rule) {
             if (method_exists($rule, 'name') && $rule->name() === $name) {
                 return $rule;
             }
         }
-        return null;
+        throw new \InvalidArgumentException(sprintf("Rule '%s' not found.", $name));
     }
 
     /**
