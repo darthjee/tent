@@ -5,7 +5,6 @@
 ## Table of Contents
 
 - [Overview](#overview)
-- [Matcher Configuration Migration](#matcher-configuration-migration)
 - [Configuring Matchers](#configuring-matchers)
 - [Available Matcher Types](#available-matcher-types)
 - [How Matchers Determine Caching](#how-matchers-determine-caching)
@@ -48,50 +47,6 @@ Configuration::buildRule([
     ]
 ]);
 ```
-
----
-
-## Matcher Configuration Migration
-
-### Deprecated: `httpCodes` attribute
-
-The old `httpCodes` attribute directly on `FileCacheMiddleware` is **deprecated**. It still works but will trigger a deprecation warning in the logs:
-
-```php
-// Old (deprecated) — do not use
-[
-    'class' => 'Tent\\Middlewares\\FileCacheMiddleware',
-    'location' => './cache',
-    'httpCodes' => [200]
-]
-```
-
-### New: `matchers` array
-
-Use the `matchers` array for a more flexible and explicit configuration:
-
-```php
-// New (recommended)
-[
-    'class' => 'Tent\\Middlewares\\FileCacheMiddleware',
-    'location' => './cache',
-    'matchers' => [
-        [
-            'class' => 'Tent\\Matchers\\StatusCodeMatcher',
-            'httpCodes' => [200]
-        ]
-    ]
-]
-```
-
-### Side-by-Side Comparison
-
-| Feature | Old (`httpCodes`) | New (`matchers`) |
-|---------|-------------------|------------------|
-| Status code filtering | `'httpCodes' => [200, 301]` | `StatusCodeMatcher` with `'httpCodes' => [200, 301]` |
-| Request method filtering | `'requestMethods' => ['GET']` | `RequestMethodMatcher` with `'requestMethods' => ['GET']` |
-| Multiple conditions | Not supported | Combine multiple matchers in the array |
-| Deprecation warning | Yes (if used) | No |
 
 ---
 
