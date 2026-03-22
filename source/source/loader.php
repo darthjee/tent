@@ -7,8 +7,6 @@ require_once __DIR__ . '/lib/http/HttpClientInterface.php';
 require_once __DIR__ . '/lib/common/SimpleModel.php';
 require_once __DIR__ . '/lib/models/Response.php';
 require_once __DIR__ . '/lib/models/RequestInterface.php';
-require_once __DIR__ . '/lib/utils/LoggerInterface.php';
-require_once __DIR__ . '/lib/utils/Logger.php';
 
 require_once __DIR__ . '/lib/Configuration.php';
 require_once __DIR__ . '/lib/exceptions/FileNotFoundException.php';
@@ -43,7 +41,6 @@ require_once __DIR__ . '/lib/matchers/ExactRequestMatcher.php';
 require_once __DIR__ . '/lib/matchers/BeginsWithRequestMatcher.php';
 require_once __DIR__ . '/lib/matchers/EndsWithRequestMatcher.php';
 require_once __DIR__ . '/lib/matchers/RequestResponseMatcher.php';
-require_once __DIR__ . '/lib/matchers/RequestResponseMatchersBuilder.php';
 require_once __DIR__ . '/lib/matchers/RequestMethodMatcher.php';
 require_once __DIR__ . '/lib/matchers/ResponseHeaderMatcher.php';
 require_once __DIR__ . '/lib/matchers/StatusCodeMatcher.php';
