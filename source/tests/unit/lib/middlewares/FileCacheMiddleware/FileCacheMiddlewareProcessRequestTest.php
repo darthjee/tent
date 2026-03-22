@@ -67,7 +67,14 @@ class FileCacheMiddlewareProcessRequestTest extends TestCase
         $this->request = $this->buildRequest($this->path, 'POST');
         $this->buildCache();
 
-        $middleware = $this->buildMiddleware();
+        $middleware = $this->buildMiddleware([
+            'matchers' => [
+                [
+                    'class' => \Tent\Matchers\RequestMethodMatcher::class,
+                    'requestMethods' => ['GET'],
+                ]
+            ]
+        ]);
         $result = $middleware->processRequest($this->request);
 
         $this->assertFalse($result->hasResponse());
@@ -81,7 +88,12 @@ class FileCacheMiddlewareProcessRequestTest extends TestCase
         $this->buildCache();
 
         $middleware = $this->buildMiddleware([
-            'requestMethods' => ['POST']
+            'matchers' => [
+                [
+                    'class' => \Tent\Matchers\RequestMethodMatcher::class,
+                    'requestMethods' => ['POST'],
+                ]
+            ]
         ]);
 
         $result = $middleware->processRequest($this->request);

@@ -125,7 +125,12 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
     {
         return FileCacheMiddleware::build([
             'location' => $this->cacheDir,
-            'httpCodes' => $httpCodes,
+            'matchers' => [
+                [
+                    'class' => \Tent\Matchers\StatusCodeMatcher::class,
+                    'httpCodes' => $httpCodes,
+                ]
+            ],
         ]);
     }
 }

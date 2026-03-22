@@ -8,7 +8,7 @@ use Tent\Content\FileCache;
 use Tent\Models\Response;
 use Tent\Service\ResponseContentReader;
 use Tent\Service\ResponseCacher;
-use Tent\Matchers\RequestResponseMatchersBuilder;
+use Tent\Matchers\RequestResponseMatcher;
 
 /**
  * Middleware for caching responses to files.
@@ -45,19 +45,12 @@ use Tent\Matchers\RequestResponseMatchersBuilder;
  *
  * - `location`: Directory where cached responses are stored (required).
  * - `matchers`: Array of matcher configurations to determine cacheability.
- * - `httpCodes`: (DEPRECATED) Array of HTTP status codes to cache. Use `matchers` instead.
- * - `requestMethods`: (DEPRECATED) Array of HTTP methods to cache. Use `matchers` instead.
  *
  * This middleware will cache responses matching all configured matchers,
  * and serve them from cache on subsequent requests.
  */
 class FileCacheMiddleware extends Middleware
 {
-    /**
-     * @var Deprecation warning message for requestMethods attribute.
-     */
-    private const DEPRECATION_REQUEST_METHODS_MSG =
-      'Deprecation warning: The "requestMethods" attribute is deprecated. Use "matchers" instead.';
 
     /**
      * @var FolderLocation The base folder location for caching.
@@ -87,12 +80,11 @@ class FileCacheMiddleware extends Middleware
      *
      * @param array $attributes The attributes to build the middleware.
      * @return FileCacheMiddleware The constructed FileCacheMiddleware instance.
-     * @deprecated The 'httpCodes' attribute is deprecated. Use 'matchers' instead.
      */
     public static function build(array $attributes): FileCacheMiddleware
     {
         $location = new FolderLocation($attributes['location']);
-        $matchers = (new RequestResponseMatchersBuilder($attributes))->build();
+        $matchers = RequestResponseMatcher::buildMatchers($attributes['matchers'] ?? []);
 
         return new self($location, $matchers);
     }

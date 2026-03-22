@@ -208,8 +208,16 @@ class FileCacheMiddlewareSymmetryTest extends TestCase
     {
         return FileCacheMiddleware::build([
             'location' => $this->cacheDir,
-            'requestMethods' => $requestMethods,
-            'httpCodes' => $httpCodes
+            'matchers' => [
+                [
+                    'class' => \Tent\Matchers\StatusCodeMatcher::class,
+                    'httpCodes' => $httpCodes,
+                ],
+                [
+                    'class' => \Tent\Matchers\RequestMethodMatcher::class,
+                    'requestMethods' => $requestMethods,
+                ],
+            ]
         ]);
     }
 }
