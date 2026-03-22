@@ -51,7 +51,6 @@ use Tent\Matchers\RequestResponseMatcher;
  */
 class FileCacheMiddleware extends Middleware
 {
-
     /**
      * @var FolderLocation The base folder location for caching.
      */
