@@ -20,7 +20,7 @@ services:
     <<: *base
     container_name: tent_build
     build:
-      context: .
+      context: source
       dockerfile: dockerfiles/dev_tent/Dockerfile
     command: echo done
 

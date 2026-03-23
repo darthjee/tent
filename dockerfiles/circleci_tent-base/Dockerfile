@@ -26,7 +26,7 @@ USER circleci
 
 ENV PATH="$PATH://home/circleci/project/vendor/bin"
 
-COPY --chown=circleci:circleci ./source/composer.* /home/circleci/
+COPY --chown=circleci:circleci ./composer.* /home/circleci/
 
 WORKDIR /home/circleci/
 RUN composer install

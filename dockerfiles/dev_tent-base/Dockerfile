@@ -31,7 +31,7 @@ USER app
 ENV PATH="$PATH:/home/app/app/vendor/bin"
 
 WORKDIR /home/app/app
-COPY --chown=app:app ./source/composer.* /home/app/app/
+COPY --chown=app:app ./composer.* /home/app/app/
 
 RUN composer install
 

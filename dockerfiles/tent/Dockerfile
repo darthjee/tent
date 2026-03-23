@@ -24,6 +24,6 @@ USER app
 
 WORKDIR /var/www/html
 
-COPY source/source/ /var/www/html/
+COPY source/ /var/www/html/
 
 CMD ["apache2-foreground"]
