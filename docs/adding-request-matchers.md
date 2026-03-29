@@ -1,23 +1,41 @@
-# Adicionando novos RequestMatchers
+# Adding New Request Matchers
 
-## Onde colocar a classe
-Os novos `RequestMatchers` devem ser colocados na pasta `source/source/lib/matchers`.
+## Where to place the class
 
-## Como o `RequestMatcher::build` mapeia o tipo
-A função `RequestMatcher::build` utiliza `StringUtils::toStudlyCase` para converter o tipo em uma classe específica de `RequestMatcher`. Isso permite que o sistema reconheça o tipo baseado na string fornecida.
+New `RequestMatcher` classes must be placed in `source/source/lib/matchers/`.
 
-## Como registrá-lo
-Para registrar um novo `RequestMatcher`, você precisará adicionar uma linha correspondente no arquivo `source/source/loader.php`, seguindo a estrutura dos outros `RequestMatchers` já existentes.
+## How `RequestMatcher::build` maps the type
 
-## Como escrever testes unitários
-Os testes unitários para cada `RequestMatcher` devem ser escritos na pasta `source/tests/unit/lib/matchers`. É importante garantir que todos os aspectos do `RequestMatcher` sejam testados.
+`RequestMatcher::build` uses `StringUtils::toStudlyCase` to convert the `type` string from configuration into a concrete `RequestMatcher` class name. This means the type string in configuration maps directly to the class name (e.g., `'begins_with'` → `BeginsWithRequestMatcher`).
 
-## Exemplo de configuração
-Um exemplo de configuração pode ser encontrado em `docker_volumes/configuration/configure.php`, onde os `RequestMatchers` são utilizados para definir comportamentos específicos.
+## How to register it
 
-### Exemplo de código:
+Add a `require_once` line for the new class in `source/source/loader.php`, following the same pattern as the existing matchers. Dependency-first ordering applies: interfaces and base classes must be loaded before concrete implementations.
+
+## How to write unit tests
+
+Unit tests for each `RequestMatcher` belong in `source/tests/unit/lib/matchers/`. Cover all matcher conditions, including edge cases and the behaviour of any nested/negative matchers.
+
+## Configuration example
+
+Matchers are used in rule definitions in `docker_volumes/configuration/configure.php`:
+
 ```php
-// Exemplo de registro de RequestMatcher
-$requestMatcher = new MyRequestMatcher();
-$requestMatcher->register();
+Configuration::buildRule([
+    'handler' => [
+        'type' => 'default_proxy',
+        'host' => 'http://api:80'
+    ],
+    'matchers' => [
+        ['method' => 'GET', 'uri' => '/persons', 'type' => 'begins_with'],
+    ]
+]);
+```
+
+For matchers used inside `FileCacheMiddleware`, use the full class name:
+
+```php
+'matchers' => [
+    ['class' => 'Tent\\Matchers\\StatusCodeMatcher', 'httpCodes' => [200]]
+]
 ```

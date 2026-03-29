@@ -1,39 +1,32 @@
 # Tent Documentation
 
-Welcome to the Tent documentation. This index provides an overview of all available guides and references.
+All documentation for the Tent project. See [AGENTS.md](../AGENTS.md) for a summary table and quick-start commands.
 
-## Contents
+## Guides
 
-### Configuration
+| File | Contents |
+|------|----------|
+| [Architecture](architecture.md) | Source layout, key components, configuration patterns, class loading, dev API/frontend, testing conventions. |
+| [Runtime Flow](flow.md) | Entry point, request lifecycle, execution path from Apache to response. |
+| [Request Handlers](request-handlers.md) | Differences between `default_proxy`, `proxy`, and `static`, including options and examples. |
+| [Creating Middlewares](creating-middlewares.md) | How to build custom middlewares; interface, short-circuiting, built-in middlewares. |
+| [FileCacheMiddleware Matchers](file-cache-middleware-matchers.md) | Matcher configuration for `FileCacheMiddleware`; migration from deprecated `httpCodes`. |
+| [Adding Request Matchers](adding-request-matchers.md) | How to add new `RequestMatcher` classes. |
 
-- **[Main README](../README.md)** — Getting started, architecture overview, and setup instructions
-- **[Request Handlers](request-handlers.md)** — Differences between `default_proxy`, `proxy`, and `static`, including options and examples
-- Prefer `DefaultProxyRequestHandler` (`'type' => 'default_proxy'`) for standard proxy rules
-- Use `ProxyRequestHandler` (`'type' => 'proxy'`) only for custom middleware stacks
+## Issues and Plans
 
-### Middlewares
+| Directory | Contents |
+|-----------|----------|
+| [issues/](issues/) | One file per open GitHub issue — background, task, and acceptance criteria. |
+| [plans/](plans/) | One directory per planned/in-progress issue — step-by-step implementation plan. |
 
-- **[Built-in Middlewares](built-in-middlewares.md)** — Overview, options, and examples for all built-in middlewares
-  - `SetHeadersMiddleware`, `SetPathMiddleware`, `RenameHeaderMiddleware` (quick reference)
-  - Link to dedicated `FileCacheMiddleware` documentation
+### Naming conventions
 
-- **[Creating Middlewares](creating-middlewares.md)** — Learn how to build custom middlewares to process requests and responses
-  - What middlewares are and how they work
-  - The `processRequest` and `processResponse` interface
-  - Step-by-step guide to creating a custom middleware
-  - Short-circuiting the request chain
-  - Configuration in `docker_volumes/configuration/configure.php`
-  - Built-in middlewares: `SetHeadersMiddleware`, `SetPathMiddleware`, `FileCacheMiddleware`
-  - Best practices and performance tips
+**Issues:** `docs/issues/<github_issue_id>_<issue-name>.md`
+Example: `docs/issues/42_add-negative-matcher.md`
 
-- **[FileCacheMiddleware Matchers](file-cache-middleware-matchers.md)** — Configure response caching with matchers
-  - Detailed reference for `FileCacheMiddleware`
-  - Overview of `FileCacheMiddleware`
-  - Migration from deprecated `httpCodes` to the new `matchers` array
-  - Available matcher types: `StatusCodeMatcher`, `RequestMethodMatcher`
-  - How matchers determine caching (AND logic)
-  - Complete configuration examples
-  - Cache location and structure
+**Plans:** `docs/plans/<github_issue_id>_<topic>/plan.md`
+Example: `docs/plans/42_add-negative-matcher/plan.md`
 
 ## Quick Reference
 
@@ -43,6 +36,7 @@ Welcome to the Tent documentation. This index provides an overview of all availa
 |-----------|-------------|------------|
 | `Tent\Middlewares\SetHeadersMiddleware` | Sets or overrides request headers | `headers` (array) |
 | `Tent\Middlewares\SetPathMiddleware` | Rewrites the request path | `path` (string) |
+| `Tent\Middlewares\RenameHeaderMiddleware` | Renames a request header | `from`, `to` (strings) |
 | `Tent\Middlewares\FileCacheMiddleware` | Caches responses to disk | `location` (string), `matchers` (array) |
 
 ### Available Matchers (for FileCacheMiddleware)
