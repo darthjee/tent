@@ -6,6 +6,48 @@ Shared guidance for AI agents (Claude Code, GitHub Copilot, etc.) working in thi
 
 Tent is a PHP-based intelligent reverse proxy server that routes HTTP requests to backend services, caches responses, or serves static files based on configuration rules. It runs on Apache with PHP inside Docker containers.
 
+## Documentation
+
+All project documentation lives under [`docs/`](docs/):
+
+| File | Contents |
+|------|----------|
+| [Architecture](docs/architecture.md) | Source layout, key components, configuration patterns, class loading, dev API/frontend, testing conventions. |
+| [Runtime Flow](docs/flow.md) | Entry point, request lifecycle, execution path from Apache to response. |
+| [Request Handlers](docs/request-handlers.md) | Differences between `default_proxy`, `proxy`, and `static`, including options and examples. |
+| [Creating Middlewares](docs/creating-middlewares.md) | How to build custom middlewares; interface, short-circuiting, built-in middlewares. |
+| [FileCacheMiddleware Matchers](docs/file-cache-middleware-matchers.md) | Matcher configuration for `FileCacheMiddleware`; migration from deprecated `httpCodes`. |
+| [Adding Request Matchers](docs/adding-request-matchers.md) | How to add new `RequestMatcher` classes. |
+| [Plans](docs/plans/) | Implementation plans for ongoing or upcoming work. |
+| [Issues](docs/issues/) | Detailed specs for open GitHub issues. |
+
+### Issues (`docs/issues/`)
+
+Each file documents a GitHub issue. Naming convention:
+
+    docs/issues/<github_issue_id>_<issue_name>.md
+
+Example: `docs/issues/42_add-negative-matcher.md` for issue #42.
+
+### Plans (`docs/plans/`)
+
+Each plan is a directory named after the GitHub issue ID and topic:
+
+    docs/plans/<github_issue_id>_<topic>/plan.md
+
+Example: `docs/plans/42_add-negative-matcher/plan.md` for issue #42.
+
+## Engineering Standards
+
+- **PHP**: PSR-12 code style, enforced via `composer lint` / `composer lint:fix`.
+- **JavaScript/React**: ESLint, enforced via `npm run lint` / `npm run lint_fix`.
+- **PHP tests**: PHPUnit — unit and integration tests under `source/tests/`.
+- **Frontend tests**: Jasmine — specs under `dev/frontend/spec/`.
+- **PHP dependencies**: Composer.
+- **JS dependencies**: npm.
+- **Atomic commits**: one logical change per commit. Tests and implementation go in the same commit; documentation updates (issue files, plan files) are separate commits.
+- **Small PRs**: one PR per GitHub issue. For large features, break into sub-issues and open one PR per sub-issue.
+
 ## Commands
 
 **Always use Docker Compose (v2 syntax). Never run commands directly on the host.**
@@ -53,111 +95,6 @@ make dev                          # Interactive test shell
 | `frontend_dev` | 8030 | Vite dev server |
 | `api_dev_phpmyadmin` | 8050 | DB management UI |
 | `tent_httpbin` | 3060 | HTTPBin for testing |
-
-## Architecture
-
-### Request Flow
-
-```
-HTTP Request
-→ Apache (.htaccess rewrite)
-→ source/source/index.php
-→ RequestProcessor  (iterates Rule objects, picks first match)
-→ Middleware chain  (processRequest)
-→ RequestHandler   (proxy / static file / 404)
-→ Middleware chain  (processResponse)
-→ HTTP Response
-```
-
-### Key Components
-
-- **`Configuration`** (`source/source/lib/Configuration.php`): Static rule registry. Rules are defined via `Configuration::buildRule()` in `docker_volumes/configuration/` (not version controlled).
-- **`RequestProcessor`** (`lib/service/RequestProcessor.php`): Finds first matching rule and invokes its handler.
-- **`Rule`** (`lib/models/Rule.php`): Holds matchers (URI patterns, HTTP methods) and a handler reference.
-- **Handlers** (`lib/request_handlers/`): `DefaultProxyRequestHandler` (preferred for proxying), `ProxyRequestHandler`, `StaticFileHandler`, `MissingRequestHandler`.
-- **Middlewares** (`lib/middlewares/`): Implement `processRequest(ProcessingRequest)` and/or `processResponse(Response)`. Built-ins: `FileCacheMiddleware`, `SetHeadersMiddleware`, `SetPathMiddleware`, `RenameHeaderMiddleware`.
-- **Matchers** (`lib/matchers/`): `ExactRequestMatcher`, `BeginsWithRequestMatcher`, `EndsWithRequestMatcher`, `StatusCodeMatcher`, `ResponseHeaderMatcher`, `RequestMethodMatcher`, `NegativeMatcher`.
-
-### Configuration Rules Pattern
-
-```php
-Configuration::buildRule([
-  'handler' => [
-    'type' => 'default_proxy',  // 'default_proxy' preferred; also 'proxy', 'static'
-    'host' => 'http://api:80'
-  ],
-  'matchers' => [
-    ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact'],
-    // type: 'exact' or 'begins_with'; method: any HTTP verb
-  ],
-  'middlewares' => [
-    [
-      'class' => 'Tent\\Middlewares\\FileCacheMiddleware',
-      'location' => './cache',
-      'matchers' => [                          // use 'matchers', not deprecated 'httpCodes'
-        ['class' => 'Tent\\Matchers\\StatusCodeMatcher', 'httpCodes' => [200]]
-      ]
-    ],
-    [
-      'class' => 'Tent\\Middlewares\\SetHeadersMiddleware',
-      'headers' => ['Host' => 'backend.local']
-    ]
-  ]
-]);
-```
-
-#### Deprecated: `httpCodes` on FileCacheMiddleware
-
-```php
-// Old (deprecated — triggers deprecation warning in logs)
-['class' => 'Tent\\Middlewares\\FileCacheMiddleware', 'location' => './cache', 'httpCodes' => [200]]
-
-// New (use this)
-['class' => 'Tent\\Middlewares\\FileCacheMiddleware', 'location' => './cache',
- 'matchers' => [['class' => 'Tent\\Matchers\\StatusCodeMatcher', 'httpCodes' => [200]]]]
-```
-
-### Class Loading (`loader.php`)
-
-There is **no Composer PSR-4 autoload** for runtime classes. Every new class file must be added explicitly via `require_once __DIR__ . '/lib/...'`:
-
-- Tent app → `source/source/loader.php`
-- Dev API → `dev/api/source/loader.php`
-
-Rules: one `require_once` per file, dependency-first ordering (interfaces/base classes before concrete implementations), grouped by domain (`middlewares`, `models`, `matchers`, etc.).
-
-## Dev API (`dev/api/`)
-
-A mock PHP backend used for testing the proxy.
-
-- Entry point: `dev/api/source/index.php` — routes registered with `Configuration::add('METHOD', '/path', EndpointClass::class)`
-- Endpoint classes extend `Endpoint` and implement `handle()` returning a `Response`
-- To add an endpoint: create the class in `lib/api_dev/endpoints/`, add `require_once` in `loader.php`, register in `index.php`
-- DB migrations: numbered `.sql` files in `dev/api/migrations/`, executed in order, re-run each time (use idempotent SQL)
-
-## Dev Frontend (`dev/frontend/`)
-
-React 19 app with Vite, TanStack Query, Bootstrap 5. Tests use Jasmine in `spec/`.
-
-Controlled by `FRONTEND_DEV_MODE` in `.env`:
-- `true`: Tent proxies to Vite dev server (port 8030) with HMR — changes reflect immediately
-- `false`: Tent serves built static files from `dev/frontend/dist/`
-
-Structure: components in `assets/js/components/`, API clients in `assets/js/clients/`, tests in `spec/`.
-
-## Testing Conventions
-
-- **PHP**: Use `Configuration::reset()` in `setUp()` to clear rules between tests. Test handler behavior via `Rule::match()` and handler execution separately.
-- **Frontend**: Jasmine specs in `spec/`, mirroring source structure.
-
-## Key Files
-
-- `source/source/lib/service/RequestProcessor.php` — core routing logic
-- `source/source/lib/Configuration.php` — rule registry
-- `source/source/lib/request_handlers/RequestHandler.php` — handler base with middleware application
-- `source/source/loader.php` — manual class loading (update when adding classes)
-- `docker_volumes/configuration/` — user-defined rules (not version controlled)
-- `docs/` — implementation guides for middlewares, matchers, handlers
 
 ## Language
 

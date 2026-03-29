@@ -1,3 +1,3 @@
-# Copilot Instructions for Tent
+# Copilot Instructions
 
-See [AGENTS.md](../AGENTS.md) for full documentation: commands, architecture, conventions, and key files.
+See [AGENTS.md](../AGENTS.md) for the full project instructions shared across all AI agents.
