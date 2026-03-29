@@ -27,6 +27,11 @@ workflows:
           filters:
             tags:
               only: /.*/
+      - coverage_finalize:
+          requires: [unit_test, dev_api_test, dev_frontend_test]
+          filters:
+            tags:
+              only: /.*/
       - build-and-release:
           requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks]
           filters:
@@ -68,7 +73,7 @@ jobs:
           command: composer coverage
       - run:
           name: Upload coverage to Codacy
-          command: bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r coverage/clover.xml
+          command: bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial -r coverage/clover.xml
 
   checks:
     docker:
@@ -132,7 +137,10 @@ jobs:
           command: php ./bin/migrate_databases.php
       - run:
           name: Tests
-          command: composer tests
+          command: composer coverage
+      - run:
+          name: Upload coverage to Codacy
+          command: bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial -r coverage/clover.xml
 
   dev_api_checks:
     docker:
@@ -172,6 +180,9 @@ jobs:
       - run:
           name: Tests
           command: npm test
+      - run:
+          name: Upload coverage to Codacy
+          command: bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial -r coverage/lcov.info
 
   dev_frontend_checks:
     docker:
@@ -190,6 +201,14 @@ jobs:
       - run:
           name: Check JS Lint
           command: npm run lint
+
+  coverage_finalize:
+    docker:
+      - image: darthjee/circleci_tent-base:0.0.1
+    steps:
+      - run:
+          name: Finalize coverage on Codacy
+          command: bash <(curl -Ls https://coverage.codacy.com/get.sh) final
 
   build-and-release:
     machine: true
