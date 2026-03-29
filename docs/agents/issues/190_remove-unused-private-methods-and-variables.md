@@ -25,8 +25,8 @@ focused check must be added.
 - All unused private fields and methods listed above are removed.
 - A new PHPMD ruleset `phpmd_unusedcode.xml` is added to enforce `UnusedPrivateField`
   and `UnusedPrivateMethod` rules.
-- A new `lint:unused` composer script runs PHPMD with this ruleset against both `source`
-  and `tests`.
-- The `checks` CI job runs `composer lint:unused` and fails the build when violations
-  are present.
+- The `lint` and `lint:fix` composer scripts run this PHPMD check (against both `source`
+  and `tests`) in addition to PHPCS.
+- The `checks` CI job continues to run `composer lint` and now fails the build when
+  unused private members are present.
 - All lint and test checks pass after the changes.

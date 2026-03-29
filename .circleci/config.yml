@@ -95,9 +95,6 @@ jobs:
       - run:
           name: Run Lint
           command: composer lint
-      - run:
-          name: Check unused private code
-          command: composer lint:unused
 
   dev_api_test:
     docker:
