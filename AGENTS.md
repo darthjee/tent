@@ -8,34 +8,41 @@ Tent is a PHP-based intelligent reverse proxy server that routes HTTP requests t
 
 ## Documentation
 
-All project documentation lives under [`docs/`](docs/):
+Agent-specific documentation lives under [`docs/agents/`](docs/agents/). Developer-facing guides live under [`docs/`](docs/).
+
+### Agent docs (`docs/agents/`)
 
 | File | Contents |
 |------|----------|
-| [Architecture](docs/architecture.md) | Source layout, key components, configuration patterns, class loading, dev API/frontend, testing conventions. |
-| [Runtime Flow](docs/flow.md) | Entry point, request lifecycle, execution path from Apache to response. |
+| [Architecture](docs/agents/architecture.md) | Source layout, key components, configuration patterns, class loading, dev API/frontend, testing conventions. |
+| [Runtime Flow](docs/agents/flow.md) | Entry point, request lifecycle, execution path from Apache to response. |
+| [Plans](docs/agents/plans/) | Implementation plans for ongoing or upcoming work. |
+| [Issues](docs/agents/issues/) | Detailed specs for open GitHub issues. |
+
+### Developer docs (`docs/`)
+
+| File | Contents |
+|------|----------|
 | [Request Handlers](docs/request-handlers.md) | Differences between `default_proxy`, `proxy`, and `static`, including options and examples. |
 | [Creating Middlewares](docs/creating-middlewares.md) | How to build custom middlewares; interface, short-circuiting, built-in middlewares. |
 | [FileCacheMiddleware Matchers](docs/file-cache-middleware-matchers.md) | Matcher configuration for `FileCacheMiddleware`; migration from deprecated `httpCodes`. |
 | [Adding Request Matchers](docs/adding-request-matchers.md) | How to add new `RequestMatcher` classes. |
-| [Plans](docs/plans/) | Implementation plans for ongoing or upcoming work. |
-| [Issues](docs/issues/) | Detailed specs for open GitHub issues. |
 
-### Issues (`docs/issues/`)
+### Issues (`docs/agents/issues/`)
 
 Each file documents a GitHub issue. Naming convention:
 
-    docs/issues/<github_issue_id>_<issue_name>.md
+    docs/agents/issues/<github_issue_id>_<issue_name>.md
 
-Example: `docs/issues/42_add-negative-matcher.md` for issue #42.
+Example: `docs/agents/issues/42_add-negative-matcher.md` for issue #42.
 
-### Plans (`docs/plans/`)
+### Plans (`docs/agents/plans/`)
 
 Each plan is a directory named after the GitHub issue ID and topic:
 
-    docs/plans/<github_issue_id>_<topic>/plan.md
+    docs/agents/plans/<github_issue_id>_<topic>/plan.md
 
-Example: `docs/plans/42_add-negative-matcher/plan.md` for issue #42.
+Example: `docs/agents/plans/42_add-negative-matcher/plan.md` for issue #42.
 
 ## Engineering Standards
 

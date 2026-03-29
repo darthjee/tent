@@ -67,7 +67,7 @@ Holds a list of matchers (URI patterns, HTTP methods) and a handler reference. M
 | `static` | `StaticFileHandler` | Serves files from a directory. Returns 403/404 for invalid/missing paths. |
 | _(fallback)_ | `MissingRequestHandler` | Used internally when no rule matches. Always returns 404. |
 
-See [`request-handlers.md`](request-handlers.md) for full options and examples.
+See [`request-handlers.md`](../request-handlers.md) for full options and examples.
 
 ### Middlewares (`source/source/lib/middlewares/`)
 
@@ -80,7 +80,7 @@ Implement `processRequest(ProcessingRequest)` and/or `processResponse(Response)`
 | `SetPathMiddleware` | Rewrite the request path |
 | `RenameHeaderMiddleware` | Rename a request header (copy value to new name, remove original) |
 
-See [`creating-middlewares.md`](creating-middlewares.md) for how to build custom middlewares.
+See [`creating-middlewares.md`](../creating-middlewares.md) for how to build custom middlewares.
 
 ### Matchers (`source/source/lib/matchers/`)
 
@@ -94,7 +94,7 @@ See [`creating-middlewares.md`](creating-middlewares.md) for how to build custom
 | `RequestMethodMatcher` | HTTP method (GET, POST, …) |
 | `NegativeMatcher` | Inverts any other matcher |
 
-See [`adding-request-matchers.md`](adding-request-matchers.md) for how to add new matchers.
+See [`adding-request-matchers.md`](../adding-request-matchers.md) for how to add new matchers.
 
 ---
 
