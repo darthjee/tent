@@ -26,6 +26,7 @@
         "coverage": "vendor/bin/phpunit --coverage-clover coverage/clover.xml tests",
         "lint": "phpcs --standard=phpcs.xml",
         "lint:fix": "phpcbf --standard=phpcs.xml",
+        "lint:unused": "vendor/bin/phpmd source,tests text phpmd_unusedcode.xml",
         "docs": "vendor/bin/phpdoc -d source",
         "complexity": "vendor/bin/phpmd source html phpmd.xml > complexity.html"
     },
