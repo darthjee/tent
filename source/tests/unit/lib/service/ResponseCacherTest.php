@@ -19,7 +19,6 @@ class ResponseCacherTest extends TestCase
     private $cacheDir;
     private $location;
     private $headers;
-    private $cache;
     private $request;
     private $path;
 

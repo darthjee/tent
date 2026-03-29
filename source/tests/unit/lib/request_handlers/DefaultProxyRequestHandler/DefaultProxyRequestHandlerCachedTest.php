@@ -8,7 +8,6 @@ use PHPUnit\Framework\TestCase;
 use Tent\RequestHandlers\DefaultProxyRequestHandler;
 use Tent\Models\ProcessingRequest;
 use Tent\Models\Response;
-use Tent\Http\HttpClientInterface;
 use Tent\Tests\Support\Utils\FileSystemUtils;
 use Tent\Models\FolderLocation;
 use Tent\Content\FileCache;
@@ -17,7 +16,6 @@ class DefaultProxyRequestHandlerCachedTest extends TestCase
 {
     private ?string $host = null;
     private ?ProcessingRequest $request = null;
-    private ?HttpClientInterface $httpClient = null;
     private ?string $requestMethod = null;
     private ?string $requestPath = null;
     private ?string $requestQuery = null;
@@ -86,20 +84,6 @@ class DefaultProxyRequestHandlerCachedTest extends TestCase
         $response = $handler->handleRequest($this->request);
 
         $this->assertSame($this->cachedBody, $response->body());
-    }
-
-    private function expectedHeadersAfterDefaultMiddlewares(): array
-    {
-        $headers = $this->requestHeaders ?? [];
-
-        if (array_key_exists('Host', $headers)) {
-            $headers['X-Forwarded-Host'] = $headers['Host'];
-            unset($headers['Host']);
-        }
-
-        $headers['Host'] = $this->host;
-
-        return $headers;
     }
 
     private function initVariables(array $overrides = []): void
