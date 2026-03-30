@@ -2,9 +2,9 @@
 
 ## Commit Guidelines
 
-- **Atomic and Unitary:** Each commit must represent a single logical change.  
-  *Example:*  
-  - Good: `Add needsParams() method to ResourceRequest`  
+- **Atomic and Unitary:** Each commit must represent a single logical change.
+  *Example:*
+  - Good: `Add needsParams() method to ResourceRequest`
   - Bad: `Add needsParams() and refactor Registry logic`
 - **No Unrelated Changes:** Do not mix unrelated changes in the same commit.
 - **Separate Refactoring:** Whenever possible, separate refactoring commits from new feature or bugfix commits.
@@ -26,22 +26,22 @@ A PR is considered complete when:
   - Classes and methods should have clear, focused responsibilities.
   - If a class or method is taking on too many responsibilities, refactor to simplify.
   - Methods should be small and do exactly one thing. If a method is growing, extract parts into private helper methods or separate classes.
-  - *Example (pseudo-code):*
-    ```js
+  - *Example:*
+    ```php
     // Good: Each method does one thing
     class Worker {
-      fetchJob() { ... }
-      processJob(job) { ... }
+        public function fetchJob() { ... }
+        public function processJob(Job $job) { ... }
     }
 
     // Bad: Method does too much
     class Worker {
-      run() {
-        this.fetchJob();
-        this.processJob();
-        this.sendMetrics();
-        this.cleanup();
-      }
+        public function run() {
+            $this->fetchJob();
+            $this->processJob();
+            $this->sendMetrics();
+            $this->cleanup();
+        }
     }
     ```
   - This requirement applies primarily to source code. For specs, refactor only if there is excessive duplication.
@@ -50,97 +50,92 @@ A PR is considered complete when:
 
 ### File Responsibility: Class Declarers vs Scripts
 
-Every source file (excluding test files) must act as a **class declarer** — it should define and export one or more classes or modules. Files must not act as **scripts** (i.e., they must not execute logic at import time or perform side effects directly).
+Every source file (excluding test files) must act as a **class declarer** — it should define one class per file. Files must not act as **scripts** (i.e., they must not execute logic or perform side effects when loaded via `require_once`).
 
 The only exceptions are **entrypoints**:
 
 | Application | Entrypoint |
 |-------------|-----------|
-| Main app (`source/`) | `source/bin/navi.js` |
-| Dev app (`new-dev/`) | `new-dev/server.js` |
-
-`new-dev/app.js` is the application module (exports the configured Express app) and is imported by both `server.js` and the test suite. It is not a script.
+| Main app (`source/`) | `source/source/index.php` |
+| Dev app (`dev/api/`) | `dev/api/source/index.php` |
 
 *Example:*
-```js
-// Good: class declarer — defines and exports a class
+```php
+// Good: class declarer — defines a class, no side effects at load time
 class Router {
-  register(app) { ... }
+    public function register(string $path, callable $handler): void { ... }
 }
-export default Router;
 
-// Bad: script — executes logic at module level
-const router = Router();
-router.get('/path', handler);
-export default router;
+// Bad: script — executes logic when the file is loaded
+$router = new Router();
+$router->get('/path', $handler);
 ```
 
 Test files are exempt from this rule and may import modules and execute setup code freely.
 
-### File Naming: CamelCase for Class Files
+### File Naming: PascalCase for Class Files
 
-Files that define and export a class must use **CamelCase** naming, matching the class name exactly.
+Files that define a class must use **PascalCase** naming, matching the class name exactly.
 
 *Examples:*
 
-- `Router.js` for `class Router`
-- `Config.js` for `class Config`
-- `RouteRegistrar.js` for `class RouteRegistrar`
-- `DataNavigator.js` for `class DataNavigator`
+- `Router.php` for `class Router`
+- `Configuration.php` for `class Configuration`
+- `RouteConfiguration.php` for `class RouteConfiguration`
+- `RequestHandler.php` for `class RequestHandler`
 
-This applies to both source files and their corresponding spec files:
-- `Router.js` → spec: `Router_spec.js`
-- `DataNavigator.js` → spec: `DataNavigator_spec.js`
-- `Router.js` â spec: `Router_spec.js`
-Non-class files (e.g., utility modules that export functions) use lowercase or camelCase at the author's discretion.
+This applies to both source files and their corresponding test files:
+- `Router.php` → test: `RouterTest.php`
+- `RequestHandler.php` → test: `RequestHandlerTest.php`
 
 ## Dependency Injection
 
 Classes must receive their dependencies (data, configuration, collaborators) as constructor arguments. A class must never reach out to load files, read environment variables, or fetch configuration on its own.
 
-**The entry script is the only place responsible for loading configuration** (e.g. reading a YAML file, parsing CLI arguments). It then passes the loaded data down to the classes that need it.
+**The entry script is the only place responsible for loading configuration** (e.g. reading environment variables, parsing configuration files). It then passes the loaded data down to the classes that need it.
 
 This makes every class independently testable: tests simply instantiate the class with the data they need, without touching the filesystem or environment.
 
 *Example:*
-```js
-// Good: class receives data as an argument — easy to test
-class Router {
-  constructor(data) {
-    this._data = data;
-  }
-  build() { ... }
+```php
+// Good: class receives dependencies as arguments — easy to test
+class ProxyRequestHandler {
+    public function __construct(string $host, ?HttpClientInterface $httpClient = null) {
+        $this->server = new Server($host);
+        $this->httpClient = $httpClient ?? new CurlHttpClient();
+    }
 }
 
-// In server.js (entry script):
-const data = load(readFileSync(dataPath, 'utf8'));
-const router = new Router(data);
+// In index.php (entry script):
+$host = getenv('BACKEND_HOST') ?: 'http://localhost:80';
+$handler = new ProxyRequestHandler($host);
 
-// Bad: class loads its own config — hard to test and couples to the filesystem
-class Router {
-  build() {
-    const data = load(readFileSync('./data.yml', 'utf8')); // ❌
-    ...
-  }
+// Bad: class loads its own config — hard to test and couples to the environment
+class ProxyRequestHandler {
+    public function forward(Request $request): Response {
+        $host = getenv('BACKEND_HOST'); // ❌
+        ...
+    }
 }
 ```
 
-This principle applies to all classes — including helpers and registrars. If a class needs data, it gets it through its constructor.
+This principle applies to all classes — including helpers and collaborators. If a class needs data, it gets it through its constructor.
 
 ## Refactoring Guidelines
 
 When refactoring, aim to:
 
 - **Reduce Code Duplication:**
-  *Example:* Move repeated setup code in specs to a factory function.
-  ```js
+  *Example:* Move repeated setup code in tests to a helper method or `setUp()`.
+  ```php
   // Good
-  function buildCategory(attrs = {}) {
-    return { id: 1, name: 'Books', ...attrs };
+  private function buildPerson(array $attrs = []): Person {
+      return new Person(array_merge(['first_name' => 'John', 'last_name' => 'Doe'], $attrs));
   }
   // In tests:
-  const category = buildCategory({ id: 2 });
+  $person = $this->buildPerson(['first_name' => 'Jane']);
 
   // Bad
-  const category = { id: 2, name: 'Books' };
-  // ...repeated in many files
+  $person = new Person(['first_name' => 'Jane', 'last_name' => 'Doe']);
+  // ...repeated in many test methods
+  ```
