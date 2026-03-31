@@ -57,11 +57,39 @@ class Route
     /**
      * Checks if the request's URL path matches this route's path.
      *
+     * Supports parameterised segments using the :param syntax
+     * (e.g. /persons/:id/photo.json).
+     *
      * @param RequestInterface $request The HTTP request to check
      * @return bool True if paths match or route path is null (matches any)
      */
     private function matchPath(RequestInterface $request): bool
     {
-        return $this->path === null || $request->requestUrl() === $this->path;
+        if ($this->path === null) {
+            return true;
+        }
+
+        if (strpos($this->path, ':') === false) {
+            return $request->requestUrl() === $this->path;
+        }
+
+        return (bool) preg_match($this->buildPattern(), $request->requestUrl());
+    }
+
+    /**
+     * Converts a parameterised path pattern into a regex.
+     *
+     * Each :param segment is replaced with [^/]+ so it matches any
+     * single path segment. All other characters are regex-escaped.
+     *
+     * @return string A regex pattern (e.g. #^/persons/[^/]+/photo\.json$#)
+     */
+    private function buildPattern(): string
+    {
+        $parts = preg_split('/(:[^\/]+)/', $this->path, -1, PREG_SPLIT_DELIM_CAPTURE);
+        $regexParts = array_map(function (string $part): string {
+            return str_starts_with($part, ':') ? '[^/]+' : preg_quote($part, '#');
+        }, $parts);
+        return '#^' . implode('', $regexParts) . '$#';
     }
 }
