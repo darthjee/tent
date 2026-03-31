@@ -9,7 +9,8 @@ class MockRequest implements RequestInterface
         'body' => '',
         'headers' => [],
         'requestUrl' => '/',
-        'query' => ''
+        'query' => '',
+        'uploadedFiles' => []
     ];
 
     private string $requestMethod;
@@ -17,6 +18,7 @@ class MockRequest implements RequestInterface
     private array $headers;
     private string $requestUrl;
     private string $query;
+    private array $uploadedFiles;
 
     /**
      * Creates a mock request with configurable attributes.
@@ -58,5 +60,10 @@ class MockRequest implements RequestInterface
     public function query(): string
     {
         return $this->query;
+    }
+
+    public function uploadedFile(string $field): ?array
+    {
+        return $this->uploadedFiles[$field] ?? null;
     }
 }

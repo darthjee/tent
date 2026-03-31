@@ -86,6 +86,54 @@ class RouteTest extends TestCase
         $this->assertTrue($route->matches($request));
     }
 
+    public function testPatternMatchesWithSingleParam()
+    {
+        $request = $this->createMockRequest('POST', '/persons/1/photo.json');
+        $route = new Route('POST', '/persons/:id/photo.json');
+
+        $this->assertTrue($route->matches($request));
+    }
+
+    public function testPatternMatchesWithLargeId()
+    {
+        $request = $this->createMockRequest('POST', '/persons/999/photo.json');
+        $route = new Route('POST', '/persons/:id/photo.json');
+
+        $this->assertTrue($route->matches($request));
+    }
+
+    public function testPatternDoesNotMatchMissingSegment()
+    {
+        $request = $this->createMockRequest('POST', '/persons/photo.json');
+        $route = new Route('POST', '/persons/:id/photo.json');
+
+        $this->assertFalse($route->matches($request));
+    }
+
+    public function testPatternDoesNotMatchExtraSegment()
+    {
+        $request = $this->createMockRequest('POST', '/persons/1/2/photo.json');
+        $route = new Route('POST', '/persons/:id/photo.json');
+
+        $this->assertFalse($route->matches($request));
+    }
+
+    public function testPatternDoesNotMatchDifferentSuffix()
+    {
+        $request = $this->createMockRequest('POST', '/persons/1/avatar.json');
+        $route = new Route('POST', '/persons/:id/photo.json');
+
+        $this->assertFalse($route->matches($request));
+    }
+
+    public function testExactMatchStillWorksWhenNoParamPresent()
+    {
+        $request = $this->createMockRequest('GET', '/persons');
+        $route = new Route('GET', '/persons');
+
+        $this->assertTrue($route->matches($request));
+    }
+
     private function createMockRequest($method, $url)
     {
         $mock = $this->createMock(Request::class);

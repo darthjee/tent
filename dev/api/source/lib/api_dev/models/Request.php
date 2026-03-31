@@ -55,4 +55,15 @@ class Request implements RequestInterface
         $parts = parse_url($uri);
         return $parts['query'] ?? '';
     }
+
+    /**
+     * Retrieves the uploaded file data from $_FILES for the given field.
+     *
+     * @param string $field The name of the file input field
+     * @return array|null The $_FILES[$field] array, or null if not present
+     */
+    public function uploadedFile(string $field): ?array
+    {
+        return isset($_FILES[$field]) ? $_FILES[$field] : null;
+    }
 }

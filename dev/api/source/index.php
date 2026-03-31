@@ -6,12 +6,14 @@ use ApiDev\Configuration;
 use ApiDev\HealthCheckEndpoint;
 use ApiDev\ListPersonsEndpoint;
 use ApiDev\CreatePersonEndpoint;
+use ApiDev\UploadPersonPhotoEndpoint;
 
 require_once __DIR__ . '/loader.php';
 
 Configuration::add('GET', '/health', HealthCheckEndpoint::class);
 Configuration::add('GET', '/persons', ListPersonsEndpoint::class);
 Configuration::add('POST', '/persons', CreatePersonEndpoint::class);
+Configuration::add('POST', '/persons/:id/photo.json', UploadPersonPhotoEndpoint::class);
 
 \ApiDev\Mysql\Configuration::configure(
     getenv('API_DEV_MYSQL_HOST') ?: 'localhost',
