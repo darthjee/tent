@@ -27,7 +27,7 @@ class UploadPersonPhotoEndpoint extends Endpoint
     /**
      * @var string[] MIME types accepted for photo uploads
      */
-    private const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif'];
+    private const ALLOWED_MIME_TYPES = ['image/jpeg'];
 
     /**
      * @var FileStorageInterface Handles file access and persistence
