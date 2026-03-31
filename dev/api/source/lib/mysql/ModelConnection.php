@@ -78,6 +78,19 @@ class ModelConnection
     }
 
     /**
+     * Finds a row in the table by ID.
+     *
+     * @param int $id The ID of the row to find
+     * @return array|null The row as an associative array, or null if not found
+     */
+    public function find(int $id): ?array
+    {
+        $sql = "SELECT * FROM {$this->tableName} WHERE id = ? LIMIT 1";
+        $row = $this->connection->fetch($sql, [$id]);
+        return $row !== false ? $row : null;
+    }
+
+    /**
      * Updates a row in the table by ID.
      *
      * @param int $id The ID of the row to update

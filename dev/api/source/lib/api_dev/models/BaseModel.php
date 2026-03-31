@@ -65,6 +65,21 @@ abstract class BaseModel
     }
 
     /**
+     * Finds a single record by ID.
+     *
+     * @param int $id The ID to look up
+     * @return static|null The model instance, or null if not found
+     */
+    public static function find(int $id): ?static
+    {
+        $row = static::getConnection()->find($id);
+        if ($row === null) {
+            return null;
+        }
+        return new static($row);
+    }
+
+    /**
      * Creates a new model instance.
      *
      * @param array $attributes Associative array of column => value
