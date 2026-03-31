@@ -129,7 +129,7 @@ class UploadPersonPhotoEndpoint extends Endpoint
      */
     private function validateUpload(): array
     {
-        $file = $this->fileStorage->getFile('photo');
+        $file = $this->request->uploadedFile('photo');
         if ($file === null || $file['error'] !== UPLOAD_ERR_OK) {
             throw new InvalidRequestException('No valid file uploaded');
         }

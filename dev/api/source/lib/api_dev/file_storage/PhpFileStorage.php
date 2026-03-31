@@ -3,24 +3,10 @@
 namespace ApiDev\FileStorage;
 
 /**
- * File storage implementation that uses PHP's built-in upload superglobals.
- *
- * Reads uploaded files from $_FILES and moves them to the destination
- * path using move_uploaded_file().
+ * File storage implementation that moves uploaded files using move_uploaded_file().
  */
 class PhpFileStorage implements FileStorageInterface
 {
-    /**
-     * Returns the uploaded file data from $_FILES for the given field.
-     *
-     * @param string $field The name of the file input field
-     * @return array|null The $_FILES[$field] array, or null if not present
-     */
-    public function getFile(string $field): ?array
-    {
-        return isset($_FILES[$field]) ? $_FILES[$field] : null;
-    }
-
     /**
      * Moves an uploaded file to its final destination, creating directories
      * as needed.

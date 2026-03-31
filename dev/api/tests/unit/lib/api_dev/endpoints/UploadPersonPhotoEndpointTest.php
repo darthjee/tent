@@ -38,7 +38,6 @@ class UploadPersonPhotoEndpointTest extends TestCase
     {
         $request = $this->buildRequest('/persons/999/photo.json');
         $endpoint = new UploadPersonPhotoEndpoint($request, new MockFileStorage(), $this->photosDir);
-
         $response = $endpoint->handle();
 
         $this->assertEquals(404, $response->getHttpCode());
@@ -51,8 +50,7 @@ class UploadPersonPhotoEndpointTest extends TestCase
     {
         $person = $this->createPerson();
         $request = $this->buildRequest('/persons/' . $person->getId() . '/photo.json');
-        $fileStorage = new MockFileStorage(null);
-        $endpoint = new UploadPersonPhotoEndpoint($request, $fileStorage, $this->photosDir);
+        $endpoint = new UploadPersonPhotoEndpoint($request, new MockFileStorage(), $this->photosDir);
 
         $response = $endpoint->handle();
 
@@ -64,10 +62,9 @@ class UploadPersonPhotoEndpointTest extends TestCase
     public function testReturns400WhenFileHasUploadError()
     {
         $person = $this->createPerson();
-        $request = $this->buildRequest('/persons/' . $person->getId() . '/photo.json');
         $file = $this->buildFileEntry(error: UPLOAD_ERR_NO_FILE);
-        $fileStorage = new MockFileStorage($file);
-        $endpoint = new UploadPersonPhotoEndpoint($request, $fileStorage, $this->photosDir);
+        $request = $this->buildRequest('/persons/' . $person->getId() . '/photo.json', $file);
+        $endpoint = new UploadPersonPhotoEndpoint($request, new MockFileStorage(), $this->photosDir);
 
         $response = $endpoint->handle();
 
@@ -77,11 +74,10 @@ class UploadPersonPhotoEndpointTest extends TestCase
     public function testReturns422WhenMimeTypeIsInvalid()
     {
         $person = $this->createPerson();
-        $request = $this->buildRequest('/persons/' . $person->getId() . '/photo.json');
         $tmpFile = $this->createTempFile('text/plain', 'hello world');
         $file = $this->buildFileEntry(tmpName: $tmpFile);
-        $fileStorage = new MockFileStorage($file);
-        $endpoint = new UploadPersonPhotoEndpoint($request, $fileStorage, $this->photosDir);
+        $request = $this->buildRequest('/persons/' . $person->getId() . '/photo.json', $file);
+        $endpoint = new UploadPersonPhotoEndpoint($request, new MockFileStorage(), $this->photosDir);
 
         $response = $endpoint->handle();
 
@@ -95,10 +91,10 @@ class UploadPersonPhotoEndpointTest extends TestCase
     public function testReturns200AndSavesFileForValidUpload()
     {
         $person = $this->createPerson();
-        $request = $this->buildRequest('/persons/' . $person->getId() . '/photo.json');
         $tmpFile = $this->createTempFile('image/jpeg');
         $file = $this->buildFileEntry(tmpName: $tmpFile);
-        $fileStorage = new MockFileStorage($file);
+        $request = $this->buildRequest('/persons/' . $person->getId() . '/photo.json', $file);
+        $fileStorage = new MockFileStorage();
         $endpoint = new UploadPersonPhotoEndpoint($request, $fileStorage, $this->photosDir);
 
         $response = $endpoint->handle();
@@ -117,9 +113,13 @@ class UploadPersonPhotoEndpointTest extends TestCase
 
     // ── helpers ───────────────────────────────────────────────────────────────
 
-    private function buildRequest(string $url): MockRequest
+    private function buildRequest(string $url, ?array $file = null): MockRequest
     {
-        return new MockRequest(['requestMethod' => 'POST', 'requestUrl' => $url]);
+        return new MockRequest([
+            'requestMethod' => 'POST',
+            'requestUrl'    => $url,
+            'uploadedFiles' => $file !== null ? ['photo' => $file] : [],
+        ]);
     }
 
     private function createPerson(): Person

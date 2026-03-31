@@ -38,4 +38,12 @@ interface RequestInterface
      * @return string The query string of the request, or an empty string if none exists.
      */
     public function query(): string;
+
+    /**
+     * Retrieves the uploaded file data for the given form field.
+     *
+     * @param string $field The name of the file input field
+     * @return array|null The file data array, or null if no file was uploaded for that field
+     */
+    public function uploadedFile(string $field): ?array;
 }
