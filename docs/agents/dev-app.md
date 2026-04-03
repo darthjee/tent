@@ -24,11 +24,12 @@ A self-contained PHP API server that mirrors the same class-loading pattern as T
 
 `dev/api/source/index.php` — configures the MySQL connection from environment variables, then registers routes:
 
-| Method | Path       | Endpoint class              |
-|--------|------------|-----------------------------|
-| GET    | `/health`  | `HealthCheckEndpoint`       |
-| GET    | `/persons` | `ListPersonsEndpoint`       |
-| POST   | `/persons` | `CreatePersonEndpoint`      |
+| Method | Path                       | Endpoint class                |
+|--------|----------------------------|-------------------------------|
+| GET    | `/health`                  | `HealthCheckEndpoint`         |
+| GET    | `/persons`                 | `ListPersonsEndpoint`         |
+| POST   | `/persons`                 | `CreatePersonEndpoint`        |
+| POST   | `/persons/:id/photo.json`  | `UploadPersonPhotoEndpoint`   |
 
 Routes are registered with `Configuration::add('METHOD', '/path', EndpointClass::class)`.
 
