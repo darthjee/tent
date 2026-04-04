@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { PersonClient } from '../clients/PersonClient';
+import PersonPhotoForm from './PersonPhotoForm';
 
 const PersonList = () => {
   const [persons, setPersons] = useState([]);
@@ -28,6 +29,7 @@ const PersonList = () => {
         {persons.map((person) => (
           <li key={person.id}>
             {person.first_name} {person.last_name} ({person.birthdate})
+            <PersonPhotoForm personId={person.id} />
           </li>
         ))}
       </ul>

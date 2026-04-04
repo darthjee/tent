@@ -18,6 +18,19 @@ class PersonClient {
     }
     return response.json();
   }
+
+  async uploadPhoto(id, file) {
+    const formData = new FormData();
+    formData.append('photo', file);
+    const response = await fetch(`/persons/${id}/photo`, {
+      method: 'POST',
+      body: formData,
+    });
+    if (!response.ok) {
+      throw new Error('Failed to upload photo');
+    }
+    return response.json();
+  }
 }
 
 // Export class for testing or custom instances
