@@ -39,7 +39,7 @@ Pull the image and run it:
 ```yaml
 services:
   proxy:
-    image: darthjee/tent:0.4.3
+    image: darthjee/tent:latest
     ports:
       - "0.0.0.0:80:80"
     volumes:
@@ -243,7 +243,7 @@ If you use `proxy` directly, you must do this manually:
 # docker-compose.yml
 services:
   proxy:
-    image: darthjee/tent:0.4.3
+    image: darthjee/tent:latest
     links:
       - my_api:api
   my_api:
@@ -600,7 +600,7 @@ my-project/
 ```yaml
 services:
   proxy:
-    image: darthjee/tent:0.4.3
+    image: darthjee/tent:latest
     ports:
       - "0.0.0.0:80:80"
     volumes:
