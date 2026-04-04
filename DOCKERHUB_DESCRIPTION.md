@@ -159,7 +159,8 @@ services:
 
 ## More Information
 
-- See the [README](<https://github.com/darthjee/tent>) for development instructions and advanced configuration.
+- **[How to Use darthjee/tent](https://github.com/darthjee/tent/blob/main/docs/HOW_TO_USE_DARTHJEE-TENT.md)** — Complete integration guide: Docker setup, all request handlers, cache configuration, Host header handling, middlewares, and full examples
+- See the [README](https://github.com/darthjee/tent) for development instructions and advanced configuration.
 - Issues and contributions are welcome!
 
 

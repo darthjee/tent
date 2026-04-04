@@ -16,6 +16,7 @@ Tent is an intelligent PHP-based proxy server that can route requests to backend
 
 For detailed guides and advanced topics, see our documentation:
 
+- **[How to Use darthjee/tent](docs/HOW_TO_USE_DARTHJEE-TENT.md)** - Complete integration guide: Docker setup, all request handlers, cache configuration, Host header handling, middlewares, and full examples
 - **[Creating Middlewares](docs/creating-middlewares.md)** - Learn how to build custom middlewares to process requests and responses
 - **[FileCacheMiddleware Matchers](docs/file-cache-middleware-matchers.md)** - Configure response caching with matchers
 - **[Full Documentation Index](docs/README.md)** - Browse all available documentation
