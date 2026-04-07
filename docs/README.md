@@ -6,6 +6,7 @@ Welcome to the Tent documentation.
 
 | File | Contents |
 |------|----------|
+| [How to Use darthjee/tent](HOW_TO_USE_DARTHJEE-TENT.md) | Complete integration guide for external applications: Docker setup, all request handlers, cache configuration, Host header handling, and full examples. |
 | [Request Handlers](request-handlers.md) | Differences between `default_proxy`, `proxy`, and `static`, including options and examples. |
 | [Creating Middlewares](creating-middlewares.md) | How to build custom middlewares; interface, short-circuiting, built-in middlewares. |
 | [FileCacheMiddleware Matchers](file-cache-middleware-matchers.md) | Matcher configuration for `FileCacheMiddleware`; migration from deprecated `httpCodes`. |
