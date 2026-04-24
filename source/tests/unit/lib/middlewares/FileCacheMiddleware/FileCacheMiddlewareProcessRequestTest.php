@@ -6,6 +6,9 @@ require_once __DIR__ . '/../../../../support/loader.php';
 
 use PHPUnit\Framework\TestCase;
 use Tent\Middlewares\FileCacheMiddleware;
+use Tent\Log\Logger;
+use Tent\Log\LoggerInstance;
+use Tent\Log\NullLoggerInstance;
 use Tent\Models\FolderLocation;
 use Tent\Models\Response;
 use Tent\Models\ProcessingRequest;
@@ -26,11 +29,13 @@ class FileCacheMiddlewareProcessRequestTest extends TestCase
         $this->cacheDir = sys_get_temp_dir() . '/filecache_middleware_test_' . uniqid();
         mkdir($this->cacheDir);
         $this->location = new FolderLocation($this->cacheDir);
+        Logger::setInstance(new NullLoggerInstance());
     }
 
     protected function tearDown(): void
     {
         FileSystemUtils::removeDirRecursive($this->cacheDir);
+        Logger::setInstance(new LoggerInstance());
     }
 
     public function testProcessRequestReturnsCachedResponseWhenExists()
@@ -100,6 +105,56 @@ class FileCacheMiddlewareProcessRequestTest extends TestCase
 
         $this->assertTrue($result->hasResponse());
         $this->assertSame($this->request, $result);
+    }
+
+    public function testLogsDebugWhenServingCached404(): void
+    {
+        $this->path = '/api/users';
+        $this->request = $this->buildRequest($this->path, 'GET');
+
+        $this->headers = ['Content-Type: text/plain'];
+        $this->response = new Response([
+            'body' => 'Not Found',
+            'httpCode' => 404,
+            'headers' => $this->headers,
+            'request' => $this->request
+        ]);
+        $cache = new FileCache($this->request, $this->location);
+        $cache->store($this->response);
+
+        $instance = $this->createMock(LoggerInstance::class);
+        $instance->expects($this->once())
+            ->method('log')
+            ->with('[404] - serving from cache — uri: /api/users', 'debug');
+        Logger::setInstance($instance);
+
+        $middleware = $this->buildMiddleware();
+        $middleware->processRequest($this->request);
+    }
+
+    public function testLogsDebugForAllCachedStatuses(): void
+    {
+        $this->path = '/api/users';
+        $this->request = $this->buildRequest($this->path, 'GET');
+
+        $this->headers = ['Content-Type: application/json'];
+        $this->response = new Response([
+            'body' => '{"users":[]}',
+            'httpCode' => 200,
+            'headers' => $this->headers,
+            'request' => $this->request
+        ]);
+        $cache = new FileCache($this->request, $this->location);
+        $cache->store($this->response);
+
+        $instance = $this->createMock(LoggerInstance::class);
+        $instance->expects($this->once())
+            ->method('log')
+            ->with('[200] - serving from cache — uri: /api/users', 'debug');
+        Logger::setInstance($instance);
+
+        $middleware = $this->buildMiddleware();
+        $middleware->processRequest($this->request);
     }
 
     private function buildRequest(string $path, string $method): ProcessingRequest

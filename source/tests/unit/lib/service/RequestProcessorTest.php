@@ -7,6 +7,9 @@ require_once __DIR__ . '/../../../support/loader.php';
 use PHPUnit\Framework\TestCase;
 use Tent\Service\RequestProcessor;
 use Tent\Configuration;
+use Tent\Log\Logger;
+use Tent\Log\LoggerInstance;
+use Tent\Log\NullLoggerInstance;
 use Tent\Models\Rule;
 use Tent\RequestHandlers\ProxyRequestHandler;
 use Tent\RequestHandlers\StaticFileHandler;
@@ -54,6 +57,12 @@ class RequestProcessorTest extends TestCase
         Configuration::reset();
         $this->setupStatic();
         $this->setupProxy();
+        Logger::setInstance(new NullLoggerInstance());
+    }
+
+    protected function tearDown(): void
+    {
+        Logger::setInstance(new LoggerInstance());
     }
 
     public function testStaticFileHandlerReturnsIndexHtml()
@@ -105,5 +114,22 @@ class RequestProcessorTest extends TestCase
         $this->assertInstanceOf(Response::class, $response);
         $this->assertEquals(404, $response->httpCode());
         $this->assertStringContainsString('Not Found', $response->body());
+    }
+
+    public function testLogsDebugWhenNoRulesMatch(): void
+    {
+        Configuration::reset();
+
+        $instance = $this->createMock(LoggerInstance::class);
+        $instance->expects($this->once())
+            ->method('log')
+            ->with('[404] - no rules matched — method: GET, uri: /unmatched', 'debug');
+        Logger::setInstance($instance);
+
+        $request = new Request([
+            'requestPath' => '/unmatched',
+            'requestMethod' => 'GET'
+        ]);
+        RequestProcessor::handleRequest($request);
     }
 }

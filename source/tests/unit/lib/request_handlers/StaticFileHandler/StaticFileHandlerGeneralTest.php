@@ -6,6 +6,9 @@ require_once __DIR__ . '/../../../../support/loader.php';
 
 use PHPUnit\Framework\TestCase;
 use Tent\RequestHandlers\StaticFileHandler;
+use Tent\Log\Logger;
+use Tent\Log\LoggerInstance;
+use Tent\Log\NullLoggerInstance;
 use Tent\Models\FolderLocation;
 use Tent\Models\Request;
 use Tent\Models\MissingResponse;
@@ -21,11 +24,13 @@ class StaticFileHandlerGeneralTest extends TestCase
     {
         $this->testDir = sys_get_temp_dir() . '/tent_test_' . uniqid();
         mkdir($this->testDir);
+        Logger::setInstance(new NullLoggerInstance());
     }
 
     protected function tearDown(): void
     {
         FileSystemUtils::removeDirRecursive($this->testDir);
+        Logger::setInstance(new LoggerInstance());
     }
 
     public function testHandleRequestReturnsFileContent()
@@ -196,5 +201,50 @@ class StaticFileHandlerGeneralTest extends TestCase
         $response = $handler->handleRequest($processingRequest);
         $this->assertInstanceOf(ForbiddenResponse::class, $response);
         $this->assertEquals(403, $response->httpCode());
+    }
+
+    public function testLogsDebugWhenFileNotFound(): void
+    {
+        $location = new FolderLocation($this->testDir);
+        $handler = new StaticFileHandler($location);
+
+        $instance = $this->createMock(LoggerInstance::class);
+        $instance->expects($this->once())
+            ->method('log')
+            ->with(
+                '[404] - static file not found — uri: /nonexistent.txt, resolved path: ' .
+                $this->testDir . '/nonexistent.txt',
+                'debug'
+            );
+        Logger::setInstance($instance);
+
+        $request = $this->createMock(Request::class);
+        $request->method('requestPath')->willReturn('/nonexistent.txt');
+        $processingRequest = new ProcessingRequest(['request' => $request]);
+
+        $handler->handleRequest($processingRequest);
+    }
+
+    public function testLogsDebugWhenDirectoryRequested(): void
+    {
+        mkdir($this->testDir . '/subdir');
+        $location = new FolderLocation($this->testDir);
+        $handler = new StaticFileHandler($location);
+
+        $instance = $this->createMock(LoggerInstance::class);
+        $instance->expects($this->once())
+            ->method('log')
+            ->with(
+                '[404] - static file not found — uri: /subdir, resolved path: ' .
+                $this->testDir . '/subdir',
+                'debug'
+            );
+        Logger::setInstance($instance);
+
+        $request = $this->createMock(Request::class);
+        $request->method('requestPath')->willReturn('/subdir');
+        $processingRequest = new ProcessingRequest(['request' => $request]);
+
+        $handler->handleRequest($processingRequest);
     }
 }
