@@ -317,6 +317,7 @@ Middlewares make Tent highly customizable, enabling advanced routing, header man
    A sample `.env` file is included with default values. Modify if needed, especially `FRONTEND_DEV_MODE`:
    - `FRONTEND_DEV_MODE=true`: Proxies frontend requests to Vite dev server (hot reload)
    - `FRONTEND_DEV_MODE=false`: Serves frontend from static build at `dev/frontend/dist/`
+   - `LOG_LEVEL`: Controls Tent log verbosity. Accepted values: `debug` (default), `info`, `warn`, `error`. Only messages at or above the configured level are written to stdout.
 
 3. **Build and start:**
    ```bash
