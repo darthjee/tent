@@ -38,7 +38,13 @@ class LoggerInstanceTest extends TestCase
 
     private function getLogOutput(): string
     {
-        return file_get_contents($this->errorLogFile) ?: '';
+        if (!file_exists($this->errorLogFile)) {
+            return '';
+        }
+
+        $contents = file_get_contents($this->errorLogFile);
+
+        return $contents !== false ? $contents : '';
     }
 
     public function testLogWritesDebugWhenThresholdIsDebug(): void
