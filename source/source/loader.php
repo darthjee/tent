@@ -57,3 +57,6 @@ require_once __DIR__ . '/lib/utils/FileUtils.php';
 require_once __DIR__ . '/lib/utils/HttpCodeMatcher.php';
 require_once __DIR__ . '/lib/utils/StringUtils.php';
 require_once __DIR__ . '/lib/validators/RequestPathValidator.php';
+require_once __DIR__ . '/lib/log/LoggerInstance.php';
+require_once __DIR__ . '/lib/log/NullLoggerInstance.php';
+require_once __DIR__ . '/lib/log/Logger.php';

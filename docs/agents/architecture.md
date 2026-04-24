@@ -19,6 +19,7 @@ source/
       middlewares/          ← FileCacheMiddleware, SetHeadersMiddleware, SetPathMiddleware, RenameHeaderMiddleware
       matchers/             ← ExactRequestMatcher, BeginsWithRequestMatcher, EndsWithRequestMatcher,
                               StatusCodeMatcher, ResponseHeaderMatcher, RequestMethodMatcher, NegativeMatcher
+      log/                  ← Logger (static facade), LoggerInstance (default, reads LOG_LEVEL), NullLoggerInstance (test double)
   tests/
     unit/
     integration/
@@ -95,6 +96,16 @@ See [`creating-middlewares.md`](../creating-middlewares.md) for how to build cus
 | `NegativeMatcher` | Inverts any other matcher |
 
 See [`adding-request-matchers.md`](../adding-request-matchers.md) for how to add new matchers.
+
+### Logger (`source/source/lib/log/`)
+
+| Class | Purpose |
+|-------|---------|
+| `Logger` | Static facade — call `Logger::debug()`, `Logger::info()`, `Logger::warn()`, `Logger::error()` from any production code |
+| `LoggerInstance` | Default implementation; reads `LOG_LEVEL` env var on construction and filters messages below the threshold |
+| `NullLoggerInstance` | Silent test double; inject via `Logger::setInstance(new NullLoggerInstance())` in `setUp()` |
+
+`LOG_LEVEL` accepted values (ascending precedence): `debug`, `info`, `warn`, `error`. Default: `debug` (log everything).
 
 ---
 
