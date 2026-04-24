@@ -107,6 +107,17 @@ See [`adding-request-matchers.md`](../adding-request-matchers.md) for how to add
 
 `LOG_LEVEL` accepted values (ascending precedence): `debug`, `info`, `warn`, `error`. Default: `debug` (log everything).
 
+#### Debug log messages for 404 responses
+
+When `LOG_LEVEL=debug`, Tent emits a `Logger::debug()` call for every 404 response, identifying the root cause:
+
+| Cause | Log message format | Source |
+|-------|--------------------|--------|
+| No rules matched the request | `404: no rules matched — method: <METHOD>, uri: <URI>` | `RequestProcessor::getRequestHandler()` |
+| Static file not found or path is a directory | `404: static file not found — uri: <URI>, resolved path: <ABSOLUTE_PATH>` | `StaticFileHandler::processsRequest()` |
+| Proxied upstream returned 404 | `404: upstream returned 404 — method: <METHOD>, uri: <URI>, upstream: <UPSTREAM_URL>` | `ProxyRequestHandler::processsRequest()` |
+| Previously cached 404 is being served | `404: serving cached response — uri: <URI>` | `FileCacheMiddleware::processRequest()` |
+
 ---
 
 ## Configuration Rules Pattern

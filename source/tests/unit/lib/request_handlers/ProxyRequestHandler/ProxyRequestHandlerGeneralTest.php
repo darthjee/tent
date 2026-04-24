@@ -6,6 +6,9 @@ require_once __DIR__ . '/../../../../support/loader.php';
 
 use PHPUnit\Framework\TestCase;
 use Tent\RequestHandlers\ProxyRequestHandler;
+use Tent\Log\Logger;
+use Tent\Log\LoggerInstance;
+use Tent\Log\NullLoggerInstance;
 use Tent\Models\Response;
 use Tent\Models\ProcessingRequest;
 use Tent\Http\HttpClientInterface;
@@ -19,6 +22,16 @@ class ProxyRequestHandlerGeneralTest extends TestCase
     private ?string $requestPath = null;
     private ?string $requestQuery = null;
     private ?array $requestHeaders = null;
+
+    protected function setUp(): void
+    {
+        Logger::setInstance(new NullLoggerInstance());
+    }
+
+    protected function tearDown(): void
+    {
+        Logger::setInstance(new LoggerInstance());
+    }
 
     public function testHandleRequestBuildsCorrectUrl()
     {
@@ -91,6 +104,27 @@ class ProxyRequestHandlerGeneralTest extends TestCase
         $response = $handler->handleRequest($this->request);
 
         $this->assertInstanceOf(Response::class, $response);
+    }
+
+    public function testLogsDebugWhenUpstreamReturns404(): void
+    {
+        $this->initVariables();
+
+        $instance = $this->createMock(LoggerInstance::class);
+        $instance->expects($this->once())
+            ->method('log')
+            ->with(
+                '404: upstream returned 404 — method: GET, uri: /api/users, upstream: http://backend:8080/api/users',
+                'debug'
+            );
+        Logger::setInstance($instance);
+
+        $this->createMockHttpClient(['body' => 'Not Found', 'httpCode' => 404, 'headers' => []]);
+
+        $handler = new ProxyRequestHandler($this->host, $this->httpClient);
+        $response = $handler->handleRequest($this->request);
+
+        $this->assertEquals(404, $response->httpCode());
     }
 
     private function createMockHttpClient($returnValue): void

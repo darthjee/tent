@@ -5,6 +5,7 @@ namespace Tent\Service;
 use Tent\RequestHandlers\MissingRequestHandler;
 use Tent\RequestHandlers\RequestHandler;
 use Tent\Configuration;
+use Tent\Log\Logger;
 use Tent\Models\Request;
 use Tent\Models\ProcessingRequest;
 use Tent\Models\Response;
@@ -75,6 +76,11 @@ class RequestProcessor
                 return $rule->handler();
             }
         }
+
+        Logger::debug(
+            '404: no rules matched — method: ' . $this->request->requestMethod() .
+            ', uri: ' . $this->request->requestPath()
+        );
 
         return new MissingRequestHandler();
     }

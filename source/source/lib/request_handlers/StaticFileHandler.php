@@ -8,6 +8,7 @@ use Tent\Models\Response;
 use Tent\Content\File;
 use Tent\Exceptions\FileNotFoundException;
 use Tent\Exceptions\InvalidFilePathException;
+use Tent\Log\Logger;
 use Tent\Models\MissingResponse;
 use Tent\Models\ForbiddenResponse;
 use Tent\Service\ResponseContentReader;
@@ -106,6 +107,10 @@ class StaticFileHandler extends RequestHandler
         } catch (InvalidFilePathException $e) {
             return new ForbiddenResponse($request);
         } catch (FileNotFoundException $e) {
+            Logger::debug(
+                '404: static file not found — uri: ' . $request->requestPath() .
+                ', resolved path: ' . $this->folderLocation->basePath() . '/' . ltrim($request->requestPath(), '/')
+            );
             return new MissingResponse($request);
         }
     }

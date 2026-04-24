@@ -7,6 +7,7 @@ use Tent\Models\RequestInterface;
 use Tent\Models\Response;
 use Tent\Http\HttpClientInterface;
 use Tent\Http\CurlHttpClient;
+use Tent\Log\Logger;
 
 /**
  * Handles HTTP requests by proxying them to a target server.
@@ -117,7 +118,17 @@ class ProxyRequestHandler extends RequestHandler
         $response = $this->httpClient->request($request->requestMethod(), $url, $request->headers(), $request->body());
         $response['request'] = $request;
 
-        return new Response($response);
+        $result = new Response($response);
+
+        if ($result->httpCode() === 404) {
+            Logger::debug(
+                '404: upstream returned 404 — method: ' . $request->requestMethod() .
+                ', uri: ' . $request->requestPath() .
+                ', upstream: ' . $url
+            );
+        }
+
+        return $result;
     }
 
     /**

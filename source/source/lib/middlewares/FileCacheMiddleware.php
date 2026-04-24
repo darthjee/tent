@@ -5,6 +5,7 @@ namespace Tent\Middlewares;
 use Tent\Models\ProcessingRequest;
 use Tent\Models\FolderLocation;
 use Tent\Content\FileCache;
+use Tent\Log\Logger;
 use Tent\Models\Response;
 use Tent\Service\ResponseContentReader;
 use Tent\Service\ResponseCacher;
@@ -113,6 +114,9 @@ class FileCacheMiddleware extends Middleware
         if ($cache->exists()) {
             $reader = new ResponseContentReader($request, $cache);
             $response = $reader->getResponse();
+            if ($response->httpCode() === 404) {
+                Logger::debug('404: serving cached response — uri: ' . $request->requestPath());
+            }
             $request->setResponse($response);
         }
 
