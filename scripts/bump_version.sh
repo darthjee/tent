@@ -21,7 +21,7 @@ PATCH="${REST#*.}"
 NEXT_VERSION="${MAJOR}.${MINOR}.$((PATCH + 1))"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT_DIR="$SCRIPT_DIR"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 README="$ROOT_DIR/README.md"
 COMPOSER_JSON="$ROOT_DIR/source/composer.json"
