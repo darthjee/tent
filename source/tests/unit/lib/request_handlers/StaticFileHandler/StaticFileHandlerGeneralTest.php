@@ -212,7 +212,7 @@ class StaticFileHandlerGeneralTest extends TestCase
         $instance->expects($this->once())
             ->method('log')
             ->with(
-                '404: static file not found — uri: /nonexistent.txt, resolved path: ' .
+                '[404] - static file not found — uri: /nonexistent.txt, resolved path: ' .
                 $this->testDir . '/nonexistent.txt',
                 'debug'
             );
@@ -235,7 +235,7 @@ class StaticFileHandlerGeneralTest extends TestCase
         $instance->expects($this->once())
             ->method('log')
             ->with(
-                '404: static file not found — uri: /subdir, resolved path: ' .
+                '[404] - static file not found — uri: /subdir, resolved path: ' .
                 $this->testDir . '/subdir',
                 'debug'
             );

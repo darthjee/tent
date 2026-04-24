@@ -78,7 +78,7 @@ class RequestProcessor
         }
 
         Logger::debug(
-            '404: no rules matched — method: ' . $this->request->requestMethod() .
+            '[404] - no rules matched — method: ' . $this->request->requestMethod() .
             ', uri: ' . $this->request->requestPath()
         );
 

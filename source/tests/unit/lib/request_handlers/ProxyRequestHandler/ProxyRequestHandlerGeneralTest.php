@@ -114,7 +114,7 @@ class ProxyRequestHandlerGeneralTest extends TestCase
         $instance->expects($this->once())
             ->method('log')
             ->with(
-                '404: upstream returned 404 — method: GET, uri: /api/users, upstream: http://backend:8080/api/users',
+                '[404] - upstream response — method: GET, uri: /api/users, upstream: http://backend:8080/api/users',
                 'debug'
             );
         Logger::setInstance($instance);
@@ -125,6 +125,25 @@ class ProxyRequestHandlerGeneralTest extends TestCase
         $response = $handler->handleRequest($this->request);
 
         $this->assertEquals(404, $response->httpCode());
+    }
+
+    public function testLogsDebugForAllUpstreamStatuses(): void
+    {
+        $this->initVariables();
+
+        $instance = $this->createMock(LoggerInstance::class);
+        $instance->expects($this->once())
+            ->method('log')
+            ->with(
+                '[200] - upstream response — method: GET, uri: /api/users, upstream: http://backend:8080/api/users',
+                'debug'
+            );
+        Logger::setInstance($instance);
+
+        $this->createMockHttpClient(['body' => '{"users":[]}', 'httpCode' => 200, 'headers' => []]);
+
+        $handler = new ProxyRequestHandler($this->host, $this->httpClient);
+        $handler->handleRequest($this->request);
     }
 
     private function createMockHttpClient($returnValue): void

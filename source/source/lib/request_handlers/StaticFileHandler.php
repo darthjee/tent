@@ -108,7 +108,7 @@ class StaticFileHandler extends RequestHandler
             return new ForbiddenResponse($request);
         } catch (FileNotFoundException $e) {
             Logger::debug(
-                '404: static file not found — uri: ' . $request->requestPath() .
+                '[404] - static file not found — uri: ' . $request->requestPath() .
                 ', resolved path: ' . $this->folderLocation->basePath() . '/' . ltrim($request->requestPath(), '/')
             );
             return new MissingResponse($request);

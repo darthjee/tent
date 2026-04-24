@@ -120,13 +120,11 @@ class ProxyRequestHandler extends RequestHandler
 
         $result = new Response($response);
 
-        if ($result->httpCode() === 404) {
-            Logger::debug(
-                '404: upstream returned 404 — method: ' . $request->requestMethod() .
-                ', uri: ' . $request->requestPath() .
-                ', upstream: ' . $url
-            );
-        }
+        Logger::debug(
+            '[' . $result->httpCode() . '] - upstream response — method: ' . $request->requestMethod() .
+            ', uri: ' . $request->requestPath() .
+            ', upstream: ' . $url
+        );
 
         return $result;
     }

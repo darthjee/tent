@@ -123,7 +123,7 @@ class RequestProcessorTest extends TestCase
         $instance = $this->createMock(LoggerInstance::class);
         $instance->expects($this->once())
             ->method('log')
-            ->with('404: no rules matched — method: GET, uri: /unmatched', 'debug');
+            ->with('[404] - no rules matched — method: GET, uri: /unmatched', 'debug');
         Logger::setInstance($instance);
 
         $request = new Request([

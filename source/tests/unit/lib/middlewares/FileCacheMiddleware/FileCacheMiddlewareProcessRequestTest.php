@@ -125,7 +125,32 @@ class FileCacheMiddlewareProcessRequestTest extends TestCase
         $instance = $this->createMock(LoggerInstance::class);
         $instance->expects($this->once())
             ->method('log')
-            ->with('404: serving cached response — uri: /api/users', 'debug');
+            ->with('[404] - serving from cache — uri: /api/users', 'debug');
+        Logger::setInstance($instance);
+
+        $middleware = $this->buildMiddleware();
+        $middleware->processRequest($this->request);
+    }
+
+    public function testLogsDebugForAllCachedStatuses(): void
+    {
+        $this->path = '/api/users';
+        $this->request = $this->buildRequest($this->path, 'GET');
+
+        $this->headers = ['Content-Type: application/json'];
+        $this->response = new Response([
+            'body' => '{"users":[]}',
+            'httpCode' => 200,
+            'headers' => $this->headers,
+            'request' => $this->request
+        ]);
+        $cache = new FileCache($this->request, $this->location);
+        $cache->store($this->response);
+
+        $instance = $this->createMock(LoggerInstance::class);
+        $instance->expects($this->once())
+            ->method('log')
+            ->with('[200] - serving from cache — uri: /api/users', 'debug');
         Logger::setInstance($instance);
 
         $middleware = $this->buildMiddleware();
