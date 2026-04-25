@@ -4,7 +4,7 @@ namespace Tent\Log;
 
 /**
  * Default logger implementation that reads LOG_LEVEL from the environment
- * and writes messages to stdout when their level meets or exceeds the threshold.
+ * and writes messages to the error log when their level meets or exceeds the threshold.
  *
  * Level precedence (ascending): debug < info < warn < error.
  */
@@ -52,7 +52,7 @@ class LoggerInstance
     }
 
     /**
-     * Writes $message to stdout if enabled and $level meets the threshold.
+     * Writes $message to the error log if enabled and $level meets the threshold.
      *
      * @param string $message The message to log.
      * @param string $level   One of 'debug', 'info', 'warn', 'error'.
@@ -71,6 +71,6 @@ class LoggerInstance
             return;
         }
 
-        echo '[' . strtoupper($level) . '] ' . $message . PHP_EOL;
+        error_log('[' . strtoupper($level) . '] ' . $message);
     }
 }
