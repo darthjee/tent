@@ -10,10 +10,15 @@ use Tent\Log\LoggerInstance;
 class LoggerInstanceTest extends TestCase
 {
     private string $originalLogLevel;
+    private string $errorLogFile;
+    private string $originalErrorLog;
 
     protected function setUp(): void
     {
         $this->originalLogLevel = (string) getenv('LOG_LEVEL');
+        $this->errorLogFile = (string) tempnam(sys_get_temp_dir(), 'phpunit_log_');
+        $this->originalErrorLog = (string) ini_get('error_log');
+        ini_set('error_log', $this->errorLogFile);
     }
 
     protected function tearDown(): void
@@ -23,6 +28,23 @@ class LoggerInstanceTest extends TestCase
         } else {
             putenv('LOG_LEVEL');
         }
+
+        ini_set('error_log', $this->originalErrorLog);
+
+        if (file_exists($this->errorLogFile)) {
+            unlink($this->errorLogFile);
+        }
+    }
+
+    private function getLogOutput(): string
+    {
+        if (!file_exists($this->errorLogFile)) {
+            return '';
+        }
+
+        $contents = file_get_contents($this->errorLogFile);
+
+        return $contents !== false ? $contents : '';
     }
 
     public function testLogWritesDebugWhenThresholdIsDebug(): void
@@ -30,8 +52,9 @@ class LoggerInstanceTest extends TestCase
         putenv('LOG_LEVEL=debug');
         $instance = new LoggerInstance();
 
-        $this->expectOutputRegex('/\[DEBUG\] hello/');
         $instance->log('hello', 'debug');
+
+        $this->assertMatchesRegularExpression('/\[DEBUG\] hello/', $this->getLogOutput());
     }
 
     public function testLogWritesInfoWhenThresholdIsDebug(): void
@@ -39,8 +62,9 @@ class LoggerInstanceTest extends TestCase
         putenv('LOG_LEVEL=debug');
         $instance = new LoggerInstance();
 
-        $this->expectOutputRegex('/\[INFO\] message/');
         $instance->log('message', 'info');
+
+        $this->assertMatchesRegularExpression('/\[INFO\] message/', $this->getLogOutput());
     }
 
     public function testLogWritesWarnWhenThresholdIsDebug(): void
@@ -48,8 +72,9 @@ class LoggerInstanceTest extends TestCase
         putenv('LOG_LEVEL=debug');
         $instance = new LoggerInstance();
 
-        $this->expectOutputRegex('/\[WARN\] message/');
         $instance->log('message', 'warn');
+
+        $this->assertMatchesRegularExpression('/\[WARN\] message/', $this->getLogOutput());
     }
 
     public function testLogWritesErrorWhenThresholdIsDebug(): void
@@ -57,8 +82,9 @@ class LoggerInstanceTest extends TestCase
         putenv('LOG_LEVEL=debug');
         $instance = new LoggerInstance();
 
-        $this->expectOutputRegex('/\[ERROR\] message/');
         $instance->log('message', 'error');
+
+        $this->assertMatchesRegularExpression('/\[ERROR\] message/', $this->getLogOutput());
     }
 
     public function testLogSuppressesDebugWhenThresholdIsInfo(): void
@@ -66,8 +92,9 @@ class LoggerInstanceTest extends TestCase
         putenv('LOG_LEVEL=info');
         $instance = new LoggerInstance();
 
-        $this->expectOutputString('');
         $instance->log('silent', 'debug');
+
+        $this->assertEmpty($this->getLogOutput());
     }
 
     public function testLogWritesInfoWhenThresholdIsInfo(): void
@@ -75,8 +102,9 @@ class LoggerInstanceTest extends TestCase
         putenv('LOG_LEVEL=info');
         $instance = new LoggerInstance();
 
-        $this->expectOutputRegex('/\[INFO\] visible/');
         $instance->log('visible', 'info');
+
+        $this->assertMatchesRegularExpression('/\[INFO\] visible/', $this->getLogOutput());
     }
 
     public function testLogSuppressesDebugAndInfoWhenThresholdIsWarn(): void
@@ -84,9 +112,10 @@ class LoggerInstanceTest extends TestCase
         putenv('LOG_LEVEL=warn');
         $instance = new LoggerInstance();
 
-        $this->expectOutputString('');
         $instance->log('debug msg', 'debug');
         $instance->log('info msg', 'info');
+
+        $this->assertEmpty($this->getLogOutput());
     }
 
     public function testLogWritesWarnWhenThresholdIsWarn(): void
@@ -94,8 +123,9 @@ class LoggerInstanceTest extends TestCase
         putenv('LOG_LEVEL=warn');
         $instance = new LoggerInstance();
 
-        $this->expectOutputRegex('/\[WARN\] visible/');
         $instance->log('visible', 'warn');
+
+        $this->assertMatchesRegularExpression('/\[WARN\] visible/', $this->getLogOutput());
     }
 
     public function testLogWritesErrorWhenThresholdIsWarn(): void
@@ -103,8 +133,9 @@ class LoggerInstanceTest extends TestCase
         putenv('LOG_LEVEL=warn');
         $instance = new LoggerInstance();
 
-        $this->expectOutputRegex('/\[ERROR\] visible/');
         $instance->log('visible', 'error');
+
+        $this->assertMatchesRegularExpression('/\[ERROR\] visible/', $this->getLogOutput());
     }
 
     public function testLogOnlyWritesErrorWhenThresholdIsError(): void
@@ -112,10 +143,11 @@ class LoggerInstanceTest extends TestCase
         putenv('LOG_LEVEL=error');
         $instance = new LoggerInstance();
 
-        $this->expectOutputString('');
         $instance->log('debug msg', 'debug');
         $instance->log('info msg', 'info');
         $instance->log('warn msg', 'warn');
+
+        $this->assertEmpty($this->getLogOutput());
     }
 
     public function testLogWritesErrorWhenThresholdIsError(): void
@@ -123,8 +155,9 @@ class LoggerInstanceTest extends TestCase
         putenv('LOG_LEVEL=error');
         $instance = new LoggerInstance();
 
-        $this->expectOutputRegex('/\[ERROR\] visible/');
         $instance->log('visible', 'error');
+
+        $this->assertMatchesRegularExpression('/\[ERROR\] visible/', $this->getLogOutput());
     }
 
     public function testDisableSuppressesAllOutput(): void
@@ -133,9 +166,10 @@ class LoggerInstanceTest extends TestCase
         $instance = new LoggerInstance();
         $instance->disable();
 
-        $this->expectOutputString('');
         $instance->log('debug msg', 'debug');
         $instance->log('error msg', 'error');
+
+        $this->assertEmpty($this->getLogOutput());
     }
 
     public function testEnableRestoresOutputAfterDisable(): void
@@ -145,8 +179,9 @@ class LoggerInstanceTest extends TestCase
         $instance->disable();
         $instance->enable();
 
-        $this->expectOutputRegex('/\[INFO\] restored/');
         $instance->log('restored', 'info');
+
+        $this->assertMatchesRegularExpression('/\[INFO\] restored/', $this->getLogOutput());
     }
 
     public function testDefaultThresholdIsDebugWhenEnvNotSet(): void
@@ -154,7 +189,8 @@ class LoggerInstanceTest extends TestCase
         putenv('LOG_LEVEL');
         $instance = new LoggerInstance();
 
-        $this->expectOutputRegex('/\[DEBUG\] everything/');
         $instance->log('everything', 'debug');
+
+        $this->assertMatchesRegularExpression('/\[DEBUG\] everything/', $this->getLogOutput());
     }
 }
