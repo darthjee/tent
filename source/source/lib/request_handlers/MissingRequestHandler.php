@@ -2,6 +2,7 @@
 
 namespace Tent\RequestHandlers;
 
+use Tent\Log\Logger;
 use Tent\Models\RequestInterface;
 use Tent\Models\Response;
 use Tent\Models\MissingResponse;
@@ -22,6 +23,11 @@ class MissingRequestHandler extends RequestHandler
      */
     protected function processsRequest(RequestInterface $request): Response
     {
+        Logger::debug(
+            '[404] - no rules matched — method: ' . $request->requestMethod() .
+            ', uri: ' . $request->requestPath()
+        );
+
         return new MissingResponse($request);
     }
 }
