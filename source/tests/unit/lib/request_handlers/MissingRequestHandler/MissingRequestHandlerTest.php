@@ -7,6 +7,7 @@ require_once __DIR__ . '/../../../../support/loader.php';
 use PHPUnit\Framework\TestCase;
 use Tent\Log\Logger;
 use Tent\Log\LoggerInstance;
+use Tent\Models\ProcessingRequest;
 use Tent\RequestHandlers\MissingRequestHandler;
 use Tent\Models\Request;
 
@@ -26,10 +27,11 @@ class MissingRequestHandlerTest extends TestCase
         Logger::setInstance($instance);
 
         $handler = new MissingRequestHandler();
-        $response = $handler->handleRequest(new Request([
+        $request = new Request([
             'requestMethod' => 'GET',
             'requestPath' => '/missing'
-        ]));
+        ]);
+        $response = $handler->handleRequest(new ProcessingRequest(['request' => $request]));
 
         $this->assertEquals(404, $response->httpCode());
     }
