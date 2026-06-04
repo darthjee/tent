@@ -9,6 +9,7 @@ use PHPUnit\Framework\TestCase;
 use Tent\Models\ProcessingRequest;
 use Tent\Tests\Support\Handlers\RequestToBodyHandler;
 use Tent\Models\Response;
+use Tent\Middlewares\RedirectMiddleware;
 use Tent\Tests\Support\Middlewares\QuickResponseMiddleware;
 use Tent\Tests\Support\Middlewares\DummyResponseMiddleware;
 
@@ -65,5 +66,25 @@ class RequestHandlerHandleRequestTest extends TestCase
         $this->assertInstanceOf(Response::class, $response);
 
         $this->assertEquals('Dummy response body', $response->body());
+    }
+
+    public function testRedirectMiddlewareShortCircuitsHandlerExecution()
+    {
+        $handler = new RequestToBodyHandler();
+        $handler->buildMiddleware([
+            'class' => RedirectMiddleware::class,
+            'pattern' => '/^\/old\/(.*)$/',
+            'replacement' => '/new/$1',
+        ]);
+
+        $request = new ProcessingRequest([
+            'requestPath' => '/old/path',
+            'query' => 'x=1',
+        ]);
+        $response = $handler->handleRequest($request);
+
+        $this->assertSame('', $response->body());
+        $this->assertEquals(302, $response->httpCode());
+        $this->assertEquals(['Location: /new/path?x=1'], $response->headers());
     }
 }

@@ -16,8 +16,8 @@ source/
         ProcessingRequest.php
         Response.php
       request_handlers/     ← DefaultProxyRequestHandler, ProxyRequestHandler, StaticFileHandler, MissingRequestHandler
-      middlewares/          ← FileCacheMiddleware, SetHeadersMiddleware, SetPathMiddleware, RenameHeaderMiddleware
-      matchers/             ← ExactRequestMatcher, BeginsWithRequestMatcher, EndsWithRequestMatcher,
+      middlewares/          ← FileCacheMiddleware, SetHeadersMiddleware, SetPathMiddleware, RenameHeaderMiddleware, RedirectMiddleware
+      matchers/             ← ExactRequestMatcher, BeginsWithRequestMatcher, EndsWithRequestMatcher, RegexRequestMatcher,
                               StatusCodeMatcher, ResponseHeaderMatcher, RequestMethodMatcher, NegativeMatcher
       log/                  ← Logger (static facade), LoggerInstance (default, reads LOG_LEVEL), NullLoggerInstance (test double)
   tests/
@@ -80,6 +80,7 @@ Implement `processRequest(ProcessingRequest)` and/or `processResponse(Response)`
 | `SetHeadersMiddleware` | Set or override request headers |
 | `SetPathMiddleware` | Rewrite the request path |
 | `RenameHeaderMiddleware` | Rename a request header (copy value to new name, remove original) |
+| `RedirectMiddleware` | Rewrite request path using regex and return a 302 redirect |
 
 See [`creating-middlewares.md`](../creating-middlewares.md) for how to build custom middlewares.
 
@@ -90,6 +91,7 @@ See [`creating-middlewares.md`](../creating-middlewares.md) for how to build cus
 | `ExactRequestMatcher` | Exact URI string |
 | `BeginsWithRequestMatcher` | URI prefix |
 | `EndsWithRequestMatcher` | URI suffix |
+| `RegexRequestMatcher` | URI regex pattern |
 | `StatusCodeMatcher` | HTTP response status code (exact or pattern like `"2xx"`) |
 | `ResponseHeaderMatcher` | Response header value |
 | `RequestMethodMatcher` | HTTP method (GET, POST, …) |
@@ -134,7 +136,7 @@ Configuration::buildRule([
   ],
   'matchers' => [
     ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact'],
-    // type: 'exact', 'begins_with', 'ends_with'; method: any HTTP verb
+    // type: 'exact', 'begins_with', 'ends_with', 'regex'; method: any HTTP verb
   ],
   'middlewares' => [
     [

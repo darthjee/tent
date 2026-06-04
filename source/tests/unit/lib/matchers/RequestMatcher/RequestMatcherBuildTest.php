@@ -9,6 +9,7 @@ use Tent\Matchers\RequestMatcher;
 use Tent\Matchers\ExactRequestMatcher;
 use Tent\Matchers\BeginsWithRequestMatcher;
 use Tent\Matchers\EndsWithRequestMatcher;
+use Tent\Matchers\RegexRequestMatcher;
 use Tent\Models\Request;
 
 class RequestMatcherBuildTest extends TestCase
@@ -49,15 +50,17 @@ class RequestMatcherBuildTest extends TestCase
             ['method' => 'POST', 'uri' => '/users', 'type' => 'begins_with'],
             ['method' => null, 'uri' => '/admin', 'type' => 'exact'],
             ['method' => 'GET', 'uri' => '.json', 'type' => 'ends_with'],
+            ['method' => 'GET', 'pattern' => '/^\/profiles\/.+$/', 'type' => 'regex'],
         ];
 
         $matchers = RequestMatcher::buildMatchers($attributes);
 
-        $this->assertCount(4, $matchers);
+        $this->assertCount(5, $matchers);
         $this->assertInstanceOf(ExactRequestMatcher::class, $matchers[0]);
         $this->assertInstanceOf(BeginsWithRequestMatcher::class, $matchers[1]);
         $this->assertInstanceOf(ExactRequestMatcher::class, $matchers[2]);
         $this->assertInstanceOf(EndsWithRequestMatcher::class, $matchers[3]);
+        $this->assertInstanceOf(RegexRequestMatcher::class, $matchers[4]);
     }
 
     public function testBuildEndsWithMatcher()
@@ -84,6 +87,34 @@ class RequestMatcherBuildTest extends TestCase
             'method' => 'GET',
             'uri' => '/users',
             'type' => 'invalid_type'
+        ]);
+    }
+
+    public function testBuildRegexMatcher()
+    {
+        $matcher = RequestMatcher::build([
+            'method' => 'GET',
+            'type' => 'regex',
+            'pattern' => '/^\/users\/\d+$/'
+        ]);
+
+        $this->assertInstanceOf(RegexRequestMatcher::class, $matcher);
+
+        $request = $this->createMock(Request::class);
+        $request->method('requestMethod')->willReturn('GET');
+        $request->method('requestPath')->willReturn('/users/123');
+        $this->assertTrue($matcher->matches($request));
+    }
+
+    public function testBuildRegexMatcherThrowsOnInvalidPattern()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage("Invalid regex pattern '/(invalid/'.");
+
+        RequestMatcher::build([
+            'method' => 'GET',
+            'type' => 'regex',
+            'pattern' => '/(invalid/'
         ]);
     }
 }
