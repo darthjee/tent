@@ -100,6 +100,8 @@ Each rule is registered with `Configuration::buildRule()`. A rule has three part
 |---------------|---------------------------------------------------|
 | `exact`       | Matches only if the URI is exactly equal          |
 | `begins_with` | Matches if the URI starts with the given prefix   |
+| `ends_with`   | Matches if the URI ends with the given suffix     |
+| `regex`       | Matches if the URI matches a regular expression   |
 
 Matchers also accept a `method` field (`GET`, `POST`, `PUT`, `DELETE`, etc.). When `method` is omitted, the rule matches any HTTP method for the given URI pattern.
 
@@ -372,6 +374,22 @@ Rewrites the request path before it reaches the handler.
 ```
 
 Primarily used with `StaticFileHandler` to map `/` to `/index.html` for single-page applications.
+
+---
+
+### `RedirectMiddleware`
+
+Rewrites the request path with a regex replacement and returns a `302` response immediately.
+
+```php
+[
+    'class' => 'Tent\Middlewares\RedirectMiddleware',
+    'pattern' => '/^\/old\/(.*)$/',
+    'replacement' => '/new/$1'
+]
+```
+
+If the regex matches, the middleware sets a `Location` header and short-circuits handler execution.
 
 ---
 
@@ -690,6 +708,7 @@ Configuration::buildRule([
 | `Tent\Middlewares\SetHeadersMiddleware` | Set or override request headers before forwarding |
 | `Tent\Middlewares\RenameHeaderMiddleware` | Move a header value to a different header name |
 | `Tent\Middlewares\SetPathMiddleware`    | Rewrite the request path before the handler runs |
+| `Tent\Middlewares\RedirectMiddleware`   | Rewrite path using regex and return a 302 response |
 
 ### Cache matchers
 
@@ -704,3 +723,5 @@ Configuration::buildRule([
 |---------------|-------------------------------------------------|
 | `exact`       | Match URI exactly                               |
 | `begins_with` | Match URI prefix                                |
+| `ends_with`   | Match URI suffix                                |
+| `regex`       | Match URI with regular expression pattern       |
