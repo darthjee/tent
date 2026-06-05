@@ -138,6 +138,7 @@ Configuration::buildRule([
 | `host`       | `string`         | Yes      | —           | Upstream backend URL |
 | `cache`      | `string\|false`  | No       | `'./cache'` | Cache directory path, or `false` to disable |
 | `cacheCodes` | `array`          | No       | `['2xx']`   | HTTP status codes/patterns to cache |
+| `skip_cache_header` | `string`   | No       | —           | Request header name that bypasses cache read/write when present |
 
 ---
 
@@ -439,6 +440,24 @@ Configuration::buildRule([
         'host'       => 'http://api:3000',
         'cache'      => './cache/api',
         'cacheCodes' => [200, 301]
+    ],
+    'matchers' => [
+        ['method' => 'GET', 'uri' => '/api/', 'type' => 'begins_with']
+    ]
+]);
+```
+
+### Bypass cache with request header
+
+When you need to force fresh responses for specific calls, configure `skip_cache_header`. Any request containing this header skips cache reads and writes for that request lifecycle:
+
+```php
+Configuration::buildRule([
+    'handler' => [
+        'type'              => 'default_proxy',
+        'host'              => 'http://api:3000',
+        'cache'             => './cache/api',
+        'skip_cache_header' => 'X-Skip-Cache'
     ],
     'matchers' => [
         ['method' => 'GET', 'uri' => '/api/', 'type' => 'begins_with']

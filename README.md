@@ -134,6 +134,7 @@ Configuration::buildRule([
         'host'  => 'http://api.com:80',
         // 'cache' => './cache',       // optional, defaults to './cache'
         // 'cacheCodes' => ['2xx'],    // optional, defaults to ['2xx']
+        // 'skip_cache_header' => 'X-Skip-Cache', // optional, bypasses cache when present
         // 'cache' => false,           // set to false to disable caching
     ],
     'matchers' => [
