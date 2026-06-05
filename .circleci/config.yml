@@ -258,40 +258,89 @@ jobs:
               RELEASE_PACKAGE="tent-${CIRCLE_TAG}-source.tar.gz"
             fi
 
-            RELEASE_DATA=$(curl --silent --show-error --fail \
-              -H "Authorization: token ${GITHUB_TOKEN}" \
+            RELEASE_RESPONSE=$(curl --silent --show-error \
+              -u "x-access-token:${GITHUB_TOKEN}" \
               -H "Accept: application/vnd.github+json" \
-              "https://api.github.com/repos/darthjee/tent/releases/tags/${CIRCLE_TAG}" || true)
+              -w '\n%{http_code}' \
+              "https://api.github.com/repos/darthjee/tent/releases/tags/${CIRCLE_TAG}")
+            RELEASE_STATUS=$(echo "$RELEASE_RESPONSE" | tail -n 1)
+            RELEASE_DATA=$(echo "$RELEASE_RESPONSE" | sed '$d')
 
-            if [ -z "$RELEASE_DATA" ]; then
+            if [ "$RELEASE_STATUS" = "404" ]; then
+              RELEASE_PAYLOAD=$(python3 - <<'PY'
+import json
+import os
+
+tag = os.environ["CIRCLE_TAG"]
+print(json.dumps({
+    "tag_name": tag,
+    "name": tag,
+    "generate_release_notes": True
+}))
+PY
+)
               RELEASE_DATA=$(curl --silent --show-error --fail \
                 -X POST \
-                -H "Authorization: token ${GITHUB_TOKEN}" \
+                -u "x-access-token:${GITHUB_TOKEN}" \
                 -H "Accept: application/vnd.github+json" \
-                -d "{\"tag_name\":\"${CIRCLE_TAG}\",\"name\":\"${CIRCLE_TAG}\",\"generate_release_notes\":true}" \
+                -d "$RELEASE_PAYLOAD" \
                 "https://api.github.com/repos/darthjee/tent/releases")
+            elif [ "$RELEASE_STATUS" != "200" ]; then
+              echo "Failed to fetch release for tag ${CIRCLE_TAG} (HTTP ${RELEASE_STATUS})"
+              echo "$RELEASE_DATA"
+              exit 1
             fi
 
-            RELEASE_ID=$(echo "$RELEASE_DATA" | python3 -c 'import json,sys; print(json.load(sys.stdin)["id"])')
-            UPLOAD_URL=$(echo "$RELEASE_DATA" | python3 -c 'import json,sys; print(json.load(sys.stdin)["upload_url"].split("{")[0])')
+            if [ -z "$RELEASE_DATA" ]; then
+              echo "Release data is empty for tag ${CIRCLE_TAG}"
+              exit 1
+            fi
 
-            EXISTING_ASSET_ID=$(curl --silent --show-error --fail \
-              -H "Authorization: token ${GITHUB_TOKEN}" \
+            RELEASE_ID=$(echo "$RELEASE_DATA" | python3 - <<'PY'
+import json
+import sys
+
+data = json.load(sys.stdin)
+print(data["id"])
+PY
+)
+            UPLOAD_URL=$(echo "$RELEASE_DATA" | python3 - <<'PY'
+import json
+import sys
+
+data = json.load(sys.stdin)
+print(data["upload_url"].split("{")[0])
+PY
+)
+
+            ASSETS_DATA=$(curl --silent --show-error --fail \
+              -u "x-access-token:${GITHUB_TOKEN}" \
               -H "Accept: application/vnd.github+json" \
-              "https://api.github.com/repos/darthjee/tent/releases/${RELEASE_ID}/assets" \
-              | python3 -c 'import json,sys,os; assets=json.load(sys.stdin); name=os.environ["RELEASE_PACKAGE"]; print(next((str(a["id"]) for a in assets if a["name"]==name), ""))')
+              "https://api.github.com/repos/darthjee/tent/releases/${RELEASE_ID}/assets")
+
+            EXISTING_ASSET_ID=$(echo "$ASSETS_DATA" | python3 - "$RELEASE_PACKAGE" <<'PY'
+import json
+import sys
+
+name = sys.argv[1]
+for asset in json.load(sys.stdin):
+    if asset.get("name") == name:
+        print(asset["id"])
+        break
+PY
+)
 
             if [ -n "$EXISTING_ASSET_ID" ]; then
               curl --silent --show-error --fail \
                 -X DELETE \
-                -H "Authorization: token ${GITHUB_TOKEN}" \
+                -u "x-access-token:${GITHUB_TOKEN}" \
                 -H "Accept: application/vnd.github+json" \
                 "https://api.github.com/repos/darthjee/tent/releases/assets/${EXISTING_ASSET_ID}"
             fi
 
             curl --silent --show-error --fail \
               -X POST \
-              -H "Authorization: token ${GITHUB_TOKEN}" \
+              -u "x-access-token:${GITHUB_TOKEN}" \
               -H "Content-Type: application/gzip" \
               --data-binary @"${RELEASE_PACKAGE}" \
               "${UPLOAD_URL}?name=${RELEASE_PACKAGE}"
