@@ -56,6 +56,7 @@ It automatically adds:
 | `host` | `string` | Yes | — | Backend host used for proxying |
 | `cache` | `string \| false` | No | `'./cache'` | Cache directory, or `false` to disable cache |
 | `cacheCodes` | `array` | No | `['2xx']` | Status codes/patterns used by `StatusCodeMatcher` in cache middleware |
+| `skip_cache_header` | `string` | No | — | Request header name that bypasses cache read/write when present |
 
 ### Example: Default proxy with built-in cache
 
@@ -95,6 +96,22 @@ Configuration::buildRule([
         'host' => 'http://api:80',
         'cache' => './cache/api',
         'cacheCodes' => [200, 301]
+    ],
+    'matchers' => [
+        ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact']
+    ]
+]);
+```
+
+### Example: Bypass cache with a request header
+
+```php
+Configuration::buildRule([
+    'handler' => [
+        'type' => 'default_proxy',
+        'host' => 'http://api:80',
+        'cache' => './cache/api',
+        'skip_cache_header' => 'X-Skip-Cache'
     ],
     'matchers' => [
         ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact']

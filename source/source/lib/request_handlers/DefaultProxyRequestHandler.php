@@ -71,24 +71,32 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
      * @var array HTTP status codes eligible for caching
      */
     private array $cacheCodes;
+    /**
+     * @var string|null Header name that forces cache bypass when present.
+     */
+    private ?string $skipCacheHeader;
 
     /**
      * Constructs a DefaultProxyRequestHandler.
      *
-     * @param string                   $host       The target host to proxy requests to.
-     * @param string|false             $cache      Cache directory, or false to disable caching. Defaults to './cache'.
-     * @param array                    $cacheCodes HTTP status codes eligible for caching. Defaults to ['2xx'].
-     * @param HttpClientInterface|null $httpClient Optional HTTP client.
+     * @param string                   $host            The target host to proxy requests to.
+     * @param string|false             $cache           Cache directory, or false to disable caching.
+     *   Defaults to './cache'.
+     * @param array                    $cacheCodes      HTTP status codes eligible for caching. Defaults to ['2xx'].
+     * @param HttpClientInterface|null $httpClient      Optional HTTP client.
+     * @param string|null              $skipCacheHeader Header name that disables cache read/write when present.
      */
     public function __construct(
         string $host,
         string|false $cache,
         array $cacheCodes,
-        ?HttpClientInterface $httpClient = null
+        ?HttpClientInterface $httpClient = null,
+        ?string $skipCacheHeader = null
     ) {
         parent::__construct($host, $httpClient);
         $this->cache = $cache;
         $this->cacheCodes = $cacheCodes;
+        $this->skipCacheHeader = $skipCacheHeader;
         $this->initializeMiddlewares();
     }
 
@@ -99,6 +107,7 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
      *   - 'host' (string, required): Target host URL.
      *   - 'cache' (string|false): Cache directory or false to disable. Defaults to './cache'.
      *   - 'cacheCodes' (array): HTTP codes to cache. Defaults to ['2xx'].
+     *   - 'skip_cache_header' (string): Header name that disables cache read/write when present.
      * @return self
      * @throws \InvalidArgumentException If 'host' is missing.
      */
@@ -110,7 +119,8 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
         $host = $params['host'];
         $cache = array_key_exists('cache', $params) ? $params['cache'] : './cache';
         $cacheCodes = $params['cacheCodes'] ?? ['2xx'];
-        return new self($host, $cache, $cacheCodes);
+        $skipCacheHeader = $params['skip_cache_header'] ?? null;
+        return new self($host, $cache, $cacheCodes, null, $skipCacheHeader);
     }
 
     /**
@@ -125,7 +135,8 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
         if ($this->cache !== false) {
             $this->addMiddleware(new FileCacheMiddleware(
                 new FolderLocation($this->cache),
-                [new StatusCodeMatcher($this->cacheCodes)]
+                [new StatusCodeMatcher($this->cacheCodes)],
+                $this->skipCacheHeader
             ));
         }
     }

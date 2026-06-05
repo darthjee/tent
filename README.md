@@ -8,9 +8,9 @@ Tent is an intelligent PHP-based proxy server that can route requests to backend
 
 ![tent](https://raw.githubusercontent.com/darthjee/tent/master/tent.png)
 
-**Current Version:** [0.7.3](https://github.com/darthjee/tent/releases/tag/0.7.3)
+**Current Version:** [0.7.4](https://github.com/darthjee/tent/releases/tag/0.7.4)
 
-**Next Release:** [0.7.4](https://github.com/darthjee/tent/compare/0.7.3...main)
+**Next Release:** [0.7.5](https://github.com/darthjee/tent/compare/0.7.4...main)
 
 ## Documentation
 
@@ -38,6 +38,18 @@ Tent uses Apache with PHP to process all incoming requests through a centralized
 ## Docker Image
 
 Tent is available as a Docker image: `darthjee/tent`
+
+## Release Package
+
+GitHub Releases also include a downloadable package named `tent-<tag>-source.tar.gz`.
+
+- The archive contains the exact contents of `source/source`.
+- Download the package from the release page for your version: https://github.com/darthjee/tent/releases
+- Extract it with `tar -xzf tent-<tag>-source.tar.gz` and place the extracted files where you want to run Tent source code.
+
+You can choose either distribution method:
+- Use the Docker image (`darthjee/tent`) for containerized deployments.
+- Use the release package when you want the raw source files from `source/source`.
 
 ## Current Status
 
@@ -134,6 +146,7 @@ Configuration::buildRule([
         'host'  => 'http://api.com:80',
         // 'cache' => './cache',       // optional, defaults to './cache'
         // 'cacheCodes' => ['2xx'],    // optional, defaults to ['2xx']
+        // 'skip_cache_header' => 'X-Skip-Cache', // optional, bypasses cache when present
         // 'cache' => false,           // set to false to disable caching
     ],
     'matchers' => [
