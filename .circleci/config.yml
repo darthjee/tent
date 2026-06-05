@@ -216,15 +216,7 @@ jobs:
       - checkout
       - run:
           name: Create release package
-          command: |
-            if [ -z "${CIRCLE_TAG:-}" ]; then
-              echo "Skipping package creation for non-tag build"
-              exit 0
-            fi
-
-            RELEASE_PACKAGE="tent-${CIRCLE_TAG}-source.tar.gz"
-            tar -czf "$RELEASE_PACKAGE" -C source/source .
-            echo "RELEASE_PACKAGE=$RELEASE_PACKAGE" >> "$BASH_ENV"
+          command: ./scripts/upload_release_package.sh build
       - run:
           name: Docker build
           command: |
@@ -243,7 +235,7 @@ jobs:
           command: docker push darthjee/tent:latest
       - run:
           name: Upload release package
-          command: ./scripts/upload_release_package.sh
+          command: ./scripts/upload_release_package.sh release
   update-description:
     docker:
       - image: darthjee/scripts:0.6.0
