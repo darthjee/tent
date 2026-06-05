@@ -11,6 +11,7 @@ use Tent\Models\Response;
 use Tent\Tests\Support\Utils\FileSystemUtils;
 use Tent\Models\FolderLocation;
 use Tent\Content\FileCache;
+use Tent\Http\HttpClientInterface;
 
 class DefaultProxyRequestHandlerCachedTest extends TestCase
 {
@@ -84,6 +85,42 @@ class DefaultProxyRequestHandlerCachedTest extends TestCase
         $response = $handler->handleRequest($this->request);
 
         $this->assertSame($this->cachedBody, $response->body());
+    }
+
+    public function testHandleRequestSkipsCacheWhenSkipCacheHeaderIsPresent()
+    {
+        $this->initVariables([
+            'requestHeaders' => [
+                'x-skip-cache' => '1'
+            ]
+        ]);
+        $this->buildCache();
+
+        $httpClient = $this->createMock(HttpClientInterface::class);
+        $httpClient->expects($this->once())
+            ->method('request')
+            ->willReturn([
+                'body' => 'upstream body',
+                'httpCode' => 200,
+                'headers' => ['Content-Type: text/plain']
+            ]);
+
+        $handler = DefaultProxyRequestHandler::build([
+            'type' => 'default_proxy',
+            'host' => $this->baseUrl,
+            'cache' => $this->cacheDir,
+            'cacheCodes' => ['2xx'],
+            'skip_cache_header' => 'X-SKIP-CACHE'
+        ]);
+
+        $reflection = new \ReflectionClass($handler);
+        $property = $reflection->getParentClass()->getProperty('httpClient');
+        $property->setAccessible(true);
+        $property->setValue($handler, $httpClient);
+
+        $response = $handler->handleRequest($this->request);
+
+        $this->assertSame('upstream body', $response->body());
     }
 
     private function initVariables(array $overrides = []): void

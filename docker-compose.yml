@@ -21,7 +21,7 @@ services:
     container_name: tent_build
     build:
       context: source
-      dockerfile: dockerfiles/dev_tent/Dockerfile
+      dockerfile: ../dockerfiles/dev_tent/Dockerfile
     command: echo done
 
   ###################

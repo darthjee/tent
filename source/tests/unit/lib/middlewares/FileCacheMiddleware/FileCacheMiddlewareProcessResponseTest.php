@@ -101,11 +101,71 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
         $this->assertEquals(["Header1: original", "Header2: value"], $meta['headers']);
     }
 
-    private function buildResponse(int $httpCode)
+    public function testProcessResponseWithSkipCacheHeaderConfiguredAndMissingKeepsCurrentBehavior()
+    {
+        $response = $this->buildResponse(200);
+
+        $middleware = FileCacheMiddleware::build([
+            'location' => $this->cacheDir,
+            'skip_cache_header' => 'X-Skip-Cache',
+            'matchers' => [
+                [
+                    'class' => \Tent\Matchers\StatusCodeMatcher::class,
+                    'httpCodes' => [200],
+                ]
+            ],
+        ]);
+        $middleware->processResponse($response);
+
+        $this->cache = new FileCache($this->request, $this->location);
+        $this->assertTrue($this->cache->exists());
+    }
+
+    public function testProcessResponseSkipsCacheWriteWhenSkipCacheHeaderIsPresent()
+    {
+        $response = $this->buildResponse(200, ['X-Skip-Cache' => '1']);
+
+        $middleware = FileCacheMiddleware::build([
+            'location' => $this->cacheDir,
+            'skip_cache_header' => 'X-Skip-Cache',
+            'matchers' => [
+                [
+                    'class' => \Tent\Matchers\StatusCodeMatcher::class,
+                    'httpCodes' => [200],
+                ]
+            ],
+        ]);
+        $middleware->processResponse($response);
+
+        $this->cache = new FileCache($this->request, $this->location);
+        $this->assertFalse($this->cache->exists());
+    }
+
+    public function testProcessResponseSkipsCacheWriteCaseInsensitively()
+    {
+        $response = $this->buildResponse(200, ['x-skip-cache' => '1']);
+
+        $middleware = FileCacheMiddleware::build([
+            'location' => $this->cacheDir,
+            'skip_cache_header' => 'X-SKIP-CACHE',
+            'matchers' => [
+                [
+                    'class' => \Tent\Matchers\StatusCodeMatcher::class,
+                    'httpCodes' => [200],
+                ]
+            ],
+        ]);
+        $middleware->processResponse($response);
+
+        $this->cache = new FileCache($this->request, $this->location);
+        $this->assertFalse($this->cache->exists());
+    }
+
+    private function buildResponse(int $httpCode, array $requestHeaders = [])
     {
         $this->path = '/file.txt';
         $this->headers = ['Content-Type: text/plain', 'Content-Length: 11'];
-        $this->request = $this->buildRequest($this->path, 'GET');
+        $this->request = $this->buildRequest($this->path, 'GET', $requestHeaders);
 
         return new Response([
             'body' => 'cached body', 'httpCode' => $httpCode, 'headers' => $this->headers,
@@ -113,9 +173,10 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
         ]);
     }
 
-    private function buildRequest(string $path, string $method): ProcessingRequest
+    private function buildRequest(string $path, string $method, array $headers = []): ProcessingRequest
     {
         return new ProcessingRequest([
+            'headers' => $headers,
             'requestPath' => $path,
             'requestMethod' => $method
         ]);

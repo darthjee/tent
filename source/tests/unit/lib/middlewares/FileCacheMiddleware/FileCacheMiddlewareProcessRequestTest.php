@@ -157,9 +157,57 @@ class FileCacheMiddlewareProcessRequestTest extends TestCase
         $middleware->processRequest($this->request);
     }
 
-    private function buildRequest(string $path, string $method): ProcessingRequest
+    public function testProcessRequestWithSkipCacheHeaderConfiguredAndMissingKeepsCurrentBehavior()
+    {
+        $this->path = '/file.txt';
+        $this->request = $this->buildRequest($this->path, 'GET');
+        $this->buildCache();
+
+        $middleware = $this->buildMiddleware([
+            'skip_cache_header' => 'X-Skip-Cache'
+        ]);
+        $result = $middleware->processRequest($this->request);
+
+        $this->assertTrue($result->hasResponse());
+    }
+
+    public function testProcessRequestSkipsCacheReadWhenSkipCacheHeaderIsPresent()
+    {
+        $this->path = '/file.txt';
+        $this->request = $this->buildRequest($this->path, 'GET', [
+            'X-Skip-Cache' => '1'
+        ]);
+        $this->buildCache();
+
+        $middleware = $this->buildMiddleware([
+            'skip_cache_header' => 'X-Skip-Cache'
+        ]);
+        $result = $middleware->processRequest($this->request);
+
+        $this->assertFalse($result->hasResponse());
+        $this->assertSame($this->request, $result);
+    }
+
+    public function testProcessRequestSkipsCacheReadCaseInsensitively()
+    {
+        $this->path = '/file.txt';
+        $this->request = $this->buildRequest($this->path, 'GET', [
+            'x-skip-cache' => '1'
+        ]);
+        $this->buildCache();
+
+        $middleware = $this->buildMiddleware([
+            'skip_cache_header' => 'X-SKIP-CACHE'
+        ]);
+        $result = $middleware->processRequest($this->request);
+
+        $this->assertFalse($result->hasResponse());
+    }
+
+    private function buildRequest(string $path, string $method, array $headers = []): ProcessingRequest
     {
         return new ProcessingRequest([
+            'headers' => $headers,
             'requestPath' => $path,
             'requestMethod' => $method
         ]);

@@ -8,9 +8,9 @@ Tent is an intelligent PHP-based proxy server that can route requests to backend
 
 ![tent](https://raw.githubusercontent.com/darthjee/tent/master/tent.png)
 
-**Current Version:** [0.7.3](https://github.com/darthjee/tent/releases/tag/0.7.3)
+**Current Version:** [0.7.4](https://github.com/darthjee/tent/releases/tag/0.7.4)
 
-**Next Release:** [0.7.4](https://github.com/darthjee/tent/compare/0.7.3...main)
+**Next Release:** [0.7.5](https://github.com/darthjee/tent/compare/0.7.4...main)
 
 ## Documentation
 
@@ -146,6 +146,7 @@ Configuration::buildRule([
         'host'  => 'http://api.com:80',
         // 'cache' => './cache',       // optional, defaults to './cache'
         // 'cacheCodes' => ['2xx'],    // optional, defaults to ['2xx']
+        // 'skip_cache_header' => 'X-Skip-Cache', // optional, bypasses cache when present
         // 'cache' => false,           // set to false to disable caching
     ],
     'matchers' => [
