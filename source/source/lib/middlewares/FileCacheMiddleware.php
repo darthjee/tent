@@ -170,6 +170,12 @@ class FileCacheMiddleware extends Middleware
         return true;
     }
 
+    /**
+     * Checks whether cache read/write should be bypassed for the current request.
+     *
+     * @param RequestInterface $request Current request.
+     * @return boolean True when skip header is configured and present, false otherwise.
+     */
     private function shouldSkipCache(RequestInterface $request): bool
     {
         if ($this->skipCacheHeader === null) {
