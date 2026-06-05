@@ -39,6 +39,18 @@ Tent uses Apache with PHP to process all incoming requests through a centralized
 
 Tent is available as a Docker image: `darthjee/tent`
 
+## Release Package
+
+GitHub Releases also include a downloadable package named `tent-<tag>-source.tar.gz`.
+
+- The archive contains the exact contents of `source/source`.
+- Download the package from the release page for your version: https://github.com/darthjee/tent/releases
+- Extract it with `tar -xzf tent-<tag>-source.tar.gz` and place the extracted files where you want to run Tent source code.
+
+You can choose either distribution method:
+- Use the Docker image (`darthjee/tent`) for containerized deployments.
+- Use the release package when you want the raw source files from `source/source`.
+
 ## Current Status
 
 Tent is in active development. Currently implemented:

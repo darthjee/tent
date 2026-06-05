@@ -215,6 +215,17 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Create release package
+          command: |
+            if [ -z "${CIRCLE_TAG:-}" ]; then
+              echo "Skipping package creation for non-tag build"
+              exit 0
+            fi
+
+            RELEASE_PACKAGE="tent-${CIRCLE_TAG}-source.tar.gz"
+            tar -czf "$RELEASE_PACKAGE" -C source/source .
+            echo "RELEASE_PACKAGE=$RELEASE_PACKAGE" >> "$BASH_ENV"
+      - run:
           name: Docker build
           command: |
             TAG=${CIRCLE_TAG:-latest}
@@ -230,6 +241,60 @@ jobs:
       - run:
           name: Docker release
           command: docker push darthjee/tent:latest
+      - run:
+          name: Upload release package
+          command: |
+            if [ -z "${CIRCLE_TAG:-}" ]; then
+              echo "Skipping release package upload for non-tag build"
+              exit 0
+            fi
+
+            if [ -z "${GITHUB_TOKEN:-}" ]; then
+              echo "GITHUB_TOKEN is required to upload release assets"
+              exit 1
+            fi
+
+            if [ -z "${RELEASE_PACKAGE:-}" ]; then
+              RELEASE_PACKAGE="tent-${CIRCLE_TAG}-source.tar.gz"
+            fi
+
+            RELEASE_DATA=$(curl --silent --show-error --fail \
+              -H "Authorization: token ${GITHUB_TOKEN}" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/darthjee/tent/releases/tags/${CIRCLE_TAG}" || true)
+
+            if [ -z "$RELEASE_DATA" ]; then
+              RELEASE_DATA=$(curl --silent --show-error --fail \
+                -X POST \
+                -H "Authorization: token ${GITHUB_TOKEN}" \
+                -H "Accept: application/vnd.github+json" \
+                -d "{\"tag_name\":\"${CIRCLE_TAG}\",\"name\":\"${CIRCLE_TAG}\",\"generate_release_notes\":true}" \
+                "https://api.github.com/repos/darthjee/tent/releases")
+            fi
+
+            RELEASE_ID=$(echo "$RELEASE_DATA" | python3 -c 'import json,sys; print(json.load(sys.stdin)["id"])')
+            UPLOAD_URL=$(echo "$RELEASE_DATA" | python3 -c 'import json,sys; print(json.load(sys.stdin)["upload_url"].split("{")[0])')
+
+            EXISTING_ASSET_ID=$(curl --silent --show-error --fail \
+              -H "Authorization: token ${GITHUB_TOKEN}" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/darthjee/tent/releases/${RELEASE_ID}/assets" \
+              | python3 -c 'import json,sys,os; assets=json.load(sys.stdin); name=os.environ["RELEASE_PACKAGE"]; print(next((str(a["id"]) for a in assets if a["name"]==name), ""))')
+
+            if [ -n "$EXISTING_ASSET_ID" ]; then
+              curl --silent --show-error --fail \
+                -X DELETE \
+                -H "Authorization: token ${GITHUB_TOKEN}" \
+                -H "Accept: application/vnd.github+json" \
+                "https://api.github.com/repos/darthjee/tent/releases/assets/${EXISTING_ASSET_ID}"
+            fi
+
+            curl --silent --show-error --fail \
+              -X POST \
+              -H "Authorization: token ${GITHUB_TOKEN}" \
+              -H "Content-Type: application/gzip" \
+              --data-binary @"${RELEASE_PACKAGE}" \
+              "${UPLOAD_URL}?name=${RELEASE_PACKAGE}"
   update-description:
     docker:
       - image: darthjee/scripts:0.6.0
