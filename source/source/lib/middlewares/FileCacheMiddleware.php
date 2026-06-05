@@ -10,6 +10,7 @@ use Tent\Models\Response;
 use Tent\Service\ResponseContentReader;
 use Tent\Service\ResponseCacher;
 use Tent\Matchers\RequestResponseMatcher;
+use Tent\Models\RequestInterface;
 
 /**
  * Middleware for caching responses to files.
@@ -61,18 +62,24 @@ class FileCacheMiddleware extends Middleware
      * @var array The list of response matchers to determine cacheability.
      */
     private array $matchers;
+    /**
+     * @var string|null Header name that forces cache bypass when present in request.
+     */
+    private ?string $skipCacheHeader;
 
     /**
      * Constructs a FileCacheMiddleware instance.
      *
-     * @param FolderLocation $location The base folder location for caching.
-     * @param array          $matchers Array of custom matchers for cacheability.
+     * @param FolderLocation $location        The base folder location for caching.
+     * @param array          $matchers        Array of custom matchers for cacheability.
+     * @param string|null    $skipCacheHeader Header name that disables cache read/write when present.
      */
-    public function __construct(FolderLocation $location, array $matchers = [])
+    public function __construct(FolderLocation $location, array $matchers = [], ?string $skipCacheHeader = null)
     {
         $this->location = $location;
 
         $this->matchers = $matchers;
+        $this->skipCacheHeader = $skipCacheHeader;
     }
 
     /**
@@ -85,8 +92,9 @@ class FileCacheMiddleware extends Middleware
     {
         $location = new FolderLocation($attributes['location']);
         $matchers = RequestResponseMatcher::buildMatchers($attributes['matchers'] ?? []);
+        $skipCacheHeader = $attributes['skip_cache_header'] ?? null;
 
-        return new self($location, $matchers);
+        return new self($location, $matchers, $skipCacheHeader);
     }
 
     /**
@@ -103,6 +111,10 @@ class FileCacheMiddleware extends Middleware
      */
     public function processRequest(ProcessingRequest $request): ProcessingRequest
     {
+        if ($this->shouldSkipCache($request)) {
+            return $request;
+        }
+
         foreach ($this->matchers as $matcher) {
             if (!$matcher->matchRequest($request)) {
                 return $request;
@@ -131,6 +143,10 @@ class FileCacheMiddleware extends Middleware
      */
     public function processResponse(Response $response): Response
     {
+        if ($this->shouldSkipCache($response->request())) {
+            return $response;
+        }
+
         if ($this->isCacheable($response)) {
             $cache = new FileCache($response->request(), $this->location);
             (new ResponseCacher($cache, $response))->process();
@@ -152,5 +168,15 @@ class FileCacheMiddleware extends Middleware
             }
         }
         return true;
+    }
+
+    private function shouldSkipCache(RequestInterface $request): bool
+    {
+        if ($this->skipCacheHeader === null) {
+            return false;
+        }
+
+        $normalizedHeaders = array_change_key_case($request->headers(), CASE_LOWER);
+        return array_key_exists(strtolower($this->skipCacheHeader), $normalizedHeaders);
     }
 }
