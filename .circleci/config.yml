@@ -215,6 +215,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Create release package
+          command: ./scripts/upload_release_package.sh build
+      - run:
           name: Docker build
           command: |
             TAG=${CIRCLE_TAG:-latest}
@@ -230,6 +233,9 @@ jobs:
       - run:
           name: Docker release
           command: docker push darthjee/tent:latest
+      - run:
+          name: Upload release package
+          command: ./scripts/upload_release_package.sh release
   update-description:
     docker:
       - image: darthjee/scripts:0.6.0
