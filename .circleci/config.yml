@@ -32,7 +32,23 @@ workflows:
           filters:
             tags:
               only: /.*/
-      - build-and-release:
+      - build-and-release-package:
+          requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks]
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              only:
+                - master
+      - build-and-release-linux:
+          requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks]
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              only:
+                - master
+      - build-and-release-macos:
           requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks]
           filters:
             tags:
@@ -41,7 +57,7 @@ workflows:
               only:
                 - master
       - update-description:
-          requires: [build-and-release]
+          requires: [build-and-release-linux, build-and-release-macos]
           filters:
             tags:
               only: /.*/
@@ -210,13 +226,21 @@ jobs:
           name: Finalize coverage on Codacy
           command: bash <(curl -Ls https://coverage.codacy.com/get.sh) final
 
-  build-and-release:
+  build-and-release-package:
     machine: true
     steps:
       - checkout
       - run:
           name: Create release package
           command: ./scripts/upload_release_package.sh build
+      - run:
+          name: Upload release package
+          command: ./scripts/upload_release_package.sh release
+
+  build-and-release-linux:
+    machine: true
+    steps:
+      - checkout
       - run:
           name: Docker build
           command: |
@@ -233,9 +257,27 @@ jobs:
       - run:
           name: Docker release
           command: docker push darthjee/tent:latest
+
+  build-and-release-macos:
+    machine: true
+    steps:
+      - checkout
       - run:
-          name: Upload release package
-          command: ./scripts/upload_release_package.sh release
+          name: Docker build
+          command: |
+            TAG=${CIRCLE_TAG:-latest}
+            docker build --platform linux/arm64/v8 -f dockerfiles/tent/Dockerfile source -t darthjee/tent:$TAG-arm64 -t darthjee/tent:latest-arm64
+      - run:
+          name: Docker login
+          command: echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
+      - run:
+          name: Docker push
+          command: |
+            TAG=${CIRCLE_TAG:-latest}
+            docker push darthjee/tent:$TAG-arm64
+      - run:
+          name: Docker release
+          command: docker push darthjee/tent:latest-arm64
   update-description:
     docker:
       - image: darthjee/scripts:0.6.0
