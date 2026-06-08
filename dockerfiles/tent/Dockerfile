@@ -3,8 +3,8 @@ FROM php:8.4-apache as base
 
 # Create app user and directory structure
 RUN useradd -u 1000 app; \
-    mkdir -p /home/app/app; \
-    chown app:app -R /home/app
+    mkdir -p /home/app/; \
+    chown app:app -R /var/www/html /home/app
 
 COPY --from=scripts /home/scripts/sbin/deploy_frontend.sh /usr/sbin/
 
