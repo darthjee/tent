@@ -56,6 +56,22 @@ workflows:
             branches:
               only:
                 - master
+      - build-and-release-base-linux:
+          requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks]
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              only:
+                - master
+      - build-and-release-base-macos:
+          requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks]
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              only:
+                - master
       - update-description:
           requires: [build-and-release-linux, build-and-release-macos]
           filters:
@@ -243,13 +259,13 @@ jobs:
       - checkout
       - run:
           name: Docker build
-          command: ./scripts/build_docker_image.sh build tent amd64 ${CIRCLE_TAG:-latest}
+          command: make ci-build-tent ARCH=amd64 VERSION=${CIRCLE_TAG:-latest}
       - run:
           name: Docker login
           command: echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
       - run:
           name: Docker release
-          command: ./scripts/build_docker_image.sh release tent amd64 ${CIRCLE_TAG:-latest}
+          command: make ci-release-tent ARCH=amd64 VERSION=${CIRCLE_TAG:-latest}
 
   build-and-release-macos:
     machine: true
@@ -257,13 +273,41 @@ jobs:
       - checkout
       - run:
           name: Docker build
-          command: ./scripts/build_docker_image.sh build tent arm64 ${CIRCLE_TAG:-latest}
+          command: make ci-build-tent ARCH=arm64 VERSION=${CIRCLE_TAG:-latest}
       - run:
           name: Docker login
           command: echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
       - run:
           name: Docker release
-          command: ./scripts/build_docker_image.sh release tent arm64 ${CIRCLE_TAG:-latest}
+          command: make ci-release-tent ARCH=arm64 VERSION=${CIRCLE_TAG:-latest}
+
+  build-and-release-base-linux:
+    machine: true
+    steps:
+      - checkout
+      - run:
+          name: Docker build
+          command: make ci-build-base ARCH=amd64
+      - run:
+          name: Docker login
+          command: echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
+      - run:
+          name: Docker release
+          command: make ci-release-base ARCH=amd64
+
+  build-and-release-base-macos:
+    machine: true
+    steps:
+      - checkout
+      - run:
+          name: Docker build
+          command: make ci-build-base ARCH=arm64
+      - run:
+          name: Docker login
+          command: echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
+      - run:
+          name: Docker release
+          command: make ci-release-base ARCH=arm64
   update-description:
     docker:
       - image: darthjee/scripts:0.6.0

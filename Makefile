@@ -1,8 +1,10 @@
-.PHONY: build-base push-base build push dev tests
+.PHONY: build-base push-base build push dev tests \
+        ci-build-tent ci-release-tent ci-build-base ci-release-base
 
 PROJECT?=tent
 BASE_VERSION?=0.0.2
 VERSION?=0.7.5
+ARCH?=amd64
 MOD?=dev_
 BASE_IMAGE?=$(DOCKER_ID_USER)/$(MOD)$(PROJECT)-base
 IMAGE?=$(DOCKER_ID_USER)/$(MOD)$(PROJECT)
@@ -52,3 +54,15 @@ dev-api:
 
 dev-up:
 	docker compose up $(PROJECT)_app
+
+ci-build-tent:
+	./scripts/build_docker_image.sh build tent $(ARCH) $(VERSION)
+
+ci-release-tent:
+	./scripts/build_docker_image.sh release tent $(ARCH) $(VERSION)
+
+ci-build-base:
+	./scripts/build_docker_image.sh build dev_tent-base $(ARCH) $(BASE_VERSION)
+
+ci-release-base:
+	./scripts/build_docker_image.sh release dev_tent-base $(ARCH) $(BASE_VERSION)
