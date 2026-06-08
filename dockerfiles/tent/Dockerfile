@@ -1,11 +1,10 @@
 FROM darthjee/scripts:0.8.0 as scripts
 FROM php:8.4-apache as base
 
-RUN echo $(whoami)
 # Create app user and directory structure
-RUN useradd -u 1000 app
-RUN mkdir -p /home/app/
-RUN chown app:app -R /var/www/html /home/app
+RUN useradd -u 1000 app; \
+    mkdir -p /home/app/app; \
+    chown app:app -R /home/app
 
 COPY --from=scripts /home/scripts/sbin/deploy_frontend.sh /usr/sbin/
 

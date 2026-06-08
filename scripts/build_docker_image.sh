@@ -63,14 +63,12 @@ build_image() {
   image_config "$image"
   arch_config "$arch"
 
-  set -x
   docker build \
     --platform "$PLATFORM" \
     -f "$DOCKERFILE" \
     "$CONTEXT" \
     -t "${IMAGE_NAME}:${version}${ARCH_SUFFIX}" \
     -t "${IMAGE_NAME}:latest${ARCH_SUFFIX}"
-  set +x
 }
 
 ensure_image() {
