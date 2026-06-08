@@ -44,7 +44,7 @@ arch_config() {
       ARCH_SUFFIX=""
       ;;
     arm64)
-      PLATFORM="linux/arm64/v8"
+      PLATFORM="linux/arm64"
       ARCH_SUFFIX="-arm64"
       ;;
     *)
