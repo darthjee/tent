@@ -3,7 +3,7 @@ set -euo pipefail
 
 show_help() {
   cat <<'EOF'
-Usage: scripts/build_docker_image.sh <build|release|help> <image> <arch> <version>
+Usage: scripts/build_docker_image.sh <build|ensure|release|help> <image> <arch> <version>
 
 Images:        tent, dev_tent, dev_tent-base
 Architectures: amd64, arm64
@@ -71,6 +71,21 @@ build_image() {
     -t "${IMAGE_NAME}:latest${ARCH_SUFFIX}"
 }
 
+ensure_image() {
+  local image="$1"
+  local arch="$2"
+  local version="$3"
+
+  image_config "$image"
+  arch_config "$arch"
+
+  if docker pull "${IMAGE_NAME}:${version}${ARCH_SUFFIX}"; then
+    docker tag "${IMAGE_NAME}:${version}${ARCH_SUFFIX}" "${IMAGE_NAME}:latest${ARCH_SUFFIX}"
+  else
+    build_image "$image" "$arch" "$version"
+  fi
+}
+
 release_image() {
   local image="$1"
   local arch="$2"
@@ -91,6 +106,9 @@ VERSION="${4:-}"
 case "$COMMAND" in
   build)
     build_image "$IMAGE" "$ARCH" "$VERSION"
+    ;;
+  ensure)
+    ensure_image "$IMAGE" "$ARCH" "$VERSION"
     ;;
   release)
     release_image "$IMAGE" "$ARCH" "$VERSION"

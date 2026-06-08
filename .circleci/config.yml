@@ -287,7 +287,7 @@ jobs:
       - checkout
       - run:
           name: Docker build
-          command: make ci-build-base ARCH=amd64
+          command: make ci-ensure-base ARCH=amd64
       - run:
           name: Docker login
           command: echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
@@ -301,7 +301,7 @@ jobs:
       - checkout
       - run:
           name: Docker build
-          command: make ci-build-base ARCH=arm64
+          command: make ci-ensure-base ARCH=arm64
       - run:
           name: Docker login
           command: echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin

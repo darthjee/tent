@@ -1,5 +1,5 @@
 .PHONY: build-base push-base build push dev tests \
-        ci-build-tent ci-release-tent ci-build-base ci-release-base
+        ci-build-tent ci-release-tent ci-ensure-base ci-release-base
 
 PROJECT?=tent
 BASE_VERSION?=0.0.2
@@ -61,8 +61,8 @@ ci-build-tent:
 ci-release-tent:
 	./scripts/build_docker_image.sh release tent $(ARCH) $(VERSION)
 
-ci-build-base:
-	./scripts/build_docker_image.sh build dev_tent-base $(ARCH) $(BASE_VERSION)
+ci-ensure-base:
+	./scripts/build_docker_image.sh ensure dev_tent-base $(ARCH) $(BASE_VERSION)
 
 ci-release-base:
 	./scripts/build_docker_image.sh release dev_tent-base $(ARCH) $(BASE_VERSION)
