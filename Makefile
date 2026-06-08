@@ -1,7 +1,7 @@
 .PHONY: build-base push-base build push dev tests
 
 PROJECT?=tent
-BASE_VERSION?=0.0.1
+BASE_VERSION?=0.0.2
 VERSION?=0.7.5
 MOD?=dev_
 BASE_IMAGE?=$(DOCKER_ID_USER)/$(MOD)$(PROJECT)-base
