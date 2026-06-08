@@ -31,8 +31,16 @@ USER app
 ENV PATH="$PATH:/home/app/app/vendor/bin"
 
 WORKDIR /home/app/app
+
+FROM base as builder
+
 COPY --chown=app:app ./composer.* /home/app/app/
+COPY --chown=app:app ./source/ /home/app/app/source/
 
 RUN composer install
+
+FROM base
+
+COPY --from=builder /home/app/app/vendor/ /home/app/app/vendor/
 
 CMD ["apache2-foreground"]
