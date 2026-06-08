@@ -1,6 +1,7 @@
 FROM darthjee/scripts:0.8.0 as scripts
 FROM php:8.4-apache as base
 
+RUN echo $(whoami)
 # Create app user and directory structure
 RUN useradd -u 1000 app
 RUN mkdir -p /home/app/
