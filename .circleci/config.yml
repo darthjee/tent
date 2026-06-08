@@ -243,20 +243,13 @@ jobs:
       - checkout
       - run:
           name: Docker build
-          command: |
-            TAG=${CIRCLE_TAG:-latest}
-            docker build --platform linux/amd64 -f dockerfiles/tent/Dockerfile source -t darthjee/tent:$TAG -t darthjee/tent:latest
+          command: ./scripts/build_docker_image.sh build tent amd64 ${CIRCLE_TAG:-latest}
       - run:
           name: Docker login
           command: echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
       - run:
-          name: Docker push
-          command: |
-            TAG=${CIRCLE_TAG:-latest}
-            docker push darthjee/tent:$TAG
-      - run:
           name: Docker release
-          command: docker push darthjee/tent:latest
+          command: ./scripts/build_docker_image.sh release tent amd64 ${CIRCLE_TAG:-latest}
 
   build-and-release-macos:
     machine: true
@@ -264,20 +257,13 @@ jobs:
       - checkout
       - run:
           name: Docker build
-          command: |
-            TAG=${CIRCLE_TAG:-latest}
-            docker build --platform linux/arm64/v8 -f dockerfiles/tent/Dockerfile source -t darthjee/tent:$TAG-arm64 -t darthjee/tent:latest-arm64
+          command: ./scripts/build_docker_image.sh build tent arm64 ${CIRCLE_TAG:-latest}
       - run:
           name: Docker login
           command: echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
       - run:
-          name: Docker push
-          command: |
-            TAG=${CIRCLE_TAG:-latest}
-            docker push darthjee/tent:$TAG-arm64
-      - run:
           name: Docker release
-          command: docker push darthjee/tent:latest-arm64
+          command: ./scripts/build_docker_image.sh release tent arm64 ${CIRCLE_TAG:-latest}
   update-description:
     docker:
       - image: darthjee/scripts:0.6.0
