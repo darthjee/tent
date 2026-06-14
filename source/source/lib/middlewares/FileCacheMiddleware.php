@@ -143,7 +143,7 @@ class FileCacheMiddleware extends Middleware
      */
     public function processResponse(Response $response): Response
     {
-        if ($this->shouldSkipCacheForResponse($response)) {
+        if ($this->shouldSkipCacheForResponse($response) || $this->shouldSkipCache($response->request())) {
             return $response;
         }
 

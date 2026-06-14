@@ -161,7 +161,7 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
         $this->assertFalse($this->cache->exists());
     }
 
-    public function testProcessResponseDoesNotSkipCacheWriteWhenSkipCacheHeaderIsOnlyInRequest()
+    public function testProcessResponseSkipsCacheWriteWhenSkipCacheHeaderIsOnlyInRequest()
     {
         $response = $this->buildResponse(200, ['X-Skip-Cache' => '1']);
 
@@ -178,7 +178,7 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
         $middleware->processResponse($response);
 
         $this->cache = new FileCache($this->request, $this->location);
-        $this->assertTrue($this->cache->exists());
+        $this->assertFalse($this->cache->exists());
     }
 
     private function buildResponse(int $httpCode, array $requestHeaders = [], array $responseHeaders = [])
