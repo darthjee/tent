@@ -143,7 +143,7 @@ class FileCacheMiddleware extends Middleware
      */
     public function processResponse(Response $response): Response
     {
-        if ($this->shouldSkipCache($response->request())) {
+        if ($this->shouldSkipCacheForResponse($response) || $this->shouldSkipCache($response->request())) {
             return $response;
         }
 
@@ -171,10 +171,10 @@ class FileCacheMiddleware extends Middleware
     }
 
     /**
-     * Checks whether cache read/write should be bypassed for the current request.
+     * Checks whether cache read should be bypassed based on the incoming request headers.
      *
      * @param RequestInterface $request Current request.
-     * @return boolean True when skip header is configured and present, false otherwise.
+     * @return boolean True when skip header is configured and present in the request, false otherwise.
      */
     private function shouldSkipCache(RequestInterface $request): bool
     {
@@ -184,5 +184,26 @@ class FileCacheMiddleware extends Middleware
 
         $normalizedHeaders = array_change_key_case($request->headers(), CASE_LOWER);
         return array_key_exists(strtolower($this->skipCacheHeader), $normalizedHeaders);
+    }
+
+    /**
+     * Checks whether cache write should be bypassed based on the upstream response headers.
+     *
+     * @param Response $response Upstream response.
+     * @return boolean True when skip header is configured and present in the response, false otherwise.
+     */
+    private function shouldSkipCacheForResponse(Response $response): bool
+    {
+        if ($this->skipCacheHeader === null) {
+            return false;
+        }
+
+        $headerPrefix = strtolower($this->skipCacheHeader) . ':';
+        foreach ($response->headers() as $headerLine) {
+            if (str_starts_with(strtolower($headerLine), $headerPrefix)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
