@@ -123,7 +123,7 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
 
     public function testProcessResponseSkipsCacheWriteWhenSkipCacheHeaderIsPresent()
     {
-        $response = $this->buildResponse(200, ['X-Skip-Cache' => '1']);
+        $response = $this->buildResponse(200, [], ['X-Skip-Cache: 1']);
 
         $middleware = FileCacheMiddleware::build([
             'location' => $this->cacheDir,
@@ -143,7 +143,7 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
 
     public function testProcessResponseSkipsCacheWriteCaseInsensitively()
     {
-        $response = $this->buildResponse(200, ['x-skip-cache' => '1']);
+        $response = $this->buildResponse(200, [], ['x-skip-cache: 1']);
 
         $middleware = FileCacheMiddleware::build([
             'location' => $this->cacheDir,
@@ -161,10 +161,30 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
         $this->assertFalse($this->cache->exists());
     }
 
-    private function buildResponse(int $httpCode, array $requestHeaders = [])
+    public function testProcessResponseDoesNotSkipCacheWriteWhenSkipCacheHeaderIsOnlyInRequest()
+    {
+        $response = $this->buildResponse(200, ['X-Skip-Cache' => '1']);
+
+        $middleware = FileCacheMiddleware::build([
+            'location' => $this->cacheDir,
+            'skip_cache_header' => 'X-Skip-Cache',
+            'matchers' => [
+                [
+                    'class' => \Tent\Matchers\StatusCodeMatcher::class,
+                    'httpCodes' => [200],
+                ]
+            ],
+        ]);
+        $middleware->processResponse($response);
+
+        $this->cache = new FileCache($this->request, $this->location);
+        $this->assertTrue($this->cache->exists());
+    }
+
+    private function buildResponse(int $httpCode, array $requestHeaders = [], array $responseHeaders = [])
     {
         $this->path = '/file.txt';
-        $this->headers = ['Content-Type: text/plain', 'Content-Length: 11'];
+        $this->headers = array_merge(['Content-Type: text/plain', 'Content-Length: 11'], $responseHeaders);
         $this->request = $this->buildRequest($this->path, 'GET', $requestHeaders);
 
         return new Response([
