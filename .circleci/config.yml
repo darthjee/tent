@@ -275,11 +275,11 @@ jobs:
           name: Set up QEMU
           command: docker run --privileged --rm tonistiigi/binfmt --install all
       - run:
-          name: Docker build
-          command: make ci-build-tent ARCH=arm64 VERSION=${CIRCLE_TAG:-latest}
-      - run:
           name: Prepare scripts image
           command: ./scripts/prepare_scripts_image.sh arm64
+      - run:
+          name: Docker build
+          command: make ci-build-tent ARCH=arm64 VERSION=${CIRCLE_TAG:-latest}
       - run:
           name: Docker login
           command: echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
