@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ARCH="${1:-amd64}"
+ARCH="${1:-arm64}"
 DOCKERFILE="dockerfiles/tent/Dockerfile"
 
 VERSION=$(sed -n 's/FROM darthjee\/scripts:\([^ ]*\) as.*/\1/p' "$DOCKERFILE")
