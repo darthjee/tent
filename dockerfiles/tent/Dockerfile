@@ -1,4 +1,4 @@
-FROM darthjee/scripts:0.8.0 as scripts
+FROM darthjee/scripts:0.9.0 as scripts
 FROM php:8.4-apache as base
 
 # Create app user and directory structure
