@@ -1,34 +1,90 @@
-# Plan: Add Photo Endpoint for Dev App Frontend
+# Plan: Add Photo Upload to Dev App (Frontend + Backend)
 
 ## Overview
 
-Add photo upload support to the dev-app React frontend: a new `PersonClient.uploadPhoto()` method and a `PersonPhotoForm` component rendered per person in `PersonList`.
+Add photo upload support to the dev-app — both the PHP backend (`dev/api/`) and the React frontend (`dev/frontend/`). The backend exposes a new endpoint that saves a JPEG photo for a person; the frontend adds a client method and a React component to call it.
 
-## Context
+## Agents
 
-The backend already exposes `POST /persons/:id/photo.json` (implemented in issue 192). It accepts a `multipart/form-data` request with a `photo` field (JPEG only) and returns the person JSON on success (200) or `{ error }` on failure (400, 404, 422, 500).
+- **dev-api** — backend endpoint, file storage abstraction, tests
+- **frontend** — client method, React component, integration into PersonList, Jasmine spec
+
+## Backend — dev-api
+
+### Context
+
+The backend uses a `RequestHandler` that matches routes to `Endpoint` subclasses. File uploads arrive via PHP's `$_FILES`. No ORM is used — the `Person` model uses raw SQL.
+
+### Step 1 — File storage abstraction
+
+Files:
+- `dev/api/source/lib/api_dev/file_storage/FileStorageInterface.php` — defines `save(string $tmp, string $dest): bool`
+- `dev/api/source/lib/api_dev/file_storage/PhpFileStorage.php` — implementation using `move_uploaded_file`
+- `dev/api/tests/support/models/MockFileStorage.php` — test double that records calls
+
+### Step 2 — Endpoint
+
+File: `dev/api/source/lib/api_dev/endpoints/UploadPersonPhotoEndpoint.php`
+
+Route: `POST /persons/:id/photo.json`
+
+Flow:
+1. Extract person ID from URL via regex.
+2. Load person — throw `NotFoundException` (404) if not found.
+3. Validate upload via `$request->uploadedFile('photo')` — throw `InvalidRequestException` (400) if missing or errored.
+4. Validate MIME type via `mime_content_type($file['tmp_name'])` — throw `UnprocessableEntityException` (422) if not `image/jpeg`.
+5. Save to `/home/app/app/photos/<person_id>.jpg` — throw `ServerErrorException` (500) if save fails.
+6. Return 200 with person JSON.
+
+All `RequestException` subclasses are caught and returned as `{ "error": "..." }` with the appropriate HTTP status code.
+
+Constructor accepts optional `FileStorageInterface` (defaults to `PhpFileStorage`) and `$photosDir` (defaults to `/home/app/app/photos`) for testability.
+
+### Step 3 — Tests
+
+File: `dev/api/tests/unit/lib/api_dev/endpoints/UploadPersonPhotoEndpointTest.php`
+
+Use `MockRequest` and `MockFileStorage`. Cover:
+- Success: returns 200 with person JSON.
+- Person not found: returns 404 with error.
+- No file uploaded / upload error: returns 400 with error.
+- Invalid MIME type: returns 422 with error.
+- Save failure: returns 500 with error.
+
+### Backend files
+
+| Action | File |
+|--------|------|
+| Create | `dev/api/source/lib/api_dev/endpoints/UploadPersonPhotoEndpoint.php` |
+| Create | `dev/api/source/lib/api_dev/file_storage/FileStorageInterface.php` |
+| Create | `dev/api/source/lib/api_dev/file_storage/PhpFileStorage.php` |
+| Create | `dev/api/tests/unit/lib/api_dev/endpoints/UploadPersonPhotoEndpointTest.php` |
+| Create | `dev/api/tests/support/models/MockFileStorage.php` |
+
+---
+
+## Frontend — frontend
+
+### Context
 
 The frontend follows these conventions:
 - HTTP logic lives in `dev/frontend/assets/js/clients/PersonClient.js` (plain `fetch`, no framework).
 - UI components live in `dev/frontend/assets/js/components/`, using React 19 + Bootstrap 5.
 - Tests live in `dev/frontend/spec/`, mirroring the source structure, using Jasmine + `spyOn(global, 'fetch')`.
 
-**Do not touch `source/`** (the Tent proxy). This issue is scoped entirely to `dev/frontend/`.
+**Do not touch `source/`** (the Tent proxy). This issue is scoped entirely to `dev/api/` and `dev/frontend/`.
 
-## Implementation Steps
-
-### Step 1 — Add `uploadPhoto(id, file)` to `PersonClient`
+### Step 4 — Add `uploadPhoto(id, file)` to `PersonClient`
 
 File: `dev/frontend/assets/js/clients/PersonClient.js`
 
-Add the method inside the existing `PersonClient` class, after `create()`:
+Add after `create()`:
 
 ```js
 async uploadPhoto(id, file) {
   const formData = new FormData();
   formData.append('photo', file);
-
-  const response = await fetch(`/persons/${id}/photo.json`, {
+  const response = await fetch(`/persons/${id}/photo`, {
     method: 'POST',
     body: formData,
   });
@@ -39,124 +95,27 @@ async uploadPhoto(id, file) {
 }
 ```
 
-Do **not** set a `Content-Type` header — the browser sets it automatically with the correct `multipart/form-data` boundary when `body` is a `FormData`.
+Do **not** set a `Content-Type` header — the browser sets it automatically with the correct boundary.
 
-### Step 2 — Write tests for `uploadPhoto`
+### Step 5 — Write tests for `uploadPhoto`
 
 File: `dev/frontend/spec/clients/PersonClient/PersonClientUploadPhoto_spec.js`
 
-Follow the exact same structure as `PersonClientCreate_spec.js` (same `describe` nesting, same spy pattern). The `file` argument passed to `uploadPhoto` can be any value in tests — it is passed directly to `FormData.append`, and `fetch` is fully stubbed.
+Cases: success (verify URL `/persons/1/photo` and method `POST`), failure (non-ok response throws `Error('Failed to upload photo')`), network error (rejection propagates).
 
-Cases to cover:
-
-**Success:**
-```js
-spyOn(global, 'fetch').and.returnValue(
-  Promise.resolve({ ok: true, json: () => Promise.resolve(mockPersonData) })
-);
-const result = await client.uploadPhoto(1, mockFile);
-expect(global.fetch).toHaveBeenCalledWith(
-  '/persons/1/photo.json',
-  jasmine.objectContaining({ method: 'POST' })
-);
-expect(result).toEqual(mockPersonData);
-```
-
-**Failure (non-ok response, e.g. 422):**
-```js
-spyOn(global, 'fetch').and.returnValue(Promise.resolve({ ok: false, status: 422 }));
-// expect Error('Failed to upload photo') to be thrown
-```
-
-**Network error:**
-```js
-const networkError = new Error('Network error');
-spyOn(global, 'fetch').and.returnValue(Promise.reject(networkError));
-// expect the same networkError instance to propagate
-```
-
-> Note: verifying the exact `FormData` contents via `toHaveBeenCalledWith` is not straightforward in Jasmine (FormData instances are opaque). Verifying the URL and `method` is sufficient.
-
-### Step 3 — Create `PersonPhotoForm` component
+### Step 6 — Create `PersonPhotoForm` component
 
 File: `dev/frontend/assets/js/components/PersonPhotoForm.jsx`
 
-Props: `{ personId }`
+Props: `{ personId }`. State: `file`, `loading`, `error`, `success`. File input with `accept="image/jpeg"`, submit button disabled while loading or no file selected, inline success/error feedback via Bootstrap spans.
 
-State:
-- `file` — the selected `File` object (or `null`)
-- `loading` — boolean
-- `error` — string or null
-- `success` — boolean
-
-Behaviour:
-- File input with `accept="image/jpeg"`. On change, update `file` state from `e.target.files[0]`.
-- Submit button disabled when `loading` is true or `file` is null.
-- On submit, call `new PersonClient().uploadPhoto(personId, file)`. On success set `success = true` and clear `file`. On error set `error = err.message`. Always clear `loading`.
-- Show a Bootstrap `alert-success` div when `success` is true and a `alert-danger` div when `error` is set (same pattern as `PersonForm.jsx`).
-
-Reference skeleton:
-
-```jsx
-import { useState } from 'react';
-import { PersonClient } from '../clients/PersonClient';
-
-export default function PersonPhotoForm({ personId }) {
-  const [file, setFile] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(false);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setSuccess(false);
-    try {
-      await new PersonClient().uploadPhoto(personId, file);
-      setSuccess(true);
-      setFile(null);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      {error && <div className="alert alert-danger">{error}</div>}
-      {success && <div className="alert alert-success">Photo uploaded successfully!</div>}
-      <input
-        type="file"
-        accept="image/jpeg"
-        onChange={(e) => setFile(e.target.files[0])}
-      />
-      <button type="submit" disabled={loading || !file}>
-        {loading ? 'Uploading...' : 'Upload Photo'}
-      </button>
-    </form>
-  );
-}
-```
-
-### Step 4 — Integrate into `PersonList`
+### Step 7 — Integrate into `PersonList`
 
 File: `dev/frontend/assets/js/components/PersonList.jsx`
 
-Import `PersonPhotoForm` and render it inside each list item:
+Import `PersonPhotoForm` and render `<PersonPhotoForm personId={person.id} />` inside each `<li>`.
 
-```jsx
-import PersonPhotoForm from './PersonPhotoForm';
-
-// inside the map:
-<li key={person.id}>
-  {person.first_name} {person.last_name} ({person.birthdate})
-  <PersonPhotoForm personId={person.id} />
-</li>
-```
-
-## Files to Change
+### Frontend files
 
 | Action | File |
 |--------|------|
@@ -165,14 +124,18 @@ import PersonPhotoForm from './PersonPhotoForm';
 | Modify | `dev/frontend/assets/js/components/PersonList.jsx` |
 | Create | `dev/frontend/spec/clients/PersonClient/PersonClientUploadPhoto_spec.js` |
 
+---
+
 ## Commit order
 
-1. `PersonClient.uploadPhoto` + its spec (client logic and tests together)
-2. `PersonPhotoForm` + integration in `PersonList` (UI changes together)
+1. Backend: `FileStorageInterface`, `PhpFileStorage`, `MockFileStorage`, `UploadPersonPhotoEndpoint`, tests
+2. Frontend: `PersonClient.uploadPhoto` + spec
+3. Frontend: `PersonPhotoForm` + `PersonList` integration
 
 ## Notes
 
-- Do **not** set `Content-Type` manually on the `fetch` call.
-- The backend only accepts `image/jpeg`; use `accept="image/jpeg"` on the input to guide the user.
-- No component-level Jasmine specs are planned (consistent with existing components which have no specs).
-- The mock person data shape for tests: `{ id, first_name, last_name, birthdate, created_at, updated_at }` — see existing specs for reference values.
+- The `MockRequest` needs to support `uploadedFile(string $field): ?array` — add if not already present.
+- Do **not** set `Content-Type` manually on the frontend `fetch` call.
+- The backend only accepts `image/jpeg`; use `accept="image/jpeg"` on the frontend input.
+- No component-level Jasmine specs for `PersonPhotoForm` — consistent with existing components.
+- Photos directory (`docker_volumes/photos`) is mounted at `/home/app/app/photos` inside the container.
