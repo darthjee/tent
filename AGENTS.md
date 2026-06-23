@@ -14,6 +14,7 @@ Agent-specific documentation lives under [`docs/agents/`](docs/agents/). Develop
 
 | File | Contents |
 |------|----------|
+| [Folder Structure](docs/agents/folder-structure.md) | Top-level directory layout and the role of each folder. |
 | [Architecture](docs/agents/architecture.md) | Source layout, key components, configuration patterns, class loading, dev API/frontend, testing conventions. |
 | [Runtime Flow](docs/agents/flow.md) | Entry point, request lifecycle, execution path from Apache to response. |
 | [Dev Application](docs/agents/dev-app.md) | Sample app used to test Tent: backend (PHP/MySQL), frontend (React/Vite), tests, CI jobs, and Docker Compose layout. |
