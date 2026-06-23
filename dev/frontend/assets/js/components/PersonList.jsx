@@ -7,6 +7,7 @@ const PersonList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [uploadingForPersonId, setUploadingForPersonId] = useState(null);
+  const isUploading = (id) => uploadingForPersonId === id;
 
   useEffect(() => {
     (new PersonClient()).list()
@@ -30,7 +31,7 @@ const PersonList = () => {
         {persons.map((person) => (
           <li key={person.id}>
             {person.first_name} {person.last_name} ({person.birthdate})
-            {uploadingForPersonId === person.id ? (
+            {isUploading(person.id) ? (
               <PhotoUploadForm
                 personId={person.id}
                 onSuccess={() => setUploadingForPersonId(null)}
