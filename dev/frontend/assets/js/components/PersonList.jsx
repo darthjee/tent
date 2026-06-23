@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { PersonClient } from '../clients/PersonClient';
-import PersonPhotoForm from './PersonPhotoForm';
+import PhotoUploadForm from './PhotoUploadForm';
 
 const PersonList = () => {
   const [persons, setPersons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [uploadingForPersonId, setUploadingForPersonId] = useState(null);
 
   useEffect(() => {
     (new PersonClient()).list()
@@ -29,7 +30,20 @@ const PersonList = () => {
         {persons.map((person) => (
           <li key={person.id}>
             {person.first_name} {person.last_name} ({person.birthdate})
-            <PersonPhotoForm personId={person.id} />
+            {uploadingForPersonId === person.id ? (
+              <PhotoUploadForm
+                personId={person.id}
+                onSuccess={() => setUploadingForPersonId(null)}
+                onCancel={() => setUploadingForPersonId(null)}
+              />
+            ) : (
+              <button
+                className="btn btn-sm btn-link ms-2"
+                onClick={() => setUploadingForPersonId(person.id)}
+              >
+                Upload Photo
+              </button>
+            )}
           </li>
         ))}
       </ul>
