@@ -29,6 +29,8 @@ require_once __DIR__ . '/lib/middlewares/RenameHeaderMiddleware.php';
 require_once __DIR__ . '/lib/middlewares/SetHeadersMiddleware.php';
 require_once __DIR__ . '/lib/middlewares/SetPathMiddleware.php';
 require_once __DIR__ . '/lib/models/FolderLocation.php';
+require_once __DIR__ . '/lib/models/UploadedFile.php';
+
 require_once __DIR__ . '/lib/content/ResponseContent.php';
 require_once __DIR__ . '/lib/content/Cache.php';
 require_once __DIR__ . '/lib/content/File.php';
