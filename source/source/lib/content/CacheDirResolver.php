@@ -46,22 +46,51 @@ class CacheDirResolver
      */
     public function resolve(string $target, string $path): ?string
     {
-        $base = $this->location->basePath();
         $segments = array_values(array_filter(explode('/', $path)));
 
         if ($target === 'collection') {
-            $collectionSegments = count($segments) > 1 ? array_slice($segments, 0, -1) : $segments;
-            $collectionPath = implode('/', $collectionSegments);
-            return FileUtils::getFullPath($base, $collectionPath, 'GET');
+            return $this->resolveCollection($segments);
         }
 
         if ($target === 'entity') {
-            if (count($segments) < 2) {
-                return null;
-            }
-            return FileUtils::getFullPath($base, implode('/', $segments), 'GET');
+            return $this->resolveEntity($segments);
         }
 
         return null;
+    }
+
+    /**
+     * Resolves the cache directory for a `collection` target.
+     *
+     * @param array $segments Request path segments.
+     * @return string
+     */
+    private function resolveCollection(array $segments): string
+    {
+        $base = $this->location->basePath();
+        $collectionSegments = count($segments) > 1 ? array_slice($segments, 0, -1) : $segments;
+        $collectionPath = implode('/', $collectionSegments);
+
+        return FileUtils::getFullPath($base, $collectionPath, 'GET');
+    }
+
+    /**
+     * Resolves the cache directory for an `entity` target.
+     *
+     * Returns null when the path does not have enough segments to
+     * represent an entity (e.g. a single-segment path).
+     *
+     * @param array $segments Request path segments.
+     * @return string|null
+     */
+    private function resolveEntity(array $segments): ?string
+    {
+        if (count($segments) < 2) {
+            return null;
+        }
+
+        $base = $this->location->basePath();
+
+        return FileUtils::getFullPath($base, implode('/', $segments), 'GET');
     }
 }
