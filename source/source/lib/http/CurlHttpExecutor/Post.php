@@ -22,15 +22,26 @@ class Post extends Base
     protected function addExtraCurlOptions(): void
     {
         curl_setopt($this->curlHandle, CURLOPT_POST, true);
+        curl_setopt($this->curlHandle, CURLOPT_POSTFIELDS, $this->buildPostFields());
+    }
 
-        if (!empty($this->uploadedFiles)) {
-            $fields = $this->postFields;
-            foreach ($this->uploadedFiles as $fieldName => $file) {
-                $fields[$fieldName] = (new UploadedFile($file))->toCurlFile();
-            }
-            curl_setopt($this->curlHandle, CURLOPT_POSTFIELDS, $fields);
-        } else {
-            curl_setopt($this->curlHandle, CURLOPT_POSTFIELDS, $this->body);
+    /**
+     * Builds the value to pass to CURLOPT_POSTFIELDS.
+     *
+     * When uploaded files are present, merges them into the post fields array
+     * as CURLFile instances. Otherwise returns the raw body string.
+     *
+     * @return string|array|null
+     */
+    private function buildPostFields(): string|array|null
+    {
+        if (empty($this->uploadedFiles)) {
+            return $this->body;
         }
+        $fields = $this->postFields;
+        foreach ($this->uploadedFiles as $fieldName => $file) {
+            $fields[$fieldName] = (new UploadedFile($file))->toCurlFile();
+        }
+        return $fields;
     }
 }
