@@ -308,6 +308,53 @@ Deletes stale `FileCacheMiddleware` cache directories on mutating requests (`POS
 
 **When to use**: Whenever `FileCacheMiddleware` caches `GET` responses for a resource that can also be written to — keeps cached collection/entity responses from going stale after a write.
 
+### `CacheStalenessMiddleware`
+
+Serves a stale `FileCacheMiddleware` hit immediately while triggering a background refresh against the upstream, so the next request gets fresh content without anyone having to wait for it.
+
+```php
+[
+    'class' => 'Tent\\Middlewares\\CacheStalenessMiddleware',
+    'location' => './cache',
+    'host' => 'http://api:80',
+    'maxAgeSeconds' => 300
+]
+```
+
+- `location` must match the `location` used by the corresponding `FileCacheMiddleware`.
+- `host` is the upstream base URL to re-contact when refreshing (e.g. the same `host` configured on the rule's `proxy`/`default_proxy` handler).
+- `maxAgeSeconds` (or `max_age_seconds`) is the age, in seconds, past which a cached entry is considered stale.
+- **Must be configured after `FileCacheMiddleware`** in the rule's `middlewares` list — it only evaluates staleness when a cache hit already set a response on the request.
+- A short-lived sentinel file (`<meta-file>.refreshing`) debounces concurrent stale requests for the same entry so only one refresh runs at a time.
+
+```php
+Configuration::buildRule([
+    'handler' => [
+        'type' => 'proxy',
+        'host' => 'http://api:80'
+    ],
+    'matchers' => [
+        ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact']
+    ],
+    'middlewares' => [
+        [
+            'class' => 'Tent\\Middlewares\\FileCacheMiddleware',
+            'location' => './cache'
+        ],
+        [
+            'class' => 'Tent\\Middlewares\\CacheStalenessMiddleware',
+            'location' => './cache',
+            'host' => 'http://api:80',
+            'maxAgeSeconds' => 300
+        ]
+    ]
+]);
+```
+
+**When to use**: When you want clients to always get an instant response from cache, even if it means occasionally serving slightly outdated content, while the cache quietly heals itself in the background.
+
+**Caveat — "background" is FPM-dependent**: Tent has no real async/job-queue infrastructure. The refresh is deferred via `fastcgi_finish_request()` + `register_shutdown_function()` when running under PHP-FPM, so the client gets the stale response immediately and the refresh happens afterwards in the same PHP process. Outside of PHP-FPM (e.g. CLI, built-in server, some Apache SAPIs without `fastcgi_finish_request`), the refresh runs synchronously and **will** add upstream latency to the current request. Don't rely on non-blocking behaviour outside PHP-FPM.
+
 ---
 
 ## Best Practices
