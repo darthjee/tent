@@ -17,6 +17,7 @@
 - [Host Header and Why It Matters](#host-header-and-why-it-matters)
 - [Middlewares](#middlewares)
   - [FileCacheMiddleware](#filecachemiddleware)
+  - [CacheCleanupMiddleware](#cachecleanupmiddleware)
   - [SetHeadersMiddleware](#setheadersmiddleware)
   - [RenameHeaderMiddleware](#renameheadermiddleware)
   - [SetPathMiddleware](#setpathmiddleware)
@@ -326,6 +327,27 @@ Matchers inside `FileCacheMiddleware` control which responses are stored. **All*
 Cache files are named from a hash of the request path. Each unique URI maps to a unique cache file. The `location` directory is created automatically if it does not exist.
 
 > **Note**: There is no built-in cache expiry. To clear the cache, delete the files in the `location` directory.
+
+---
+
+### `CacheCleanupMiddleware`
+
+Deletes stale `FileCacheMiddleware` cache directories when a mutating request (`POST`, `PATCH`, `PUT`, `DELETE`) arrives, before the request is forwarded upstream. Use it alongside `FileCacheMiddleware` so writes don't leave outdated `GET` responses cached.
+
+```php
+[
+    'class'    => 'Tent\Middlewares\CacheCleanupMiddleware',
+    'location' => './cache',
+    'clear'    => ['collection', 'entity']
+]
+```
+
+- **`location`** (required) — must match the `location` used by the corresponding `FileCacheMiddleware`.
+- **`clear`** (optional) — which cache directories to delete. Defaults to `['collection']` on `POST`, and `['collection', 'entity']` on `PATCH`, `PUT`, `DELETE`.
+  - `collection` — the parent-resource cache dir, e.g. a write to `/users/1` clears `{location}/users/GET/`.
+  - `entity` — the cache dir for the specific resource path, e.g. `{location}/users/1/GET/`. Has no effect on single-segment paths (e.g. `/users`).
+
+Place it **before** the handler so the cleanup happens ahead of the upstream call, allowing `FileCacheMiddleware` to re-cache the fresh response afterwards.
 
 ---
 
@@ -724,6 +746,7 @@ Configuration::buildRule([
 | Class                                   | What it does |
 |-----------------------------------------|--------------|
 | `Tent\Middlewares\FileCacheMiddleware`   | Cache upstream responses to disk; serve on subsequent requests |
+| `Tent\Middlewares\CacheCleanupMiddleware` | Delete stale cache directories on `POST`/`PATCH`/`PUT`/`DELETE` |
 | `Tent\Middlewares\SetHeadersMiddleware` | Set or override request headers before forwarding |
 | `Tent\Middlewares\RenameHeaderMiddleware` | Move a header value to a different header name |
 | `Tent\Middlewares\SetPathMiddleware`    | Rewrite the request path before the handler runs |
