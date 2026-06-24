@@ -29,7 +29,9 @@ class ProcessingRequestUploadedFilesTest extends TestCase
 
     public function testUploadedFilesCachesResult()
     {
-        $files = ['photo' => ['name' => 'a.jpg', 'type' => 'image/jpeg', 'tmp_name' => '/tmp/x', 'error' => 0, 'size' => 1]];
+        $files = [
+            'photo' => ['name' => 'a.jpg', 'type' => 'image/jpeg', 'tmp_name' => '/tmp/x', 'error' => 0, 'size' => 1],
+        ];
         $request = new Request(['uploadedFiles' => $files]);
         $processingRequest = new ProcessingRequest(['request' => $request]);
 
@@ -48,7 +50,11 @@ class ProcessingRequestUploadedFilesTest extends TestCase
 
     public function testUploadedFilesCanBeOverridden()
     {
-        $files = ['doc' => ['name' => 'file.pdf', 'type' => 'application/pdf', 'tmp_name' => '/tmp/y', 'error' => 0, 'size' => 512]];
+        $files = [
+            'doc' => [
+                'name' => 'file.pdf', 'type' => 'application/pdf', 'tmp_name' => '/tmp/y', 'error' => 0, 'size' => 512,
+            ],
+        ];
         $processingRequest = new ProcessingRequest(['uploadedFiles' => $files]);
 
         $this->assertEquals($files, $processingRequest->uploadedFiles());

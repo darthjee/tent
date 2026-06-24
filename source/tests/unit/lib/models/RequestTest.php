@@ -133,7 +133,11 @@ class RequestTest extends TestCase
 
     public function testUploadedFilesReturnsOptionOverride()
     {
-        $files = ['photo' => ['name' => 'test.jpg', 'type' => 'image/jpeg', 'tmp_name' => '/tmp/php123', 'error' => 0, 'size' => 1024]];
+        $files = [
+            'photo' => [
+                'name' => 'test.jpg', 'type' => 'image/jpeg', 'tmp_name' => '/tmp/php123', 'error' => 0, 'size' => 1024,
+            ],
+        ];
 
         $request = new Request(['uploadedFiles' => $files]);
 

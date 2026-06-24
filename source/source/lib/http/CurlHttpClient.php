@@ -23,18 +23,26 @@ class CurlHttpClient implements HttpClientInterface
      * This method serves as a general request handler that can be used for different HTTP methods.
      * It determines the appropriate executor class based on the method and executes the request.
      *
-     * @param string      $method  The HTTP method (e.g., 'GET', 'POST').
-     * @param string      $url     The target URL for the request (may include query parameters).
-     * @param array       $headers Associative array of headers to send (e.g., ['User-Agent' => 'Test']).
-     * @param string|null $body    Optional request body/payload to send (used for POST requests).
+     * @param string      $method        The HTTP method (e.g., 'GET', 'POST').
+     * @param string      $url           The target URL for the request (may include query parameters).
+     * @param array       $headers       Associative array of headers to send (e.g., ['User-Agent' => 'Test']).
+     * @param string|null $body          Optional request body/payload to send (used for POST requests).
+     * @param array       $uploadedFiles Optional array of uploaded files to include in the request.
+     * @param array       $postFields    Optional array of POST fields to include in the request.
      * @return array{
      *   body: string,
      *   httpCode: int,
      *   headers: string[]
      * } Array with response body, status code, and headers.
      */
-    public function request(string $method, string $url, array $headers, ?string $body = null, array $uploadedFiles = [], array $postFields = []): array
-    {
+    public function request(
+        string $method,
+        string $url,
+        array $headers,
+        ?string $body = null,
+        array $uploadedFiles = [],
+        array $postFields = []
+    ): array {
         $executorClass = match (strtoupper($method)) {
             'GET' => Get::class,
             'POST' => Post::class,
