@@ -87,4 +87,31 @@ class CurlHttpClientPostTest extends TestCase
         $this->assertEquals('value1', $body['form']['field1']);
         $this->assertEquals('value2', $body['form']['field2']);
     }
+
+    public function testPostWithFileUpload()
+    {
+        $client = new CurlHttpClient();
+
+        $tmpFile = tempnam(sys_get_temp_dir(), 'tent_test_');
+        file_put_contents($tmpFile, 'fake image content');
+
+        try {
+            $result = $client->request('POST', $this->baseUrl . '/post', [], null, [
+                'photo' => [
+                    'tmp_name' => $tmpFile,
+                    'type' => 'image/jpeg',
+                    'name' => 'photo.jpg',
+                    'error' => 0,
+                    'size' => 18,
+                ]
+            ]);
+
+            $this->assertEquals(200, $result['httpCode']);
+            $body = json_decode($result['body'], true);
+            $this->assertArrayHasKey('files', $body);
+            $this->assertArrayHasKey('photo', $body['files']);
+        } finally {
+            unlink($tmpFile);
+        }
+    }
 }

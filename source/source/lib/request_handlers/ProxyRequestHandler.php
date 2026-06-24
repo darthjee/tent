@@ -112,10 +112,24 @@ class ProxyRequestHandler extends RequestHandler
      */
     protected function processsRequest(RequestInterface $request): Response
     {
-        // Build full URL from target host and request path
-        $url = $this->server()->fullUrl($request->requestPath(), $request->query());
+        $url     = $this->server()->fullUrl($request->requestPath(), $request->query());
+        $headers = $request->headers();
+        $files   = $request->uploadedFiles();
 
-        $response = $this->httpClient->request($request->requestMethod(), $url, $request->headers(), $request->body());
+        if (!empty($files)) {
+            // Strip Content-Type so curl generates a new multipart boundary that
+            // matches the forwarded body (the original boundary is no longer valid).
+            unset($headers['Content-Type'], $headers['content-type']);
+        }
+
+        $response = $this->httpClient->request(
+            $request->requestMethod(),
+            $url,
+            $headers,
+            $request->body(),
+            $files,
+            $request->postFields()
+        );
         $response['request'] = $request;
 
         $result = new Response($response);

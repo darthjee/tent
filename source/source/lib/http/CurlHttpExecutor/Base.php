@@ -27,6 +27,16 @@ abstract class Base
     protected ?string $body;
 
     /**
+     * @var array Uploaded files in $_FILES format (for multipart POST requests)
+     */
+    protected array $uploadedFiles;
+
+    /**
+     * @var array POST form fields (for multipart POST requests)
+     */
+    protected array $postFields;
+
+    /**
      * @var CurlHandle|null The cURL handle for the request
      */
     protected ?CurlHandle $curlHandle;
@@ -38,12 +48,16 @@ abstract class Base
      *  - 'url': The target URL for the request
      *  - 'headers': Associative array of headers to send
      *  - 'body': (optional) The request body/payload to send (for POST requests).
+     *  - 'uploadedFiles': (optional) Uploaded files in $_FILES format.
+     *  - 'postFields': (optional) POST form fields.
      */
     public function __construct(array $options)
     {
         $this->url = $options['url'] ?? '';
         $this->headers = $options['headers'] ?? [];
         $this->body = $options['body'] ?? null;
+        $this->uploadedFiles = $options['uploadedFiles'] ?? [];
+        $this->postFields = $options['postFields'] ?? [];
     }
 
     /**

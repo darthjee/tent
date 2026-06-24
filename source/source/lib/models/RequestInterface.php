@@ -33,4 +33,16 @@ interface RequestInterface
      * @return string
      */
     public function query();
+
+    /**
+     * Returns uploaded files in $_FILES format.
+     * @return array
+     */
+    public function uploadedFiles(): array;
+
+    /**
+     * Returns POST form fields (mirrors $_POST).
+     * @return array
+     */
+    public function postFields(): array;
 }

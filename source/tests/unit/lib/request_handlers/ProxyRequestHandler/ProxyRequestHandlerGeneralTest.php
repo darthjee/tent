@@ -146,6 +146,82 @@ class ProxyRequestHandlerGeneralTest extends TestCase
         $handler->handleRequest($this->request);
     }
 
+    public function testHandleRequestWithFileUploadForwardsFiles()
+    {
+        $this->initVariables(['requestMethod' => 'POST']);
+
+        $files = [
+            'photo' => [
+                'name' => 'photo.jpg',
+                'type' => 'image/jpeg',
+                'tmp_name' => '/tmp/phpXXX',
+                'error' => 0,
+                'size' => 1024,
+            ]
+        ];
+        $postFields = ['caption' => 'My photo'];
+
+        $this->request = new ProcessingRequest([
+            'requestMethod' => 'POST',
+            'headers' => [],
+            'requestPath' => $this->requestPath,
+            'query' => $this->requestQuery,
+            'uploadedFiles' => $files,
+            'postFields' => $postFields,
+        ]);
+
+        $this->httpClient = $this->createMock(HttpClientInterface::class);
+        $expectedUrl = $this->host . $this->requestPath;
+
+        $this->httpClient->expects($this->once())
+            ->method('request')
+            ->with('POST', $expectedUrl, [], null, $files, $postFields)
+            ->willReturn(['body' => '{}', 'httpCode' => 200, 'headers' => []]);
+
+        $handler = new ProxyRequestHandler($this->host, $this->httpClient);
+        $response = $handler->handleRequest($this->request);
+
+        $this->assertEquals(200, $response->httpCode());
+    }
+
+    public function testHandleRequestWithFileUploadStripsContentTypeHeader()
+    {
+        $this->initVariables(['requestMethod' => 'POST']);
+
+        $files = [
+            'photo' => [
+                'name' => 'photo.jpg',
+                'type' => 'image/jpeg',
+                'tmp_name' => '/tmp/phpXXX',
+                'error' => 0,
+                'size' => 1024,
+            ]
+        ];
+
+        $this->request = new ProcessingRequest([
+            'requestMethod' => 'POST',
+            'headers' => ['Content-Type' => 'multipart/form-data; boundary=abc123'],
+            'requestPath' => $this->requestPath,
+            'query' => $this->requestQuery,
+            'uploadedFiles' => $files,
+            'postFields' => [],
+        ]);
+
+        $capturedHeaders = null;
+        $this->httpClient = $this->createMock(HttpClientInterface::class);
+        $this->httpClient->expects($this->once())
+            ->method('request')
+            ->willReturnCallback(function ($method, $url, $headers) use (&$capturedHeaders) {
+                $capturedHeaders = $headers;
+                return ['body' => '{}', 'httpCode' => 200, 'headers' => []];
+            });
+
+        $handler = new ProxyRequestHandler($this->host, $this->httpClient);
+        $handler->handleRequest($this->request);
+
+        $this->assertArrayNotHasKey('Content-Type', $capturedHeaders);
+    }
+
     private function createMockHttpClient($returnValue): void
     {
         $this->httpClient = $this->createMock(HttpClientInterface::class);
