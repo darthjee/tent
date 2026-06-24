@@ -291,6 +291,23 @@ Caches responses to disk and serves them on subsequent requests. Caching behavio
 
 See [FileCacheMiddleware Matchers](file-cache-middleware-matchers.md) for detailed matcher configuration.
 
+### `CacheCleanupMiddleware`
+
+Deletes stale `FileCacheMiddleware` cache directories on mutating requests (`POST`, `PATCH`, `PUT`, `DELETE`), before the request is forwarded upstream.
+
+```php
+[
+    'class'    => 'Tent\\Middlewares\\CacheCleanupMiddleware',
+    'location' => './cache',
+    'clear'    => ['collection', 'entity']
+]
+```
+
+- `location` must match the `location` used by the corresponding `FileCacheMiddleware`.
+- `clear` (optional) selects which cache directories to delete: `collection` (the parent-resource cache dir) and/or `entity` (the specific resource's cache dir). Defaults to `['collection']` on `POST`, and `['collection', 'entity']` on `PATCH`/`PUT`/`DELETE`.
+
+**When to use**: Whenever `FileCacheMiddleware` caches `GET` responses for a resource that can also be written to — keeps cached collection/entity responses from going stale after a write.
+
 ---
 
 ## Best Practices
