@@ -27,5 +27,5 @@ interface HttpClientInterface
      *   headers: string[]
      * } Array with response body, status code, and headers.
      */
-    public function request(string $method, string $url, array $headers, ?string $body = null): array;
+    public function request(string $method, string $url, array $headers, ?string $body = null, array $uploadedFiles = [], array $postFields = []): array;
 }

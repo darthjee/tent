@@ -33,7 +33,7 @@ class CurlHttpClient implements HttpClientInterface
      *   headers: string[]
      * } Array with response body, status code, and headers.
      */
-    public function request(string $method, string $url, array $headers, ?string $body = null): array
+    public function request(string $method, string $url, array $headers, ?string $body = null, array $uploadedFiles = [], array $postFields = []): array
     {
         $executorClass = match (strtoupper($method)) {
             'GET' => Get::class,
@@ -44,7 +44,13 @@ class CurlHttpClient implements HttpClientInterface
             default => throw new InvalidArgumentException("Unsupported HTTP method: $method"),
         };
 
-        $executor = new $executorClass(['url' => $url, 'headers' => $headers, 'body' => $body]);
+        $executor = new $executorClass([
+            'url'           => $url,
+            'headers'       => $headers,
+            'body'          => $body,
+            'uploadedFiles' => $uploadedFiles,
+            'postFields'    => $postFields,
+        ]);
         return $executor->request();
     }
 }

@@ -126,4 +126,72 @@ class PostTest extends TestCase
             $this->assertStringContainsString(':', $header);
         }
     }
+
+    public function testRequestWithFileUpload()
+    {
+        $tmpFile = tempnam(sys_get_temp_dir(), 'tent_test_');
+        file_put_contents($tmpFile, 'fake image content');
+
+        try {
+            $executor = new Post([
+                'url' => $this->baseUrl . '/post',
+                'headers' => [],
+                'body' => null,
+                'uploadedFiles' => [
+                    'photo' => [
+                        'tmp_name' => $tmpFile,
+                        'type' => 'image/jpeg',
+                        'name' => 'photo.jpg',
+                        'error' => 0,
+                        'size' => 18,
+                    ]
+                ],
+                'postFields' => [],
+            ]);
+
+            $result = $executor->request();
+
+            $this->assertEquals(200, $result['httpCode']);
+            $body = json_decode($result['body'], true);
+            $this->assertArrayHasKey('files', $body);
+            $this->assertArrayHasKey('photo', $body['files']);
+        } finally {
+            unlink($tmpFile);
+        }
+    }
+
+    public function testRequestWithFileUploadAndPostFields()
+    {
+        $tmpFile = tempnam(sys_get_temp_dir(), 'tent_test_');
+        file_put_contents($tmpFile, 'fake image content');
+
+        try {
+            $executor = new Post([
+                'url' => $this->baseUrl . '/post',
+                'headers' => [],
+                'body' => null,
+                'uploadedFiles' => [
+                    'photo' => [
+                        'tmp_name' => $tmpFile,
+                        'type' => 'image/jpeg',
+                        'name' => 'photo.jpg',
+                        'error' => 0,
+                        'size' => 18,
+                    ]
+                ],
+                'postFields' => ['caption' => 'My photo'],
+            ]);
+
+            $result = $executor->request();
+
+            $this->assertEquals(200, $result['httpCode']);
+            $body = json_decode($result['body'], true);
+            $this->assertArrayHasKey('files', $body);
+            $this->assertArrayHasKey('photo', $body['files']);
+            $this->assertArrayHasKey('form', $body);
+            $this->assertEquals('My photo', $body['form']['caption']);
+        } finally {
+            unlink($tmpFile);
+        }
+    }
 }
