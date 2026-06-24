@@ -46,6 +46,21 @@ A PR is considered complete when:
     ```
   - This requirement applies primarily to source code. For specs, refactor only if there is excessive duplication.
 
+### CI Checks
+
+Before a PR is considered complete, all CI checks relevant to the modified parts of the project must pass locally.
+
+| Modified folder | CircleCI job | Local command |
+|----------------|-------------|---------------|
+| `source/` | `unit_test` | `docker compose run --rm tent_tests composer tests` |
+| `source/` | `checks` | `docker compose run --rm tent_tests composer lint` |
+| `dev/api/` | `dev_api_test` | `docker compose run --rm api_dev composer tests` |
+| `dev/api/` | `dev_api_checks` | `docker compose run --rm api_dev composer lint` |
+| `dev/frontend/` | `dev_frontend_test` | `docker compose run --rm frontend_dev npm test` |
+| `dev/frontend/` | `dev_frontend_checks` | `docker compose run --rm frontend_dev npm run lint` |
+
+Run only the checks that correspond to the folders you changed. This same process must be followed when **planning how to resolve an issue**: include a final step in the plan that identifies the affected folders and lists the CI commands to run before opening a PR.
+
 ## Code Organization
 
 ### File Responsibility: Class Declarers vs Scripts
@@ -87,6 +102,35 @@ Files that define a class must use **PascalCase** naming, matching the class nam
 This applies to both source files and their corresponding test files:
 - `Router.php` → test: `RouterTest.php`
 - `RequestHandler.php` → test: `RequestHandlerTest.php`
+
+### Method Order: Public Before Private
+
+Within a class, **public methods must be declared before private/protected methods**. Private methods serve as implementation helpers and should appear at the end of the class body.
+
+*Example:*
+```php
+// Good: public methods first, private methods last
+class Worker {
+    public function run(): void {
+        $this->prepare();
+        $this->execute();
+    }
+
+    public function getStatus(): string { ... }
+
+    private function prepare(): void { ... }
+    private function execute(): void { ... }
+}
+
+// Bad: private methods mixed in with or before public methods
+class Worker {
+    private function prepare(): void { ... }
+
+    public function run(): void { ... }
+
+    private function execute(): void { ... }
+}
+```
 
 ## Dependency Injection
 
@@ -139,3 +183,20 @@ When refactoring, aim to:
   $person = new Person(['first_name' => 'Jane', 'last_name' => 'Doe']);
   // ...repeated in many test methods
   ```
+
+- **Improve Readability:**
+  Extract complex conditionals or long method chains into named variables or helper methods.
+  ```php
+  // Good
+  $isExpired = $token->expiresAt() < new DateTime();
+  if ($isExpired) { ... }
+
+  // Bad
+  if ($token->expiresAt() < new DateTime()) { ... }
+  ```
+
+- **Keep Methods Small:**
+  If a method grows beyond ~10 lines, consider extracting logic into private helpers.
+
+- **Refactoring Commits Must Not Change Behaviour:**
+  A refactoring commit should not alter observable behaviour. If behaviour must change, do it in a separate commit.

@@ -15,6 +15,12 @@ source/
         Rule.php
         ProcessingRequest.php
         Response.php
+      common/               ← Base model (SimpleModel)
+      content/              ← Cache and file abstractions (Cache, File, FileCache, ResponseContent)
+      exceptions/           ← Custom exceptions (FileNotFoundException, InvalidFilePathException)
+      http/                 ← HTTP client abstraction (CurlHttpClient, HttpClientInterface)
+      utils/                ← Utility helpers (CacheFilePath, ContentType, CurlUtils, FileUtils, StringUtils, HttpCodeMatcher)
+      validators/           ← Input validation (RequestPathValidator)
       request_handlers/     ← DefaultProxyRequestHandler, ProxyRequestHandler, StaticFileHandler, MissingRequestHandler
       middlewares/          ← FileCacheMiddleware, SetHeadersMiddleware, SetPathMiddleware, RenameHeaderMiddleware, RedirectMiddleware
       matchers/             ← ExactRequestMatcher, BeginsWithRequestMatcher, EndsWithRequestMatcher, RegexRequestMatcher,
@@ -98,6 +104,26 @@ See [`creating-middlewares.md`](../creating-middlewares.md) for how to build cus
 | `NegativeMatcher` | Inverts any other matcher |
 
 See [`adding-request-matchers.md`](../adding-request-matchers.md) for how to add new matchers.
+
+### Content (`source/source/lib/content/`)
+
+Cache and file abstractions used by `FileCacheMiddleware`: `Cache`, `File`, `FileCache`, and `ResponseContent`.
+
+### HTTP Client (`source/source/lib/http/`)
+
+Thin abstraction over cURL: `HttpClientInterface`, `CurlHttpClient`, and `CurlHttpExecutor`. Used by proxy handlers to forward requests upstream.
+
+### Utils (`source/source/lib/utils/`)
+
+Internal helpers: `CacheFilePath` (cache key generation), `ContentType` (MIME mapping), `CurlUtils`, `FileUtils`, `StringUtils`, `HttpCodeMatcher` (wildcard HTTP code matching like `"2xx"`).
+
+### Validators (`source/source/lib/validators/`)
+
+`RequestPathValidator` — validates the resolved path for `StaticFileHandler` (guards against path traversal, returns 403/404 as appropriate).
+
+### Exceptions (`source/source/lib/exceptions/`)
+
+`FileNotFoundException` and `InvalidFilePathException` — thrown by `StaticFileHandler` and caught to produce the correct HTTP error response.
 
 ### Logger (`source/source/lib/log/`)
 
