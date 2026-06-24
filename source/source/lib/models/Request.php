@@ -109,6 +109,30 @@ class Request implements RequestInterface
     }
 
     /**
+     * Returns uploaded files in $_FILES format.
+     *
+     * @return array Uploaded files or option override for tests
+     *
+     * @see RequestInterface::uploadedFiles()
+     */
+    public function uploadedFiles(): array
+    {
+        return $this->options['uploadedFiles'] ?? $_FILES;
+    }
+
+    /**
+     * Returns POST form fields (mirrors $_POST).
+     *
+     * @return array POST fields or option override for tests
+     *
+     * @see RequestInterface::postFields()
+     */
+    public function postFields(): array
+    {
+        return $this->options['postFields'] ?? $_POST;
+    }
+
+    /**
      * Helper method to get the full request URI.
      *
      * @return string The full request URI

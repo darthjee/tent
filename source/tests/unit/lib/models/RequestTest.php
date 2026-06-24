@@ -130,4 +130,22 @@ class RequestTest extends TestCase
         $this->assertEquals('/api/v1/users/123/posts', $request->requestPath());
         $this->assertEquals('filter=active', $request->query());
     }
+
+    public function testUploadedFilesReturnsOptionOverride()
+    {
+        $files = ['photo' => ['name' => 'test.jpg', 'type' => 'image/jpeg', 'tmp_name' => '/tmp/php123', 'error' => 0, 'size' => 1024]];
+
+        $request = new Request(['uploadedFiles' => $files]);
+
+        $this->assertEquals($files, $request->uploadedFiles());
+    }
+
+    public function testPostFieldsReturnsOptionOverride()
+    {
+        $fields = ['field1' => 'value1', 'field2' => 'value2'];
+
+        $request = new Request(['postFields' => $fields]);
+
+        $this->assertEquals($fields, $request->postFields());
+    }
 }

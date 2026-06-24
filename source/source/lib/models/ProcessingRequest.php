@@ -34,6 +34,8 @@ class ProcessingRequest implements RequestInterface
     private $headers;
     private $requestPath;
     private $query;
+    private $uploadedFiles;
+    private $postFields;
 
     /**
      * List of attributes that can be set via constructor params.
@@ -46,6 +48,8 @@ class ProcessingRequest implements RequestInterface
         'headers',
         'requestPath',
         'query',
+        'uploadedFiles',
+        'postFields',
     ];
 
     /**
@@ -229,5 +233,35 @@ class ProcessingRequest implements RequestInterface
             $this->query = $this->request->query();
         }
         return $this->query ?? '';
+    }
+
+    /**
+     * Returns uploaded files in $_FILES format, caching the result after first access.
+     *
+     * @return array Uploaded files or empty array if no request is set
+     *
+     * @see RequestInterface::uploadedFiles()
+     */
+    public function uploadedFiles(): array
+    {
+        if ($this->uploadedFiles === null && $this->request) {
+            $this->uploadedFiles = $this->request->uploadedFiles();
+        }
+        return $this->uploadedFiles ?? [];
+    }
+
+    /**
+     * Returns POST form fields, caching the result after first access.
+     *
+     * @return array POST fields or empty array if no request is set
+     *
+     * @see RequestInterface::postFields()
+     */
+    public function postFields(): array
+    {
+        if ($this->postFields === null && $this->request) {
+            $this->postFields = $this->request->postFields();
+        }
+        return $this->postFields ?? [];
     }
 }
