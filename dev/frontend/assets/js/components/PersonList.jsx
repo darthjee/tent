@@ -9,6 +9,26 @@ const PersonList = () => {
   const [uploadingForPersonId, setUploadingForPersonId] = useState(null);
   const isUploading = (id) => uploadingForPersonId === id;
 
+  const renderPhotoUpload = (person) => {
+    if (isUploading(person.id)) {
+      return (
+        <PhotoUploadForm
+          personId={person.id}
+          onSuccess={() => setUploadingForPersonId(null)}
+          onCancel={() => setUploadingForPersonId(null)}
+        />
+      );
+    }
+    return (
+      <button
+        className="btn btn-sm btn-link ms-2"
+        onClick={() => setUploadingForPersonId(person.id)}
+      >
+        Upload Photo
+      </button>
+    );
+  };
+
   useEffect(() => {
     (new PersonClient()).list()
       .then((data) => {
@@ -31,20 +51,7 @@ const PersonList = () => {
         {persons.map((person) => (
           <li key={person.id}>
             {person.first_name} {person.last_name} ({person.birthdate})
-            {isUploading(person.id) ? (
-              <PhotoUploadForm
-                personId={person.id}
-                onSuccess={() => setUploadingForPersonId(null)}
-                onCancel={() => setUploadingForPersonId(null)}
-              />
-            ) : (
-              <button
-                className="btn btn-sm btn-link ms-2"
-                onClick={() => setUploadingForPersonId(person.id)}
-              >
-                Upload Photo
-              </button>
-            )}
+            {renderPhotoUpload(person)}
           </li>
         ))}
       </ul>
