@@ -28,6 +28,7 @@ require_once __DIR__ . '/lib/utils/FileUtils.php';
 require_once __DIR__ . '/lib/log/LoggerInstance.php';
 require_once __DIR__ . '/lib/log/NullLoggerInstance.php';
 require_once __DIR__ . '/lib/log/Logger.php';
+require_once __DIR__ . '/lib/content/CacheDirResolver.php';
 require_once __DIR__ . '/lib/content/CacheDirCleaner.php';
 require_once __DIR__ . '/lib/middlewares/CacheCleanupMiddleware.php';
 require_once __DIR__ . '/lib/middlewares/FileCacheMiddleware.php';

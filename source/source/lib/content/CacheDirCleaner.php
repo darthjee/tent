@@ -3,7 +3,6 @@
 namespace Tent\Content;
 
 use Tent\Models\FolderLocation;
-use Tent\Utils\FileUtils;
 use Tent\Log\Logger;
 
 /**
@@ -27,12 +26,15 @@ class CacheDirCleaner
 {
     private FolderLocation $location;
 
+    private CacheDirResolver $resolver;
+
     /**
      * @param FolderLocation $location Base cache directory (must match FileCacheMiddleware).
      */
     public function __construct(FolderLocation $location)
     {
         $this->location = $location;
+        $this->resolver = new CacheDirResolver($location);
     }
 
     /**
@@ -49,42 +51,11 @@ class CacheDirCleaner
      */
     public function clean(string $target, string $path): void
     {
-        $dir = $this->resolveDir($target, $path);
+        $dir = $this->resolver->resolve($target, $path);
 
         if ($dir !== null) {
             $this->deleteDir($dir);
         }
-    }
-
-    /**
-     * Resolves the cache directory for a given target and request path.
-     *
-     * Returns null when the target cannot be meaningfully applied
-     * (e.g. `entity` on a single-segment path).
-     *
-     * @param string $target Target type, either 'collection' or 'entity'.
-     * @param string $path   Request path, e.g. '/users/1'.
-     * @return string|null
-     */
-    private function resolveDir(string $target, string $path): ?string
-    {
-        $base = $this->location->basePath();
-        $segments = array_values(array_filter(explode('/', $path)));
-
-        if ($target === 'collection') {
-            $collectionSegments = count($segments) > 1 ? array_slice($segments, 0, -1) : $segments;
-            $collectionPath = implode('/', $collectionSegments);
-            return FileUtils::getFullPath($base, $collectionPath, 'GET');
-        }
-
-        if ($target === 'entity') {
-            if (count($segments) < 2) {
-                return null;
-            }
-            return FileUtils::getFullPath($base, implode('/', $segments), 'GET');
-        }
-
-        return null;
     }
 
     /**

@@ -90,13 +90,12 @@ class CacheCleanupMiddleware extends Middleware
      */
     public function processRequest(ProcessingRequest $request): ProcessingRequest
     {
-        $method = strtoupper($request->requestMethod());
+        $targets = $this->resolveTargets($request);
 
-        if (!in_array($method, self::MUTATING_METHODS, true)) {
+        if ($targets === null) {
             return $request;
         }
 
-        $targets = $this->clearTargets ?? self::DEFAULT_TARGETS[$method];
         $path = $request->requestPath();
 
         foreach ($targets as $target) {
@@ -104,5 +103,25 @@ class CacheCleanupMiddleware extends Middleware
         }
 
         return $request;
+    }
+
+    /**
+     * Resolves the cleanup targets that apply to the given request.
+     *
+     * Returns null when the request method is not mutating, meaning no
+     * cleanup should be performed.
+     *
+     * @param ProcessingRequest $request The incoming request.
+     * @return string[]|null
+     */
+    private function resolveTargets(ProcessingRequest $request): ?array
+    {
+        $method = strtoupper($request->requestMethod());
+
+        if (!in_array($method, self::MUTATING_METHODS, true)) {
+            return null;
+        }
+
+        return $this->clearTargets ?? self::DEFAULT_TARGETS[$method];
     }
 }
