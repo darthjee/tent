@@ -23,6 +23,7 @@ require_once __DIR__ . '/lib/http/CurlHttpExecutor/Patch.php';
 require_once __DIR__ . '/lib/http/CurlHttpExecutor/Post.php';
 require_once __DIR__ . '/lib/http/CurlHttpExecutor/Put.php';
 require_once __DIR__ . '/lib/middlewares/Middleware.php';
+require_once __DIR__ . '/lib/middlewares/CacheCleanupMiddleware.php';
 require_once __DIR__ . '/lib/middlewares/FileCacheMiddleware.php';
 require_once __DIR__ . '/lib/middlewares/RedirectMiddleware.php';
 require_once __DIR__ . '/lib/middlewares/RenameHeaderMiddleware.php';
