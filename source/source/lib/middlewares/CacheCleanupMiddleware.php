@@ -2,10 +2,9 @@
 
 namespace Tent\Middlewares;
 
+use Tent\Content\CacheDirCleaner;
 use Tent\Models\FolderLocation;
 use Tent\Models\ProcessingRequest;
-use Tent\Utils\FileUtils;
-use Tent\Log\Logger;
 
 /**
  * Middleware that deletes stale file-cache directories on mutating requests.
@@ -56,6 +55,8 @@ class CacheCleanupMiddleware extends Middleware
     /** @var string[]|null */
     private ?array $clearTargets;
 
+    private CacheDirCleaner $cleaner;
+
     /**
      * @param FolderLocation $location     Base cache directory (must match FileCacheMiddleware).
      * @param string[]|null  $clearTargets Explicit targets, or null to use method-driven defaults.
@@ -64,6 +65,7 @@ class CacheCleanupMiddleware extends Middleware
     {
         $this->location = $location;
         $this->clearTargets = $clearTargets;
+        $this->cleaner = new CacheDirCleaner($location);
     }
 
     /**
@@ -98,87 +100,9 @@ class CacheCleanupMiddleware extends Middleware
         $path = $request->requestPath();
 
         foreach ($targets as $target) {
-            $dir = $this->resolveDir($target, $path);
-            if ($dir !== null) {
-                $this->deleteDir($dir);
-            }
+            $this->cleaner->clean($target, $path);
         }
 
         return $request;
-    }
-
-    /**
-     * Resolves the cache directory for a given target and request path.
-     *
-     * Returns null when the target cannot be meaningfully applied
-     * (e.g. `entity` on a single-segment path).
-     *
-     * @param string $target Target type, either 'collection' or 'entity'.
-     * @param string $path   Request path, e.g. '/users/1'.
-     * @return string|null
-     */
-    private function resolveDir(string $target, string $path): ?string
-    {
-        $base = $this->location->basePath();
-        $segments = array_values(array_filter(explode('/', $path)));
-
-        if ($target === 'collection') {
-            $collectionSegments = count($segments) > 1 ? array_slice($segments, 0, -1) : $segments;
-            $collectionPath = implode('/', $collectionSegments);
-            return FileUtils::getFullPath($base, $collectionPath, 'GET');
-        }
-
-        if ($target === 'entity') {
-            if (count($segments) < 2) {
-                return null;
-            }
-            return FileUtils::getFullPath($base, implode('/', $segments), 'GET');
-        }
-
-        return null;
-    }
-
-    /**
-     * Recursively deletes a directory and all its contents if it exists and is
-     * safely scoped under the configured cache location.
-     *
-     * @param string $dir Absolute path to the directory to delete.
-     * @return void
-     */
-    private function deleteDir(string $dir): void
-    {
-        $base = rtrim($this->location->basePath(), '/');
-        if (!str_starts_with($dir, $base . '/')) {
-            return;
-        }
-
-        if (!is_dir($dir)) {
-            return;
-        }
-
-        $this->removeDirRecursive($dir);
-        Logger::debug('cache cleared — dir: ' . $dir);
-    }
-
-    /**
-     * Recursively removes a directory and all its contents.
-     *
-     * @param string $dir Absolute path to the directory to remove.
-     * @return void
-     */
-    private function removeDirRecursive(string $dir): void
-    {
-        $items = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
-            \RecursiveIteratorIterator::CHILD_FIRST
-        );
-        foreach ($items as $item) {
-            if ($item->isFile() || $item->isLink()) {
-                unlink($item->getPathname());
-            } elseif ($item->isDir()) {
-                rmdir($item->getPathname());
-            }
-        }
-        rmdir($dir);
     }
 }
