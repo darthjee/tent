@@ -50,9 +50,7 @@ class CacheDirResolver
 
         if ($target === 'collection') {
             return $this->resolveCollection($segments);
-        }
-
-        if ($target === 'entity') {
+        } elseif ($target === 'entity') {
             return $this->resolveEntity($segments);
         }
 
