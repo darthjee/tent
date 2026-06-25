@@ -66,10 +66,7 @@ class BackgroundRefresher
     }
 
     /**
-     * Performs the upstream refresh request and re-stores the result into the cache.
-     *
-     * Removes the stale entry first since `ResponseCacher::process()` only stores into
-     * a cache that does not already `exist()`.
+     * Entry point that logs the start of the refresh and delegates to `attemptRefresh()`.
      *
      * @return void
      */
@@ -78,18 +75,56 @@ class BackgroundRefresher
         $uri = $this->request->requestPath();
         Logger::debug('[refresh] - starting background cache refresh — uri: ' . $uri);
 
-        try {
-            $response = $this->fetch();
-            $this->cache->remove();
-            (new ResponseCacher($this->cache, $response))->process();
+        $this->attemptRefresh($uri);
+    }
 
-            Logger::debug(
-                '[' . $response->httpCode() . '] - background cache refresh completed — uri: ' . $uri
-            );
+    /**
+     * Wraps the refresh attempt in a try/catch, delegating the actual work to
+     * `refresh()` and any failure handling to `handleFailure()`.
+     *
+     * @param string $uri The request path being refreshed (used for logging).
+     * @return void
+     */
+    private function attemptRefresh(string $uri): void
+    {
+        try {
+            $this->refresh($uri);
         } catch (\Throwable $exception) {
-            Logger::warn('[refresh] - background cache refresh failed — uri: ' . $uri .
-                ', reason: ' . $exception->getMessage());
+            $this->handleFailure($uri, $exception);
         }
+    }
+
+    /**
+     * Performs the upstream refresh request and re-stores the result into the cache.
+     *
+     * Removes the stale entry first since `ResponseCacher::process()` only stores into
+     * a cache that does not already `exist()`.
+     *
+     * @param string $uri The request path being refreshed (used for logging).
+     * @return void
+     */
+    private function refresh(string $uri): void
+    {
+        $response = $this->fetch();
+        $this->cache->remove();
+        (new ResponseCacher($this->cache, $response))->process();
+
+        Logger::debug(
+            '[' . $response->httpCode() . '] - background cache refresh completed — uri: ' . $uri
+        );
+    }
+
+    /**
+     * Logs a warning when the background refresh attempt fails.
+     *
+     * @param string     $uri       The request path being refreshed (used for logging).
+     * @param \Throwable $exception The exception raised during the refresh attempt.
+     * @return void
+     */
+    private function handleFailure(string $uri, \Throwable $exception): void
+    {
+        Logger::warn('[refresh] - background cache refresh failed — uri: ' . $uri .
+            ', reason: ' . $exception->getMessage());
     }
 
     /**
