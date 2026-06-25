@@ -188,6 +188,20 @@ class CacheStalenessMiddleware extends Middleware
 
         $this->writeSentinel($sentinel);
 
+        $this->scheduleRefresh($request, $cache, $sentinel);
+    }
+
+    /**
+     * Builds a `BackgroundRefresher` for the given request/cache pair and hands it to the
+     * scheduler, removing the debounce sentinel once the refresh finishes.
+     *
+     * @param ProcessingRequest $request  The incoming processing request.
+     * @param FileCache         $cache    The stale cache entry to refresh.
+     * @param string            $sentinel The debounce sentinel file path.
+     * @return void
+     */
+    private function scheduleRefresh(ProcessingRequest $request, FileCache $cache, string $sentinel): void
+    {
         $refresher = new BackgroundRefresher($request, $cache, $this->host, $this->httpClient);
 
         ($this->scheduler)(function () use ($refresher, $sentinel) {
