@@ -120,6 +120,40 @@ class BackgroundRefresherTest extends TestCase
         $this->assertEquals('stale body', $this->cache->content());
     }
 
+    public function testRunKeepsStaleCacheWhenUpstreamRespondsWithError()
+    {
+        $this->request = $this->buildRequest('/users', 'GET');
+        $this->cache = new FileCache($this->request, $this->location);
+        $this->storeStaleCache('stale body');
+
+        $httpClient = $this->createMock(HttpClientInterface::class);
+        $httpClient->method('request')
+            ->willReturn(['body' => 'error body', 'httpCode' => 500, 'headers' => []]);
+
+        $refresher = new BackgroundRefresher($this->request, $this->cache, 'http://api:80', $httpClient);
+        $refresher->run();
+
+        $this->assertEquals('stale body', $this->cache->content());
+        $this->assertEquals(200, $this->cache->httpCode());
+    }
+
+    public function testRunKeepsStaleTimestampWhenUpstreamRespondsWithError()
+    {
+        $this->request = $this->buildRequest('/users', 'GET');
+        $this->cache = new FileCache($this->request, $this->location);
+        $staleTimestamp = time() - 1000;
+        $this->storeStaleCache('stale body', $staleTimestamp);
+
+        $httpClient = $this->createMock(HttpClientInterface::class);
+        $httpClient->method('request')
+            ->willReturn(['body' => 'error body', 'httpCode' => 404, 'headers' => []]);
+
+        $refresher = new BackgroundRefresher($this->request, $this->cache, 'http://api:80', $httpClient);
+        $refresher->run();
+
+        $this->assertEquals($staleTimestamp, $this->cache->timestamp());
+    }
+
     private function storeStaleCache(string $body, ?int $timestamp = null): void
     {
         $response = new \Tent\Models\Response([

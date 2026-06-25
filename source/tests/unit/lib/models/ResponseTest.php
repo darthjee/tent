@@ -68,4 +68,42 @@ class ResponseTest extends TestCase
         $this->assertEquals(201, $response->httpCode());
         $this->assertEquals(['A: B'], $response->headers());
     }
+
+    /**
+     * @dataProvider successfulHttpCodesProvider
+     */
+    public function testIsSuccessfulReturnsTrueFor2xxCodes(int $httpCode)
+    {
+        $response = new Response(['body' => '', 'httpCode' => $httpCode, 'headers' => []]);
+        $this->assertTrue($response->isSuccessful());
+    }
+
+    /**
+     * @dataProvider unsuccessfulHttpCodesProvider
+     */
+    public function testIsSuccessfulReturnsFalseForNon2xxCodes(int $httpCode)
+    {
+        $response = new Response(['body' => '', 'httpCode' => $httpCode, 'headers' => []]);
+        $this->assertFalse($response->isSuccessful());
+    }
+
+    public function successfulHttpCodesProvider(): array
+    {
+        return [
+            'lower boundary (200)' => [200],
+            'mid range (204)' => [204],
+            'upper boundary (299)' => [299],
+        ];
+    }
+
+    public function unsuccessfulHttpCodesProvider(): array
+    {
+        return [
+            'redirect (301)' => [301],
+            'client error (404)' => [404],
+            'server error (500)' => [500],
+            'just below range (199)' => [199],
+            'just above range (300)' => [300],
+        ];
+    }
 }

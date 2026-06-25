@@ -97,8 +97,8 @@ class BackgroundRefresher
     /**
      * Performs the upstream refresh request and re-stores the result into the cache.
      *
-     * Removes the stale entry first since `ResponseCacher::process()` only stores into
-     * a cache that does not already `exist()`.
+     * The stale entry is only removed and replaced when the upstream response is
+     * successful (2xx). Otherwise, the stale entry is kept so it can keep being served.
      *
      * @param string $uri The request path being refreshed (used for logging).
      * @return void
@@ -106,11 +106,45 @@ class BackgroundRefresher
     private function refresh(string $uri): void
     {
         $response = $this->fetch();
-        $this->cache->remove();
-        (new ResponseCacher($this->cache, $response))->process();
+
+        if ($response->isSuccessful()) {
+            $this->replaceCache($response);
+        } else {
+            $this->keepStaleCache($uri, $response);
+        }
 
         Logger::debug(
             '[' . $response->httpCode() . '] - background cache refresh completed — uri: ' . $uri
+        );
+    }
+
+    /**
+     * Removes the stale entry and stores the fresh successful response into the cache.
+     *
+     * Removes the stale entry first since `ResponseCacher::process()` only stores into
+     * a cache that does not already `exist()`.
+     *
+     * @param Response $response The fresh upstream response.
+     * @return void
+     */
+    private function replaceCache(Response $response): void
+    {
+        $this->cache->remove();
+        (new ResponseCacher($this->cache, $response))->process();
+    }
+
+    /**
+     * Logs that the upstream response was not successful, keeping the stale cache entry.
+     *
+     * @param string   $uri      The request path being refreshed (used for logging).
+     * @param Response $response The fresh, unsuccessful upstream response.
+     * @return void
+     */
+    private function keepStaleCache(string $uri, Response $response): void
+    {
+        Logger::warn(
+            '[' . $response->httpCode() . '] - background cache refresh got a non-successful response, ' .
+            'keeping stale cache — uri: ' . $uri
         );
     }
 
