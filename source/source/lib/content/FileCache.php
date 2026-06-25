@@ -159,6 +159,33 @@ class FileCache implements Cache
     }
 
     /**
+     * Returns the raw Unix timestamp stored when this entry was last written.
+     *
+     * Returns null when the entry has no metadata (e.g. cache miss) or the
+     * metadata does not include a `timestamp` field.
+     *
+     * @return integer|null The stored Unix timestamp, or null when unavailable.
+     */
+    public function timestamp(): ?int
+    {
+        $meta = $this->readMeta();
+        return $meta['timestamp'] ?? null;
+    }
+
+    /**
+     * Returns the full path to the metadata cache file.
+     *
+     * Exposed so callers (e.g. staleness/debounce mechanisms) can derive
+     * sentinel/lock file paths scoped to this specific cache entry.
+     *
+     * @return string The full path to the meta cache file.
+     */
+    public function metaFilePath(): string
+    {
+        return $this->metaFilePath;
+    }
+
+    /**
      * Checks if the cached response files exist.
      *
      * @see FileUtils::exists()
@@ -181,6 +208,29 @@ class FileCache implements Cache
         $this->ensureCacheFolderExists();
         file_put_contents($this->bodyFilePath, $response->body());
         file_put_contents($this->metaFilePath, json_encode($this->buildMeta($response)));
+    }
+
+    /**
+     * Removes the cached body and metadata files, if present.
+     *
+     * Used to discard a stale entry before re-storing a fresh response,
+     * since {@see store()} only writes the entry and {@see ResponseCacher}
+     * (used by background refreshers) only stores into a cache that does
+     * not already `exist()`.
+     *
+     * @return void
+     */
+    public function remove(): void
+    {
+        if (FileUtils::exists($this->bodyFilePath)) {
+            unlink($this->bodyFilePath);
+        }
+
+        if (FileUtils::exists($this->metaFilePath)) {
+            unlink($this->metaFilePath);
+        }
+
+        $this->content = null;
     }
 
     /**

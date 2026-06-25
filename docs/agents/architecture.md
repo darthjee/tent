@@ -22,7 +22,7 @@ source/
       utils/                ← Utility helpers (CacheFilePath, ContentType, CurlUtils, FileUtils, StringUtils, HttpCodeMatcher)
       validators/           ← Input validation (RequestPathValidator)
       request_handlers/     ← DefaultProxyRequestHandler, ProxyRequestHandler, StaticFileHandler, MissingRequestHandler
-      middlewares/          ← FileCacheMiddleware, SetHeadersMiddleware, SetPathMiddleware, RenameHeaderMiddleware, RedirectMiddleware
+      middlewares/          ← FileCacheMiddleware, CacheStalenessMiddleware, SetHeadersMiddleware, SetPathMiddleware, RenameHeaderMiddleware, RedirectMiddleware
       matchers/             ← ExactRequestMatcher, BeginsWithRequestMatcher, EndsWithRequestMatcher, RegexRequestMatcher,
                               StatusCodeMatcher, ResponseHeaderMatcher, RequestMethodMatcher, NegativeMatcher
       log/                  ← Logger (static facade), LoggerInstance (default, reads LOG_LEVEL), NullLoggerInstance (test double)
@@ -83,6 +83,7 @@ Implement `processRequest(ProcessingRequest)` and/or `processResponse(Response)`
 | Class | Purpose |
 |-------|---------|
 | `FileCacheMiddleware` | Cache responses to disk; serve from cache on subsequent requests |
+| `CacheStalenessMiddleware` | Serve a stale `FileCacheMiddleware` hit immediately while triggering a background refresh; must run **after** `FileCacheMiddleware` with the same `location` |
 | `SetHeadersMiddleware` | Set or override request headers |
 | `SetPathMiddleware` | Rewrite the request path |
 | `RenameHeaderMiddleware` | Rename a request header (copy value to new name, remove original) |

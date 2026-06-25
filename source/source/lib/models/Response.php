@@ -92,6 +92,16 @@ class Response extends SimpleModel
     }
 
     /**
+     * Checks whether the HTTP status code represents a successful response (2xx).
+     *
+     * @return boolean
+     */
+    public function isSuccessful(): bool
+    {
+        return $this->httpCode >= 200 && $this->httpCode < 300;
+    }
+
+    /**
      * Sets the response body content.
      *
      * @param string $body The new resposne body content.
