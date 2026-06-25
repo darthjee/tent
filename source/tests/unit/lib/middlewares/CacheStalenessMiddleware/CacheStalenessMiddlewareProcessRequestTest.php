@@ -20,7 +20,6 @@ class CacheStalenessMiddlewareProcessRequestTest extends TestCase
 {
     private $cacheDir;
     private $location;
-    private $request;
 
     protected function setUp(): void
     {
