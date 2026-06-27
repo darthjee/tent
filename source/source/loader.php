@@ -69,3 +69,5 @@ require_once __DIR__ . '/lib/utils/ContentType.php';
 require_once __DIR__ . '/lib/utils/HttpCodeMatcher.php';
 require_once __DIR__ . '/lib/utils/StringUtils.php';
 require_once __DIR__ . '/lib/validators/RequestPathValidator.php';
+
+require_once __DIR__ . '/extension/loader.php';
