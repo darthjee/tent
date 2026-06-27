@@ -33,6 +33,21 @@ class PersonClient {
   }
 
   /**
+   * Fetches a single person by ID.
+   *
+   * @param {number|string} id - The ID of the person.
+   * @returns {Promise<Object>} Resolves with the person object.
+   * @throws {Error} If the request fails.
+   */
+  async get(id) {
+    const response = await fetch(`/persons/${id}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch person data');
+    }
+    return response.json();
+  }
+
+  /**
    * Uploads a photo for the given person.
    *
    * Sends a POST request to `/persons/:id/photo` with the file as
