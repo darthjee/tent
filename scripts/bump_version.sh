@@ -7,6 +7,7 @@ ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 README="$ROOT_DIR/README.md"
 MAKEFILE="$ROOT_DIR/Makefile"
 COMPOSER_JSON="$ROOT_DIR/source/composer.json"
+HOW_TO_USE="$ROOT_DIR/docs/HOW_TO_USE_DARTHJEE-TENT.md"
 
 if [[ $# -ge 1 ]]; then
   VERSION="$1"
@@ -36,6 +37,10 @@ NEXT_VERSION="${MAJOR}.${MINOR}.$((PATCH + 1))"
 sed -i '' \
   "s|\*\*Current Version:\*\* \[.*\](https://github.com/darthjee/tent/releases/tag/.*)|**Current Version:** [$VERSION](https://github.com/darthjee/tent/releases/tag/$VERSION)|" \
   "$README"
+
+sed -i '' \
+  "s|\*\*Minimum version:\*\* \[.*\](https://github.com/darthjee/tent/releases/tag/.*)|**Minimum version:** [$VERSION](https://github.com/darthjee/tent/releases/tag/$VERSION)|" \
+  "$HOW_TO_USE"
 
 sed -i '' \
   "s|\*\*Next Release:\*\* \[.*\](https://github.com/darthjee/tent/compare/.*)|**Next Release:** [$NEXT_VERSION](https://github.com/darthjee/tent/compare/$VERSION...main)|" \
