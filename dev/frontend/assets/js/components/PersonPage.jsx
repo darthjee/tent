@@ -33,6 +33,8 @@ const PersonPage = () => {
       />
       <p>Birthdate: {person.birthdate}</p>
       <Link to="/persons">Back to list</Link>
+      {' '}
+      <Link to={`/persons/${id}/edit`} className="btn btn-secondary btn-sm">Edit</Link>
     </div>
   );
 };
