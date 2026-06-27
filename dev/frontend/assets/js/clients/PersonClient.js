@@ -48,6 +48,26 @@ class PersonClient {
   }
 
   /**
+   * Updates an existing person by ID.
+   *
+   * @param {number|string} id   - The ID of the person.
+   * @param {Object}        data - The person attributes to update.
+   * @returns {Promise<Object>} Resolves with the updated person object.
+   * @throws {Error} If the request fails.
+   */
+  async update(id, data) {
+    const response = await fetch(`/persons/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update person');
+    }
+    return response.json();
+  }
+
+  /**
    * Uploads a photo for the given person.
    *
    * Sends a POST request to `/persons/:id/photo` with the file as

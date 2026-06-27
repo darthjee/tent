@@ -7,6 +7,7 @@ use ApiDev\HealthCheckEndpoint;
 use ApiDev\ListPersonsEndpoint;
 use ApiDev\ShowPersonEndpoint;
 use ApiDev\CreatePersonEndpoint;
+use ApiDev\UpdatePersonEndpoint;
 use ApiDev\UploadPersonPhotoEndpoint;
 
 require_once __DIR__ . '/loader.php';
@@ -15,6 +16,7 @@ Configuration::add('GET', '/health', HealthCheckEndpoint::class);
 Configuration::add('GET', '/persons', ListPersonsEndpoint::class);
 Configuration::add('GET', '/persons/:id', ShowPersonEndpoint::class);
 Configuration::add('POST', '/persons', CreatePersonEndpoint::class);
+Configuration::add('PATCH', '/persons/:id', UpdatePersonEndpoint::class);
 Configuration::add('POST', '/persons/:id/photo.json', UploadPersonPhotoEndpoint::class);
 
 \ApiDev\Mysql\Configuration::configure(
