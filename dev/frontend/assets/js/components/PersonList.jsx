@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { PersonClient } from '../clients/PersonClient';
 import PhotoUploadForm from './PhotoUploadForm';
 
@@ -50,7 +51,8 @@ const PersonList = () => {
       <ul>
         {persons.map((person) => (
           <li key={person.id}>
-            {person.first_name} {person.last_name} ({person.birthdate})
+            <Link to={`/persons/${person.id}`}>{person.first_name} {person.last_name}</Link>
+            {' '}({person.birthdate})
             {renderPhotoUpload(person)}
           </li>
         ))}
