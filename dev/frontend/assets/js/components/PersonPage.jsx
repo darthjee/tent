@@ -35,6 +35,8 @@ const PersonPage = () => {
       <Link to="/persons">Back to list</Link>
       {' '}
       <Link to={`/persons/${id}/edit`} className="btn btn-secondary btn-sm">Edit</Link>
+      {' '}
+      <Link to={`/persons/${id}/upload_photo`} className="btn btn-secondary btn-sm">Upload Photo</Link>
     </div>
   );
 };
