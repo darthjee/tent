@@ -17,3 +17,6 @@ docker_volumes/node_modules
 docker_volumes/vendor/
 docker_volumes/cache/
 source/vendor/
+
+.claude/state/
+dev/frontend/coverage/
