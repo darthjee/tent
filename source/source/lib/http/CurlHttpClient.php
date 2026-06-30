@@ -2,6 +2,7 @@
 
 namespace Tent\Http;
 
+use InvalidArgumentException;
 use Tent\Http\CurlHttpExecutor\Delete;
 use Tent\Http\CurlHttpExecutor\Get;
 use Tent\Http\CurlHttpExecutor\Patch;
