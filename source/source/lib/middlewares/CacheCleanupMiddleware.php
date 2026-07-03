@@ -5,6 +5,7 @@ namespace Tent\Middlewares;
 use Tent\Content\CacheDirCleaner;
 use Tent\Models\FolderLocation;
 use Tent\Models\ProcessingRequest;
+use Tent\Utils\PlaceholderPattern;
 
 /**
  * Middleware that deletes stale file-cache directories on mutating requests.
@@ -23,6 +24,14 @@ use Tent\Models\ProcessingRequest;
  * - `collection`: the parent-resource cache dir (`{location}/{parent}/GET/`)
  * - `entity`: the entity cache dir (`{location}/{path}/GET/`)
  *
+ * ## Custom targets
+ *
+ * `custom` maps a `:placeholder` route pattern to an explicit list of cache
+ * path templates to clear when a mutating request matches it. This is
+ * additive to `collection`/`entity` cleanup — both run for a matching
+ * mutating request. See `PlaceholderPattern` for the supported placeholder
+ * families.
+ *
  * ## Example configuration
  *
  * ```php
@@ -34,6 +43,12 @@ use Tent\Models\ProcessingRequest;
  *             'class'    => 'Tent\\Middlewares\\CacheCleanupMiddleware',
  *             'location' => './cache',
  *             'clear'    => ['collection', 'entity'],
+ *             'custom'   => [
+ *                 '/games/:game_slug/photo_upload' => [
+ *                     '/games.json',
+ *                     '/games/:game_slug.json',
+ *                 ]
+ *             ]
  *         ]
  *     ]
  * ]);
@@ -55,31 +70,37 @@ class CacheCleanupMiddleware extends Middleware
     /** @var string[]|null */
     private ?array $clearTargets;
 
+    /** @var array<string, string[]> */
+    private array $customRules;
+
     private CacheDirCleaner $cleaner;
 
     /**
-     * @param FolderLocation $location     Base cache directory (must match FileCacheMiddleware).
-     * @param string[]|null  $clearTargets Explicit targets, or null to use method-driven defaults.
+     * @param FolderLocation               $location     Base cache directory (must match FileCacheMiddleware).
+     * @param string[]|null                $clearTargets Explicit targets, or null to use method-driven defaults.
+     * @param array<string, string[]>|null $customRules  Map of route pattern to target path templates.
      */
-    public function __construct(FolderLocation $location, ?array $clearTargets = null)
+    public function __construct(FolderLocation $location, ?array $clearTargets = null, ?array $customRules = null)
     {
         $this->location = $location;
         $this->clearTargets = $clearTargets;
+        $this->customRules = $customRules ?? [];
         $this->cleaner = new CacheDirCleaner($location);
     }
 
     /**
      * Builds a CacheCleanupMiddleware from configuration attributes.
      *
-     * @param array $attributes Must include `location`; optionally `clear`.
+     * @param array $attributes Must include `location`; optionally `clear`, `custom`.
      * @return CacheCleanupMiddleware
      */
     public static function build(array $attributes): CacheCleanupMiddleware
     {
         $location = new FolderLocation($attributes['location']);
         $clearTargets = isset($attributes['clear']) ? (array) $attributes['clear'] : null;
+        $customRules = $attributes['custom'] ?? [];
 
-        return new self($location, $clearTargets);
+        return new self($location, $clearTargets, $customRules);
     }
 
     /**
@@ -102,7 +123,34 @@ class CacheCleanupMiddleware extends Middleware
             $this->cleaner->clean($target, $path);
         }
 
+        $this->cleanCustomTargets($path);
+
         return $request;
+    }
+
+    /**
+     * Clears every configured `custom` target matching the given path.
+     *
+     * More than one `custom` pattern may match the same path; all matches
+     * apply.
+     *
+     * @param string $path Request path.
+     * @return void
+     */
+    private function cleanCustomTargets(string $path): void
+    {
+        foreach ($this->customRules as $pattern => $targetTemplates) {
+            $values = PlaceholderPattern::match($pattern, $path);
+
+            if ($values === null) {
+                continue;
+            }
+
+            foreach ((array) $targetTemplates as $targetTemplate) {
+                $target = PlaceholderPattern::substitute($targetTemplate, $values);
+                $this->cleaner->cleanPath($target);
+            }
+        }
     }
 
     /**

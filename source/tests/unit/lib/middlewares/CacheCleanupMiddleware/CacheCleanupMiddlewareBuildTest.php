@@ -51,4 +51,34 @@ class CacheCleanupMiddlewareBuildTest extends TestCase
 
         $this->assertSame(['collection'], $prop->getValue($middleware));
     }
+
+    public function testBuildWithoutCustomDefaultsToEmptyArray()
+    {
+        $middleware = CacheCleanupMiddleware::build(['location' => '/tmp/cache']);
+        $reflection = new \ReflectionClass($middleware);
+        $prop = $reflection->getProperty('customRules');
+        $prop->setAccessible(true);
+
+        $this->assertSame([], $prop->getValue($middleware));
+    }
+
+    public function testBuildWithCustomAttributeStoresRules()
+    {
+        $custom = [
+            '/games/:game_slug/photo_upload' => [
+                '/games.json',
+                '/games/:game_slug.json',
+            ],
+        ];
+
+        $middleware = CacheCleanupMiddleware::build([
+            'location' => '/tmp/cache',
+            'custom'   => $custom,
+        ]);
+        $reflection = new \ReflectionClass($middleware);
+        $prop = $reflection->getProperty('customRules');
+        $prop->setAccessible(true);
+
+        $this->assertSame($custom, $prop->getValue($middleware));
+    }
 }
