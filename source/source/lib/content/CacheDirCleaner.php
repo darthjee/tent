@@ -20,6 +20,7 @@ use Tent\Log\Logger;
  *
  * $cleaner->clean('collection', '/users/1');
  * $cleaner->clean('entity', '/users/1');
+ * $cleaner->cleanPath('/users.json');
  * ```
  */
 class CacheDirCleaner
@@ -56,6 +57,21 @@ class CacheDirCleaner
         if ($dir !== null) {
             $this->deleteDir($dir);
         }
+    }
+
+    /**
+     * Resolves the cache directory for an arbitrary, already-concrete path,
+     * then deletes it if it exists.
+     *
+     * Unlike `clean()`, this has no `collection`/`entity` segment-count
+     * restriction, so it can be used for explicit `custom` cleanup targets.
+     *
+     * @param string $path Concrete request path, e.g. '/games/space-invaders.json'.
+     * @return void
+     */
+    public function cleanPath(string $path): void
+    {
+        $this->deleteDir($this->resolver->resolveExact($path));
     }
 
     /**

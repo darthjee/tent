@@ -20,6 +20,7 @@ use Tent\Utils\FileUtils;
  *
  * $resolver->resolve('collection', '/users/1');
  * $resolver->resolve('entity', '/users/1');
+ * $resolver->resolveExact('/users.json');
  * ```
  */
 class CacheDirResolver
@@ -55,6 +56,24 @@ class CacheDirResolver
         }
 
         return null;
+    }
+
+    /**
+     * Resolves the cache directory for an arbitrary, already-concrete path.
+     *
+     * Unlike `resolveEntity()`, this has no segment-count restriction, so it
+     * can be used for single-segment paths (e.g. '/games.json') as well as
+     * deeper ones.
+     *
+     * @param string $path Concrete request path, e.g. '/games/space-invaders.json'.
+     * @return string
+     */
+    public function resolveExact(string $path): string
+    {
+        $segments = array_values(array_filter(explode('/', $path)));
+        $base = $this->location->basePath();
+
+        return FileUtils::getFullPath($base, implode('/', $segments), 'GET');
     }
 
     /**

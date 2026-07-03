@@ -178,6 +178,97 @@ class CacheCleanupMiddlewareProcessRequestTest extends TestCase
         $this->assertDirectoryExists($collectionDir);
     }
 
+    public function testCustomPatternClearsSubstitutedTargetsOnMatch()
+    {
+        $collectionDir = $this->cacheDir . '/games.json/GET';
+        $entityDir     = $this->cacheDir . '/games/space-invaders.json/GET';
+        mkdir($collectionDir, 0777, true);
+        mkdir($entityDir, 0777, true);
+
+        $middleware = $this->buildMiddleware([
+            'custom' => [
+                '/games/:game_slug/photo_upload' => [
+                    '/games.json',
+                    '/games/:game_slug.json',
+                ],
+            ],
+        ]);
+        $middleware->processRequest($this->buildRequest('/games/space-invaders/photo_upload', 'POST'));
+
+        $this->assertDirectoryDoesNotExist($collectionDir);
+        $this->assertDirectoryDoesNotExist($entityDir);
+    }
+
+    public function testCustomCleanupIsAdditiveToCollectionAndEntity()
+    {
+        $collectionDir = $this->cacheDir . '/users/GET';
+        $entityDir     = $this->cacheDir . '/users/1/GET';
+        $customDir     = $this->cacheDir . '/reports.json/GET';
+        mkdir($collectionDir, 0777, true);
+        mkdir($entityDir, 0777, true);
+        mkdir($customDir, 0777, true);
+
+        $middleware = $this->buildMiddleware([
+            'custom' => [
+                '/users/:user_id' => ['/reports.json'],
+            ],
+        ]);
+        $middleware->processRequest($this->buildRequest('/users/1', 'PATCH'));
+
+        $this->assertDirectoryDoesNotExist($collectionDir);
+        $this->assertDirectoryDoesNotExist($entityDir);
+        $this->assertDirectoryDoesNotExist($customDir);
+    }
+
+    public function testCustomCleanupDoesNotRunOnGetRequest()
+    {
+        $customDir = $this->cacheDir . '/games.json/GET';
+        mkdir($customDir, 0777, true);
+
+        $middleware = $this->buildMiddleware([
+            'custom' => [
+                '/games/:game_slug/photo_upload' => ['/games.json'],
+            ],
+        ]);
+        $middleware->processRequest($this->buildRequest('/games/space-invaders/photo_upload', 'GET'));
+
+        $this->assertDirectoryExists($customDir);
+    }
+
+    public function testCustomCleanupDoesNothingWhenPatternDoesNotMatch()
+    {
+        $customDir = $this->cacheDir . '/games.json/GET';
+        mkdir($customDir, 0777, true);
+
+        $middleware = $this->buildMiddleware([
+            'custom' => [
+                '/games/:game_slug/photo_upload' => ['/games.json'],
+            ],
+        ]);
+        $middleware->processRequest($this->buildRequest('/games/space-invaders/rename', 'POST'));
+
+        $this->assertDirectoryExists($customDir);
+    }
+
+    public function testMultipleMatchingCustomPatternsAllApply()
+    {
+        $firstDir  = $this->cacheDir . '/games.json/GET';
+        $secondDir = $this->cacheDir . '/games/space-invaders/summary.json/GET';
+        mkdir($firstDir, 0777, true);
+        mkdir($secondDir, 0777, true);
+
+        $middleware = $this->buildMiddleware([
+            'custom' => [
+                '/games/:game_slug/photo_upload' => ['/games.json'],
+                '/games/:game_slug/:action_slug' => ['/games/:game_slug/summary.json'],
+            ],
+        ]);
+        $middleware->processRequest($this->buildRequest('/games/space-invaders/photo_upload', 'POST'));
+
+        $this->assertDirectoryDoesNotExist($firstDir);
+        $this->assertDirectoryDoesNotExist($secondDir);
+    }
+
     private function buildRequest(string $path, string $method): ProcessingRequest
     {
         return new ProcessingRequest([
