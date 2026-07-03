@@ -341,7 +341,13 @@ Deletes stale `FileCacheMiddleware` cache directories when a mutating request (`
 [
     'class'    => 'Tent\Middlewares\CacheCleanupMiddleware',
     'location' => './cache',
-    'clear'    => ['collection', 'entity']
+    'clear'    => ['collection', 'entity'],
+    'custom'   => [
+        '/games/:game_slug/photo_upload' => [
+            '/games.json',
+            '/games/:game_slug.json',
+        ]
+    ]
 ]
 ```
 
@@ -349,6 +355,13 @@ Deletes stale `FileCacheMiddleware` cache directories when a mutating request (`
 - **`clear`** (optional) — which cache directories to delete. Defaults to `['collection']` on `POST`, and `['collection', 'entity']` on `PATCH`, `PUT`, `DELETE`.
   - `collection` — the parent-resource cache dir, e.g. a write to `/users/1` clears `{location}/users/GET/`.
   - `entity` — the cache dir for the specific resource path, e.g. `{location}/users/1/GET/`. Has no effect on single-segment paths (e.g. `/users`).
+- **`custom`** (optional) — maps a `:placeholder` route pattern to an explicit list of cache path templates to clear when a mutating request matches it. On a match, the captured placeholder values are substituted into every target template (e.g. the actual `game_slug` value fills in `:game_slug` in `/games/:game_slug.json`) before that concrete path's cache is cleared. More than one `custom` pattern may match the same request, and all matches apply. `custom` is additive — it never replaces `clear`'s `collection`/`entity` cleanup; both run for a matching mutating request.
+  - Supported placeholders (matched exactly or by suffix):
+    - `:slug` or `:xxx_slug` — letters, digits, dashes, underscores (`[A-Za-z0-9_-]+`).
+    - `:id` or `:xxx_id` — digits only (`[0-9]+`).
+    - `:uuid` or `:xxx_uuid` — canonical UUID shape (`[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}`).
+  - Any other placeholder name is a configuration error.
+  - In the example above, a `POST /games/space-invaders/photo_upload` clears `{location}/games.json/GET/` and `{location}/games/space-invaders.json/GET/`, in addition to whatever `clear` targets apply.
 
 Place it **before** the handler so the cleanup happens ahead of the upstream call, allowing `FileCacheMiddleware` to re-cache the fresh response afterwards.
 
