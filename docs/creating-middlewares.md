@@ -299,14 +299,26 @@ Deletes stale `FileCacheMiddleware` cache directories on mutating requests (`POS
 [
     'class'    => 'Tent\\Middlewares\\CacheCleanupMiddleware',
     'location' => './cache',
-    'clear'    => ['collection', 'entity']
+    'clear'    => ['collection', 'entity'],
+    'custom'   => [
+        '/games/:game_slug/photo_upload' => [
+            '/games.json',
+            '/games/:game_slug.json',
+        ]
+    ]
 ]
 ```
 
 - `location` must match the `location` used by the corresponding `FileCacheMiddleware`.
 - `clear` (optional) selects which cache directories to delete: `collection` (the parent-resource cache dir) and/or `entity` (the specific resource's cache dir). Defaults to `['collection']` on `POST`, and `['collection', 'entity']` on `PATCH`/`PUT`/`DELETE`.
+- `custom` (optional) maps a `:placeholder` route pattern to an explicit list of cache path templates to clear when a mutating request matches it. On a match, the captured placeholder values are substituted into every target template (e.g. the actual `game_slug` value fills in `:game_slug` in `/games/:game_slug.json`) before that concrete path's cache is cleared. More than one `custom` pattern may match the same request, and all matches apply. `custom` is additive — it never replaces `clear`'s `collection`/`entity` cleanup; both run for a matching mutating request.
+  - Supported placeholders (by name, matched exactly or by suffix):
+    - `:slug` or `:<anything>_slug` — letters, digits, dashes, underscores (`[A-Za-z0-9_-]+`).
+    - `:id` or `:<anything>_id` — digits only (`[0-9]+`).
+    - `:uuid` or `:<anything>_uuid` — canonical UUID shape (`[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}`).
+  - Any other placeholder name is a configuration error.
 
-**When to use**: Whenever `FileCacheMiddleware` caches `GET` responses for a resource that can also be written to — keeps cached collection/entity responses from going stale after a write.
+**When to use**: Whenever `FileCacheMiddleware` caches `GET` responses for a resource that can also be written to — keeps cached collection/entity responses from going stale after a write. Use `custom` for routes that don't fit the `collection`/`entity` segment-count model, such as an action nested under an entity (e.g. `/games/:game_slug/photo_upload`) or a non-numeric entity segment.
 
 ### `CacheStalenessMiddleware`
 
