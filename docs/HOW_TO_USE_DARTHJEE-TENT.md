@@ -1,6 +1,6 @@
 # How to Use darthjee/tent
 
-**Minimum version:** [0.9.0](https://github.com/darthjee/tent/releases/tag/0.9.0)
+**Minimum version:** [0.9.1](https://github.com/darthjee/tent/releases/tag/0.9.1)
 
 [Tent](https://github.com/darthjee/tent) is a PHP-based reverse proxy and static file server distributed as a Docker image. It acts as the single entry point for applications that combine a backend API and a frontend — routing, caching, and serving files through a simple PHP configuration layer.
 
