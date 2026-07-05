@@ -84,14 +84,15 @@ class PlaceholderPattern
     private static function compile(string $pattern): string
     {
         $segments = explode('/', $pattern);
+        $lastIndex = count($segments) - 1;
 
-        $compiled = array_map(function (string $segment) {
+        $compiled = array_map(function (string $segment, int $index) use ($lastIndex) {
             if ($segment !== '' && $segment[0] === ':') {
-                return self::compileSegment(substr($segment, 1));
+                return self::compileSegment(substr($segment, 1), $index === $lastIndex);
             }
 
             return preg_quote($segment, '/');
-        }, $segments);
+        }, $segments, array_keys($segments));
 
         return '/^' . implode('\/', $compiled) . '$/';
     }
@@ -99,14 +100,39 @@ class PlaceholderPattern
     /**
      * Compiles a single `:name` segment into a named capture group.
      *
-     * @param string $name Placeholder name (without the leading colon).
+     * @param string  $name   Placeholder name (without the leading colon).
+     * @param boolean $isLast Whether this is the last segment of the pattern —
+     *                        only the last segment may carry a trailing format suffix.
      * @return string Named capture group regex fragment.
      */
-    private static function compileSegment(string $name): string
+    private static function compileSegment(string $name, bool $isLast = false): string
     {
+        $suffix = '';
+
+        if ($isLast) {
+            [$name, $suffix] = self::splitFormatSuffix($name);
+        }
+
         $characterClass = self::characterClassFor($name);
 
-        return '(?P<' . $name . '>' . $characterClass . ')';
+        return '(?P<' . $name . '>' . $characterClass . ')' . $suffix;
+    }
+
+    /**
+     * Splits an optional trailing format suffix (e.g. `.json`, `.xml`) off a
+     * placeholder name, so it can be resolved and matched as a literal
+     * outside the named capture group.
+     *
+     * @param string $name Placeholder name, possibly ending in a format suffix.
+     * @return array{0: string, 1: string} Tuple of [base name, quoted literal suffix or ''].
+     */
+    private static function splitFormatSuffix(string $name): array
+    {
+        if (preg_match('/^(.+)(\.[A-Za-z0-9]+)$/', $name, $matches) === 1) {
+            return [$matches[1], preg_quote($matches[2], '/')];
+        }
+
+        return [$name, ''];
     }
 
     /**
