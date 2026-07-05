@@ -91,4 +91,51 @@ class PlaceholderPatternMatchTest extends TestCase
 
         PlaceholderPattern::match('/games/:foo', '/games/space-invaders');
     }
+
+    public function testMatchesLastSegmentWithFormatSuffix()
+    {
+        $values = PlaceholderPattern::match(
+            '/games/:game_slug/npcs/:character_id.json',
+            '/games/space-invaders/npcs/42.json'
+        );
+
+        $this->assertSame(['game_slug' => 'space-invaders', 'character_id' => '42'], $values);
+    }
+
+    public function testMatchesLastSegmentWithDifferentFormatSuffix()
+    {
+        $values = PlaceholderPattern::match('/games/:game_slug.xml', '/games/space-invaders.xml');
+
+        $this->assertSame(['game_slug' => 'space-invaders'], $values);
+    }
+
+    public function testReturnsNullWhenFormatSuffixDoesNotMatch()
+    {
+        $values = PlaceholderPattern::match(
+            '/games/:game_slug/npcs/:character_id.json',
+            '/games/space-invaders/npcs/42.xml'
+        );
+
+        $this->assertNull($values);
+    }
+
+    public function testReturnsNullWhenFormatSuffixIsMissing()
+    {
+        $values = PlaceholderPattern::match(
+            '/games/:game_slug/npcs/:character_id.json',
+            '/games/space-invaders/npcs/42'
+        );
+
+        $this->assertNull($values);
+    }
+
+    public function testThrowsWhenFormatSuffixAppearsOnNonLastSegment()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        PlaceholderPattern::match(
+            '/games/:game_slug.json/npcs/:character_id',
+            '/games/space-invaders.json/npcs/42'
+        );
+    }
 }
