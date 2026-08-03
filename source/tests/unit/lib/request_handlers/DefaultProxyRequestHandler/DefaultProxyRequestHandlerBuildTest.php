@@ -13,6 +13,7 @@ use Tent\Models\FolderLocation;
 use Tent\Content\FileCache;
 use Tent\Models\Response;
 use Tent\Http\HttpClientInterface;
+use Tent\Tests\Support\Cache\DummyRequestHasher;
 
 class DefaultProxyRequestHandlerBuildTest extends TestCase
 {
@@ -114,6 +115,62 @@ class DefaultProxyRequestHandlerBuildTest extends TestCase
         }
 
         $this->assertTrue($hasCacheMiddleware);
+    }
+
+    public function testBuildWithRequestHasherPassesThroughToFileCacheMiddleware()
+    {
+        $handler = DefaultProxyRequestHandler::build([
+            'host' => 'http://backend:80',
+            'cache' => $this->cacheDir,
+            'request_hasher' => [
+                'class' => DummyRequestHasher::class,
+            ],
+        ]);
+
+        $middlewares = $this->getMiddlewares($handler);
+        $fileCacheMiddleware = null;
+
+        foreach ($middlewares as $middleware) {
+            if ($middleware instanceof FileCacheMiddleware) {
+                $fileCacheMiddleware = $middleware;
+            }
+        }
+
+        $this->assertNotNull($fileCacheMiddleware);
+
+        $reflection = new \ReflectionClass($fileCacheMiddleware);
+        $property = $reflection->getProperty('requestHasher');
+        $property->setAccessible(true);
+
+        $this->assertInstanceOf(DummyRequestHasher::class, $property->getValue($fileCacheMiddleware));
+    }
+
+    public function testBuildWithoutRequestHasherDefaultsToQueryRequestHasherOnFileCacheMiddleware()
+    {
+        $handler = DefaultProxyRequestHandler::build([
+            'host' => 'http://backend:80',
+            'cache' => $this->cacheDir,
+        ]);
+
+        $middlewares = $this->getMiddlewares($handler);
+        $fileCacheMiddleware = null;
+
+        foreach ($middlewares as $middleware) {
+            if ($middleware instanceof FileCacheMiddleware) {
+                $fileCacheMiddleware = $middleware;
+            }
+        }
+
+        $this->assertNotNull($fileCacheMiddleware);
+
+        $reflection = new \ReflectionClass($fileCacheMiddleware);
+        $property = $reflection->getProperty('requestHasher');
+        $property->setAccessible(true);
+
+        $this->assertInstanceOf(
+            \Tent\Cache\QueryRequestHasher::class,
+            $property->getValue($fileCacheMiddleware)
+        );
     }
 
     private function buildRequest(array $overrides = []): ProcessingRequest

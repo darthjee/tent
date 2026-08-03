@@ -87,8 +87,9 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
     {
         $response = $this->buildResponse(200);
 
-        $bodyFile = CacheFilePath::path('body', $this->cacheDir . '/file.txt', '');
-        $metaFile = CacheFilePath::path('meta', $this->cacheDir . '/file.txt', '');
+        $hash = hash('sha256', '');
+        $bodyFile = CacheFilePath::path('body', $this->cacheDir . '/file.txt', $hash);
+        $metaFile = CacheFilePath::path('meta', $this->cacheDir . '/file.txt', $hash);
         mkdir(dirname($bodyFile), 0777, true);
         file_put_contents($bodyFile, 'original body');
         file_put_contents($metaFile, json_encode(['headers' => ["Header1: original", "Header2: value"]]));

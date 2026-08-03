@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../../../support/loader.php';
 use PHPUnit\Framework\TestCase;
 use Tent\Content\FileCache;
 use Tent\Models\FolderLocation;
-use Tent\Models\Request;
+use Tent\Models\ProcessingRequest;
 use Tent\Utils\CacheFilePath;
 use Tent\Tests\Support\Utils\FileSystemUtils;
 
@@ -20,6 +20,7 @@ class FileCacheGeneralTest extends TestCase
     private $request;
     private $meta;
     private $location;
+    private $hash;
 
     public function setUp(): void
     {
@@ -27,8 +28,9 @@ class FileCacheGeneralTest extends TestCase
         $this->path = 'some_file.txt';
         $this->fullPath = $this->basePath . '/' . $this->path . '/GET';
         $this->headers = ['Content-Type' => 'text/plain'];
-        $this->request = new Request(['requestPath' => $this->path, 'requestMethod' => 'GET']);
+        $this->request = new ProcessingRequest(['requestPath' => $this->path, 'requestMethod' => 'GET']);
         $this->location = new FolderLocation($this->basePath);
+        $this->hash = hash('sha256', '');
         $this->meta = [
             'headers' => $this->headers,
             'httpCode' => 201
@@ -36,8 +38,8 @@ class FileCacheGeneralTest extends TestCase
 
         mkdir($this->fullPath, 0777, true);
 
-        file_put_contents(CacheFilePath::path('body', $this->fullPath, ''), 'Cached body content');
-        file_put_contents(CacheFilePath::path('meta', $this->fullPath, ''), json_encode($this->meta));
+        file_put_contents(CacheFilePath::path('body', $this->fullPath, $this->hash), 'Cached body content');
+        file_put_contents(CacheFilePath::path('meta', $this->fullPath, $this->hash), json_encode($this->meta));
     }
 
     public function tearDown(): void
@@ -71,42 +73,42 @@ class FileCacheGeneralTest extends TestCase
 
     public function testExistsReturnsFalseWhenBodyFileIsMissing()
     {
-        @unlink(CacheFilePath::path('body', $this->fullPath, ''));
+        @unlink(CacheFilePath::path('body', $this->fullPath, $this->hash));
         $cache = new FileCache($this->request, $this->location);
         $this->assertFalse($cache->exists());
     }
 
     public function testExistsReturnsFalseWhenMetaFileIsMissing()
     {
-        @unlink(CacheFilePath::path('meta', $this->fullPath, ''));
+        @unlink(CacheFilePath::path('meta', $this->fullPath, $this->hash));
         $cache = new FileCache($this->request, $this->location);
         $this->assertFalse($cache->exists());
     }
 
     public function testHeadersReturnsEmptyArrayWhenMetaFileIsMissing()
     {
-        @unlink(CacheFilePath::path('meta', $this->fullPath, ''));
+        @unlink(CacheFilePath::path('meta', $this->fullPath, $this->hash));
         $cache = new FileCache($this->request, $this->location);
         $this->assertEquals([], $cache->headers());
     }
 
     public function testHttpCodeReturnsDefaultWhenMetaFileIsMissing()
     {
-        @unlink(CacheFilePath::path('meta', $this->fullPath, ''));
+        @unlink(CacheFilePath::path('meta', $this->fullPath, $this->hash));
         $cache = new FileCache($this->request, $this->location);
         $this->assertEquals(200, $cache->httpCode());
     }
 
     public function testHeadersReturnsEmptyArrayWhenMetaFileIsCorrupt()
     {
-        file_put_contents(CacheFilePath::path('meta', $this->fullPath, ''), 'invalid json {]');
+        file_put_contents(CacheFilePath::path('meta', $this->fullPath, $this->hash), 'invalid json {]');
         $cache = new FileCache($this->request, $this->location);
         $this->assertEquals([], $cache->headers());
     }
 
     public function testHttpCodeReturnsDefaultWhenMetaFileIsCorrupt()
     {
-        file_put_contents(CacheFilePath::path('meta', $this->fullPath, ''), 'invalid json {]');
+        file_put_contents(CacheFilePath::path('meta', $this->fullPath, $this->hash), 'invalid json {]');
         $cache = new FileCache($this->request, $this->location);
         $this->assertEquals(200, $cache->httpCode());
     }
@@ -116,7 +118,7 @@ class FileCacheGeneralTest extends TestCase
         $timestamp = mktime(12, 30, 0, 6, 15, 2025);
         $metaWithTimestamp = array_merge($this->meta, ['timestamp' => $timestamp]);
         file_put_contents(
-            CacheFilePath::path('meta', $this->fullPath, ''),
+            CacheFilePath::path('meta', $this->fullPath, $this->hash),
             json_encode($metaWithTimestamp)
         );
 

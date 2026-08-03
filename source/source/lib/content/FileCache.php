@@ -6,7 +6,9 @@ use Tent\Models\FolderLocation;
 use Tent\Utils\FileUtils;
 use Tent\Models\Response;
 use Tent\Utils\CacheFilePath;
-use Tent\Models\RequestInterface;
+use Tent\Models\ProcessingRequest;
+use Tent\Cache\RequestHasher;
+use Tent\Cache\QueryRequestHasher;
 
 /**
  * File-based cache implementation for Tent.
@@ -26,9 +28,10 @@ use Tent\Models\RequestInterface;
  * ## Example: Direct usage
  *
  * ```php
- * $request = ...; // RequestInterface instance
+ * $request = ...; // ProcessingRequest instance
  * $location = new FolderLocation('/tmp/cache');
  * $cache = new FileCache($request, $location);
+ * // Optionally: new FileCache($request, $location, new CustomRequestHasher());
  *
  * // Reading from cache
  * if ($cache->exists()) {
@@ -66,9 +69,9 @@ use Tent\Models\RequestInterface;
 class FileCache implements Cache
 {
     /**
-     * @var RequestInterface The request associated with this cache.
+     * @var ProcessingRequest The request associated with this cache.
      */
-    private RequestInterface $request;
+    private ProcessingRequest $request;
 
     /**
      * @var string Relative or absolute file path.
@@ -96,20 +99,35 @@ class FileCache implements Cache
     private string $metaFilePath;
 
     /**
+     * @var string The cache-key hash used to derive the body/meta file paths.
+     */
+    private string $hash;
+
+    /**
      * Constructs a Cache object.
      *
-     * @param RequestInterface $request  The request associated with this cache.
-     * @param FolderLocation   $location The base folder location.
+     * @param ProcessingRequest  $request       The request associated with this cache.
+     * @param FolderLocation     $location      The base folder location.
+     * @param RequestHasher|null $requestHasher Optional hasher used to derive the cache key.
+     *                                          Defaults to {@see QueryRequestHasher}. The
+     *                                          resulting hash is memoized on `$request` so it
+     *                                          is computed at most once per request.
      */
-    public function __construct(RequestInterface $request, FolderLocation $location)
-    {
+    public function __construct(
+        ProcessingRequest $request,
+        FolderLocation $location,
+        ?RequestHasher $requestHasher = null
+    ) {
         $this->request = $request;
         $this->path = $request->requestPath();
         $this->location = $location;
 
-        $query = $this->request->query();
-        $this->bodyFilePath = CacheFilePath::path('body', $this->basePath(), $query);
-        $this->metaFilePath = CacheFilePath::path('meta', $this->basePath(), $query);
+        $this->hash = $request->cacheHash() ?? $request->setCacheHash(
+            ($requestHasher ?? new QueryRequestHasher())->hash($request)
+        );
+
+        $this->bodyFilePath = CacheFilePath::path('body', $this->basePath(), $this->hash);
+        $this->metaFilePath = CacheFilePath::path('meta', $this->basePath(), $this->hash);
     }
 
     /**
@@ -285,7 +303,7 @@ class FileCache implements Cache
      */
     protected function fullPath(string $type): string
     {
-        return CacheFilePath::path($type, $this->basePath(), $this->request->query());
+        return CacheFilePath::path($type, $this->basePath(), $this->hash);
     }
 
     /**

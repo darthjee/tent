@@ -10,21 +10,29 @@ use InvalidArgumentException;
 
 class CacheFilePathTest extends TestCase
 {
+    private const HASH = 'a8b771920b8319e47251d1360f5e880bc18e8d329b0f0d003ea3c7e615558947';
+
     public function testPathReturnsBodyCacheFile()
     {
-        $expected = '/tmp/a8b771920b8319e47251d1360f5e880bc18e8d329b0f0d003ea3c7e615558947.body.dat';
-        $this->assertEquals($expected, CacheFilePath::path('body', '/tmp', 'query'));
+        $expected = '/tmp/' . self::HASH . '.body.dat';
+        $this->assertEquals($expected, CacheFilePath::path('body', '/tmp', self::HASH));
     }
 
     public function testPathReturnsMetaCacheFile()
     {
-        $expected = '/tmp/a8b771920b8319e47251d1360f5e880bc18e8d329b0f0d003ea3c7e615558947.meta.json';
-        $this->assertEquals($expected, CacheFilePath::path('meta', '/tmp', 'query'));
+        $expected = '/tmp/' . self::HASH . '.meta.json';
+        $this->assertEquals($expected, CacheFilePath::path('meta', '/tmp', self::HASH));
+    }
+
+    public function testPathUsesTheGivenHashVerbatimWithoutRehashing()
+    {
+        $expected = '/tmp/not-a-real-hash.body.dat';
+        $this->assertEquals($expected, CacheFilePath::path('body', '/tmp', 'not-a-real-hash'));
     }
 
     public function testPathThrowsOnInvalidType()
     {
         $this->expectException(InvalidArgumentException::class);
-        CacheFilePath::path('invalid', '/tmp', 'query');
+        CacheFilePath::path('invalid', '/tmp', self::HASH);
     }
 }

@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../../../support/loader.php';
 use PHPUnit\Framework\TestCase;
 use Tent\Content\FileCache;
 use Tent\Models\Response;
-use Tent\Models\Request;
+use Tent\Models\ProcessingRequest;
 use Tent\Models\FolderLocation;
 use Tent\Utils\CacheFilePath;
 use Tent\Tests\Support\Utils\FileSystemUtils;
@@ -88,8 +88,9 @@ class FileCacheStoreTest extends TestCase
         $cache->store($response);
 
         $basePath = $this->cacheDir . '/path/file.txt/GET';
-        $bodyPath = CacheFilePath::path('body', $basePath, $this->request->query());
-        $metaPath = CacheFilePath::path('meta', $basePath, $this->request->query());
+        $hash = hash('sha256', $this->request->query());
+        $bodyPath = CacheFilePath::path('body', $basePath, $hash);
+        $metaPath = CacheFilePath::path('meta', $basePath, $hash);
 
         $this->assertTrue(is_file($bodyPath), 'Body file does not exist or is not a file');
         $this->assertTrue(is_file($metaPath), 'Meta file does not exist or is not a file');
@@ -113,9 +114,9 @@ class FileCacheStoreTest extends TestCase
         ]);
     }
 
-    private function buildRequest(string $path): Request
+    private function buildRequest(string $path): ProcessingRequest
     {
-        return new Request([
+        return new ProcessingRequest([
             'requestPath' => $path,
             'requestMethod' => 'GET'
         ]);

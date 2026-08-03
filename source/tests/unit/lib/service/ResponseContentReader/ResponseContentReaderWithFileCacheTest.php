@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../../../support/loader.php';
 use PHPUnit\Framework\TestCase;
 use Tent\Service\ResponseContentReader;
 use Tent\Content\FileCache;
-use Tent\Models\Request;
+use Tent\Models\ProcessingRequest;
 use Tent\Models\FolderLocation;
 use Tent\Models\Response;
 use Tent\Utils\CacheFilePath;
@@ -29,8 +29,9 @@ class ResponseContentReaderWithFileCacheTest extends TestCase
             'httpCode' => 207
         ];
         $fullPath = $this->testDir . '/file.txt/POST';
-        $bodyPath = CacheFilePath::path('body', $fullPath, '');
-        $metaPath = CacheFilePath::path('meta', $fullPath, '');
+        $hash = hash('sha256', '');
+        $bodyPath = CacheFilePath::path('body', $fullPath, $hash);
+        $metaPath = CacheFilePath::path('meta', $fullPath, $hash);
 
         mkdir($fullPath, 0777, true);
         file_put_contents($bodyPath, $this->body);
@@ -45,7 +46,7 @@ class ResponseContentReaderWithFileCacheTest extends TestCase
     public function testGetResponseReturnsCacheContentAndMeta()
     {
         $location = new FolderLocation($this->testDir);
-        $request = new Request(['requestPath' => '/file.txt', 'requestMethod' => 'POST']);
+        $request = new ProcessingRequest(['requestPath' => '/file.txt', 'requestMethod' => 'POST']);
         $cache = new FileCache($request, $location);
         $reader = new ResponseContentReader($request, $cache);
 

@@ -6,6 +6,8 @@ require_once __DIR__ . '/../../../../support/loader.php';
 
 use PHPUnit\Framework\TestCase;
 use Tent\Middlewares\FileCacheMiddleware;
+use Tent\Cache\QueryRequestHasher;
+use Tent\Tests\Support\Cache\DummyRequestHasher;
 
 class FileCacheMiddlewareBuildTest extends TestCase
 {
@@ -14,6 +16,25 @@ class FileCacheMiddlewareBuildTest extends TestCase
         $middleware = FileCacheMiddleware::build(['location' => '/tmp/cache']);
 
         $this->assertInstanceOf(FileCacheMiddleware::class, $middleware);
+    }
+
+    public function testBuildDefaultsRequestHasherToQueryRequestHasherWhenOmitted()
+    {
+        $middleware = FileCacheMiddleware::build(['location' => '/tmp/cache']);
+
+        $this->assertInstanceOf(QueryRequestHasher::class, $this->getRequestHasher($middleware));
+    }
+
+    public function testBuildWithRequestHasherAttributeBuildsConfiguredClass()
+    {
+        $middleware = FileCacheMiddleware::build([
+            'location' => '/tmp/cache',
+            'request_hasher' => [
+                'class' => DummyRequestHasher::class,
+            ],
+        ]);
+
+        $this->assertInstanceOf(DummyRequestHasher::class, $this->getRequestHasher($middleware));
     }
 
     public function testBuildDefaultsToEmptyMatchersWhenMatchersNotProvided()
@@ -47,5 +68,13 @@ class FileCacheMiddlewareBuildTest extends TestCase
         $this->assertTrue($matcher->matchResponse($response));
         $response = new \Tent\Models\Response(['httpCode' => 200]);
         $this->assertFalse($matcher->matchResponse($response));
+    }
+
+    private function getRequestHasher(FileCacheMiddleware $middleware)
+    {
+        $reflection = new \ReflectionClass($middleware);
+        $property = $reflection->getProperty('requestHasher');
+        $property->setAccessible(true);
+        return $property->getValue($middleware);
     }
 }

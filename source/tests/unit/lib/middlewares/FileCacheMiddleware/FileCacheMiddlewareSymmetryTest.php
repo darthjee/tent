@@ -13,6 +13,7 @@ use Tent\Models\RequestInterface;
 use Tent\Content\FileCache;
 use Tent\Utils\CacheFilePath;
 use Tent\Tests\Support\Utils\FileSystemUtils;
+use Tent\Tests\Support\Cache\DummyRequestHasher;
 
 class FileCacheMiddlewareSymmetryTest extends TestCase
 {
@@ -182,6 +183,38 @@ class FileCacheMiddlewareSymmetryTest extends TestCase
     }
 
 
+    /**
+     * Tests that a custom RequestHasher round-trips through processResponse()/processRequest()
+     * even across a fresh middleware/request pair, as long as the same hasher class is configured.
+     */
+    public function testCustomHasherRoundTripsThroughProcessResponseAndProcessRequest()
+    {
+        $writeRequest = $this->buildRequest('GET');
+        $response = $this->buildResponse(200, $writeRequest);
+
+        $writeMiddleware = $this->buildMiddlewareWithHasher();
+        $writeMiddleware->processResponse($response);
+
+        // Fresh middleware/request pair, configured with the same hasher class.
+        $readRequest = $this->buildRequest('GET');
+        $readMiddleware = $this->buildMiddlewareWithHasher();
+
+        $result = $readMiddleware->processRequest($readRequest);
+
+        $this->assertTrue($result->hasResponse());
+        $this->assertSame('response body', $result->response()->body());
+    }
+
+    private function buildMiddlewareWithHasher(): FileCacheMiddleware
+    {
+        return FileCacheMiddleware::build([
+            'location' => $this->cacheDir,
+            'request_hasher' => [
+                'class' => DummyRequestHasher::class,
+            ],
+        ]);
+    }
+
     private function buildRequest(string $method)
     {
         return new ProcessingRequest([
@@ -196,8 +229,9 @@ class FileCacheMiddlewareSymmetryTest extends TestCase
     private function createCacheFile(string $path, string $body, array $headers, string $method): void
     {
         $fullPath = $this->cacheDir . $path . "/" . $method;
-        $bodyFile = CacheFilePath::path('body', $fullPath, '');
-        $metaFile = CacheFilePath::path('meta', $fullPath, '');
+        $hash = hash('sha256', '');
+        $bodyFile = CacheFilePath::path('body', $fullPath, $hash);
+        $metaFile = CacheFilePath::path('meta', $fullPath, $hash);
         mkdir(dirname($bodyFile), 0777, true);
 
         file_put_contents($bodyFile, $body);
