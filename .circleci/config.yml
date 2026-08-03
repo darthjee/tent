@@ -56,6 +56,22 @@ workflows:
             branches:
               only:
                 - master
+      - build-and-release-tent-test-linux:
+          requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks]
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              only:
+                - master
+      - build-and-release-tent-test-macos:
+          requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks]
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              only:
+                - master
       - build-and-release-base-linux:
           requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks]
           filters:
@@ -286,6 +302,40 @@ jobs:
       - run:
           name: Docker release
           command: make ci-release-tent ARCH=arm64 VERSION=${CIRCLE_TAG:-latest}
+
+  build-and-release-tent-test-linux:
+    machine: true
+    steps:
+      - checkout
+      - run:
+          name: Docker build
+          command: make ci-build-tent-test ARCH=amd64 VERSION=${CIRCLE_TAG:-latest}
+      - run:
+          name: Docker login
+          command: echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
+      - run:
+          name: Docker release
+          command: make ci-release-tent-test ARCH=amd64 VERSION=${CIRCLE_TAG:-latest}
+
+  build-and-release-tent-test-macos:
+    machine: true
+    steps:
+      - checkout
+      - run:
+          name: Set up QEMU
+          command: docker run --privileged --rm tonistiigi/binfmt --install all
+      - run:
+          name: Prepare scripts image
+          command: ./scripts/prepare_scripts_image.sh arm64
+      - run:
+          name: Docker build
+          command: make ci-build-tent-test ARCH=arm64 VERSION=${CIRCLE_TAG:-latest}
+      - run:
+          name: Docker login
+          command: echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
+      - run:
+          name: Docker release
+          command: make ci-release-tent-test ARCH=arm64 VERSION=${CIRCLE_TAG:-latest}
 
   build-and-release-base-linux:
     machine: true
