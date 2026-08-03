@@ -14,7 +14,9 @@ use Tent\Models\ProcessingRequest;
 use Tent\Models\Response;
 use Tent\Content\FileCache;
 use Tent\Http\HttpClientInterface;
+use Tent\Middlewares\FileCacheMiddleware;
 use Tent\Tests\Support\Utils\FileSystemUtils;
+use Tent\Tests\Support\Cache\DummyRequestHasher;
 
 class CacheStalenessMiddlewareProcessRequestTest extends TestCase
 {
@@ -188,6 +190,47 @@ class CacheStalenessMiddlewareProcessRequestTest extends TestCase
             return str_contains($message, '[stale]');
         });
         $this->assertNotEmpty($staleMessages);
+    }
+
+    /**
+     * `FileCacheMiddleware` configured with a non-default hasher memoizes the resulting
+     * hash on the request. `CacheStalenessMiddleware`, configured with no hasher at all,
+     * must still locate the same cache entry by reusing that memoized hash.
+     */
+    public function testReusesMemoizedHashFromFileCacheMiddlewareConfiguredWithCustomHasher()
+    {
+        $request = $this->buildRequest('/users', 'GET');
+
+        $fileCache = new FileCache($request, $this->location, new DummyRequestHasher());
+        $response = new Response([
+            'body' => 'stale body',
+            'httpCode' => 200,
+            'headers' => [],
+            'request' => $request,
+        ]);
+        $fileCache->store($response);
+        $this->overrideTimestamp($fileCache, time() - 1000);
+
+        $fileCacheMiddleware = FileCacheMiddleware::build([
+            'location' => $this->cacheDir,
+            'request_hasher' => [
+                'class' => DummyRequestHasher::class,
+            ],
+        ]);
+        $request = $fileCacheMiddleware->processRequest($request);
+
+        $this->assertTrue($request->hasResponse());
+        $this->assertEquals('dummy-hash', $request->cacheHash());
+
+        $httpClient = $this->createMock(HttpClientInterface::class);
+        $httpClient->expects($this->once())
+            ->method('request')
+            ->willReturn(['body' => 'fresh body', 'httpCode' => 200, 'headers' => []]);
+
+        $middleware = $this->buildMiddleware($httpClient, 300);
+        $result = $middleware->processRequest($request);
+
+        $this->assertSame('stale body', $result->response()->body());
     }
 
     private function buildMiddleware(HttpClientInterface $httpClient, int $maxAgeSeconds): CacheStalenessMiddleware

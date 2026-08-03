@@ -8,6 +8,7 @@ use Tent\Middlewares\SetHeadersMiddleware;
 use Tent\Middlewares\FileCacheMiddleware;
 use Tent\Models\FolderLocation;
 use Tent\Matchers\StatusCodeMatcher;
+use Tent\Cache\RequestHasher;
 
 /**
  * A ProxyRequestHandler with a default middleware stack for common proxy behavior.
@@ -77,6 +78,12 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
     private ?string $skipCacheHeader;
 
     /**
+     * @var RequestHasher|null Hasher used to derive the cache-key hash. Null defers the
+     *                         default resolution to `FileCacheMiddleware`.
+     */
+    private ?RequestHasher $requestHasher;
+
+    /**
      * Constructs a DefaultProxyRequestHandler.
      *
      * @param string                   $host            The target host to proxy requests to.
@@ -85,18 +92,22 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
      * @param array                    $cacheCodes      HTTP status codes eligible for caching. Defaults to ['2xx'].
      * @param HttpClientInterface|null $httpClient      Optional HTTP client.
      * @param string|null              $skipCacheHeader Header name that disables cache read/write when present.
+     * @param RequestHasher|null       $requestHasher   Hasher used to derive the cache-key hash. Defaults to
+     *   {@see \Tent\Cache\QueryRequestHasher}, resolved by `FileCacheMiddleware`.
      */
     public function __construct(
         string $host,
         string|false $cache,
         array $cacheCodes,
         ?HttpClientInterface $httpClient = null,
-        ?string $skipCacheHeader = null
+        ?string $skipCacheHeader = null,
+        ?RequestHasher $requestHasher = null
     ) {
         parent::__construct($host, $httpClient);
         $this->cache = $cache;
         $this->cacheCodes = $cacheCodes;
         $this->skipCacheHeader = $skipCacheHeader;
+        $this->requestHasher = $requestHasher;
         $this->initializeMiddlewares();
     }
 
@@ -108,6 +119,8 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
      *   - 'cache' (string|false): Cache directory or false to disable. Defaults to './cache'.
      *   - 'cacheCodes' (array): HTTP codes to cache. Defaults to ['2xx'].
      *   - 'skip_cache_header' (string): Header name that disables cache read/write when present.
+     *   - 'request_hasher' (array): RequestHasher configuration (`class` key), following the same
+     *     strategy pattern as matchers. Defaults to `QueryRequestHasher` when omitted.
      * @return self
      * @throws \InvalidArgumentException If 'host' is missing.
      */
@@ -120,7 +133,8 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
         $cache = array_key_exists('cache', $params) ? $params['cache'] : './cache';
         $cacheCodes = $params['cacheCodes'] ?? ['2xx'];
         $skipCacheHeader = $params['skip_cache_header'] ?? null;
-        return new self($host, $cache, $cacheCodes, null, $skipCacheHeader);
+        $requestHasher = self::buildRequestHasher($params);
+        return new self($host, $cache, $cacheCodes, null, $skipCacheHeader, $requestHasher);
     }
 
     /**
@@ -136,8 +150,27 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
             $this->addMiddleware(new FileCacheMiddleware(
                 new FolderLocation($this->cache),
                 [new StatusCodeMatcher($this->cacheCodes)],
-                $this->skipCacheHeader
+                $this->skipCacheHeader,
+                $this->requestHasher
             ));
         }
+    }
+
+    /**
+     * Builds the configured RequestHasher, if any.
+     *
+     * @param array $params The build parameters.
+     * @return RequestHasher|null The constructed hasher, or null when not configured.
+     */
+    private static function buildRequestHasher(array $params): ?RequestHasher
+    {
+        if (!isset($params['request_hasher'])) {
+            return null;
+        }
+
+        $config = $params['request_hasher'];
+        $class = $config['class'];
+
+        return $class::build($config);
     }
 }

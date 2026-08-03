@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../../../support/loader.php';
 use PHPUnit\Framework\TestCase;
 use Tent\Content\FileCache;
 use Tent\Models\FolderLocation;
-use Tent\Models\Request;
+use Tent\Models\ProcessingRequest;
 use Tent\Utils\CacheFilePath;
 use Tent\Tests\Support\Utils\FileSystemUtils;
 
@@ -18,14 +18,16 @@ class FileCacheTimestampTest extends TestCase
     private $fullPath;
     private $request;
     private $location;
+    private $hash;
 
     public function setUp(): void
     {
         $this->basePath = sys_get_temp_dir() . '/tent_cache_timestamp_' . uniqid();
         $this->path = 'some_file.txt';
         $this->fullPath = $this->basePath . '/' . $this->path . '/GET';
-        $this->request = new Request(['requestPath' => $this->path, 'requestMethod' => 'GET']);
+        $this->request = new ProcessingRequest(['requestPath' => $this->path, 'requestMethod' => 'GET']);
         $this->location = new FolderLocation($this->basePath);
+        $this->hash = hash('sha256', '');
 
         mkdir($this->fullPath, 0777, true);
     }
@@ -39,8 +41,8 @@ class FileCacheTimestampTest extends TestCase
     {
         $timestamp = mktime(12, 30, 0, 6, 15, 2025);
         $meta = ['headers' => [], 'httpCode' => 200, 'timestamp' => $timestamp];
-        file_put_contents(CacheFilePath::path('body', $this->fullPath, ''), 'body');
-        file_put_contents(CacheFilePath::path('meta', $this->fullPath, ''), json_encode($meta));
+        file_put_contents(CacheFilePath::path('body', $this->fullPath, $this->hash), 'body');
+        file_put_contents(CacheFilePath::path('meta', $this->fullPath, $this->hash), json_encode($meta));
 
         $cache = new FileCache($this->request, $this->location);
 
@@ -57,7 +59,7 @@ class FileCacheTimestampTest extends TestCase
     public function testTimestampReturnsNullWhenTimestampKeyIsMissing()
     {
         $meta = ['headers' => [], 'httpCode' => 200];
-        file_put_contents(CacheFilePath::path('meta', $this->fullPath, ''), json_encode($meta));
+        file_put_contents(CacheFilePath::path('meta', $this->fullPath, $this->hash), json_encode($meta));
 
         $cache = new FileCache($this->request, $this->location);
 
@@ -67,8 +69,8 @@ class FileCacheTimestampTest extends TestCase
     public function testRemoveDeletesBodyAndMetaFiles()
     {
         $meta = ['headers' => [], 'httpCode' => 200, 'timestamp' => time()];
-        $bodyPath = CacheFilePath::path('body', $this->fullPath, '');
-        $metaPath = CacheFilePath::path('meta', $this->fullPath, '');
+        $bodyPath = CacheFilePath::path('body', $this->fullPath, $this->hash);
+        $metaPath = CacheFilePath::path('meta', $this->fullPath, $this->hash);
         file_put_contents($bodyPath, 'body');
         file_put_contents($metaPath, json_encode($meta));
 
@@ -91,7 +93,7 @@ class FileCacheTimestampTest extends TestCase
     public function testMetaFilePathReturnsExpectedPath()
     {
         $cache = new FileCache($this->request, $this->location);
-        $expected = CacheFilePath::path('meta', $this->fullPath, '');
+        $expected = CacheFilePath::path('meta', $this->fullPath, $this->hash);
 
         $this->assertEquals($expected, $cache->metaFilePath());
     }

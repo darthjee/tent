@@ -36,6 +36,7 @@ class ProcessingRequest implements RequestInterface
     private $query;
     private $uploadedFiles;
     private $postFields;
+    private $cacheHash;
 
     /**
      * List of attributes that can be set via constructor params.
@@ -263,5 +264,26 @@ class ProcessingRequest implements RequestInterface
             $this->postFields = $this->request->postFields();
         }
         return $this->postFields ?? [];
+    }
+
+    /**
+     * Returns the memoized cache-key hash for this request, if already computed.
+     *
+     * @return string|null The memoized cache-key hash, or null if not yet computed.
+     */
+    public function cacheHash(): ?string
+    {
+        return $this->cacheHash;
+    }
+
+    /**
+     * Memoizes the cache-key hash for this request.
+     *
+     * @param string $hash The cache-key hash to store.
+     * @return string The stored cache-key hash.
+     */
+    public function setCacheHash(string $hash): string
+    {
+        return $this->cacheHash = $hash;
     }
 }

@@ -11,6 +11,7 @@ Welcome to the Tent documentation.
 | [Creating Middlewares](creating-middlewares.md) | How to build custom middlewares; interface, short-circuiting, built-in middlewares. |
 | [FileCacheMiddleware Matchers](file-cache-middleware-matchers.md) | Matcher configuration for `FileCacheMiddleware`; migration from deprecated `httpCodes`. |
 | [Adding Request Matchers](adding-request-matchers.md) | How to add new `RequestMatcher` classes. |
+| [Creating Request Hashers](creating-request-hashers.md) | How to build a custom `RequestHasher` to control `FileCacheMiddleware`'s cache-key generation. |
 
 ## Quick Reference
 

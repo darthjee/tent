@@ -289,6 +289,9 @@ Caches responses to disk and serves them on subsequent requests. Caching behavio
 
 **When to use**: When proxying expensive or slow backend calls and you want to cache successful responses to reduce load and improve response times.
 
+- `location` and `matchers` control *where* and *whether* a response is cached.
+- `request_hasher` (optional) controls *how the cache key is derived* — a `RequestHasher` configuration (`class` key), following the same strategy pattern as matchers. Defaults to `Tent\Cache\QueryRequestHasher` (hash of the query string) when omitted. See [Creating Request Hashers](creating-request-hashers.md) for writing a custom one.
+
 See [FileCacheMiddleware Matchers](file-cache-middleware-matchers.md) for detailed matcher configuration.
 
 ### `CacheCleanupMiddleware`

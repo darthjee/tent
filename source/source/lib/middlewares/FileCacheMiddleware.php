@@ -11,6 +11,8 @@ use Tent\Service\ResponseContentReader;
 use Tent\Service\ResponseCacher;
 use Tent\Matchers\RequestResponseMatcher;
 use Tent\Models\RequestInterface;
+use Tent\Cache\RequestHasher;
+use Tent\Cache\QueryRequestHasher;
 
 /**
  * Middleware for caching responses to files.
@@ -39,6 +41,9 @@ use Tent\Models\RequestInterface;
  *                     'class' => 'Tent\\Matchers\\RequestMethodMatcher',
  *                     'requestMethods' => ['GET', 'POST']
  *                 ]
+ *             ],
+ *             'request_hasher' => [
+ *                 'class' => 'Tent\\Cache\\QueryRequestHasher'
  *             ]
  *         ]
  *     ]
@@ -47,6 +52,9 @@ use Tent\Models\RequestInterface;
  *
  * - `location`: Directory where cached responses are stored (required).
  * - `matchers`: Array of matcher configurations to determine cacheability.
+ * - `request_hasher`: Optional `RequestHasher` configuration (`class` key, following the same
+ *   strategy pattern as matchers) used to derive the cache-key hash. Defaults to
+ *   {@see \Tent\Cache\QueryRequestHasher} when omitted.
  *
  * This middleware will cache responses matching all configured matchers,
  * and serve them from cache on subsequent requests.
@@ -68,18 +76,30 @@ class FileCacheMiddleware extends Middleware
     private ?string $skipCacheHeader;
 
     /**
+     * @var RequestHasher Hasher used to derive the cache-key hash for each request.
+     */
+    private RequestHasher $requestHasher;
+
+    /**
      * Constructs a FileCacheMiddleware instance.
      *
-     * @param FolderLocation $location        The base folder location for caching.
-     * @param array          $matchers        Array of custom matchers for cacheability.
-     * @param string|null    $skipCacheHeader Header name that disables cache read/write when present.
+     * @param FolderLocation     $location        The base folder location for caching.
+     * @param array              $matchers        Array of custom matchers for cacheability.
+     * @param string|null        $skipCacheHeader Header name that disables cache read/write when present.
+     * @param RequestHasher|null $requestHasher   Hasher used to derive the cache-key hash.
+     *                                            Defaults to {@see QueryRequestHasher}.
      */
-    public function __construct(FolderLocation $location, array $matchers = [], ?string $skipCacheHeader = null)
-    {
+    public function __construct(
+        FolderLocation $location,
+        array $matchers = [],
+        ?string $skipCacheHeader = null,
+        ?RequestHasher $requestHasher = null
+    ) {
         $this->location = $location;
 
         $this->matchers = $matchers;
         $this->skipCacheHeader = $skipCacheHeader;
+        $this->requestHasher = $requestHasher ?? new QueryRequestHasher();
     }
 
     /**
@@ -93,8 +113,9 @@ class FileCacheMiddleware extends Middleware
         $location = new FolderLocation($attributes['location']);
         $matchers = RequestResponseMatcher::buildMatchers($attributes['matchers'] ?? []);
         $skipCacheHeader = $attributes['skip_cache_header'] ?? null;
+        $requestHasher = self::buildRequestHasher($attributes);
 
-        return new self($location, $matchers, $skipCacheHeader);
+        return new self($location, $matchers, $skipCacheHeader, $requestHasher);
     }
 
     /**
@@ -121,7 +142,7 @@ class FileCacheMiddleware extends Middleware
             }
         }
 
-        $cache = new FileCache($request, $this->location);
+        $cache = new FileCache($request, $this->location, $this->requestHasher);
 
         if ($cache->exists()) {
             $reader = new ResponseContentReader($request, $cache);
@@ -148,7 +169,7 @@ class FileCacheMiddleware extends Middleware
         }
 
         if ($this->isCacheable($response)) {
-            $cache = new FileCache($response->request(), $this->location);
+            $cache = new FileCache($response->request(), $this->location, $this->requestHasher);
             (new ResponseCacher($cache, $response))->process();
         }
         return $response;
@@ -205,5 +226,23 @@ class FileCacheMiddleware extends Middleware
             }
         }
         return false;
+    }
+
+    /**
+     * Builds the configured RequestHasher, if any.
+     *
+     * @param array $attributes The attributes to build the middleware.
+     * @return RequestHasher|null The constructed hasher, or null when not configured.
+     */
+    private static function buildRequestHasher(array $attributes): ?RequestHasher
+    {
+        if (!isset($attributes['request_hasher'])) {
+            return null;
+        }
+
+        $config = $attributes['request_hasher'];
+        $class = $config['class'];
+
+        return $class::build($config);
     }
 }
