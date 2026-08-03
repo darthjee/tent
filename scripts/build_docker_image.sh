@@ -5,18 +5,29 @@ show_help() {
   cat <<'EOF'
 Usage: scripts/build_docker_image.sh <build|ensure|release|help> <image> <arch> <version>
 
-Images:        tent, dev_tent, dev_tent-base
+Images:        tent, tent-test, dev_tent, dev_tent-base
 Architectures: amd64, arm64
 EOF
 }
 
 image_config() {
   local image="$1"
+  EXTRA_BUILD_CONTEXT=""
+
   case "$image" in
     tent)
       DOCKERFILE="dockerfiles/tent/Dockerfile"
       CONTEXT="source"
       IMAGE_NAME="darthjee/tent"
+      ;;
+    tent-test)
+      DOCKERFILE="dockerfiles/tent-test/Dockerfile"
+      CONTEXT="source"
+      IMAGE_NAME="darthjee/tent-test"
+      # phpunit.xml/bootstrap.php baked into the image live under
+      # dockerfiles/tent-test/, outside the "source" build context, so they
+      # are wired in as an extra named build context (see build_image()).
+      EXTRA_BUILD_CONTEXT="tent-test-assets=dockerfiles/tent-test"
       ;;
     dev_tent)
       DOCKERFILE="dockerfiles/dev_tent/Dockerfile"
@@ -63,12 +74,19 @@ build_image() {
   image_config "$image"
   arch_config "$arch"
 
-  docker build \
-    --platform "$PLATFORM" \
-    -f "$DOCKERFILE" \
-    "$CONTEXT" \
-    -t "${IMAGE_NAME}:${version}${ARCH_SUFFIX}" \
+  local cmd=(docker build --platform "$PLATFORM" -f "$DOCKERFILE")
+
+  if [[ -n "$EXTRA_BUILD_CONTEXT" ]]; then
+    cmd+=(--build-context "$EXTRA_BUILD_CONTEXT")
+  fi
+
+  cmd+=(
+    "$CONTEXT"
+    -t "${IMAGE_NAME}:${version}${ARCH_SUFFIX}"
     -t "${IMAGE_NAME}:latest${ARCH_SUFFIX}"
+  )
+
+  "${cmd[@]}"
 }
 
 ensure_image() {
