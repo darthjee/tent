@@ -23,6 +23,7 @@ Delegate implementation work to the right agent. Never implement what belongs to
 | `dev-api` | `dev/api/` — mock PHP backend API and database migrations |
 | `frontend` | `dev/frontend/` — React/Vite frontend app and Jasmine tests |
 | `infra` | `dockerfiles/`, `scripts/`, `docker_volumes/` — Docker images, CI scripts, volume layout |
+| `product-dev-extending` | `docs/` (excluding `docs/agents/`) — developer-facing extension guides (middlewares, matchers, handlers), verified against the real interfaces |
 
 ## How to coordinate
 
