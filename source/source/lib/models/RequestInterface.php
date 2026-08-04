@@ -45,4 +45,10 @@ interface RequestInterface
      * @return array
      */
     public function postFields(): array;
+
+    /**
+     * Returns the request's Host header (e.g., mydomain.com or mydomain.com:8080).
+     * @return string
+     */
+    public function domain(): string;
 }

@@ -32,6 +32,19 @@ Configuration::buildRule([
 ]);
 ```
 
+### Matching by domain
+
+Every `RequestMatcher` (`ExactRequestMatcher`, `BeginsWithRequestMatcher`, `EndsWithRequestMatcher`, `RegexRequestMatcher`) also accepts an optional `domain` key, checked alongside `method`/`uri`:
+
+```php
+'matchers' => [
+    ['method' => 'GET', 'uri' => '/persons', 'type' => 'begins_with', 'domain' => 'mydomain.com'],
+    ['method' => 'GET', 'uri' => '/persons', 'type' => 'begins_with', 'domain' => '%.mydomain.com'],
+],
+```
+
+`domain` is optional — omitting it matches any domain, so existing configuration examples remain valid as-is. When present, it is matched case-insensitively against the incoming request's `Host` header with any port stripped, and it supports `%` as a wildcard matching any sequence of characters (including none), anywhere in the pattern, any number of times (SQL `LIKE` semantics) — e.g. `'%.mydomain.com'` matches any subdomain of `mydomain.com`.
+
 For matchers used inside `FileCacheMiddleware`, use the full class name:
 
 ```php

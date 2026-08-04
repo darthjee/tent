@@ -18,15 +18,21 @@ abstract class RequestMatcher
 {
     protected $requestMethod;
     protected $requestUri;
+    protected $requestDomain;
 
     /**
      * @param string|null $requestMethod HTTP method to match (e.g., GET, POST), or null for any.
      * @param string|null $requestUri    URI to match, or null for any.
+     * @param string|null $requestDomain Domain to match (supports '%' wildcards), or null for any.
      */
-    public function __construct(?string $requestMethod = null, ?string $requestUri = null)
-    {
+    public function __construct(
+        ?string $requestMethod = null,
+        ?string $requestUri = null,
+        ?string $requestDomain = null
+    ) {
         $this->requestMethod = $requestMethod;
         $this->requestUri = $requestUri;
+        $this->requestDomain = $requestDomain;
     }
 
     /**
@@ -40,7 +46,7 @@ abstract class RequestMatcher
      *   RequestMatcher::build(['method' => 'GET', 'uri' => '/assets/', 'type' => 'begins_with'])
      *   RequestMatcher::build(['method' => 'GET', 'uri' => '.json', 'type' => 'ends_with'])
      *
-     * @param array $params Associative array with keys 'method', 'uri', 'type'.
+     * @param array $params Associative array with keys 'method', 'uri', 'domain', 'type'.
      * @return RequestMatcher
      * @throws InvalidArgumentException When 'type' does not map to a valid RequestMatcher class.
      */
@@ -59,7 +65,7 @@ abstract class RequestMatcher
     /**
      * Builds several RequestMatchers.
      *
-     * @param array $attributes Array of associative arrays, each with keys 'method', 'uri', 'type'.
+     * @param array $attributes Array of associative arrays, each with keys 'method', 'uri', 'domain', 'type'.
      * @see RequestMatcher::build
      * @return array all RequestMatchers.
      */
@@ -76,11 +82,13 @@ abstract class RequestMatcher
      * Checks if the given Request matches this matcher.
      *
      * @param RequestInterface $request The incoming HTTP request.
-     * @return boolean True if the request matches method and URI criteria.
+     * @return boolean True if the request matches method, URI and domain criteria.
      */
     public function matches(RequestInterface $request): bool
     {
-        return $this->matchRequestMethod($request) && $this->matchRequestUri($request);
+        return $this->matchRequestMethod($request)
+            && $this->matchRequestUri($request)
+            && $this->matchRequestDomain($request);
     }
 
     /**
@@ -92,6 +100,29 @@ abstract class RequestMatcher
     private function matchRequestMethod(RequestInterface $request): bool
     {
         return $this->requestMethod == null || $request->requestMethod() == $this->requestMethod;
+    }
+
+    /**
+     * Checks if the request domain matches.
+     *
+     * Supports '%' as a wildcard character with SQL LIKE semantics: it matches any
+     * sequence of characters (including none), anywhere in the pattern, any number
+     * of times. Any port present in the request's domain is stripped before
+     * comparison, and the comparison itself is case-insensitive.
+     *
+     * @param RequestInterface $request The incoming HTTP request.
+     * @return boolean True if the request matches the configured domain criteria.
+     */
+    private function matchRequestDomain(RequestInterface $request): bool
+    {
+        if ($this->requestDomain === null) {
+            return true;
+        }
+
+        list($domain) = explode(':', $request->domain(), 2);
+        $pattern = '/^' . str_replace('%', '.*', preg_quote($this->requestDomain, '/')) . '$/i';
+
+        return preg_match($pattern, $domain) === 1;
     }
 
     /**

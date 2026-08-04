@@ -17,12 +17,12 @@ class ExactRequestMatcher extends RequestMatcher
      * Example:
      *   ExactRequestMatcher::build(['method' => 'GET', 'uri' => '/users'])
      *
-     * @param array $params Associative array with keys 'method' and 'uri'.
+     * @param array $params Associative array with keys 'method', 'uri' and 'domain'.
      * @return ExactRequestMatcher
      */
     public static function build(array $params): self
     {
-        return new self($params['method'] ?? null, $params['uri'] ?? null);
+        return new self($params['method'] ?? null, $params['uri'] ?? null, $params['domain'] ?? null);
     }
 
     /**

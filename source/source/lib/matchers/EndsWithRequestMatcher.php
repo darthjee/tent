@@ -17,12 +17,12 @@ class EndsWithRequestMatcher extends RequestMatcher
      * Example:
      *   EndsWithRequestMatcher::build(['method' => 'GET', 'uri' => '.json'])
      *
-     * @param array $params Associative array with keys 'method' and 'uri'.
+     * @param array $params Associative array with keys 'method', 'uri' and 'domain'.
      * @return EndsWithRequestMatcher
      */
     public static function build(array $params): self
     {
-        return new self($params['method'] ?? null, $params['uri'] ?? null);
+        return new self($params['method'] ?? null, $params['uri'] ?? null, $params['domain'] ?? null);
     }
 
     /**
