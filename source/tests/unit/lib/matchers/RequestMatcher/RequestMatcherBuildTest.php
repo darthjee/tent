@@ -117,4 +117,72 @@ class RequestMatcherBuildTest extends TestCase
             'pattern' => '/(invalid/'
         ]);
     }
+
+    public function testBuildExactMatcherPassesThroughDomain()
+    {
+        $matcher = RequestMatcher::build([
+            'method' => 'GET',
+            'uri' => '/users',
+            'domain' => 'mydomain.com',
+            'type' => 'exact',
+        ]);
+
+        $request = $this->createMock(Request::class);
+        $request->method('requestMethod')->willReturn('GET');
+        $request->method('requestPath')->willReturn('/users');
+        $request->method('domain')->willReturn('otherdomain.com');
+
+        $this->assertFalse($matcher->matches($request));
+    }
+
+    public function testBuildBeginsWithMatcherPassesThroughDomain()
+    {
+        $matcher = RequestMatcher::build([
+            'method' => 'GET',
+            'uri' => '/assets/',
+            'domain' => 'mydomain.com',
+            'type' => 'begins_with',
+        ]);
+
+        $request = $this->createMock(Request::class);
+        $request->method('requestMethod')->willReturn('GET');
+        $request->method('requestPath')->willReturn('/assets/js/main.js');
+        $request->method('domain')->willReturn('mydomain.com');
+
+        $this->assertTrue($matcher->matches($request));
+    }
+
+    public function testBuildEndsWithMatcherPassesThroughDomain()
+    {
+        $matcher = RequestMatcher::build([
+            'method' => 'GET',
+            'uri' => '.json',
+            'domain' => 'mydomain.com',
+            'type' => 'ends_with',
+        ]);
+
+        $request = $this->createMock(Request::class);
+        $request->method('requestMethod')->willReturn('GET');
+        $request->method('requestPath')->willReturn('/api/data.json');
+        $request->method('domain')->willReturn('otherdomain.com');
+
+        $this->assertFalse($matcher->matches($request));
+    }
+
+    public function testBuildRegexMatcherPassesThroughDomain()
+    {
+        $matcher = RequestMatcher::build([
+            'method' => 'GET',
+            'type' => 'regex',
+            'pattern' => '/^\/users\/\d+$/',
+            'domain' => 'mydomain.com',
+        ]);
+
+        $request = $this->createMock(Request::class);
+        $request->method('requestMethod')->willReturn('GET');
+        $request->method('requestPath')->willReturn('/users/123');
+        $request->method('domain')->willReturn('mydomain.com');
+
+        $this->assertTrue($matcher->matches($request));
+    }
 }

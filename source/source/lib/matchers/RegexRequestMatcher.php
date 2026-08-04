@@ -29,7 +29,7 @@ class RegexRequestMatcher extends RequestMatcher
             throw new InvalidArgumentException(sprintf("Invalid regex pattern '%s'.", $pattern));
         }
 
-        return new self($params['method'] ?? null, $pattern);
+        return new self($params['method'] ?? null, $pattern, $params['domain'] ?? null);
     }
 
     /**

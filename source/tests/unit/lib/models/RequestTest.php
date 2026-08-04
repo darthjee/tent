@@ -152,4 +152,38 @@ class RequestTest extends TestCase
 
         $this->assertEquals($fields, $request->postFields());
     }
+
+    public function testDomainReturnsHostHeader()
+    {
+        $_SERVER['HTTP_HOST'] = 'mydomain.com';
+
+        $request = new Request();
+
+        $this->assertEquals('mydomain.com', $request->domain());
+    }
+
+    public function testDomainReturnsHostHeaderWithPort()
+    {
+        $_SERVER['HTTP_HOST'] = 'mydomain.com:8080';
+
+        $request = new Request();
+
+        $this->assertEquals('mydomain.com:8080', $request->domain());
+    }
+
+    public function testDomainReturnsOptionOverride()
+    {
+        $request = new Request(['domain' => 'otherdomain.com']);
+
+        $this->assertEquals('otherdomain.com', $request->domain());
+    }
+
+    public function testDomainReturnsEmptyStringWhenNotSet()
+    {
+        unset($_SERVER['HTTP_HOST']);
+
+        $request = new Request();
+
+        $this->assertEquals('', $request->domain());
+    }
 }

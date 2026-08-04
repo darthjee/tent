@@ -36,6 +36,7 @@ class ProcessingRequest implements RequestInterface
     private $query;
     private $uploadedFiles;
     private $postFields;
+    private $domain;
     private $cacheHash;
 
     /**
@@ -51,6 +52,7 @@ class ProcessingRequest implements RequestInterface
         'query',
         'uploadedFiles',
         'postFields',
+        'domain',
     ];
 
     /**
@@ -264,6 +266,21 @@ class ProcessingRequest implements RequestInterface
             $this->postFields = $this->request->postFields();
         }
         return $this->postFields ?? [];
+    }
+
+    /**
+     * Returns the request's Host header, caching the result after first access.
+     *
+     * @return string The raw Host header value or empty string if no request is set
+     *
+     * @see RequestInterface::domain()
+     */
+    public function domain(): string
+    {
+        if ($this->domain === null && $this->request) {
+            $this->domain = $this->request->domain();
+        }
+        return $this->domain ?? '';
     }
 
     /**

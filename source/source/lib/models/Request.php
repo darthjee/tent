@@ -133,6 +133,21 @@ class Request implements RequestInterface
     }
 
     /**
+     * Returns the request's Host header (e.g., mydomain.com or mydomain.com:8080).
+     *
+     * @return string The raw Host header value, or an empty string if not present.
+     *
+     * @see RequestInterface::domain()
+     */
+    public function domain(): string
+    {
+        if (isset($this->options['domain'])) {
+            return $this->options['domain'];
+        }
+        return $this->get('host') ?? '';
+    }
+
+    /**
      * Helper method to get the full request URI.
      *
      * @return string The full request URI
@@ -158,6 +173,9 @@ class Request implements RequestInterface
                 break;
             case 'request_method':
                 $key = 'REQUEST_METHOD';
+                break;
+            case 'host':
+                $key = 'HTTP_HOST';
                 break;
             default:
                 throw new InvalidArgumentException('Invalid attribute access: ' . $information);

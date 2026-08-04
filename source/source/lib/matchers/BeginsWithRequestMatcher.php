@@ -17,12 +17,12 @@ class BeginsWithRequestMatcher extends RequestMatcher
      * Example:
      *   BeginsWithRequestMatcher::build(['method' => 'GET', 'uri' => '/assets/'])
      *
-     * @param array $params Associative array with keys 'method' and 'uri'.
+     * @param array $params Associative array with keys 'method', 'uri' and 'domain'.
      * @return BeginsWithRequestMatcher
      */
     public static function build(array $params): self
     {
-        return new self($params['method'] ?? null, $params['uri'] ?? null);
+        return new self($params['method'] ?? null, $params['uri'] ?? null, $params['domain'] ?? null);
     }
 
     /**
