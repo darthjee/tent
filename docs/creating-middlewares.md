@@ -394,6 +394,8 @@ Middlewares are applied in the order they are listed in the configuration:
 
 Place middlewares that can short-circuit (like `FileCacheMiddleware`) **before** middlewares that modify the request, so cached responses are served without unnecessary processing.
 
+This ordering advice applies within a single `middlewares` list. If a middleware needs to run ahead of a handler's own built-in defaults — for example, before `default_proxy`'s `Host` header rewriting — `middlewares` can't help, since those entries are always appended *after* the handler's defaults. Use the sibling `prependMiddlewares` rule key instead; its entries run *before* the handler's default middlewares while `middlewares` keeps running after them, unchanged. See [Defining Rules](guides/tent/defining-rules.md) and [Request Handlers — Middleware Order](request-handlers.md#middleware-order).
+
 ### Performance Considerations
 
 - **Cache early**: Place `FileCacheMiddleware` at the start of the middlewares list so cached requests are resolved without forwarding to the backend.

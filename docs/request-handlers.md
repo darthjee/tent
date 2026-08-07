@@ -276,6 +276,8 @@ With `default_proxy`, there is an extra detail:
 
 So rule-level middlewares run **after** the built-in default middlewares.
 
+`prependMiddlewares` entries are inserted *before* the internal default middlewares (step 1), while `middlewares` entries are still appended after them (step 2) — so the full order is: `prependMiddlewares` → internal defaults → `middlewares`.
+
 ---
 
 ## MissingRequestHandler (404 Fallback)

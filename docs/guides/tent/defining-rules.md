@@ -5,6 +5,7 @@ Each rule is registered with `Configuration::buildRule()`. A rule has three part
 - **`handler`** — what to do with the request (proxy it, serve a file, serve a folder).
 - **`matchers`** — which requests this rule applies to.
 - **`middlewares`** (optional) — transformations applied before or after the handler.
+- **`prependMiddlewares`** (optional) — same shape as `middlewares`, but its entries run *before* the handler's built-in default middlewares (if any) instead of after.
 
 ## Matcher types
 
