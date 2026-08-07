@@ -10,6 +10,8 @@
 
 This means you get correct Host header handling and caching out of the box, with no extra configuration.
 
+Rule-level `middlewares` are appended *after* these built-in defaults. If you need a custom middleware to run *before* them (e.g. before `Host` header rewriting), use `prependMiddlewares` instead — see [Defining Rules](defining-rules.md) and [Middleware Order](../../request-handlers.md#middleware-order).
+
 ```php
 Configuration::buildRule([
     'handler' => [

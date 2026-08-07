@@ -6,7 +6,9 @@ require_once __DIR__ . '/../../../../support/loader.php';
 
 use PHPUnit\Framework\TestCase;
 use Tent\RequestHandlers\DefaultProxyRequestHandler;
+use Tent\RequestHandlers\RequestHandler;
 use Tent\Middlewares\FileCacheMiddleware;
+use Tent\Middlewares\SetHeadersMiddleware;
 use Tent\Models\ProcessingRequest;
 use Tent\Tests\Support\Utils\FileSystemUtils;
 use Tent\Models\FolderLocation;
@@ -171,6 +173,36 @@ class DefaultProxyRequestHandlerBuildTest extends TestCase
             \Tent\Cache\QueryRequestHasher::class,
             $property->getValue($fileCacheMiddleware)
         );
+    }
+
+    public function testBuildWithPrependMiddlewaresRunsBeforeHandlerDefaults()
+    {
+        $capturedHeaders = null;
+
+        $httpClient = $this->createMock(HttpClientInterface::class);
+        $httpClient->method('request')
+            ->willReturnCallback(function ($method, $url, $headers) use (&$capturedHeaders) {
+                $capturedHeaders = $headers;
+                return ['body' => 'upstream body', 'httpCode' => 200, 'headers' => []];
+            });
+
+        $handler = RequestHandler::build([
+            'type' => 'default_proxy',
+            'host' => 'http://backend:80',
+            'cache' => false,
+            'prependMiddlewares' => [
+                [
+                    'class' => SetHeadersMiddleware::class,
+                    'headers' => ['Host' => 'prepended-host'],
+                ],
+            ],
+        ]);
+        $this->injectHttpClient($handler, $httpClient);
+
+        $request = $this->buildRequest();
+        $handler->handleRequest($request);
+
+        $this->assertSame('backend:80', $capturedHeaders['Host']);
     }
 
     private function buildRequest(array $overrides = []): ProcessingRequest

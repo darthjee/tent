@@ -67,4 +67,64 @@ class RequestHandlerBuildMiddlewareTest extends TestCase
         $actual = json_decode($response->body(), true);
         $this->assertEquals($expected, $actual);
     }
+
+    public function testPrependMiddlewaresRunBeforeMiddlewares()
+    {
+        $handler = new RequestToBodyHandler();
+
+        $handler->prependMiddlewares([
+            [
+                'class' => SetHeadersMiddleware::class,
+                'headers' => ['X-Test' => 'prepend'],
+            ],
+        ]);
+        $handler->buildMiddlewares([
+            [
+                'class' => SetHeadersMiddleware::class,
+                'headers' => ['X-Test' => 'append'],
+            ],
+        ]);
+
+        $request = new ProcessingRequest();
+        $response = $handler->handleRequest($request);
+
+        $expected = [
+            'uri' => null,
+            'query' => null,
+            'method' => null,
+            'headers' => ['X-Test' => 'append'],
+            'body' => null,
+        ];
+        $actual = json_decode($response->body(), true);
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function testPrependMiddlewaresPreservesRelativeOrder()
+    {
+        $handler = new RequestToBodyHandler();
+
+        $handler->prependMiddlewares([
+            [
+                'class' => SetHeadersMiddleware::class,
+                'headers' => ['X-Test' => 'first', 'X-First' => 'applied'],
+            ],
+            [
+                'class' => SetHeadersMiddleware::class,
+                'headers' => ['X-Test' => 'second'],
+            ],
+        ]);
+
+        $request = new ProcessingRequest();
+        $response = $handler->handleRequest($request);
+
+        $expected = [
+            'uri' => null,
+            'query' => null,
+            'method' => null,
+            'headers' => ['X-Test' => 'second', 'X-First' => 'applied'],
+            'body' => null,
+        ];
+        $actual = json_decode($response->body(), true);
+        $this->assertEquals($expected, $actual);
+    }
 }

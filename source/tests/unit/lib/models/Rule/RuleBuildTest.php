@@ -74,4 +74,37 @@ class RuleBuildTest extends TestCase
         $actual = json_decode($response->body(), true);
         $this->assertEquals($expected, $actual);
     }
+
+    public function testBuildCreatesRuleWithPrependMiddleware()
+    {
+        $rule = Rule::build([
+            'handler' => [
+                'class' => '\Tent\Tests\Support\Handlers\RequestToBodyHandler',
+            ],
+            'prependMiddlewares' => [
+                [
+                    'class' => '\Tent\Tests\Support\Middlewares\DummyRequestMiddleware',
+                ]
+            ]
+        ]);
+
+        $request = new ProcessingRequest([
+            'requestMethod' => 'GET',
+            'requestPath' => '/index.html',
+        ]);
+
+        $handler = $rule->handler();
+
+        $response = $handler->handleRequest($request);
+
+        $expected = [
+            'uri' => '/index.html',
+            'query' => null,
+            'method' => 'GET',
+            'headers' => ['X-Test' => 'middleware'],
+            'body' => null,
+        ];
+        $actual = json_decode($response->body(), true);
+        $this->assertEquals($expected, $actual);
+    }
 }
