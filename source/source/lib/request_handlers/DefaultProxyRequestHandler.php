@@ -5,6 +5,7 @@ namespace Tent\RequestHandlers;
 use Tent\Http\HttpClientInterface;
 use Tent\Middlewares\RenameHeaderMiddleware;
 use Tent\Middlewares\SetHeadersMiddleware;
+use Tent\Middlewares\FilterQueryParamsMiddleware;
 use Tent\Middlewares\FileCacheMiddleware;
 use Tent\Models\FolderLocation;
 use Tent\Matchers\StatusCodeMatcher;
@@ -16,7 +17,8 @@ use Tent\Cache\RequestHasher;
  * Automatically configures:
  * 1. RenameHeaderMiddleware: renames `Host` to `X-Forwarded-Host`.
  * 2. SetHeadersMiddleware: sets `Host` to the provided host value.
- * 3. FileCacheMiddleware (optional): caches responses matching the given HTTP codes.
+ * 3. FilterQueryParamsMiddleware (optional): filters the request query string.
+ * 4. FileCacheMiddleware (optional): caches responses matching the given HTTP codes.
  *
  * ## Usage Example
  *
@@ -61,6 +63,24 @@ use Tent\Cache\RequestHasher;
  *     ]
  * ]);
  * ```
+ *
+ * @example Configuration with query params filtering (runs before caching, so the
+ * cache key reflects the filtered query)
+ * ```php
+ * Configuration::buildRule([
+ *     'handler' => [
+ *         'type' => 'default_proxy',
+ *         'host' => 'http://api:80',
+ *         'filter_query_params' => [
+ *             'params' => ['id', 'page'],
+ *             'mode' => 'allow'
+ *         ]
+ *     ],
+ *     'matchers' => [
+ *          ['method' => 'GET', 'uri' => '.json', 'type' => 'ends_with']
+ *     ]
+ * ]);
+ * ```
  */
 class DefaultProxyRequestHandler extends ProxyRequestHandler
 {
@@ -84,16 +104,25 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
     private ?RequestHasher $requestHasher;
 
     /**
+     * @var array|null Configuration passed through to `FilterQueryParamsMiddleware::build()`.
+     *                 Null disables query params filtering.
+     */
+    private ?array $filterQueryParams;
+
+    /**
      * Constructs a DefaultProxyRequestHandler.
      *
-     * @param string                   $host            The target host to proxy requests to.
-     * @param string|false             $cache           Cache directory, or false to disable caching.
+     * @param string                   $host              The target host to proxy requests to.
+     * @param string|false             $cache             Cache directory, or false to disable caching.
      *   Defaults to './cache'.
-     * @param array                    $cacheCodes      HTTP status codes eligible for caching. Defaults to ['2xx'].
-     * @param HttpClientInterface|null $httpClient      Optional HTTP client.
-     * @param string|null              $skipCacheHeader Header name that disables cache read/write when present.
-     * @param RequestHasher|null       $requestHasher   Hasher used to derive the cache-key hash. Defaults to
+     * @param array                    $cacheCodes        HTTP status codes eligible for caching.
+     *   Defaults to ['2xx'].
+     * @param HttpClientInterface|null $httpClient        Optional HTTP client.
+     * @param string|null              $skipCacheHeader   Header name that disables cache read/write when present.
+     * @param RequestHasher|null       $requestHasher     Hasher used to derive the cache-key hash. Defaults to
      *   {@see \Tent\Cache\QueryRequestHasher}, resolved by `FileCacheMiddleware`.
+     * @param array|null               $filterQueryParams Configuration passed through to
+     *   `FilterQueryParamsMiddleware::build()`. Null disables query params filtering.
      */
     public function __construct(
         string $host,
@@ -101,13 +130,15 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
         array $cacheCodes,
         ?HttpClientInterface $httpClient = null,
         ?string $skipCacheHeader = null,
-        ?RequestHasher $requestHasher = null
+        ?RequestHasher $requestHasher = null,
+        ?array $filterQueryParams = null
     ) {
         parent::__construct($host, $httpClient);
         $this->cache = $cache;
         $this->cacheCodes = $cacheCodes;
         $this->skipCacheHeader = $skipCacheHeader;
         $this->requestHasher = $requestHasher;
+        $this->filterQueryParams = $filterQueryParams;
         $this->initializeMiddlewares();
     }
 
@@ -121,6 +152,8 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
      *   - 'skip_cache_header' (string): Header name that disables cache read/write when present.
      *   - 'request_hasher' (array): RequestHasher configuration (`class` key), following the same
      *     strategy pattern as matchers. Defaults to `QueryRequestHasher` when omitted.
+     *   - 'filter_query_params' (array): Configuration passed through to
+     *     `FilterQueryParamsMiddleware::build()`. Defaults to null (disabled).
      * @return self
      * @throws \InvalidArgumentException If 'host' is missing.
      */
@@ -134,7 +167,8 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
         $cacheCodes = $params['cacheCodes'] ?? ['2xx'];
         $skipCacheHeader = $params['skip_cache_header'] ?? null;
         $requestHasher = self::buildRequestHasher($params);
-        return new self($host, $cache, $cacheCodes, null, $skipCacheHeader, $requestHasher);
+        $filterQueryParams = $params['filter_query_params'] ?? null;
+        return new self($host, $cache, $cacheCodes, null, $skipCacheHeader, $requestHasher, $filterQueryParams);
     }
 
     /**
@@ -145,6 +179,10 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
     {
         $this->addMiddleware(new RenameHeaderMiddleware('Host', 'X-Forwarded-Host'));
         $this->addMiddleware(new SetHeadersMiddleware(['Host' => $this->host()]));
+
+        if ($this->filterQueryParams !== null) {
+            $this->addMiddleware(FilterQueryParamsMiddleware::build($this->filterQueryParams));
+        }
 
         if ($this->cache !== false) {
             $this->addMiddleware(new FileCacheMiddleware(

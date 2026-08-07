@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Tent\RequestHandlers\DefaultProxyRequestHandler;
 use Tent\RequestHandlers\RequestHandler;
 use Tent\Middlewares\FileCacheMiddleware;
+use Tent\Middlewares\FilterQueryParamsMiddleware;
 use Tent\Middlewares\SetHeadersMiddleware;
 use Tent\Models\ProcessingRequest;
 use Tent\Tests\Support\Utils\FileSystemUtils;
@@ -173,6 +174,43 @@ class DefaultProxyRequestHandlerBuildTest extends TestCase
             \Tent\Cache\QueryRequestHasher::class,
             $property->getValue($fileCacheMiddleware)
         );
+    }
+
+    public function testBuildWithoutFilterQueryParamsDoesNotAddMiddleware()
+    {
+        $handler = DefaultProxyRequestHandler::build([
+            'host' => 'http://backend:80',
+            'cache' => false,
+        ]);
+
+        $middlewares = $this->getMiddlewares($handler);
+
+        foreach ($middlewares as $middleware) {
+            $this->assertNotInstanceOf(FilterQueryParamsMiddleware::class, $middleware);
+        }
+    }
+
+    public function testBuildWithFilterQueryParamsAddsMiddleware()
+    {
+        $handler = DefaultProxyRequestHandler::build([
+            'host' => 'http://backend:80',
+            'cache' => false,
+            'filter_query_params' => [
+                'params' => ['id'],
+                'mode' => 'allow',
+            ],
+        ]);
+
+        $middlewares = $this->getMiddlewares($handler);
+        $hasFilterQueryParamsMiddleware = false;
+
+        foreach ($middlewares as $middleware) {
+            if ($middleware instanceof FilterQueryParamsMiddleware) {
+                $hasFilterQueryParamsMiddleware = true;
+            }
+        }
+
+        $this->assertTrue($hasFilterQueryParamsMiddleware);
     }
 
     public function testBuildWithPrependMiddlewaresRunsBeforeHandlerDefaults()

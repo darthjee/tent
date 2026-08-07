@@ -47,7 +47,8 @@ It automatically adds:
 
 1. `RenameHeaderMiddleware('Host', 'X-Forwarded-Host')`
 2. `SetHeadersMiddleware(['Host' => <configured host>])`
-3. `FileCacheMiddleware(...)` (unless cache is disabled)
+3. `FilterQueryParamsMiddleware(...)` (only when `filter_query_params` is configured)
+4. `FileCacheMiddleware(...)` (unless cache is disabled)
 
 ### Options
 
@@ -57,6 +58,7 @@ It automatically adds:
 | `cache` | `string \| false` | No | `'./cache'` | Cache directory, or `false` to disable cache |
 | `cacheCodes` | `array` | No | `['2xx']` | Status codes/patterns used by `StatusCodeMatcher` in cache middleware |
 | `skip_cache_header` | `string` | No | — | Request header name that bypasses cache read/write when present |
+| `filter_query_params` | `array` | No | — (middleware not added) | Filters incoming query params; see `filter_query_params` example below |
 
 ### Example: Default proxy with built-in cache
 
@@ -118,6 +120,26 @@ Configuration::buildRule([
     ]
 ]);
 ```
+
+### Example: Filter query parameters
+
+```php
+Configuration::buildRule([
+    'handler' => [
+        'type' => 'default_proxy',
+        'host' => 'http://api:80',
+        'filter_query_params' => [
+            'params' => ['id', 'page'],
+            'mode' => 'allow' // optional, defaults to 'allow'
+        ]
+    ],
+    'matchers' => [
+         ['method' => 'GET', 'uri' => '.json', 'type' => 'ends_with']
+    ]
+]);
+```
+
+`filter_query_params` is passed straight through to `FilterQueryParamsMiddleware::build()`. Its `mode` can be `'allow'` (default — only the listed `params` are kept) or `'deny'` (the listed `params` are removed and everything else is kept); any other value throws `\InvalidArgumentException`. Filtering runs **before** the cache middleware, so the cache key (via `QueryRequestHasher`) reflects the already-filtered query string.
 
 ---
 

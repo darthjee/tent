@@ -87,6 +87,37 @@ class DefaultProxyRequestHandlerCachedTest extends TestCase
         $this->assertSame($this->cachedBody, $response->body());
     }
 
+    public function testHandleRequestUsesFilteredQueryForCacheKey()
+    {
+        $this->initVariables(['requestQuery' => 'id=1']);
+        $this->buildCache();
+
+        $handler = DefaultProxyRequestHandler::build([
+            'host' => $this->baseUrl,
+            'cache' => $this->cacheDir,
+            'cacheCodes' => ['2xx'],
+            'filter_query_params' => [
+                'params' => ['id'],
+                'mode' => 'allow',
+            ],
+        ]);
+
+        // Same 'id' value but with an extra, non-listed param that should be
+        // filtered out before the cache key/hash is computed, since
+        // FilterQueryParamsMiddleware runs before FileCacheMiddleware.
+        $incomingRequest = new ProcessingRequest([
+            'requestMethod' => $this->requestMethod,
+            'body' => $this->requestBody,
+            'headers' => $this->requestHeaders,
+            'requestPath' => $this->requestPath,
+            'query' => 'id=1&noise=xyz',
+        ]);
+
+        $response = $handler->handleRequest($incomingRequest);
+
+        $this->assertSame($this->cachedBody, $response->body());
+    }
+
     public function testHandleRequestSkipsCacheWhenSkipCacheHeaderIsPresent()
     {
         $this->initVariables([
