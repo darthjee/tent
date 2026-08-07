@@ -94,6 +94,40 @@ abstract class RequestHandler
     }
 
     /**
+     * Prepends a middleware to the list of middlewares.
+     *
+     * @param Middleware $middleware The middleware to
+     *   add which will be applied in a request, before existing middlewares.
+     * @return Middleware The added middleware.
+     */
+    public function prependMiddleware(Middleware $middleware): Middleware
+    {
+        array_unshift($this->middlewares, $middleware);
+        return $middleware;
+    }
+
+    /**
+     * Builds and prepends multiple middlewares to the handler.
+     *
+     * Entries are inserted before the handler's existing middlewares
+     * (including any default middlewares added during construction),
+     * preserving their own relative order.
+     *
+     * @param array $attributes Array of associative arrays,
+     *   each with keys for Middleware::build.
+     * @return array The list of middlewares.
+     */
+    public function prependMiddlewares(array $attributes): array
+    {
+        $built = [];
+        foreach ($attributes as $attributes) {
+            $built[] = Middleware::build($attributes);
+        }
+        array_splice($this->middlewares, 0, 0, $built);
+        return $this->middlewares;
+    }
+
+    /**
      * Factory method to build a RequestHandler based on type and parameters.
      *
      * Example:
@@ -111,6 +145,7 @@ abstract class RequestHandler
         }
 
         $handler = self::handlerClass($params)::build($params);
+        $handler->prependMiddlewares($params['prependMiddlewares'] ?? []);
         $handler->buildMiddlewares($params['middlewares'] ?? []);
         return $handler;
     }

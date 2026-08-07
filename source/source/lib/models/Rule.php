@@ -98,6 +98,7 @@ class Rule extends SimpleModel
     public static function build(array $params): self
     {
         $handlerParams = $params['handler'];
+        $handlerParams['prependMiddlewares'] = $params['prependMiddlewares'] ?? [];
         $handlerParams['middlewares'] = $params['middlewares'] ?? [];
 
         return new self([
