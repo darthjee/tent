@@ -65,6 +65,8 @@ Iterates through registered `Rule` objects and invokes the handler of the first 
 
 Holds a list of matchers (URI patterns, HTTP methods) and a handler reference. Matched via `Rule::match()`.
 
+Handler construction (which wires up any handler-specific default middlewares) happens before `RequestHandler::build()` applies rule-level middlewares: the optional `prependMiddlewares` rule key is inserted right after construction — before those defaults — while `middlewares` keeps being appended after them, unchanged.
+
 ### Handlers (`source/source/lib/request_handlers/`)
 
 | Type | Class | Notes |
@@ -165,7 +167,17 @@ Configuration::buildRule([
     ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact'],
     // type: 'exact', 'begins_with', 'ends_with', 'regex'; method: any HTTP verb
   ],
+  'prependMiddlewares' => [
+    // optional; same shape as 'middlewares' below, but inserted BEFORE
+    // the handler's own default middlewares (e.g. default_proxy's
+    // RenameHeaderMiddleware/SetHeadersMiddleware/FileCacheMiddleware)
+    [
+      'class' => 'Tent\\Middlewares\\SetHeadersMiddleware',
+      'headers' => ['X-Api-Key' => 'secret']
+    ]
+  ],
   'middlewares' => [
+    // appended AFTER the handler's default middlewares (unchanged behavior)
     [
       'class' => 'Tent\\Middlewares\\FileCacheMiddleware',
       'location' => './cache',
