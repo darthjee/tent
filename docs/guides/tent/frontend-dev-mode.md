@@ -77,4 +77,4 @@ if (getenv('FRONTEND_DEV_MODE') === 'true') {
 
 Rules are evaluated at request time, but `getenv()` is resolved at boot — when PHP parses the configuration. As long as the `FRONTEND_DEV_MODE` environment variable is set correctly before the container starts, Tent will load the right set of rules.
 
-[← Back to How to Use darthjee/tent](../HOW_TO_USE_DARTHJEE-TENT.md)
+[← Back to How to Use darthjee/tent](../how-to-use-tent.md)

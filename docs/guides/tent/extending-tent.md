@@ -81,4 +81,4 @@ docker run --rm \
 
 The image bakes in a default `phpunit.xml` that requires `vendor/autoload.php` and then `/var/www/html/extension/loader.php` before running, and points its test suite at `/var/www/html/tests/extension` — so running the container with these two mounts and no extra arguments runs your extension's tests immediately. The default command (`vendor/bin/phpunit`) is overridable, e.g. `docker run --rm darthjee/tent-test /bin/bash` for a debugging shell, or `... vendor/bin/phpcs` to run one of the other bundled tools directly (Tent's own `phpcs.xml`/`phpmd.xml` configs aren't baked into the image, so `composer lint` isn't available out of the box).
 
-[← Back to How to Use darthjee/tent](../HOW_TO_USE_DARTHJEE-TENT.md)
+[← Back to How to Use darthjee/tent](../how-to-use-tent.md)

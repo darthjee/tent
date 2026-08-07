@@ -7,7 +7,7 @@ ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 README="$ROOT_DIR/README.md"
 MAKEFILE="$ROOT_DIR/Makefile"
 COMPOSER_JSON="$ROOT_DIR/source/composer.json"
-HOW_TO_USE="$ROOT_DIR/docs/HOW_TO_USE_DARTHJEE-TENT.md"
+HOW_TO_USE="$ROOT_DIR/docs/guides/how-to-use-tent.md"
 
 if [[ $# -ge 1 ]]; then
   VERSION="$1"

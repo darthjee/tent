@@ -11,7 +11,7 @@ You are the extensibility specialist for the Tent project — responsible for ma
 You own the developer-facing extension guides under `docs/` (not `docs/agents/`):
 
 - `docs/README.md` — documentation index
-- `docs/HOW_TO_USE_DARTHJEE-TENT.md` — integration guide for external applications
+- `docs/guides/how-to-use-tent.md` — integration guide for external applications
 - `docs/creating-middlewares.md` — custom `Middleware` classes
 - `docs/adding-request-matchers.md` — custom `RequestMatcher` classes
 - `docs/request-handlers.md` — `RequestHandler` types and the `class` override

@@ -145,6 +145,6 @@ The same option is available on a manual `FileCacheMiddleware` entry:
 ]
 ```
 
-See [Creating Request Hashers](../creating-request-hashers.md) for the full `RequestHasher` interface, security guidance, and a complete custom-hasher example.
+See [Creating Request Hashers](./creating-request-hashers.md) for the full `RequestHasher` interface, security guidance, and a complete custom-hasher example.
 
-[← Back to How to Use darthjee/tent](../HOW_TO_USE_DARTHJEE-TENT.md)
+[← Back to How to Use darthjee/tent](../how-to-use-tent.md)

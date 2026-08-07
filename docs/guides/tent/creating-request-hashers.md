@@ -81,7 +81,7 @@ class HeaderAwareRequestHasher implements RequestHasher
 
 ### 2. Load It
 
-Custom `RequestHasher` classes are wired the same way as custom middlewares and matchers — via `/var/www/html/extension/loader.php` (see [Extending Tent](tent/extending-tent.md)):
+Custom `RequestHasher` classes are wired the same way as custom middlewares and matchers — via `/var/www/html/extension/loader.php` (see [Extending Tent](extending-tent.md)):
 
 ```php
 <?php
