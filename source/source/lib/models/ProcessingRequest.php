@@ -224,6 +224,20 @@ class ProcessingRequest implements RequestInterface
     }
 
     /**
+     * Sets the query string value.
+     *
+     * This method allows you to override or set the query string portion of the
+     * request URL (e.g., a=1&b=2) for this ProcessingRequest instance.
+     *
+     * @param string $query The query string to set.
+     * @return string The set query string value.
+     */
+    public function setQuery(string $query): string
+    {
+        return $this->query = $query;
+    }
+
+    /**
      * Returns the query string from the request URL, caching the result after first access.
      *
      * @return string The query string or empty string if no request is set

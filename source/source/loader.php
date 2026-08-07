@@ -35,6 +35,7 @@ require_once __DIR__ . '/lib/content/CacheDirResolver.php';
 require_once __DIR__ . '/lib/content/CacheDirCleaner.php';
 require_once __DIR__ . '/lib/middlewares/CacheCleanupMiddleware.php';
 require_once __DIR__ . '/lib/middlewares/FileCacheMiddleware.php';
+require_once __DIR__ . '/lib/middlewares/FilterQueryParamsMiddleware.php';
 require_once __DIR__ . '/lib/middlewares/RedirectMiddleware.php';
 require_once __DIR__ . '/lib/middlewares/RenameHeaderMiddleware.php';
 require_once __DIR__ . '/lib/middlewares/SetHeadersMiddleware.php';
