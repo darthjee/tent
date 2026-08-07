@@ -155,4 +155,4 @@ Rewrites the request path with a regex replacement and returns a `302` response 
 
 If the regex matches, the middleware sets a `Location` header and short-circuits handler execution.
 
-[← Back to How to Use darthjee/tent](../HOW_TO_USE_DARTHJEE-TENT.md)
+[← Back to How to Use darthjee/tent](../how-to-use-tent.md)

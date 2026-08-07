@@ -21,4 +21,4 @@ The two key mounts are:
 - `/var/www/html/static/` — static files Tent will serve directly.
 - `/var/www/html/configuration/` — PHP rule files that define routing behavior.
 
-[← Back to How to Use darthjee/tent](../HOW_TO_USE_DARTHJEE-TENT.md)
+[← Back to How to Use darthjee/tent](../how-to-use-tent.md)

@@ -89,4 +89,4 @@ Configuration::buildRule([
 ]);
 ```
 
-[← Back to How to Use darthjee/tent](../HOW_TO_USE_DARTHJEE-TENT.md)
+[← Back to How to Use darthjee/tent](../how-to-use-tent.md)

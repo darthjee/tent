@@ -43,4 +43,4 @@
 | `ends_with`   | Match URI suffix                                |
 | `regex`       | Match URI with regular expression pattern       |
 
-[← Back to How to Use darthjee/tent](../HOW_TO_USE_DARTHJEE-TENT.md)
+[← Back to How to Use darthjee/tent](../how-to-use-tent.md)

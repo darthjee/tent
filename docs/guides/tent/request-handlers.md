@@ -97,4 +97,4 @@ Configuration::buildRule([
 
 In almost all backend proxy scenarios, prefer `default_proxy`. Only drop down to `proxy` when you explicitly need to change or omit the default middleware behavior.
 
-[← Back to How to Use darthjee/tent](../HOW_TO_USE_DARTHJEE-TENT.md)
+[← Back to How to Use darthjee/tent](../how-to-use-tent.md)

@@ -17,4 +17,4 @@ Each rule is registered with `Configuration::buildRule()`. A rule has three part
 
 Matchers also accept a `method` field (`GET`, `POST`, `PUT`, `DELETE`, etc.). When `method` is omitted, the rule matches any HTTP method for the given URI pattern.
 
-[← Back to How to Use darthjee/tent](../HOW_TO_USE_DARTHJEE-TENT.md)
+[← Back to How to Use darthjee/tent](../how-to-use-tent.md)

@@ -15,7 +15,7 @@
 - [Host Header and Why It Matters](./tent/host-header.md) — Why the `Host` header must be rewritten when proxying, and how `default_proxy` handles it automatically.
 - [Middlewares](./tent/middlewares.md) — All built-in middlewares (`FileCacheMiddleware`, `CacheCleanupMiddleware`, `SetHeadersMiddleware`, `RenameHeaderMiddleware`, `SetPathMiddleware`, `RedirectMiddleware`) with configuration examples.
 - [Cache Configuration](./tent/cache-configuration.md) — Enabling, disabling, customizing, and bypassing the `default_proxy` file cache, plus manual `FileCacheMiddleware` setup.
-- [Creating Request Hashers](./creating-request-hashers.md) — Plugging in a custom `RequestHasher` to control how `FileCacheMiddleware` derives its cache key.
+- [Creating Request Hashers](./tent/creating-request-hashers.md) — Plugging in a custom `RequestHasher` to control how `FileCacheMiddleware` derives its cache key.
 - [Frontend Dev Mode Flip](./tent/frontend-dev-mode.md) — Using an environment variable to switch between proxying a live dev server and serving pre-built static files.
 - [Static Files](./tent/static-files.md) — Where to place static assets and how to share a build-output volume with Tent.
 - [Complete Example Layout](./tent/complete-example.md) — A full project layout combining `docker-compose.yml`, configuration, and rule files.

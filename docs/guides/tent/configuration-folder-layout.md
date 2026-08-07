@@ -25,4 +25,4 @@ require_once __DIR__ . '/rules/backend.php';
 
 You can split rules into as many files as makes sense for your project — the only requirement is that `configure.php` requires them all.
 
-[← Back to How to Use darthjee/tent](../HOW_TO_USE_DARTHJEE-TENT.md)
+[← Back to How to Use darthjee/tent](../how-to-use-tent.md)

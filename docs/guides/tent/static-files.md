@@ -13,4 +13,4 @@ volumes:
 
 The Vite container writes to `./docker_volumes/static/` as its `outDir`, and Tent picks it up immediately.
 
-[← Back to How to Use darthjee/tent](../HOW_TO_USE_DARTHJEE-TENT.md)
+[← Back to How to Use darthjee/tent](../how-to-use-tent.md)
