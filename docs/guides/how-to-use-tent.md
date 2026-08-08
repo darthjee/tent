@@ -1,6 +1,6 @@
 # How to Use darthjee/tent
 
-**Minimum version:** [0.10.1](https://github.com/darthjee/tent/releases/tag/0.10.1)
+**Minimum version:** [0.10.2](https://github.com/darthjee/tent/releases/tag/0.10.2)
 
 [Tent](https://github.com/darthjee/tent) is a PHP-based reverse proxy and static file server distributed as a Docker image. It acts as the single entry point for applications that combine a backend API and a frontend — routing, caching, and serving files through a simple PHP configuration layer.
 
@@ -13,7 +13,7 @@
 - [Defining Rules](./tent/defining-rules.md) — The three parts of a rule (`handler`, `matchers`, `middlewares`) and the available matcher types.
 - [Request Handlers](./tent/request-handlers.md) — `default_proxy`, `proxy`, and `static` handlers, their options, and which one to use for a given scenario.
 - [Host Header and Why It Matters](./tent/host-header.md) — Why the `Host` header must be rewritten when proxying, and how `default_proxy` handles it automatically.
-- [Middlewares](./tent/middlewares.md) — All built-in middlewares (`FileCacheMiddleware`, `CacheCleanupMiddleware`, `SetHeadersMiddleware`, `RenameHeaderMiddleware`, `SetPathMiddleware`, `RedirectMiddleware`) with configuration examples.
+- [Middlewares](./tent/middlewares.md) — All built-in middlewares (`FileCacheMiddleware`, `CacheCleanupMiddleware`, `FilterQueryParamsMiddleware`, `SetHeadersMiddleware`, `RenameHeaderMiddleware`, `SetPathMiddleware`, `RedirectMiddleware`) with configuration examples.
 - [Cache Configuration](./tent/cache-configuration.md) — Enabling, disabling, customizing, and bypassing the `default_proxy` file cache, plus manual `FileCacheMiddleware` setup.
 - [Creating Request Hashers](./tent/creating-request-hashers.md) — Plugging in a custom `RequestHasher` to control how `FileCacheMiddleware` derives its cache key.
 - [Frontend Dev Mode Flip](./tent/frontend-dev-mode.md) — Using an environment variable to switch between proxying a live dev server and serving pre-built static files.

@@ -22,6 +22,7 @@
 |-----------------------------------------|--------------|
 | `Tent\Middlewares\FileCacheMiddleware`   | Cache upstream responses to disk; serve on subsequent requests |
 | `Tent\Middlewares\CacheCleanupMiddleware` | Delete stale cache directories on `POST`/`PATCH`/`PUT`/`DELETE` |
+| `Tent\Middlewares\FilterQueryParamsMiddleware` | Allow-list or deny-list query parameters before forwarding |
 | `Tent\Middlewares\SetHeadersMiddleware` | Set or override request headers before forwarding |
 | `Tent\Middlewares\RenameHeaderMiddleware` | Move a header value to a different header name |
 | `Tent\Middlewares\SetPathMiddleware`    | Rewrite the request path before the handler runs |
