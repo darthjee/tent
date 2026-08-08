@@ -69,6 +69,33 @@ Configuration::buildRule([
 ]);
 ```
 
+## Require header before caching
+
+When you only want to cache responses that opt in explicitly, configure `require_cache_header`. It is the write-only counterpart to `skip_cache_header`: it only checks the **response**, never the request, and gates the cache write — a response is only stored when the configured header is present in it:
+
+```php
+Configuration::buildRule([
+    'handler' => [
+        'type'                  => 'default_proxy',
+        'host'                  => 'http://api:3000',
+        'cache'                 => './cache/api',
+        'require_cache_header'  => 'X-Cache-Allow'
+    ],
+    'matchers' => [
+        ['method' => 'GET', 'uri' => '/api/', 'type' => 'begins_with']
+    ]
+]);
+```
+
+`skip_cache_header` and `require_cache_header` can be combined:
+
+```php
+'skip_cache_header'    => 'X-Skip-Cache',   // presence in request OR response → don't cache
+'require_cache_header' => 'X-Cache-Allow',  // absence in response → don't cache (response-only)
+```
+
+If both are configured and both headers are found in the response, the response is **not** cached — `skip_cache_header` wins.
+
 ## Manual `FileCacheMiddleware` setup
 
 When using `proxy` instead of `default_proxy`, configure `FileCacheMiddleware` explicitly. Place it **before** header middlewares so cached responses are served without forwarding:
@@ -85,8 +112,9 @@ Configuration::buildRule([
     'middlewares' => [
         // Cache first — short-circuits on hit, skipping the backend entirely
         [
-            'class'    => 'Tent\Middlewares\FileCacheMiddleware',
-            'location' => './cache',
+            'class'                 => 'Tent\Middlewares\FileCacheMiddleware',
+            'location'              => './cache',
+            'require_cache_header'  => 'X-Cache-Allow',
             'matchers' => [
                 [
                     'class'     => 'Tent\Matchers\StatusCodeMatcher',
