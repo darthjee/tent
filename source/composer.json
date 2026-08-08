@@ -1,6 +1,6 @@
 {
     "name": "darthjee/tent",
-    "version": "0.10.2",
+    "version": "0.10.3",
     "description": "A simple and extensible PHP web server.",
     "license": "MIT",
     "require": {
