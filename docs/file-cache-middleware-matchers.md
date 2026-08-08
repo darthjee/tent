@@ -20,7 +20,7 @@
 1. **On request** (`processRequest`): Checks whether a cached file exists for the incoming request path. If found, the cached response is loaded and returned immediately, skipping the backend.
 2. **On response** (`processResponse`): After the handler returns a response, checks whether it should be cached. If all configured matchers pass, the response is written to disk.
 
-You can also set `skip_cache_header` to bypass cache lookup and cache writes when a specific request header is present.
+You can also set `skip_cache_header` to bypass cache lookup and cache writes when a specific request header is present, or `require_cache_header` to only allow cache writes when a specific header is present in the response.
 
 For standard proxying, prefer `DefaultProxyRequestHandler` (`'type' => 'default_proxy'`). Use `ProxyRequestHandler` (`'type' => 'proxy'`) when you need to configure `FileCacheMiddleware` explicitly as part of a custom middleware stack.
 
@@ -63,6 +63,7 @@ Matchers are defined as an array of associative arrays inside the `matchers` key
     'class' => 'Tent\\Middlewares\\FileCacheMiddleware',
     'location' => './cache',
     'skip_cache_header' => 'X-Skip-Cache',
+    'require_cache_header' => 'X-Cache-Allow',
     'matchers' => [
         [
             'class' => 'Tent\\Matchers\\StatusCodeMatcher',

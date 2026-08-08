@@ -55,6 +55,10 @@ use Tent\Cache\QueryRequestHasher;
  * - `request_hasher`: Optional `RequestHasher` configuration (`class` key, following the same
  *   strategy pattern as matchers) used to derive the cache-key hash. Defaults to
  *   {@see \Tent\Cache\QueryRequestHasher} when omitted.
+ * - `skip_cache_header`: Optional header name that disables cache read/write when present in the
+ *   request or response.
+ * - `require_cache_header`: Optional header name that must be present in the response for it to be
+ *   cached. Only gates the cache write path; request-side presence is never checked.
  *
  * This middleware will cache responses matching all configured matchers,
  * and serve them from cache on subsequent requests.
@@ -81,25 +85,34 @@ class FileCacheMiddleware extends Middleware
     private RequestHasher $requestHasher;
 
     /**
+     * @var string|null Header name that must be present in the response for it to be cached.
+     */
+    private ?string $requireCacheHeader;
+
+    /**
      * Constructs a FileCacheMiddleware instance.
      *
-     * @param FolderLocation     $location        The base folder location for caching.
-     * @param array              $matchers        Array of custom matchers for cacheability.
-     * @param string|null        $skipCacheHeader Header name that disables cache read/write when present.
-     * @param RequestHasher|null $requestHasher   Hasher used to derive the cache-key hash.
-     *                                            Defaults to {@see QueryRequestHasher}.
+     * @param FolderLocation     $location           The base folder location for caching.
+     * @param array              $matchers           Array of custom matchers for cacheability.
+     * @param string|null        $skipCacheHeader    Header name that disables cache read/write when present.
+     * @param RequestHasher|null $requestHasher      Hasher used to derive the cache-key hash.
+     *                                                Defaults to {@see QueryRequestHasher}.
+     * @param string|null        $requireCacheHeader Header name that must be present in the response for
+     *                                                it to be cached.
      */
     public function __construct(
         FolderLocation $location,
         array $matchers = [],
         ?string $skipCacheHeader = null,
-        ?RequestHasher $requestHasher = null
+        ?RequestHasher $requestHasher = null,
+        ?string $requireCacheHeader = null
     ) {
         $this->location = $location;
 
         $this->matchers = $matchers;
         $this->skipCacheHeader = $skipCacheHeader;
         $this->requestHasher = $requestHasher ?? new QueryRequestHasher();
+        $this->requireCacheHeader = $requireCacheHeader;
     }
 
     /**
@@ -114,8 +127,9 @@ class FileCacheMiddleware extends Middleware
         $matchers = RequestResponseMatcher::buildMatchers($attributes['matchers'] ?? []);
         $skipCacheHeader = $attributes['skip_cache_header'] ?? null;
         $requestHasher = self::buildRequestHasher($attributes);
+        $requireCacheHeader = $attributes['require_cache_header'] ?? null;
 
-        return new self($location, $matchers, $skipCacheHeader, $requestHasher);
+        return new self($location, $matchers, $skipCacheHeader, $requestHasher, $requireCacheHeader);
     }
 
     /**
@@ -164,7 +178,7 @@ class FileCacheMiddleware extends Middleware
      */
     public function processResponse(Response $response): Response
     {
-        if ($this->shouldSkipCacheForResponse($response) || $this->shouldSkipCache($response->request())) {
+        if ($this->shouldSkipCacheWrite($response)) {
             return $response;
         }
 
@@ -226,6 +240,41 @@ class FileCacheMiddleware extends Middleware
             }
         }
         return false;
+    }
+
+    /**
+     * Checks whether the response satisfies the configured require-cache header.
+     *
+     * @param Response $response Upstream response.
+     * @return boolean True when no require header is configured, or when it is present in the
+     *                  response, false otherwise.
+     */
+    private function meetsRequireCacheHeader(Response $response): bool
+    {
+        if ($this->requireCacheHeader === null) {
+            return true;
+        }
+
+        $headerPrefix = strtolower($this->requireCacheHeader) . ':';
+        foreach ($response->headers() as $headerLine) {
+            if (str_starts_with(strtolower($headerLine), $headerPrefix)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks whether the cache write should be skipped for the given response.
+     *
+     * @param Response $response Upstream response.
+     * @return boolean True when the response should not be cached, false otherwise.
+     */
+    private function shouldSkipCacheWrite(Response $response): bool
+    {
+        return $this->shouldSkipCacheForResponse($response)
+            || $this->shouldSkipCache($response->request())
+            || !$this->meetsRequireCacheHeader($response);
     }
 
     /**

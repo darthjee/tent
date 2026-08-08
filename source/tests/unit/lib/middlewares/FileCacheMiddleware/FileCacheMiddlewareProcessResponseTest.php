@@ -182,6 +182,139 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
         $this->assertFalse($this->cache->exists());
     }
 
+    public function testProcessResponseWithRequireCacheHeaderNotConfiguredKeepsCurrentBehavior()
+    {
+        $response = $this->buildResponse(200);
+
+        $middleware = $this->buildMiddleware();
+        $middleware->processResponse($response);
+
+        $this->cache = new FileCache($this->request, $this->location);
+        $this->assertTrue($this->cache->exists());
+    }
+
+    public function testProcessResponseStoresCacheWhenRequireCacheHeaderIsPresentInResponse()
+    {
+        $response = $this->buildResponse(200, [], ['X-Cache-Allow: 1']);
+
+        $middleware = FileCacheMiddleware::build([
+            'location' => $this->cacheDir,
+            'require_cache_header' => 'X-Cache-Allow',
+            'matchers' => [
+                [
+                    'class' => \Tent\Matchers\StatusCodeMatcher::class,
+                    'httpCodes' => [200],
+                ]
+            ],
+        ]);
+        $middleware->processResponse($response);
+
+        $this->cache = new FileCache($this->request, $this->location);
+        $this->assertTrue($this->cache->exists());
+    }
+
+    public function testProcessResponseSkipsCacheWriteWhenRequireCacheHeaderIsMissingFromResponse()
+    {
+        $response = $this->buildResponse(200);
+
+        $middleware = FileCacheMiddleware::build([
+            'location' => $this->cacheDir,
+            'require_cache_header' => 'X-Cache-Allow',
+            'matchers' => [
+                [
+                    'class' => \Tent\Matchers\StatusCodeMatcher::class,
+                    'httpCodes' => [200],
+                ]
+            ],
+        ]);
+        $middleware->processResponse($response);
+
+        $this->cache = new FileCache($this->request, $this->location);
+        $this->assertFalse($this->cache->exists());
+    }
+
+    public function testProcessResponseStoresCacheWhenRequireCacheHeaderMatchesCaseInsensitively()
+    {
+        $response = $this->buildResponse(200, [], ['x-cache-allow: 1']);
+
+        $middleware = FileCacheMiddleware::build([
+            'location' => $this->cacheDir,
+            'require_cache_header' => 'X-CACHE-ALLOW',
+            'matchers' => [
+                [
+                    'class' => \Tent\Matchers\StatusCodeMatcher::class,
+                    'httpCodes' => [200],
+                ]
+            ],
+        ]);
+        $middleware->processResponse($response);
+
+        $this->cache = new FileCache($this->request, $this->location);
+        $this->assertTrue($this->cache->exists());
+    }
+
+    public function testProcessResponseSkipsCacheWriteWhenRequireCacheHeaderIsOnlyInRequest()
+    {
+        $response = $this->buildResponse(200, ['X-Cache-Allow' => '1']);
+
+        $middleware = FileCacheMiddleware::build([
+            'location' => $this->cacheDir,
+            'require_cache_header' => 'X-Cache-Allow',
+            'matchers' => [
+                [
+                    'class' => \Tent\Matchers\StatusCodeMatcher::class,
+                    'httpCodes' => [200],
+                ]
+            ],
+        ]);
+        $middleware->processResponse($response);
+
+        $this->cache = new FileCache($this->request, $this->location);
+        $this->assertFalse($this->cache->exists());
+    }
+
+    public function testProcessResponseSkipsCacheWriteWhenBothHeadersConfiguredAndBothPresentInResponse()
+    {
+        $response = $this->buildResponse(200, [], ['X-Skip-Cache: 1', 'X-Cache-Allow: 1']);
+
+        $middleware = FileCacheMiddleware::build([
+            'location' => $this->cacheDir,
+            'skip_cache_header' => 'X-Skip-Cache',
+            'require_cache_header' => 'X-Cache-Allow',
+            'matchers' => [
+                [
+                    'class' => \Tent\Matchers\StatusCodeMatcher::class,
+                    'httpCodes' => [200],
+                ]
+            ],
+        ]);
+        $middleware->processResponse($response);
+
+        $this->cache = new FileCache($this->request, $this->location);
+        $this->assertFalse($this->cache->exists());
+    }
+
+    public function testProcessResponseStoresCacheWhenBothConfiguredAndOnlyRequireCacheHeaderPresent()
+    {
+        $response = $this->buildResponse(200, [], ['X-Cache-Allow: 1']);
+
+        $middleware = FileCacheMiddleware::build([
+            'location' => $this->cacheDir,
+            'skip_cache_header' => 'X-Skip-Cache',
+            'require_cache_header' => 'X-Cache-Allow',
+            'matchers' => [
+                [
+                    'class' => \Tent\Matchers\StatusCodeMatcher::class,
+                    'httpCodes' => [200],
+                ]
+            ],
+        ]);
+        $middleware->processResponse($response);
+
+        $this->cache = new FileCache($this->request, $this->location);
+        $this->assertTrue($this->cache->exists());
+    }
+
     private function buildResponse(int $httpCode, array $requestHeaders = [], array $responseHeaders = [])
     {
         $this->path = '/file.txt';

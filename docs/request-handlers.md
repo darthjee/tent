@@ -58,6 +58,7 @@ It automatically adds:
 | `cache` | `string \| false` | No | `'./cache'` | Cache directory, or `false` to disable cache |
 | `cacheCodes` | `array` | No | `['2xx']` | Status codes/patterns used by `StatusCodeMatcher` in cache middleware |
 | `skip_cache_header` | `string` | No | — | Request header name that bypasses cache read/write when present |
+| `require_cache_header` | `string` | No | — | Response header name required for a response to be cached (checked on the response only) |
 | `filter_query_params` | `array` | No | — (middleware not added) | Filters incoming query params; see `filter_query_params` example below |
 
 ### Example: Default proxy with built-in cache
@@ -120,6 +121,43 @@ Configuration::buildRule([
     ]
 ]);
 ```
+
+### Example: Require a header before caching
+
+```php
+Configuration::buildRule([
+    'handler' => [
+        'type' => 'default_proxy',
+        'host' => 'http://api:80',
+        'cache' => './cache/api',
+        'require_cache_header' => 'X-Cache-Allow'
+    ],
+    'matchers' => [
+        ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact']
+    ]
+]);
+```
+
+`require_cache_header` only checks the **response**: a response is only written to cache when the configured header is present in it. It never checks the request.
+
+### Example: Combine skip and require cache headers
+
+```php
+Configuration::buildRule([
+    'handler' => [
+        'type' => 'default_proxy',
+        'host' => 'http://api:80',
+        'cache' => './cache/api',
+        'skip_cache_header'    => 'X-Skip-Cache',   // presence in request OR response → don't cache
+        'require_cache_header' => 'X-Cache-Allow'   // absence in response → don't cache (response-only)
+    ],
+    'matchers' => [
+        ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact']
+    ]
+]);
+```
+
+When both options are configured and both headers are found in the response, the response is **not** cached — `skip_cache_header` wins.
 
 ### Example: Filter query parameters
 

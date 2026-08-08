@@ -110,19 +110,26 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
     private ?array $filterQueryParams;
 
     /**
+     * @var string|null Header name that must be present in the response for it to be cached.
+     */
+    private ?string $requireCacheHeader;
+
+    /**
      * Constructs a DefaultProxyRequestHandler.
      *
-     * @param string                   $host              The target host to proxy requests to.
-     * @param string|false             $cache             Cache directory, or false to disable caching.
+     * @param string                   $host               The target host to proxy requests to.
+     * @param string|false             $cache              Cache directory, or false to disable caching.
      *   Defaults to './cache'.
-     * @param array                    $cacheCodes        HTTP status codes eligible for caching.
+     * @param array                    $cacheCodes         HTTP status codes eligible for caching.
      *   Defaults to ['2xx'].
-     * @param HttpClientInterface|null $httpClient        Optional HTTP client.
-     * @param string|null              $skipCacheHeader   Header name that disables cache read/write when present.
-     * @param RequestHasher|null       $requestHasher     Hasher used to derive the cache-key hash. Defaults to
+     * @param HttpClientInterface|null $httpClient         Optional HTTP client.
+     * @param string|null              $skipCacheHeader    Header name that disables cache read/write when present.
+     * @param RequestHasher|null       $requestHasher      Hasher used to derive the cache-key hash. Defaults to
      *   {@see \Tent\Cache\QueryRequestHasher}, resolved by `FileCacheMiddleware`.
-     * @param array|null               $filterQueryParams Configuration passed through to
+     * @param array|null               $filterQueryParams  Configuration passed through to
      *   `FilterQueryParamsMiddleware::build()`. Null disables query params filtering.
+     * @param string|null              $requireCacheHeader Header name that must be present in the response
+     *   for it to be cached.
      */
     public function __construct(
         string $host,
@@ -131,7 +138,8 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
         ?HttpClientInterface $httpClient = null,
         ?string $skipCacheHeader = null,
         ?RequestHasher $requestHasher = null,
-        ?array $filterQueryParams = null
+        ?array $filterQueryParams = null,
+        ?string $requireCacheHeader = null
     ) {
         parent::__construct($host, $httpClient);
         $this->cache = $cache;
@@ -139,6 +147,7 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
         $this->skipCacheHeader = $skipCacheHeader;
         $this->requestHasher = $requestHasher;
         $this->filterQueryParams = $filterQueryParams;
+        $this->requireCacheHeader = $requireCacheHeader;
         $this->initializeMiddlewares();
     }
 
@@ -154,6 +163,8 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
      *     strategy pattern as matchers. Defaults to `QueryRequestHasher` when omitted.
      *   - 'filter_query_params' (array): Configuration passed through to
      *     `FilterQueryParamsMiddleware::build()`. Defaults to null (disabled).
+     *   - 'require_cache_header' (string): Header name that must be present in the response for
+     *     it to be cached.
      * @return self
      * @throws \InvalidArgumentException If 'host' is missing.
      */
@@ -168,7 +179,17 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
         $skipCacheHeader = $params['skip_cache_header'] ?? null;
         $requestHasher = self::buildRequestHasher($params);
         $filterQueryParams = $params['filter_query_params'] ?? null;
-        return new self($host, $cache, $cacheCodes, null, $skipCacheHeader, $requestHasher, $filterQueryParams);
+        $requireCacheHeader = $params['require_cache_header'] ?? null;
+        return new self(
+            $host,
+            $cache,
+            $cacheCodes,
+            null,
+            $skipCacheHeader,
+            $requestHasher,
+            $filterQueryParams,
+            $requireCacheHeader
+        );
     }
 
     /**
@@ -189,7 +210,8 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
                 new FolderLocation($this->cache),
                 [new StatusCodeMatcher($this->cacheCodes)],
                 $this->skipCacheHeader,
-                $this->requestHasher
+                $this->requestHasher,
+                $this->requireCacheHeader
             ));
         }
     }

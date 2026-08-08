@@ -33,6 +33,7 @@ Configuration::buildRule([
 | `cache`      | `string\|false`  | No       | `'./cache'` | Cache directory path, or `false` to disable |
 | `cacheCodes` | `array`          | No       | `['2xx']`   | HTTP status codes/patterns to cache |
 | `skip_cache_header` | `string`   | No       | —           | Request header name that bypasses cache read/write when present |
+| `require_cache_header` | `string` | No     | —           | Response header name required for a response to be cached (checked on the response only) |
 | `filter_query_params` | `array` | No       | — (middleware not added) | Filters incoming query params; passed straight through to `FilterQueryParamsMiddleware::build()` — see [Middlewares](middlewares.md#filterqueryparamsmiddleware) |
 
 Query filtering runs **before** caching, so the cache key reflects the already-filtered query string.

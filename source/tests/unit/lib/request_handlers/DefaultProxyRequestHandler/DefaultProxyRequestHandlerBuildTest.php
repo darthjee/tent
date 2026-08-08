@@ -176,6 +176,32 @@ class DefaultProxyRequestHandlerBuildTest extends TestCase
         );
     }
 
+    public function testBuildWithRequireCacheHeaderPassesThroughToFileCacheMiddleware()
+    {
+        $handler = DefaultProxyRequestHandler::build([
+            'host' => 'http://backend:80',
+            'cache' => $this->cacheDir,
+            'require_cache_header' => 'X-Cache-Allow',
+        ]);
+
+        $middlewares = $this->getMiddlewares($handler);
+        $fileCacheMiddleware = null;
+
+        foreach ($middlewares as $middleware) {
+            if ($middleware instanceof FileCacheMiddleware) {
+                $fileCacheMiddleware = $middleware;
+            }
+        }
+
+        $this->assertNotNull($fileCacheMiddleware);
+
+        $reflection = new \ReflectionClass($fileCacheMiddleware);
+        $property = $reflection->getProperty('requireCacheHeader');
+        $property->setAccessible(true);
+
+        $this->assertSame('X-Cache-Allow', $property->getValue($fileCacheMiddleware));
+    }
+
     public function testBuildWithoutFilterQueryParamsDoesNotAddMiddleware()
     {
         $handler = DefaultProxyRequestHandler::build([
