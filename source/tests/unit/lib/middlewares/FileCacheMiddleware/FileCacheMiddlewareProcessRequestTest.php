@@ -204,6 +204,21 @@ class FileCacheMiddlewareProcessRequestTest extends TestCase
         $this->assertFalse($result->hasResponse());
     }
 
+    public function testProcessRequestWithRequireCacheHeaderConfiguredHasNoEffectOnCacheRead()
+    {
+        $this->path = '/file.txt';
+        $this->request = $this->buildRequest($this->path, 'GET');
+        $this->buildCache();
+
+        $middleware = $this->buildMiddleware([
+            'require_cache_header' => 'X-Cache-Allow'
+        ]);
+        $result = $middleware->processRequest($this->request);
+
+        $this->assertTrue($result->hasResponse());
+        $this->assertEquals('cached body', $result->response()->body());
+    }
+
     private function buildRequest(string $path, string $method, array $headers = []): ProcessingRequest
     {
         return new ProcessingRequest([

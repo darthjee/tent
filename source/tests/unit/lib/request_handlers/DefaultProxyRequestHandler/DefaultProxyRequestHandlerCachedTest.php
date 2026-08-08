@@ -154,6 +154,74 @@ class DefaultProxyRequestHandlerCachedTest extends TestCase
         $this->assertSame('upstream body', $response->body());
     }
 
+    public function testHandleRequestCachesUpstreamResponseWhenRequireCacheHeaderIsPresent()
+    {
+        $this->initVariables();
+
+        $httpClient = $this->createMock(HttpClientInterface::class);
+        $httpClient->expects($this->once())
+            ->method('request')
+            ->willReturn([
+                'body' => 'upstream body',
+                'httpCode' => 200,
+                'headers' => ['Content-Type: text/plain', 'X-Cache-Allow: 1']
+            ]);
+
+        $handler = DefaultProxyRequestHandler::build([
+            'host' => $this->baseUrl,
+            'cache' => $this->cacheDir,
+            'cacheCodes' => ['2xx'],
+            'require_cache_header' => 'X-Cache-Allow'
+        ]);
+
+        $reflection = new \ReflectionClass($handler);
+        $property = $reflection->getParentClass()->getProperty('httpClient');
+        $property->setAccessible(true);
+        $property->setValue($handler, $httpClient);
+
+        $response = $handler->handleRequest($this->request);
+
+        $this->assertSame('upstream body', $response->body());
+
+        $location = new FolderLocation($this->cacheDir);
+        $cache = new FileCache($this->request, $location);
+        $this->assertTrue($cache->exists());
+    }
+
+    public function testHandleRequestDoesNotCacheUpstreamResponseWhenRequireCacheHeaderIsMissing()
+    {
+        $this->initVariables();
+
+        $httpClient = $this->createMock(HttpClientInterface::class);
+        $httpClient->expects($this->once())
+            ->method('request')
+            ->willReturn([
+                'body' => 'upstream body',
+                'httpCode' => 200,
+                'headers' => ['Content-Type: text/plain']
+            ]);
+
+        $handler = DefaultProxyRequestHandler::build([
+            'host' => $this->baseUrl,
+            'cache' => $this->cacheDir,
+            'cacheCodes' => ['2xx'],
+            'require_cache_header' => 'X-Cache-Allow'
+        ]);
+
+        $reflection = new \ReflectionClass($handler);
+        $property = $reflection->getParentClass()->getProperty('httpClient');
+        $property->setAccessible(true);
+        $property->setValue($handler, $httpClient);
+
+        $response = $handler->handleRequest($this->request);
+
+        $this->assertSame('upstream body', $response->body());
+
+        $location = new FolderLocation($this->cacheDir);
+        $cache = new FileCache($this->request, $location);
+        $this->assertFalse($cache->exists());
+    }
+
     private function initVariables(array $overrides = []): void
     {
         $this->requestMethod = $overrides['requestMethod'] ?? 'GET';

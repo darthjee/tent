@@ -70,10 +70,35 @@ class FileCacheMiddlewareBuildTest extends TestCase
         $this->assertFalse($matcher->matchResponse($response));
     }
 
+    public function testBuildWithRequireCacheHeaderAttributeIsPassedThrough()
+    {
+        $middleware = FileCacheMiddleware::build([
+            'location' => '/tmp/cache',
+            'require_cache_header' => 'X-Cache-Allow',
+        ]);
+
+        $this->assertSame('X-Cache-Allow', $this->getRequireCacheHeader($middleware));
+    }
+
+    public function testBuildDefaultsRequireCacheHeaderToNullWhenOmitted()
+    {
+        $middleware = FileCacheMiddleware::build(['location' => '/tmp/cache']);
+
+        $this->assertNull($this->getRequireCacheHeader($middleware));
+    }
+
     private function getRequestHasher(FileCacheMiddleware $middleware)
     {
         $reflection = new \ReflectionClass($middleware);
         $property = $reflection->getProperty('requestHasher');
+        $property->setAccessible(true);
+        return $property->getValue($middleware);
+    }
+
+    private function getRequireCacheHeader(FileCacheMiddleware $middleware)
+    {
+        $reflection = new \ReflectionClass($middleware);
+        $property = $reflection->getProperty('requireCacheHeader');
         $property->setAccessible(true);
         return $property->getValue($middleware);
     }
