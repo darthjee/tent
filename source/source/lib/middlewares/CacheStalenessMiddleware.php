@@ -3,6 +3,8 @@
 namespace Tent\Middlewares;
 
 use Tent\Content\FileCache;
+use Tent\Content\HeaderFilter;
+use Tent\Content\HeaderFilterBuilder;
 use Tent\Http\CurlHttpClient;
 use Tent\Http\HttpClientInterface;
 use Tent\Log\Logger;
@@ -58,6 +60,15 @@ use Tent\Service\BackgroundRefresher;
  *     ]
  * ]);
  * ```
+ *
+ * ## Header filtering options
+ *
+ * Accepts the same `mode`/`excluded_headers`/`additional_excluded_headers`/`allowed_headers`
+ * options as `FileCacheMiddleware` (see its docblock for full semantics), applied to its own
+ * background-refresh cache write via `BackgroundRefresher`. These should normally be configured
+ * to match `FileCacheMiddleware`'s configuration for the same `location`, to avoid inconsistent
+ * header filtering between a direct cache write and a background-refresh write of the same
+ * cache entry.
  */
 class CacheStalenessMiddleware extends Middleware
 {
@@ -93,32 +104,61 @@ class CacheStalenessMiddleware extends Middleware
     private $scheduler;
 
     /**
-     * @param FolderLocation           $location      Base folder location for caching.
-     * @param integer                  $maxAgeSeconds Maximum age, in seconds, before staleness.
-     * @param string                   $host          Base URL of the upstream server.
-     * @param HttpClientInterface|null $httpClient    Optional HTTP client. Defaults to CurlHttpClient.
-     * @param callable|null            $scheduler     Optional override for how refreshes are run.
-     *                                                Receives a `BackgroundRefresher` instance.
+     * @var HeaderFilter The filter applied to a refreshed response's headers before it is
+     *                   re-stored in cache.
+     */
+    private HeaderFilter $headerFilter;
+
+    /**
+     * @param FolderLocation           $location                  Base folder location for caching.
+     * @param integer                  $maxAgeSeconds             Maximum age, in seconds, before
+     *                                                            staleness.
+     * @param string                   $host                      Base URL of the upstream server.
+     * @param HttpClientInterface|null $httpClient                Optional HTTP client. Defaults to
+     *                                                             CurlHttpClient.
+     * @param callable|null            $scheduler                 Optional override for how refreshes
+     *                                                             are run. Receives a
+     *                                                             `BackgroundRefresher` instance.
+     * @param array|null               $excludedHeaders           Deny mode: full override of the
+     *                                                            excluded headers list.
+     * @param array|null               $additionalExcludedHeaders Deny mode: merged on top of the
+     *                                                            resolved excluded headers list.
+     * @param array|null               $allowedHeaders            Allow mode: explicit, complete
+     *                                                            list of the only headers kept in
+     *                                                            cache storage.
+     * @param string                   $mode                      Either 'deny' (default) or 'allow'.
+     * @throws \InvalidArgumentException If $mode is invalid, or 'allow' mode has an empty/missing list.
      */
     public function __construct(
         FolderLocation $location,
         int $maxAgeSeconds,
         string $host,
         ?HttpClientInterface $httpClient = null,
-        ?callable $scheduler = null
+        ?callable $scheduler = null,
+        ?array $excludedHeaders = null,
+        ?array $additionalExcludedHeaders = null,
+        ?array $allowedHeaders = null,
+        string $mode = 'deny'
     ) {
         $this->location = $location;
         $this->maxAgeSeconds = $maxAgeSeconds;
         $this->host = $host;
         $this->httpClient = $httpClient ?? new CurlHttpClient();
         $this->scheduler = $scheduler ?? self::defaultScheduler(...);
+        $this->headerFilter = HeaderFilterBuilder::build(
+            $mode,
+            $excludedHeaders,
+            $additionalExcludedHeaders,
+            $allowedHeaders
+        );
     }
 
     /**
      * Builds a CacheStalenessMiddleware instance from the given attributes.
      *
      * @param array $attributes Must include `location`, `host` and `maxAgeSeconds`
-     *                          (or `max_age_seconds`).
+     *                          (or `max_age_seconds`). Optionally `mode`, `excluded_headers`,
+     *                          `additional_excluded_headers`, `allowed_headers`.
      * @return CacheStalenessMiddleware
      */
     public static function build(array $attributes): CacheStalenessMiddleware
@@ -126,8 +166,22 @@ class CacheStalenessMiddleware extends Middleware
         $location = new FolderLocation($attributes['location']);
         $maxAgeSeconds = (int) ($attributes['maxAgeSeconds'] ?? $attributes['max_age_seconds'] ?? 0);
         $host = $attributes['host'] ?? '';
+        $mode = $attributes['mode'] ?? 'deny';
+        $excludedHeaders = $attributes['excluded_headers'] ?? null;
+        $additionalExcludedHeaders = $attributes['additional_excluded_headers'] ?? null;
+        $allowedHeaders = $attributes['allowed_headers'] ?? null;
 
-        return new self($location, $maxAgeSeconds, $host);
+        return new self(
+            $location,
+            $maxAgeSeconds,
+            $host,
+            null,
+            null,
+            $excludedHeaders,
+            $additionalExcludedHeaders,
+            $allowedHeaders,
+            $mode
+        );
     }
 
     /**
@@ -202,7 +256,7 @@ class CacheStalenessMiddleware extends Middleware
      */
     private function scheduleRefresh(ProcessingRequest $request, FileCache $cache, string $sentinel): void
     {
-        $refresher = new BackgroundRefresher($request, $cache, $this->host, $this->httpClient);
+        $refresher = new BackgroundRefresher($request, $cache, $this->host, $this->httpClient, $this->headerFilter);
 
         ($this->scheduler)(function () use ($refresher, $sentinel) {
             try {

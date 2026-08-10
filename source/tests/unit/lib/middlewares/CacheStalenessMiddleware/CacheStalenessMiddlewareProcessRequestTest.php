@@ -115,6 +115,42 @@ class CacheStalenessMiddlewareProcessRequestTest extends TestCase
         $this->assertEquals('fresh body', $cache->content());
     }
 
+    public function testStaleCacheRefreshStripsDefaultDangerousHeadersFromRepopulatedCacheEntry()
+    {
+        $request = $this->buildRequest('/users', 'GET');
+        $this->storeCache($request, 'stale body', time() - 1000);
+        $this->setResponseOnRequest($request, 'stale body');
+
+        $httpClient = $this->createMock(HttpClientInterface::class);
+        $httpClient->method('request')
+            ->willReturn([
+                'body' => 'fresh body',
+                'httpCode' => 200,
+                'headers' => ['X-Test: 1', 'Set-Cookie: session=abc'],
+            ]);
+
+        $middleware = CacheStalenessMiddleware::build([
+            'location' => $this->cacheDir,
+            'host' => 'http://api:80',
+            'maxAgeSeconds' => 300,
+        ]);
+        $reflection = new \ReflectionClass($middleware);
+        $httpClientProp = $reflection->getProperty('httpClient');
+        $httpClientProp->setAccessible(true);
+        $httpClientProp->setValue($middleware, $httpClient);
+        $schedulerProp = $reflection->getProperty('scheduler');
+        $schedulerProp->setAccessible(true);
+        $schedulerProp->setValue($middleware, function (callable $task) {
+            $task();
+        });
+
+        $middleware->processRequest($request);
+
+        $cache = new FileCache($request, $this->location);
+        $this->assertContains('X-Test: 1', $cache->headers());
+        $this->assertNotContains('Set-Cookie: session=abc', $cache->headers());
+    }
+
     public function testNoRefreshTriggeredWhenCacheHasNoTimestamp()
     {
         $request = $this->buildRequest('/users', 'GET');

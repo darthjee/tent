@@ -5,12 +5,27 @@ namespace Tent\Tests\Middlewares\FileCacheMiddleware;
 require_once __DIR__ . '/../../../../support/loader.php';
 
 use PHPUnit\Framework\TestCase;
+use Tent\Content\AllowedHeaderFilter;
+use Tent\Content\ExcludedHeaderFilter;
+use Tent\Log\Logger;
+use Tent\Log\LoggerInstance;
+use Tent\Log\NullLoggerInstance;
 use Tent\Middlewares\FileCacheMiddleware;
 use Tent\Cache\QueryRequestHasher;
 use Tent\Tests\Support\Cache\DummyRequestHasher;
 
 class FileCacheMiddlewareBuildTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        Logger::setInstance(new NullLoggerInstance());
+    }
+
+    protected function tearDown(): void
+    {
+        Logger::setInstance(new LoggerInstance());
+    }
+
     public function testBuildWithLocationAttribute()
     {
         $middleware = FileCacheMiddleware::build(['location' => '/tmp/cache']);
@@ -85,6 +100,91 @@ class FileCacheMiddlewareBuildTest extends TestCase
         $middleware = FileCacheMiddleware::build(['location' => '/tmp/cache']);
 
         $this->assertNull($this->getRequireCacheHeader($middleware));
+    }
+
+    public function testBuildDefaultsToDenyModeWithDefaultExcludedHeadersWhenOmitted()
+    {
+        $middleware = FileCacheMiddleware::build(['location' => '/tmp/cache']);
+
+        $filter = $this->getHeaderFilter($middleware);
+        $this->assertInstanceOf(ExcludedHeaderFilter::class, $filter);
+
+        $response = new \Tent\Models\Response(['headers' => ['Set-Cookie: a=1', 'Content-Type: text/plain']]);
+        $this->assertEquals(['Content-Type: text/plain'], $filter->filter($response)->headers());
+    }
+
+    public function testBuildWithExcludedHeadersAttributeOverridesDefaultList()
+    {
+        $middleware = FileCacheMiddleware::build([
+            'location' => '/tmp/cache',
+            'excluded_headers' => ['X-Custom'],
+        ]);
+
+        $filter = $this->getHeaderFilter($middleware);
+        $response = new \Tent\Models\Response([
+            'headers' => ['Set-Cookie: a=1', 'X-Custom: 1', 'Content-Type: text/plain'],
+        ]);
+        $this->assertEquals(
+            ['Set-Cookie: a=1', 'Content-Type: text/plain'],
+            $filter->filter($response)->headers()
+        );
+    }
+
+    public function testBuildWithAdditionalExcludedHeadersAttributeMergesOnTopOfDefaults()
+    {
+        $middleware = FileCacheMiddleware::build([
+            'location' => '/tmp/cache',
+            'additional_excluded_headers' => ['X-Custom'],
+        ]);
+
+        $filter = $this->getHeaderFilter($middleware);
+        $response = new \Tent\Models\Response([
+            'headers' => ['Set-Cookie: a=1', 'X-Custom: 1', 'Content-Type: text/plain'],
+        ]);
+        $this->assertEquals(['Content-Type: text/plain'], $filter->filter($response)->headers());
+    }
+
+    public function testBuildWithAllowModeAndAllowedHeadersAttribute()
+    {
+        $middleware = FileCacheMiddleware::build([
+            'location' => '/tmp/cache',
+            'mode' => 'allow',
+            'allowed_headers' => ['Content-Type'],
+        ]);
+
+        $filter = $this->getHeaderFilter($middleware);
+        $this->assertInstanceOf(AllowedHeaderFilter::class, $filter);
+
+        $response = new \Tent\Models\Response(['headers' => ['Set-Cookie: a=1', 'Content-Type: text/plain']]);
+        $this->assertEquals(['Content-Type: text/plain'], $filter->filter($response)->headers());
+    }
+
+    public function testBuildWithAllowModeAndMissingAllowedHeadersThrows()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        FileCacheMiddleware::build([
+            'location' => '/tmp/cache',
+            'mode' => 'allow',
+        ]);
+    }
+
+    public function testBuildWithInvalidModeThrows()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        FileCacheMiddleware::build([
+            'location' => '/tmp/cache',
+            'mode' => 'invalid',
+        ]);
+    }
+
+    private function getHeaderFilter(FileCacheMiddleware $middleware)
+    {
+        $reflection = new \ReflectionClass($middleware);
+        $property = $reflection->getProperty('headerFilter');
+        $property->setAccessible(true);
+        return $property->getValue($middleware);
     }
 
     private function getRequestHasher(FileCacheMiddleware $middleware)
