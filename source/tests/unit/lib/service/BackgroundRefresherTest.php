@@ -6,6 +6,7 @@ require_once __DIR__ . '/../../../support/loader.php';
 
 use PHPUnit\Framework\TestCase;
 use Tent\Service\BackgroundRefresher;
+use Tent\Content\ExcludedHeaderFilter;
 use Tent\Http\HttpClientInterface;
 use Tent\Log\Logger;
 use Tent\Log\LoggerInstance;
@@ -54,6 +55,33 @@ class BackgroundRefresherTest extends TestCase
         $this->assertEquals('fresh body', $this->cache->content());
         $this->assertContains('X-Test: 1', $this->cache->headers());
         $this->assertEquals(200, $this->cache->httpCode());
+    }
+
+    public function testRunStripsHeadersMatchingConfiguredHeaderFilter()
+    {
+        $this->request = $this->buildRequest('/users', 'GET');
+        $this->cache = new FileCache($this->request, $this->location);
+        $this->storeStaleCache('stale body');
+
+        $httpClient = $this->createMock(HttpClientInterface::class);
+        $httpClient->method('request')
+            ->willReturn([
+                'body' => 'fresh body',
+                'httpCode' => 200,
+                'headers' => ['X-Test: 1', 'Set-Cookie: session=abc'],
+            ]);
+
+        $refresher = new BackgroundRefresher(
+            $this->request,
+            $this->cache,
+            'http://api:80',
+            $httpClient,
+            new ExcludedHeaderFilter(['Set-Cookie'])
+        );
+        $refresher->run();
+
+        $this->assertContains('X-Test: 1', $this->cache->headers());
+        $this->assertNotContains('Set-Cookie: session=abc', $this->cache->headers());
     }
 
     public function testRunUpdatesTheStoredTimestamp()

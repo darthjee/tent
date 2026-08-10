@@ -9,7 +9,11 @@ use PHPUnit\Framework\TestCase;
 use Tent\Service\ResponseCacher;
 use Tent\Models\Response;
 use Tent\Models\ProcessingRequest;
+use Tent\Content\ExcludedHeaderFilter;
 use Tent\Content\FileCache;
+use Tent\Log\Logger;
+use Tent\Log\LoggerInstance;
+use Tent\Log\NullLoggerInstance;
 use Tent\Models\FolderLocation;
 use Tent\Utils\CacheFilePath;
 use Tent\Tests\Support\Utils\FileSystemUtils;
@@ -27,11 +31,13 @@ class ResponseCacherTest extends TestCase
         $this->cacheDir = sys_get_temp_dir() . '/response_cacher_test_' . uniqid();
         mkdir($this->cacheDir);
         $this->location = new FolderLocation($this->cacheDir);
+        Logger::setInstance(new NullLoggerInstance());
     }
 
     protected function tearDown(): void
     {
         FileSystemUtils::removeDirRecursive($this->cacheDir);
+        Logger::setInstance(new LoggerInstance());
     }
 
     public function testProcessStoresCache()
@@ -78,6 +84,35 @@ class ResponseCacherTest extends TestCase
         $this->assertEquals('original body', file_get_contents($bodyFile));
         $meta = json_decode(file_get_contents($metaFile), true);
         $this->assertEquals(["Header1: original", "Header2: value"], $meta['headers']);
+    }
+
+    public function testProcessStoresFilteredHeadersWhenHeaderFilterConfigured()
+    {
+        $response = $this->buildResponse(200);
+        $response->setHeaders(array_merge($this->headers, ['Set-Cookie: session=abc']));
+        $cache = new FileCache($this->request, $this->location);
+
+        $cacher = new ResponseCacher($cache, $response, new ExcludedHeaderFilter(['Set-Cookie']));
+        $cacher->process();
+
+        $this->assertTrue($cache->exists());
+        foreach ($this->headers as $header) {
+            $this->assertContains($header, $cache->headers());
+        }
+        $this->assertNotContains('Set-Cookie: session=abc', $cache->headers());
+    }
+
+    public function testProcessStoresUnfilteredHeadersWhenHeaderFilterIsNull()
+    {
+        $response = $this->buildResponse(200);
+        $response->setHeaders(array_merge($this->headers, ['Set-Cookie: session=abc']));
+        $cache = new FileCache($this->request, $this->location);
+
+        $cacher = new ResponseCacher($cache, $response);
+        $cacher->process();
+
+        $this->assertTrue($cache->exists());
+        $this->assertContains('Set-Cookie: session=abc', $cache->headers());
     }
 
     private function buildResponse(int $httpCode)
