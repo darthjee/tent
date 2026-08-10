@@ -12,6 +12,9 @@ use Tent\Tests\Support\Utils\FileSystemUtils;
 use Tent\Models\FolderLocation;
 use Tent\Content\FileCache;
 use Tent\Http\HttpClientInterface;
+use Tent\Log\Logger;
+use Tent\Log\LoggerInstance;
+use Tent\Log\NullLoggerInstance;
 
 class DefaultProxyRequestHandlerCachedTest extends TestCase
 {
@@ -30,11 +33,13 @@ class DefaultProxyRequestHandlerCachedTest extends TestCase
     {
         $this->cacheDir = sys_get_temp_dir() . '/default_proxy_handler_test_' . uniqid();
         mkdir($this->cacheDir);
+        Logger::setInstance(new NullLoggerInstance());
     }
 
     protected function tearDown(): void
     {
         FileSystemUtils::removeDirRecursive($this->cacheDir);
+        Logger::setInstance(new LoggerInstance());
     }
 
     public function testHandleRequestBuildsCorrectUrlWithCache()
@@ -186,6 +191,40 @@ class DefaultProxyRequestHandlerCachedTest extends TestCase
         $location = new FolderLocation($this->cacheDir);
         $cache = new FileCache($this->request, $location);
         $this->assertTrue($cache->exists());
+    }
+
+    public function testHandleRequestStripsDefaultDangerousHeadersFromCacheStorage()
+    {
+        $this->initVariables();
+
+        $httpClient = $this->createMock(HttpClientInterface::class);
+        $httpClient->expects($this->once())
+            ->method('request')
+            ->willReturn([
+                'body' => 'upstream body',
+                'httpCode' => 200,
+                'headers' => ['Content-Type: text/plain', 'Set-Cookie: session=abc']
+            ]);
+
+        $handler = DefaultProxyRequestHandler::build([
+            'host' => $this->baseUrl,
+            'cache' => $this->cacheDir,
+            'cacheCodes' => ['2xx'],
+        ]);
+
+        $reflection = new \ReflectionClass($handler);
+        $property = $reflection->getParentClass()->getProperty('httpClient');
+        $property->setAccessible(true);
+        $property->setValue($handler, $httpClient);
+
+        $response = $handler->handleRequest($this->request);
+
+        $this->assertContains('Set-Cookie: session=abc', $response->headers());
+
+        $location = new FolderLocation($this->cacheDir);
+        $cache = new FileCache($this->request, $location);
+        $this->assertTrue($cache->exists());
+        $this->assertNotContains('Set-Cookie: session=abc', $cache->headers());
     }
 
     public function testHandleRequestDoesNotCacheUpstreamResponseWhenRequireCacheHeaderIsMissing()

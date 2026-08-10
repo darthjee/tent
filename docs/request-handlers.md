@@ -60,6 +60,10 @@ It automatically adds:
 | `skip_cache_header` | `string` | No | — | Request header name that bypasses cache read/write when present |
 | `require_cache_header` | `string` | No | — | Response header name required for a response to be cached (checked on the response only) |
 | `filter_query_params` | `array` | No | — (middleware not added) | Filters incoming query params; see `filter_query_params` example below |
+| `mode` | `string` | No | `'deny'` | Either `'deny'` or `'allow'`, controlling how the header-filtering options below are interpreted. Invalid values throw `\InvalidArgumentException` |
+| `excluded_headers` | `array` | No | `Set-Cookie`, `Set-Cookie2`, `WWW-Authenticate`, `Proxy-Authenticate` | *(deny mode)* Full override of the headers stripped from cache storage |
+| `additional_excluded_headers` | `array` | No | — | *(deny mode)* Always merged on top of the resolved `excluded_headers` list |
+| `allowed_headers` | `array` | No | — | *(allow mode)* Explicit, complete list of the only headers kept in cache storage. Required and non-empty when `mode` is `'allow'` |
 
 ### Example: Default proxy with built-in cache
 
@@ -178,6 +182,45 @@ Configuration::buildRule([
 ```
 
 `filter_query_params` is passed straight through to `FilterQueryParamsMiddleware::build()`. Its `mode` can be `'allow'` (default — only the listed `params` are kept) or `'deny'` (the listed `params` are removed and everything else is kept); any other value throws `\InvalidArgumentException`. Filtering runs **before** the cache middleware, so the cache key (via `QueryRequestHasher`) reflects the already-filtered query string.
+
+### Example: Exclude headers from cache storage
+
+Out of the box, with zero configuration, a curated list of dangerous headers (`Set-Cookie`, `Set-Cookie2`, `WWW-Authenticate`, `Proxy-Authenticate`) is never stored in the cache — this prevents a session cookie (or similar) received by one client from being replayed to a different client on a future cache hit.
+
+```php
+Configuration::buildRule([
+    'handler' => [
+        'type' => 'default_proxy',
+        'host' => 'http://api:80',
+        'cache' => './cache/api',
+        'additional_excluded_headers' => ['X-Internal-Token']
+    ],
+    'matchers' => [
+        ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact']
+    ]
+]);
+```
+
+`additional_excluded_headers` is always merged on top of the resolved excluded-headers list (`excluded_headers ?? Tent\Content\ExcludedHeaderFilter::DEFAULT_EXCLUDED_HEADERS`). Passing `excluded_headers: []` explicitly disables all default protection — **this reintroduces the cross-client header replay risk the defaults exist to prevent**, so only do this if you have another way of keeping dangerous headers out of the response.
+
+```php
+Configuration::buildRule([
+    'handler' => [
+        'type' => 'default_proxy',
+        'host' => 'http://api:80',
+        'cache' => './cache/api',
+        'mode' => 'allow',
+        'allowed_headers' => ['Content-Type', 'Cache-Control']
+    ],
+    'matchers' => [
+        ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact']
+    ]
+]);
+```
+
+With `mode: 'allow'`, `allowed_headers` becomes the explicit, complete list of the only headers kept in cache storage — everything else is stripped. `allowed_headers` is required and must be non-empty in this mode; an empty/missing list throws `\InvalidArgumentException` (an empty allowlist would silently strip every header). Note that `skip_cache_header`/`require_cache_header` gate whether a response is cached **at all**, while `mode`/`excluded_headers`/`additional_excluded_headers`/`allowed_headers` instead control which individual headers are stripped from what gets stored once a response is being cached — the two option groups are independent and can be combined freely.
+
+`Tent\Middlewares\CacheStalenessMiddleware`'s background-refresh writes accept the same four options, so they should normally be configured to match `FileCacheMiddleware`'s configuration for the same `location`.
 
 ---
 

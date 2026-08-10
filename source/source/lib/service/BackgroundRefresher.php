@@ -3,6 +3,7 @@
 namespace Tent\Service;
 
 use Tent\Content\FileCache;
+use Tent\Content\HeaderFilter;
 use Tent\Http\HttpClientInterface;
 use Tent\Log\Logger;
 use Tent\Models\RequestInterface;
@@ -48,21 +49,33 @@ class BackgroundRefresher
     private HttpClientInterface $httpClient;
 
     /**
-     * @param RequestInterface    $request    The request to replay against the upstream server.
-     * @param FileCache           $cache      The cache entry to refresh.
-     * @param string              $host       Base URL of the upstream server (e.g. 'http://api:80').
-     * @param HttpClientInterface $httpClient The HTTP client used to perform the upstream request.
+     * @var HeaderFilter|null Optional filter applied to the refreshed response's headers
+     *                        before it is re-stored in cache.
+     */
+    private ?HeaderFilter $headerFilter;
+
+    /**
+     * @param RequestInterface    $request      The request to replay against the upstream server.
+     * @param FileCache           $cache        The cache entry to refresh.
+     * @param string              $host         Base URL of the upstream server (e.g. 'http://api:80').
+     * @param HttpClientInterface $httpClient   The HTTP client used to perform the upstream request.
+     * @param HeaderFilter|null   $headerFilter Optional filter applied to the refreshed response's
+     *                                          headers before it is re-stored in cache. Should
+     *                                          normally match the `HeaderFilter` configured on the
+     *                                          `FileCacheMiddleware` for the same cache location.
      */
     public function __construct(
         RequestInterface $request,
         FileCache $cache,
         string $host,
-        HttpClientInterface $httpClient
+        HttpClientInterface $httpClient,
+        ?HeaderFilter $headerFilter = null
     ) {
         $this->request = $request;
         $this->cache = $cache;
         $this->host = rtrim($host, '/');
         $this->httpClient = $httpClient;
+        $this->headerFilter = $headerFilter;
     }
 
     /**
@@ -130,7 +143,7 @@ class BackgroundRefresher
     private function replaceCache(Response $response): void
     {
         $this->cache->remove();
-        (new ResponseCacher($this->cache, $response))->process();
+        (new ResponseCacher($this->cache, $response, $this->headerFilter))->process();
     }
 
     /**

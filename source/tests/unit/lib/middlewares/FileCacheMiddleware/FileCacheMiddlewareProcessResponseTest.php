@@ -11,6 +11,9 @@ use Tent\Models\FolderLocation;
 use Tent\Models\Response;
 use Tent\Models\ProcessingRequest;
 use Tent\Content\FileCache;
+use Tent\Log\Logger;
+use Tent\Log\LoggerInstance;
+use Tent\Log\NullLoggerInstance;
 use Tent\Utils\CacheFilePath;
 use Tent\Tests\Support\Utils\FileSystemUtils;
 
@@ -28,11 +31,13 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
         $this->cacheDir = sys_get_temp_dir() . '/filecache_middleware_test_' . uniqid();
         mkdir($this->cacheDir);
         $this->location = new FolderLocation($this->cacheDir);
+        Logger::setInstance(new NullLoggerInstance());
     }
 
     protected function tearDown(): void
     {
         FileSystemUtils::removeDirRecursive($this->cacheDir);
+        Logger::setInstance(new LoggerInstance());
     }
 
     public function testProcessResponseStoresCache()
@@ -313,6 +318,93 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
 
         $this->cache = new FileCache($this->request, $this->location);
         $this->assertTrue($this->cache->exists());
+    }
+
+    public function testProcessResponseStripsDefaultDangerousHeadersWithZeroConfig()
+    {
+        $response = $this->buildResponse(200, [], ['Set-Cookie: session=abc']);
+
+        $middleware = $this->buildMiddleware();
+        $middleware->processResponse($response);
+
+        $this->cache = new FileCache($this->request, $this->location);
+        $this->assertTrue($this->cache->exists());
+        $this->assertNotContains('Set-Cookie: session=abc', $this->cache->headers());
+    }
+
+    public function testProcessResponseStripsHeadersConfiguredViaExcludedHeaders()
+    {
+        $response = $this->buildResponse(200, [], ['X-Secret: value']);
+
+        $middleware = FileCacheMiddleware::build([
+            'location' => $this->cacheDir,
+            'excluded_headers' => ['X-Secret'],
+            'matchers' => [
+                [
+                    'class' => \Tent\Matchers\StatusCodeMatcher::class,
+                    'httpCodes' => [200],
+                ]
+            ],
+        ]);
+        $middleware->processResponse($response);
+
+        $this->cache = new FileCache($this->request, $this->location);
+        $this->assertNotContains('X-Secret: value', $this->cache->headers());
+    }
+
+    public function testProcessResponseStripsHeadersConfiguredViaAdditionalExcludedHeaders()
+    {
+        $response = $this->buildResponse(200, [], ['Set-Cookie: session=abc', 'X-Secret: value']);
+
+        $middleware = FileCacheMiddleware::build([
+            'location' => $this->cacheDir,
+            'additional_excluded_headers' => ['X-Secret'],
+            'matchers' => [
+                [
+                    'class' => \Tent\Matchers\StatusCodeMatcher::class,
+                    'httpCodes' => [200],
+                ]
+            ],
+        ]);
+        $middleware->processResponse($response);
+
+        $this->cache = new FileCache($this->request, $this->location);
+        $this->assertNotContains('Set-Cookie: session=abc', $this->cache->headers());
+        $this->assertNotContains('X-Secret: value', $this->cache->headers());
+    }
+
+    public function testProcessResponseKeepsOnlyAllowedHeadersWhenModeIsAllow()
+    {
+        $response = $this->buildResponse(200, [], ['Set-Cookie: session=abc']);
+
+        $middleware = FileCacheMiddleware::build([
+            'location' => $this->cacheDir,
+            'mode' => 'allow',
+            'allowed_headers' => ['Content-Type'],
+            'matchers' => [
+                [
+                    'class' => \Tent\Matchers\StatusCodeMatcher::class,
+                    'httpCodes' => [200],
+                ]
+            ],
+        ]);
+        $middleware->processResponse($response);
+
+        $this->cache = new FileCache($this->request, $this->location);
+        $this->assertContains('Content-Type: text/plain', $this->cache->headers());
+        $this->assertNotContains('Content-Length: 11', $this->cache->headers());
+        $this->assertNotContains('Set-Cookie: session=abc', $this->cache->headers());
+    }
+
+    public function testProcessResponseReturnsUnfilteredResponseToTheCaller()
+    {
+        $response = $this->buildResponse(200, [], ['Set-Cookie: session=abc']);
+
+        $middleware = $this->buildMiddleware();
+        $result = $middleware->processResponse($response);
+
+        $this->assertContains('Set-Cookie: session=abc', $result->headers());
+        $this->assertSame($response, $result);
     }
 
     private function buildResponse(int $httpCode, array $requestHeaders = [], array $responseHeaders = [])

@@ -5,6 +5,8 @@ namespace Tent\Tests\RequestHandlers\DefaultProxyRequestHandler;
 require_once __DIR__ . '/../../../../support/loader.php';
 
 use PHPUnit\Framework\TestCase;
+use Tent\Content\AllowedHeaderFilter;
+use Tent\Content\ExcludedHeaderFilter;
 use Tent\RequestHandlers\DefaultProxyRequestHandler;
 use Tent\RequestHandlers\RequestHandler;
 use Tent\Middlewares\FileCacheMiddleware;
@@ -16,6 +18,9 @@ use Tent\Models\FolderLocation;
 use Tent\Content\FileCache;
 use Tent\Models\Response;
 use Tent\Http\HttpClientInterface;
+use Tent\Log\Logger;
+use Tent\Log\LoggerInstance;
+use Tent\Log\NullLoggerInstance;
 use Tent\Tests\Support\Cache\DummyRequestHasher;
 
 class DefaultProxyRequestHandlerBuildTest extends TestCase
@@ -26,11 +31,13 @@ class DefaultProxyRequestHandlerBuildTest extends TestCase
     {
         $this->cacheDir = sys_get_temp_dir() . '/default_proxy_build_test_' . uniqid();
         mkdir($this->cacheDir);
+        Logger::setInstance(new NullLoggerInstance());
     }
 
     protected function tearDown(): void
     {
         FileSystemUtils::removeDirRecursive($this->cacheDir);
+        Logger::setInstance(new LoggerInstance());
     }
 
     public function testBuildWithCacheFalseDoesNotAddCacheMiddleware()
@@ -202,6 +209,70 @@ class DefaultProxyRequestHandlerBuildTest extends TestCase
         $this->assertSame('X-Cache-Allow', $property->getValue($fileCacheMiddleware));
     }
 
+    public function testBuildDefaultsToDenyModeWithDefaultExcludedHeadersOnFileCacheMiddleware()
+    {
+        $handler = DefaultProxyRequestHandler::build([
+            'host' => 'http://backend:80',
+            'cache' => $this->cacheDir,
+        ]);
+
+        $filter = $this->getHeaderFilter($handler);
+        $this->assertInstanceOf(ExcludedHeaderFilter::class, $filter);
+    }
+
+    public function testBuildWithExcludedHeadersPassesThroughToFileCacheMiddleware()
+    {
+        $handler = DefaultProxyRequestHandler::build([
+            'host' => 'http://backend:80',
+            'cache' => $this->cacheDir,
+            'excluded_headers' => ['X-Custom'],
+        ]);
+
+        $filter = $this->getHeaderFilter($handler);
+        $response = new Response(['headers' => ['Set-Cookie: a=1', 'X-Custom: 1', 'Content-Type: text/plain']]);
+        $this->assertEquals(
+            ['Set-Cookie: a=1', 'Content-Type: text/plain'],
+            $filter->filter($response)->headers()
+        );
+    }
+
+    public function testBuildWithAdditionalExcludedHeadersPassesThroughToFileCacheMiddleware()
+    {
+        $handler = DefaultProxyRequestHandler::build([
+            'host' => 'http://backend:80',
+            'cache' => $this->cacheDir,
+            'additional_excluded_headers' => ['X-Custom'],
+        ]);
+
+        $filter = $this->getHeaderFilter($handler);
+        $response = new Response(['headers' => ['Set-Cookie: a=1', 'X-Custom: 1', 'Content-Type: text/plain']]);
+        $this->assertEquals(['Content-Type: text/plain'], $filter->filter($response)->headers());
+    }
+
+    public function testBuildWithAllowModeAndAllowedHeadersPassesThroughToFileCacheMiddleware()
+    {
+        $handler = DefaultProxyRequestHandler::build([
+            'host' => 'http://backend:80',
+            'cache' => $this->cacheDir,
+            'mode' => 'allow',
+            'allowed_headers' => ['Content-Type'],
+        ]);
+
+        $filter = $this->getHeaderFilter($handler);
+        $this->assertInstanceOf(AllowedHeaderFilter::class, $filter);
+    }
+
+    public function testBuildWithAllowModeAndMissingAllowedHeadersThrows()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        DefaultProxyRequestHandler::build([
+            'host' => 'http://backend:80',
+            'cache' => $this->cacheDir,
+            'mode' => 'allow',
+        ]);
+    }
+
     public function testBuildWithoutFilterQueryParamsDoesNotAddMiddleware()
     {
         $handler = DefaultProxyRequestHandler::build([
@@ -307,5 +378,24 @@ class DefaultProxyRequestHandlerBuildTest extends TestCase
         $property = $reflection->getParentClass()->getParentClass()->getProperty('middlewares');
         $property->setAccessible(true);
         return $property->getValue($handler);
+    }
+
+    private function getHeaderFilter(DefaultProxyRequestHandler $handler)
+    {
+        $middlewares = $this->getMiddlewares($handler);
+        $fileCacheMiddleware = null;
+
+        foreach ($middlewares as $middleware) {
+            if ($middleware instanceof FileCacheMiddleware) {
+                $fileCacheMiddleware = $middleware;
+            }
+        }
+
+        $this->assertNotNull($fileCacheMiddleware);
+
+        $reflection = new \ReflectionClass($fileCacheMiddleware);
+        $property = $reflection->getProperty('headerFilter');
+        $property->setAccessible(true);
+        return $property->getValue($fileCacheMiddleware);
     }
 }
