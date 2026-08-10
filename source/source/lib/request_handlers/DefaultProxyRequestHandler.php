@@ -81,6 +81,21 @@ use Tent\Cache\RequestHasher;
  *     ]
  * ]);
  * ```
+ *
+ * @example Configuration excluding additional headers from cache storage (in addition to
+ * the built-in defaults — `Set-Cookie`, `Set-Cookie2`, `WWW-Authenticate`, `Proxy-Authenticate`)
+ * ```php
+ * Configuration::buildRule([
+ *     'handler' => [
+ *         'type' => 'default_proxy',
+ *         'host' => 'http://api:80',
+ *         'additional_excluded_headers' => ['X-Internal-Token']
+ *     ],
+ *     'matchers' => [
+ *          ['method' => 'GET', 'uri' => '.json', 'type' => 'ends_with']
+ *     ]
+ * ]);
+ * ```
  */
 class DefaultProxyRequestHandler extends ProxyRequestHandler
 {
@@ -115,21 +130,50 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
     private ?string $requireCacheHeader;
 
     /**
+     * @var array|null Deny mode: full override of the excluded headers list. Null defaults to
+     *                 `\Tent\Content\ExcludedHeaderFilter::DEFAULT_EXCLUDED_HEADERS`.
+     */
+    private ?array $excludedHeaders;
+
+    /**
+     * @var array|null Deny mode: merged on top of the resolved excluded headers list.
+     */
+    private ?array $additionalExcludedHeaders;
+
+    /**
+     * @var array|null Allow mode: explicit, complete list of the only headers kept in cache storage.
+     */
+    private ?array $allowedHeaders;
+
+    /**
+     * @var string Either 'deny' (default) or 'allow'.
+     */
+    private string $mode;
+
+    /**
      * Constructs a DefaultProxyRequestHandler.
      *
-     * @param string                   $host               The target host to proxy requests to.
-     * @param string|false             $cache              Cache directory, or false to disable caching.
-     *   Defaults to './cache'.
-     * @param array                    $cacheCodes         HTTP status codes eligible for caching.
-     *   Defaults to ['2xx'].
-     * @param HttpClientInterface|null $httpClient         Optional HTTP client.
-     * @param string|null              $skipCacheHeader    Header name that disables cache read/write when present.
-     * @param RequestHasher|null       $requestHasher      Hasher used to derive the cache-key hash. Defaults to
-     *   {@see \Tent\Cache\QueryRequestHasher}, resolved by `FileCacheMiddleware`.
-     * @param array|null               $filterQueryParams  Configuration passed through to
-     *   `FilterQueryParamsMiddleware::build()`. Null disables query params filtering.
-     * @param string|null              $requireCacheHeader Header name that must be present in the response
-     *   for it to be cached.
+     * @param string                   $host                      The target host to proxy requests to.
+     * @param string|false             $cache                     Cache directory, or false to disable caching.
+     *          Defaults to './cache'.
+     * @param array                    $cacheCodes                HTTP status codes eligible for caching.
+     *          Defaults to ['2xx'].
+     * @param HttpClientInterface|null $httpClient                Optional HTTP client.
+     * @param string|null              $skipCacheHeader           Header name that disables cache read/write
+     *          when present.
+     * @param RequestHasher|null       $requestHasher             Hasher used to derive the cache-key hash. Defaults to
+     *          {@see \Tent\Cache\QueryRequestHasher}, resolved by `FileCacheMiddleware`.
+     * @param array|null               $filterQueryParams         Configuration passed through to
+     *          `FilterQueryParamsMiddleware::build()`. Null disables query params filtering.
+     * @param string|null              $requireCacheHeader        Header name that must be present in the response
+     *          for it to be cached.
+     * @param array|null               $excludedHeaders           Deny mode: full override of the excluded headers
+     *          list.
+     * @param array|null               $additionalExcludedHeaders Deny mode: merged on top of the resolved
+     *   excluded headers list.
+     * @param array|null               $allowedHeaders            Allow mode: explicit, complete list of the only
+     *          headers kept in cache storage.
+     * @param string                   $mode                      Either 'deny' (default) or 'allow'.
      */
     public function __construct(
         string $host,
@@ -139,7 +183,11 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
         ?string $skipCacheHeader = null,
         ?RequestHasher $requestHasher = null,
         ?array $filterQueryParams = null,
-        ?string $requireCacheHeader = null
+        ?string $requireCacheHeader = null,
+        ?array $excludedHeaders = null,
+        ?array $additionalExcludedHeaders = null,
+        ?array $allowedHeaders = null,
+        string $mode = 'deny'
     ) {
         parent::__construct($host, $httpClient);
         $this->cache = $cache;
@@ -148,6 +196,10 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
         $this->requestHasher = $requestHasher;
         $this->filterQueryParams = $filterQueryParams;
         $this->requireCacheHeader = $requireCacheHeader;
+        $this->excludedHeaders = $excludedHeaders;
+        $this->additionalExcludedHeaders = $additionalExcludedHeaders;
+        $this->allowedHeaders = $allowedHeaders;
+        $this->mode = $mode;
         $this->initializeMiddlewares();
     }
 
@@ -165,8 +217,17 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
      *     `FilterQueryParamsMiddleware::build()`. Defaults to null (disabled).
      *   - 'require_cache_header' (string): Header name that must be present in the response for
      *     it to be cached.
+     *   - 'mode' (string): Either 'deny' (default) or 'allow', controlling how the header-filtering
+     *     options below are interpreted.
+     *   - 'excluded_headers' (array): Deny mode: full override of the excluded headers list.
+     *     Defaults to `\Tent\Content\ExcludedHeaderFilter::DEFAULT_EXCLUDED_HEADERS` when omitted.
+     *   - 'additional_excluded_headers' (array): Deny mode: always merged on top of the resolved
+     *     excluded headers list.
+     *   - 'allowed_headers' (array): Allow mode: explicit, complete list of the only headers kept
+     *     in cache storage. Required and non-empty when 'mode' is 'allow'.
      * @return self
-     * @throws \InvalidArgumentException If 'host' is missing.
+     * @throws \InvalidArgumentException If 'host' is missing, 'mode' is invalid, or 'allow' mode
+     *   has an empty/missing 'allowed_headers'.
      */
     public static function build(array $params): self
     {
@@ -180,6 +241,10 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
         $requestHasher = self::buildRequestHasher($params);
         $filterQueryParams = $params['filter_query_params'] ?? null;
         $requireCacheHeader = $params['require_cache_header'] ?? null;
+        $excludedHeaders = $params['excluded_headers'] ?? null;
+        $additionalExcludedHeaders = $params['additional_excluded_headers'] ?? null;
+        $allowedHeaders = $params['allowed_headers'] ?? null;
+        $mode = $params['mode'] ?? 'deny';
         return new self(
             $host,
             $cache,
@@ -188,7 +253,11 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
             $skipCacheHeader,
             $requestHasher,
             $filterQueryParams,
-            $requireCacheHeader
+            $requireCacheHeader,
+            $excludedHeaders,
+            $additionalExcludedHeaders,
+            $allowedHeaders,
+            $mode
         );
     }
 
@@ -211,7 +280,11 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
                 [new StatusCodeMatcher($this->cacheCodes)],
                 $this->skipCacheHeader,
                 $this->requestHasher,
-                $this->requireCacheHeader
+                $this->requireCacheHeader,
+                $this->excludedHeaders,
+                $this->additionalExcludedHeaders,
+                $this->allowedHeaders,
+                $this->mode
             ));
         }
     }
