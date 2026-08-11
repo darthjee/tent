@@ -96,6 +96,47 @@ Configuration::buildRule([
 
 If both are configured and both headers are found in the response, the response is **not** cached — `skip_cache_header` wins.
 
+## Filter headers stored in cache
+
+With zero configuration, a curated list of dangerous headers (`Set-Cookie`, `Set-Cookie2`, `WWW-Authenticate`, `Proxy-Authenticate`) is never written to cache. This stops a session cookie (or similar) received by one client from being replayed to a different client on a future cache hit.
+
+To strip additional headers on top of the defaults, configure `additional_excluded_headers`:
+
+```php
+Configuration::buildRule([
+    'handler' => [
+        'type'                         => 'default_proxy',
+        'host'                         => 'http://api:3000',
+        'cache'                        => './cache/api',
+        'additional_excluded_headers'  => ['X-Internal-Token']
+    ],
+    'matchers' => [
+        ['method' => 'GET', 'uri' => '/api/', 'type' => 'begins_with']
+    ]
+]);
+```
+
+To keep only an explicit set of headers instead, switch to allow mode with `mode: 'allow'` and `allowed_headers`:
+
+```php
+Configuration::buildRule([
+    'handler' => [
+        'type'            => 'default_proxy',
+        'host'            => 'http://api:3000',
+        'cache'           => './cache/api',
+        'mode'            => 'allow',
+        'allowed_headers' => ['Content-Type', 'Cache-Control']
+    ],
+    'matchers' => [
+        ['method' => 'GET', 'uri' => '/api/', 'type' => 'begins_with']
+    ]
+]);
+```
+
+`skip_cache_header`/`require_cache_header` decide **whether** a response is cached at all; `mode`/`excluded_headers`/`additional_excluded_headers`/`allowed_headers` decide which headers are stripped from what gets stored once a response is being cached — the two are independent and can be combined freely. See [Request Handlers](../../request-handlers.md#defaultproxyrequesthandler-default_proxy) for the full option table, including how `excluded_headers` fully overrides the default list and why an empty `allowed_headers` throws.
+
+If you also use `CacheStalenessMiddleware` (see [Middlewares](./middlewares.md)) for the same `location`, configure it with the same header-filtering options — its background-refresh writes go through the same filter and should stay consistent with `FileCacheMiddleware`'s configuration.
+
 ## Manual `FileCacheMiddleware` setup
 
 When using `proxy` instead of `default_proxy`, configure `FileCacheMiddleware` explicitly. Place it **before** header middlewares so cached responses are served without forwarding:

@@ -14,7 +14,7 @@
 - [Request Handlers](./tent/request-handlers.md) — `default_proxy`, `proxy`, and `static` handlers, their options, and which one to use for a given scenario.
 - [Host Header and Why It Matters](./tent/host-header.md) — Why the `Host` header must be rewritten when proxying, and how `default_proxy` handles it automatically.
 - [Middlewares](./tent/middlewares.md) — All built-in middlewares (`FileCacheMiddleware`, `CacheCleanupMiddleware`, `FilterQueryParamsMiddleware`, `SetHeadersMiddleware`, `RenameHeaderMiddleware`, `SetPathMiddleware`, `RedirectMiddleware`) with configuration examples.
-- [Cache Configuration](./tent/cache-configuration.md) — Enabling, disabling, customizing, and bypassing the `default_proxy` file cache, plus manual `FileCacheMiddleware` setup.
+- [Cache Configuration](./tent/cache-configuration.md) — Enabling, disabling, customizing, and bypassing the `default_proxy` file cache, filtering which headers are stored in cache, plus manual `FileCacheMiddleware` setup.
 - [Creating Request Hashers](./tent/creating-request-hashers.md) — Plugging in a custom `RequestHasher` to control how `FileCacheMiddleware` derives its cache key.
 - [Frontend Dev Mode Flip](./tent/frontend-dev-mode.md) — Using an environment variable to switch between proxying a live dev server and serving pre-built static files.
 - [Static Files](./tent/static-files.md) — Where to place static assets and how to share a build-output volume with Tent.
