@@ -110,7 +110,7 @@ See [`adding-request-matchers.md`](../adding-request-matchers.md) for how to add
 
 ### Content (`source/source/lib/content/`)
 
-Cache and file abstractions used by `FileCacheMiddleware`: `Cache`, `File`, `FileCache`, and `ResponseContent`.
+Cache and file abstractions used by `FileCacheMiddleware`: `Cache`, `File`, `FileCache`, `ResponseContent`, `HeaderFilter`, `ExcludedHeaderFilter`, `AllowedHeaderFilter`, and `HeaderFilterBuilder`.
 
 ### HTTP Client (`source/source/lib/http/`)
 
