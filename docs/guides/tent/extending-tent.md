@@ -48,9 +48,44 @@ Configuration::buildRule([
 ]);
 ```
 
+## PHP runtime available to extensions
+
+Since `1.0.0`, both `darthjee/tent` and `darthjee/tent-test` ship the `gd` extension (with JPEG and PNG support) and `exif`. Extensions can use them to decode, resize and re-encode uploaded images: `imagecreatefromjpeg`/`imagecreatefrompng`, `imagescale`, `imagejpeg`/`imagepng`.
+
+Phone JPEGs often carry an EXIF `Orientation` flag, and GD ignores it. Read the flag with `exif_read_data()` and apply `imagerotate()` before you resize:
+
+```php
+function loadOrientedJpeg(string $path): \GdImage
+{
+    $image = imagecreatefromjpeg($path);
+    $exif = @exif_read_data($path);
+    $orientation = $exif['Orientation'] ?? 1;
+
+    $angle = match ($orientation) {
+        3 => 180,
+        6 => -90,
+        8 => 90,
+        default => 0,
+    };
+
+    return $angle === 0 ? $image : imagerotate($image, $angle, 0);
+}
+
+$image = loadOrientedJpeg($uploadedPath);
+$thumbnail = imagescale($image, 320);
+imagejpeg($thumbnail, $targetPath, 85);
+```
+
+Upload and memory limits:
+
+- `upload_max_filesize=20M` and `post_max_size=25M` are set in `/usr/local/etc/php/conf.d/tent.ini`. You can't change them with `ini_set()`. To override them, mount or add another `.ini` file in `/usr/local/etc/php/conf.d/`.
+- `memory_limit` stays at PHP's default of `128M`. GD needs about 4–5 bytes per pixel while it decodes an image, so a 12 MP photo takes about 60 MB. Extensions that handle large images should raise the limit with `ini_set('memory_limit', '256M')` or a similar value.
+
+Only JPEG and PNG are guaranteed. Imagick (and the ImageMagick CLI) isn't included, and GD has no WebP, AVIF or FreeType support. The bundled GD can also handle GIF and BMP, but those formats aren't guaranteed.
+
 ## Testing your extension
 
-The production `darthjee/tent` image is deliberately lean — it ships no PHPUnit or other dev tooling, so there is no way to run automated tests against a custom matcher, middleware, or handler using it. Use the separate `darthjee/tent-test` image for that instead.
+The production `darthjee/tent` image is deliberately lean in dev tooling. It ships no PHPUnit or other test tooling, so there is no way to run automated tests against a custom matcher, middleware, or handler using it. Use the separate `darthjee/tent-test` image for that instead.
 
 `darthjee/tent-test` bundles Tent's own source, the full dev-tooling set from its `composer.json` (`phpunit`, `pcov`, `phpcs`, `phpmd`, `phpdocumentor`), and a set of reusable test-support helper classes (`DummyRequestMiddleware`, `QuickResponseMiddleware`, `DummyResponseMiddleware`, `FileSystemUtils`, `RequestToBodyHandler`) under `tests/support/` that you can require from your own test classes. These helpers are adopted as quasi-public API for this purpose and may evolve between Tent versions.
 
