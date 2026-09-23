@@ -1,5 +1,6 @@
 # Use a base image from Dockerfile.tent-base
-FROM darthjee/dev_tent-base:0.0.2
+ARG BASE_SUFFIX=""
+FROM darthjee/dev_tent-base:0.0.3${BASE_SUFFIX}
 
 # Bake in Tent's own source (webroot + core classes) and full require-dev
 # tooling (phpunit, pcov, phpcs, phpmd, phpdocumentor), so extension authors

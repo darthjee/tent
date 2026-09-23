@@ -1,5 +1,6 @@
 # Use a base image from Dockerfile.tent-base
-FROM darthjee/dev_tent-base:0.0.2
+ARG BASE_SUFFIX=""
+FROM darthjee/dev_tent-base:0.0.3${BASE_SUFFIX}
     
 # Copy the project code to the default Apache directory
 COPY --chown=app:app ./composer.* /home/app/app/
