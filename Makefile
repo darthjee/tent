@@ -3,7 +3,7 @@
         ci-ensure-base ci-release-base
 
 PROJECT?=tent
-BASE_VERSION?=0.0.2
+BASE_VERSION?=0.0.3
 VERSION?=0.10.4
 ARCH?=amd64
 MOD?=dev_

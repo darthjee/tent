@@ -13,6 +13,7 @@ EOF
 image_config() {
   local image="$1"
   EXTRA_BUILD_CONTEXT=""
+  BASE_SUFFIX_ARG=""
 
   case "$image" in
     tent)
@@ -28,11 +29,15 @@ image_config() {
       # dockerfiles/tent-test/, outside the "source" build context, so they
       # are wired in as an extra named build context (see build_image()).
       EXTRA_BUILD_CONTEXT="tent-test-assets=dockerfiles/tent-test"
+      # Built FROM darthjee/dev_tent-base; the base tag must carry the same
+      # arch suffix (see build_image()).
+      BASE_SUFFIX_ARG=true
       ;;
     dev_tent)
       DOCKERFILE="dockerfiles/dev_tent/Dockerfile"
       CONTEXT="dev/api"
       IMAGE_NAME="darthjee/dev_tent"
+      BASE_SUFFIX_ARG=true
       ;;
     dev_tent-base)
       DOCKERFILE="dockerfiles/dev_tent-base/Dockerfile"
@@ -78,6 +83,12 @@ build_image() {
 
   if [[ -n "$EXTRA_BUILD_CONTEXT" ]]; then
     cmd+=(--build-context "$EXTRA_BUILD_CONTEXT")
+  fi
+
+  # Images built FROM darthjee/dev_tent-base must use the base matching the
+  # target arch ("" for amd64, "-arm64" for arm64).
+  if [[ -n "$BASE_SUFFIX_ARG" ]]; then
+    cmd+=(--build-arg "BASE_SUFFIX=${ARCH_SUFFIX}")
   fi
 
   cmd+=(
