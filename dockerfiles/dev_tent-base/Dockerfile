@@ -11,13 +11,19 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     libzip-dev \
+    libjpeg62-turbo-dev \
+    libpng-dev \
     telnet \
     $PHPIZE_DEPS \
-    && docker-php-ext-install zip pdo pdo_mysql \
+    && docker-php-ext-configure gd --with-jpeg \
+    && docker-php-ext-install zip pdo pdo_mysql gd exif \
     && pecl install pcov \
     && docker-php-ext-enable pcov; \
     a2enmod rewrite; \
     rm -rf /var/lib/apt/lists/*
+
+# PHP runtime limits for Tent (uploads)
+RUN printf 'upload_max_filesize=20M\npost_max_size=25M\n' > /usr/local/etc/php/conf.d/tent.ini
 
 # Install composer globally
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
