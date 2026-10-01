@@ -11,6 +11,8 @@ use Tent\Exceptions\InvalidFilePathException;
 use Tent\Log\Logger;
 use Tent\Models\MissingResponse;
 use Tent\Models\ForbiddenResponse;
+use Tent\Models\NotModifiedResponse;
+use Tent\Service\ConditionalRequestMatcher;
 use Tent\Service\ResponseContentReader;
 
 /**
@@ -51,6 +53,28 @@ use Tent\Service\ResponseContentReader;
  *     ]
  * ]);
  * ```
+ *
+ * @example Serving files with conditional GET support (ETag / Last-Modified / 304):
+ * ```php
+ * Configuration::buildRule([
+ *     'handler' => [
+ *         'type' => 'static',
+ *         'location' => '/var/www/html/photos',
+ *         'conditional' => true
+ *     ],
+ *     'matchers' => [
+ *         ['method' => 'GET', 'uri' => '/photos', 'type' => 'begins_with']
+ *     ]
+ * ]);
+ * ```
+ *
+ * With `'conditional' => true` (default `false`), `GET` responses carry `ETag`
+ * (a quoted hash of the file size and mtime) and `Last-Modified` headers. When the
+ * request's `If-None-Match` matches the ETag (supporting `*`, lists and weak `W/`
+ * comparison), or, when `If-None-Match` is absent, `If-Modified-Since` is at or after
+ * the file's mtime, a `304 Not Modified` with an empty body is returned without
+ * reading the file. Response middlewares still run on the `304`. `HEAD` and other
+ * methods, as well as `403` / `404` responses, are unchanged.
  */
 class StaticFileHandler extends RequestHandler
 {
@@ -60,26 +84,35 @@ class StaticFileHandler extends RequestHandler
     private FolderLocation $folderLocation;
 
     /**
-     * @param FolderLocation $folderLocation The base directory for static files.
+     * @var boolean Whether to emit validators and answer conditional GETs with 304.
      */
-    public function __construct(FolderLocation $folderLocation)
+    private bool $conditional;
+
+    /**
+     * @param FolderLocation $folderLocation The base directory for static files.
+     * @param boolean        $conditional    Whether to emit ETag / Last-Modified and
+     *                                       answer conditional GETs with 304.
+     */
+    public function __construct(FolderLocation $folderLocation, bool $conditional = false)
     {
         $this->folderLocation = $folderLocation;
+        $this->conditional = $conditional;
     }
 
     /**
      * Builds a StaticFileHandler using named parameters.
      *
      * Example:
-     *   StaticFileHandler::build(['location' => './some_folder'])
+     *   StaticFileHandler::build(['location' => './some_folder', 'conditional' => true])
      *
-     * @param array $params Associative array with key 'location' (string).
+     * @param array $params Associative array with keys 'location' (string) and
+     *                      optional 'conditional' (bool, default false).
      * @return StaticFileHandler
      */
     public static function build(array $params): self
     {
         $folderLocation = new FolderLocation($params['location'] ?? '');
-        return new self($folderLocation);
+        return new self($folderLocation, (bool) ($params['conditional'] ?? false));
     }
 
     /**
@@ -103,6 +136,10 @@ class StaticFileHandler extends RequestHandler
             $file = new File($request->requestPath(), $this->folderLocation);
             $fileReader = new ResponseContentReader($request, $file);
 
+            if ($this->isConditional($request)) {
+                return $this->conditionalResponse($request, $file, $fileReader);
+            }
+
             return $fileReader->getResponse();
         } catch (InvalidFilePathException $e) {
             return new ForbiddenResponse($request);
@@ -113,5 +150,45 @@ class StaticFileHandler extends RequestHandler
             );
             return new MissingResponse($request);
         }
+    }
+
+    /**
+     * Checks whether the conditional flow applies to the request.
+     *
+     * @param RequestInterface $request The incoming HTTP request.
+     * @return boolean True when the option is enabled and the method is GET.
+     */
+    private function isConditional(RequestInterface $request): bool
+    {
+        return $this->conditional && strtoupper((string) $request->requestMethod()) === 'GET';
+    }
+
+    /**
+     * Returns a 304 when the request's validators match the file, otherwise the
+     * regular 200 response with ETag / Last-Modified added.
+     *
+     * @param RequestInterface      $request    The incoming HTTP request.
+     * @param File                  $file       The requested file.
+     * @param ResponseContentReader $fileReader The reader for the file.
+     * @throws InvalidFilePathException If the request path is invalid.
+     * @throws FileNotFoundException If the file does not exist.
+     * @return Response
+     */
+    private function conditionalResponse(
+        RequestInterface $request,
+        File $file,
+        ResponseContentReader $fileReader
+    ): Response {
+        $fileReader->ensureReadable();
+
+        $matcher = new ConditionalRequestMatcher($request, $file->etag(), $file->lastModified());
+        if ($matcher->isNotModified()) {
+            return new NotModifiedResponse($request, $file->validatorHeaders());
+        }
+
+        $response = $fileReader->getResponse();
+        $response->setHeaders(array_merge($response->headers(), $file->validatorHeaders()));
+
+        return $response;
     }
 }

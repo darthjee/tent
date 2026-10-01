@@ -308,6 +308,7 @@ It validates paths and returns:
 | Option | Type | Required | Default | Description |
 |---|---|---|---|---|
 | `location` | `string` | Yes | `''` | Base folder for static files |
+| `conditional` | `bool` | No | `false` | Emit `ETag` / `Last-Modified` and answer conditional `GET` requests with `304 Not Modified` |
 
 ### Example: Serve static frontend files
 
@@ -342,6 +343,62 @@ Configuration::buildRule([
     ]
 ]);
 ```
+
+### Conditional requests
+
+With `'conditional' => true` (off by default), `GET` requests to the `static` handler get cheap revalidation:
+
+- `200` responses also carry `ETag` (a quoted hash of the file size and mtime) and `Last-Modified` (the file mtime, IMF-fixdate).
+- If `If-None-Match` matches the current ETag (`*`, comma-separated lists, and weak `W/` comparison are supported), Tent answers `304 Not Modified`.
+- Otherwise, if `If-None-Match` is absent and `If-Modified-Since` is at or after the file mtime, Tent answers `304 Not Modified`. Unparseable dates are ignored.
+- A `304` has an empty body and only the `ETag` / `Last-Modified` headers (no `Content-Type` / `Content-Length`). The file contents are not read.
+- `403` / `404` responses are unchanged, and `HEAD` and other methods behave exactly as without the option.
+- The rule's middlewares still run on the `304` response.
+
+Because files are validated by size and mtime, a file replaced in place (same path) is served fresh on the next request.
+
+### Example: Revalidate photos on every view
+
+```php
+Configuration::buildRule([
+    'handler' => [
+        'type' => 'static',
+        'location' => '/var/www/html/photos',
+        'conditional' => true
+    ],
+    'matchers' => [
+        ['method' => 'GET', 'uri' => '/photos', 'type' => 'begins_with']
+    ],
+    'middlewares' => [
+        ['class' => 'App\\Middlewares\\NoCacheMiddleware']
+    ]
+]);
+```
+
+To make clients revalidate on every view, pair the option with a `Cache-Control: no-cache` response header. `SetHeadersMiddleware` sets **request** headers, so the response header must come from a middleware that implements `processResponse`, for example:
+
+```php
+namespace App\Middlewares;
+
+use Tent\Middlewares\Middleware;
+use Tent\Models\Response;
+
+class NoCacheMiddleware extends Middleware
+{
+    public static function build(array $attributes): self
+    {
+        return new self();
+    }
+
+    public function processResponse(Response $response): Response
+    {
+        $response->setHeaders(array_merge($response->headers(), ['Cache-Control: no-cache']));
+        return $response;
+    }
+}
+```
+
+The middleware runs on both the `200` and the `304`, so unchanged files cost only a `304` round-trip.
 
 ---
 

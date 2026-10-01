@@ -60,6 +60,79 @@ class FileTest extends TestCase
         $this->assertFalse($file->exists());
     }
 
+    public function testEtagIsQuotedMd5OfSizeAndMtime()
+    {
+        $path = $this->basePath . 'test.txt';
+        touch($path, 1700000000);
+        $file = new File('test.txt', new FolderLocation($this->basePath));
+
+        $expected = '"' . md5(filesize($path) . '-1700000000') . '"';
+        $this->assertEquals($expected, $file->etag());
+        $this->assertMatchesRegularExpression('/^"[0-9a-f]{32}"$/', $file->etag());
+    }
+
+    public function testEtagIsStableForUnchangedFile()
+    {
+        $file = new File('test.txt', new FolderLocation($this->basePath));
+
+        $this->assertEquals($file->etag(), $file->etag());
+    }
+
+    public function testEtagChangesWhenFileIsRewritten()
+    {
+        $path = $this->basePath . 'test.txt';
+        touch($path, 1700000000);
+        $file = new File('test.txt', new FolderLocation($this->basePath));
+        $before = $file->etag();
+
+        file_put_contents($path, 'Hello World, again');
+        touch($path, 1700000000);
+
+        $this->assertNotEquals($before, $file->etag());
+    }
+
+    public function testEtagChangesWhenMtimeChanges()
+    {
+        $path = $this->basePath . 'test.txt';
+        touch($path, 1700000000);
+        $file = new File('test.txt', new FolderLocation($this->basePath));
+        $before = $file->etag();
+
+        touch($path, 1700000100);
+
+        $this->assertNotEquals($before, $file->etag());
+    }
+
+    public function testLastModifiedReturnsMtime()
+    {
+        touch($this->basePath . 'test.txt', 1700000000);
+        $file = new File('test.txt', new FolderLocation($this->basePath));
+
+        $this->assertSame(1700000000, $file->lastModified());
+    }
+
+    public function testLastModifiedHeaderIsImfFixdate()
+    {
+        touch($this->basePath . 'test.txt', 1700000000);
+        $file = new File('test.txt', new FolderLocation($this->basePath));
+
+        $this->assertEquals('Tue, 14 Nov 2023 22:13:20 GMT', $file->lastModifiedHeader());
+    }
+
+    public function testValidatorHeaders()
+    {
+        touch($this->basePath . 'test.txt', 1700000000);
+        $file = new File('test.txt', new FolderLocation($this->basePath));
+
+        $this->assertEquals(
+            [
+                'ETag: ' . $file->etag(),
+                'Last-Modified: Tue, 14 Nov 2023 22:13:20 GMT'
+            ],
+            $file->validatorHeaders()
+        );
+    }
+
     public function testHttpCodeReturns200()
     {
         $location = new FolderLocation($this->basePath);

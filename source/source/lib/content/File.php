@@ -87,6 +87,57 @@ class File implements ResponseContent
     }
 
     /**
+     * Returns a strong, quoted ETag computed from the file size and mtime.
+     *
+     * The file content is not read.
+     *
+     * @return string The quoted ETag (e.g. "\"<md5>\"").
+     */
+    public function etag(): string
+    {
+        $path = $this->fullPath();
+        clearstatcache(true, $path);
+
+        return '"' . md5(filesize($path) . '-' . filemtime($path)) . '"';
+    }
+
+    /**
+     * Returns the file modification time.
+     *
+     * @return integer The mtime as a Unix timestamp.
+     */
+    public function lastModified(): int
+    {
+        $path = $this->fullPath();
+        clearstatcache(true, $path);
+
+        return (int) filemtime($path);
+    }
+
+    /**
+     * Returns the file modification time formatted as an IMF-fixdate.
+     *
+     * @return string The date (e.g. "Sun, 06 Nov 1994 08:49:37 GMT").
+     */
+    public function lastModifiedHeader(): string
+    {
+        return gmdate('D, d M Y H:i:s \G\M\T', $this->lastModified());
+    }
+
+    /**
+     * Returns the cache validator headers (ETag and Last-Modified).
+     *
+     * @return array Array of HTTP header strings.
+     */
+    public function validatorHeaders(): array
+    {
+        return [
+            "ETag: " . $this->etag(),
+            "Last-Modified: " . $this->lastModifiedHeader()
+        ];
+    }
+
+    /**
      * Returns the full path to the file, combining the base folder and file path.
      *
      * @return string The full file path.

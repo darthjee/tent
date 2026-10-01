@@ -76,6 +76,20 @@ class ResponseContentReader
     }
 
     /**
+     * Ensures the ResponseContent can be read, without reading it.
+     *
+     * Runs the same path validation and existence checks as getResponse().
+     *
+     * @throws InvalidFilePathException If the request path is invalid.
+     * @throws FileNotFoundException If the ResponseContent does not exist correctly.
+     * @return void
+     */
+    public function ensureReadable(): void
+    {
+        $this->validate();
+    }
+
+    /**
      * Validates the file path and existence.
      *
      * @throws InvalidFilePathException If the file path is invalid.

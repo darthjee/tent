@@ -65,4 +65,35 @@ class ResponseContentReaderWithFileTest extends TestCase
         $this->expectException(InvalidFilePathException::class);
         $reader->getResponse();
     }
+
+    public function testEnsureReadablePassesForExistingFileWithoutReadingIt()
+    {
+        $file = $this->createMock(File::class);
+        $file->method('exists')->willReturn(true);
+        $file->expects($this->never())->method('content');
+        $reader = new ResponseContentReader(new Request(['requestPath' => '/test.txt']), $file);
+
+        $reader->ensureReadable();
+        $this->addToAssertionCount(1);
+    }
+
+    public function testEnsureReadableThrowsFileNotFoundException()
+    {
+        $location = new FolderLocation($this->testDir);
+        $request = new Request(['requestPath' => '/nonexistent.txt']);
+        $reader = new ResponseContentReader($request, new File('/nonexistent.txt', $location));
+
+        $this->expectException(FileNotFoundException::class);
+        $reader->ensureReadable();
+    }
+
+    public function testEnsureReadableThrowsInvalidFilePathException()
+    {
+        $location = new FolderLocation($this->testDir);
+        $request = new Request(['requestPath' => '../etc/passwd']);
+        $reader = new ResponseContentReader($request, new File('../etc/passwd', $location));
+
+        $this->expectException(InvalidFilePathException::class);
+        $reader->ensureReadable();
+    }
 }

@@ -21,4 +21,34 @@ class StaticFileHandlerBuildTest extends TestCase
         $folderLocation = $folderLocationProp->getValue($handler);
         $this->assertEquals('./some_folder', $folderLocation->basePath());
     }
+
+    public function testBuildDefaultsConditionalToFalse()
+    {
+        $handler = StaticFileHandler::build(['location' => './some_folder']);
+
+        $this->assertFalse($this->conditionalOf($handler));
+    }
+
+    public function testBuildParsesConditionalOption()
+    {
+        $handler = StaticFileHandler::build(['location' => './some_folder', 'conditional' => true]);
+
+        $this->assertTrue($this->conditionalOf($handler));
+    }
+
+    public function testBuildParsesDisabledConditionalOption()
+    {
+        $handler = StaticFileHandler::build(['location' => './some_folder', 'conditional' => false]);
+
+        $this->assertFalse($this->conditionalOf($handler));
+    }
+
+    private function conditionalOf(StaticFileHandler $handler): bool
+    {
+        $reflection = new \ReflectionClass($handler);
+        $property = $reflection->getProperty('conditional');
+        $property->setAccessible(true);
+
+        return $property->getValue($handler);
+    }
 }
