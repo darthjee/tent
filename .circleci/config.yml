@@ -1,107 +1,22 @@
-version: 2
-workflows:
-  version: 2
-  test-and-release:
-    jobs:
-      - unit_test:
-          filters:
-            tags:
-              only: /.*/
-      - checks:
-          filters:
-            tags:
-              only: /.*/
-      - dev_api_test:
-          filters:
-            tags:
-              only: /.*/
-      - dev_api_checks:
-          filters:
-            tags:
-              only: /.*/
-      - dev_frontend_test:
-          filters:
-            tags:
-              only: /.*/
-      - dev_frontend_checks:
-          filters:
-            tags:
-              only: /.*/
-      - coverage_finalize:
-          requires: [unit_test, dev_api_test, dev_frontend_test]
-          filters:
-            tags:
-              only: /.*/
-      - build-and-release-package:
-          requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks]
-          filters:
-            tags:
-              only: /.*/
-            branches:
-              only:
-                - master
-      - build-and-release-linux:
-          requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks]
-          filters:
-            tags:
-              only: /.*/
-            branches:
-              only:
-                - master
-      - build-and-release-macos:
-          requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks]
-          filters:
-            tags:
-              only: /.*/
-            branches:
-              only:
-                - master
-      - build-and-release-tent-test-linux:
-          requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks, build-and-release-base-linux]
-          filters:
-            tags:
-              only: /.*/
-            branches:
-              only:
-                - master
-      - build-and-release-tent-test-macos:
-          requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks, build-and-release-base-macos]
-          filters:
-            tags:
-              only: /.*/
-            branches:
-              only:
-                - master
-      - build-and-release-base-linux:
-          requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks]
-          filters:
-            tags:
-              only: /.*/
-            branches:
-              only:
-                - master
-      - build-and-release-base-macos:
-          requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks]
-          filters:
-            tags:
-              only: /.*/
-            branches:
-              only:
-                - master
-      - update-description:
-          requires: [build-and-release-linux, build-and-release-macos]
-          filters:
-            tags:
-              only: /.*/
-            branches:
-              only:
-                - master
-jobs:
-  unit_test:
+version: 2.1
+
+executors:
+  tent-base:
     docker:
       - image: darthjee/circleci_tent-base:0.0.1
-      - image: kennethreitz/httpbin
-        name: httpbin
+  node:
+    docker:
+      - image: darthjee/circleci_node:0.2.1
+  scripts:
+    docker:
+      - image: darthjee/scripts:0.6.0
+  machine:
+    machine:
+      image: ubuntu-2204:current
+
+commands:
+  prepare_source:
+    description: Checkout and keep only the source/ folder at the root
     steps:
       - checkout
       - run:
@@ -110,36 +25,75 @@ jobs:
       - run:
           name: Set folder
           command: mv source old; mv old/* ./; rm -rf old;
+
+  prepare_dev_folder:
+    description: Checkout and keep only the given dev/ subfolder at the root
+    parameters:
+      folder:
+        type: string
+    steps:
+      - checkout
+      - run:
+          name: Remove other folders
+          command: rm -rf source
+      - run:
+          name: Set folder
+          command: mv << parameters.folder >>/* ./; rm -rf dev;
+
+  composer_setup:
+    description: Copy pre-installed vendor folder and run composer install
+    steps:
       - run:
           name: Copy dependencies
           command: cp /home/circleci/vendor/ ./vendor/ -R
       - run:
           name: composer install
           command: composer install
+
+  upload_codacy_coverage:
+    description: Upload a partial coverage report to Codacy
+    parameters:
+      report:
+        type: string
+    steps:
+      - run:
+          name: Upload coverage to Codacy
+          command: bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial -r << parameters.report >>
+
+  docker_login:
+    description: Log in to Docker Hub
+    steps:
+      - run:
+          name: Docker login
+          command: echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
+
+  setup_qemu:
+    description: Install QEMU binfmt handlers for cross-architecture builds
+    steps:
+      - run:
+          name: Set up QEMU
+          command: docker run --privileged --rm tonistiigi/binfmt --install all
+
+jobs:
+  unit_test:
+    docker:
+      - image: darthjee/circleci_tent-base:0.0.1
+      - image: kennethreitz/httpbin
+        name: httpbin
+    steps:
+      - prepare_source
+      - composer_setup
       - run:
           name: Tests
           command: composer coverage
-      - run:
-          name: Upload coverage to Codacy
-          command: bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial -r coverage/clover.xml
+      - upload_codacy_coverage:
+          report: coverage/clover.xml
 
   checks:
-    docker:
-      - image: darthjee/circleci_tent-base:0.0.1
+    executor: tent-base
     steps:
-      - checkout
-      - run:
-          name: Remove other folders
-          command: rm -rf dev
-      - run:
-          name: Copy files
-          command: mv source old; mv old/* ./; rm -rf old;
-      - run:
-          name: Copy dependencies
-          command: cp /home/circleci/vendor/ ./vendor/ -R
-      - run:
-          name: Install dependencies
-          command: composer install
+      - prepare_source
+      - composer_setup
       - run:
           name: Run Lint
           command: composer lint
@@ -161,19 +115,9 @@ jobs:
           MYSQL_PASSWORD: tent
           MYSQL_ROOT_PASSWORD: tent
     steps:
-      - checkout
-      - run:
-          name: Remove other folders
-          command: rm -rf source
-      - run:
-          name: Set folder
-          command: mv dev/api/* ./; rm -rf dev;
-      - run:
-          name: Copy dependencies
-          command: cp /home/circleci/vendor/ ./vendor/ -R
-      - run:
-          name: composer install
-          command: composer install
+      - prepare_dev_folder:
+          folder: dev/api
+      - composer_setup
       - run:
           name: Wait for DB
           command: php ./bin/wait_for_database.php
@@ -181,68 +125,43 @@ jobs:
           name: Ensure database exists
           command: php ./bin/create_databases.php
       - run:
-          name: EnsurMigrate database
+          name: Migrate database
           command: php ./bin/migrate_databases.php
       - run:
           name: Tests
           command: composer coverage
-      - run:
-          name: Upload coverage to Codacy
-          command: bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial -r coverage/clover.xml
+      - upload_codacy_coverage:
+          report: coverage/clover.xml
 
   dev_api_checks:
-    docker:
-      - image: darthjee/circleci_tent-base:0.0.1
+    executor: tent-base
     steps:
-      - checkout
-      - run:
-          name: Remove other folders
-          command: rm -rf source
-      - run:
-          name: Set folder
-          command: mv dev/api/* ./; rm -rf dev;
-      - run:
-          name: Copy dependencies
-          command: cp /home/circleci/vendor/ ./vendor/ -R
-      - run:
-          name: Install dependencies
-          command: composer install
+      - prepare_dev_folder:
+          folder: dev/api
+      - composer_setup
       - run:
           name: Run Lint
           command: composer lint
 
   dev_frontend_test:
-    docker:
-      - image: darthjee/circleci_node:0.2.1
+    executor: node
     steps:
-      - checkout
-      - run:
-          name: Remove other folders
-          command: rm -rf source
-      - run:
-          name: Set folder
-          command: mv dev/frontend/* ./; rm -rf dev;
+      - prepare_dev_folder:
+          folder: dev/frontend
       - run:
           name: Yarn install
           command: yarn install
       - run:
           name: Tests
           command: npm run coverage
-      - run:
-          name: Upload coverage to Codacy
-          command: bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial -r coverage/lcov.info
+      - upload_codacy_coverage:
+          report: coverage/lcov.info
 
   dev_frontend_checks:
-    docker:
-      - image: darthjee/circleci_node:0.2.1
+    executor: node
     steps:
-      - checkout
-      - run:
-          name: Remove other folders
-          command: rm -rf source
-      - run:
-          name: Set folder
-          command: mv dev/frontend/* ./; rm -rf dev;
+      - prepare_dev_folder:
+          folder: dev/frontend
       - run:
           name: Yarn install
           command: yarn install
@@ -251,15 +170,14 @@ jobs:
           command: npm run lint
 
   coverage_finalize:
-    docker:
-      - image: darthjee/circleci_tent-base:0.0.1
+    executor: tent-base
     steps:
       - run:
           name: Finalize coverage on Codacy
           command: bash <(curl -Ls https://coverage.codacy.com/get.sh) final
 
   build-and-release-package:
-    machine: true
+    executor: machine
     steps:
       - checkout
       - run:
@@ -269,121 +187,133 @@ jobs:
           name: Upload release package
           command: ./scripts/upload_release_package.sh release
 
-  build-and-release-linux:
-    machine: true
+  build-and-release-image:
+    executor: machine
+    parameters:
+      target:
+        type: enum
+        enum: [tent, tent-test]
+      arch:
+        type: enum
+        enum: [amd64, arm64]
     steps:
       - checkout
+      - when:
+          condition:
+            equal: [arm64, << parameters.arch >>]
+          steps:
+            - setup_qemu
+            - run:
+                name: Prepare scripts image
+                command: ./scripts/prepare_scripts_image.sh arm64
       - run:
           name: Docker build
-          command: make ci-build-tent ARCH=amd64 VERSION=${CIRCLE_TAG:-latest}
+          command: make ci-build-<< parameters.target >> ARCH=<< parameters.arch >> VERSION=${CIRCLE_TAG:-latest}
       - run:
           name: Docker check
-          command: make ci-check-tent ARCH=amd64 VERSION=${CIRCLE_TAG:-latest}
-      - run:
-          name: Docker login
-          command: echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
+          command: make ci-check-<< parameters.target >> ARCH=<< parameters.arch >> VERSION=${CIRCLE_TAG:-latest}
+      - docker_login
       - run:
           name: Docker release
-          command: make ci-release-tent ARCH=amd64 VERSION=${CIRCLE_TAG:-latest}
+          command: make ci-release-<< parameters.target >> ARCH=<< parameters.arch >> VERSION=${CIRCLE_TAG:-latest}
 
-  build-and-release-macos:
-    machine: true
+  build-and-release-base:
+    executor: machine
+    parameters:
+      arch:
+        type: enum
+        enum: [amd64, arm64]
     steps:
       - checkout
-      - run:
-          name: Set up QEMU
-          command: docker run --privileged --rm tonistiigi/binfmt --install all
-      - run:
-          name: Prepare scripts image
-          command: ./scripts/prepare_scripts_image.sh arm64
+      - when:
+          condition:
+            equal: [arm64, << parameters.arch >>]
+          steps:
+            - setup_qemu
       - run:
           name: Docker build
-          command: make ci-build-tent ARCH=arm64 VERSION=${CIRCLE_TAG:-latest}
-      - run:
-          name: Docker check
-          command: make ci-check-tent ARCH=arm64 VERSION=${CIRCLE_TAG:-latest}
-      - run:
-          name: Docker login
-          command: echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
+          command: make ci-ensure-base ARCH=<< parameters.arch >>
+      - docker_login
       - run:
           name: Docker release
-          command: make ci-release-tent ARCH=arm64 VERSION=${CIRCLE_TAG:-latest}
+          command: make ci-release-base ARCH=<< parameters.arch >>
 
-  build-and-release-tent-test-linux:
-    machine: true
-    steps:
-      - checkout
-      - run:
-          name: Docker build
-          command: make ci-build-tent-test ARCH=amd64 VERSION=${CIRCLE_TAG:-latest}
-      - run:
-          name: Docker check
-          command: make ci-check-tent-test ARCH=amd64 VERSION=${CIRCLE_TAG:-latest}
-      - run:
-          name: Docker login
-          command: echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
-      - run:
-          name: Docker release
-          command: make ci-release-tent-test ARCH=amd64 VERSION=${CIRCLE_TAG:-latest}
-
-  build-and-release-tent-test-macos:
-    machine: true
-    steps:
-      - checkout
-      - run:
-          name: Set up QEMU
-          command: docker run --privileged --rm tonistiigi/binfmt --install all
-      - run:
-          name: Prepare scripts image
-          command: ./scripts/prepare_scripts_image.sh arm64
-      - run:
-          name: Docker build
-          command: make ci-build-tent-test ARCH=arm64 VERSION=${CIRCLE_TAG:-latest}
-      - run:
-          name: Docker check
-          command: make ci-check-tent-test ARCH=arm64 VERSION=${CIRCLE_TAG:-latest}
-      - run:
-          name: Docker login
-          command: echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
-      - run:
-          name: Docker release
-          command: make ci-release-tent-test ARCH=arm64 VERSION=${CIRCLE_TAG:-latest}
-
-  build-and-release-base-linux:
-    machine: true
-    steps:
-      - checkout
-      - run:
-          name: Docker build
-          command: make ci-ensure-base ARCH=amd64
-      - run:
-          name: Docker login
-          command: echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
-      - run:
-          name: Docker release
-          command: make ci-release-base ARCH=amd64
-
-  build-and-release-base-macos:
-    machine: true
-    steps:
-      - checkout
-      - run:
-          name: Set up QEMU
-          command: docker run --privileged --rm tonistiigi/binfmt --install all
-      - run:
-          name: Docker build
-          command: make ci-ensure-base ARCH=arm64
-      - run:
-          name: Docker login
-          command: echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
-      - run:
-          name: Docker release
-          command: make ci-release-base ARCH=arm64
   update-description:
-    docker:
-      - image: darthjee/scripts:0.6.0
+    executor: scripts
     steps:
       - checkout
       - run:
           name: Docker push description
           command: /bin/sh /home/scripts/sbin/docker_hub.sh login_and_push_description darthjee/tent DOCKERHUB_DESCRIPTION.md
+
+all_tags: &all_tags
+  tags:
+    only: /.*/
+
+release_filters: &release_filters
+  tags:
+    only: /.*/
+  branches:
+    ignore: /.*/
+
+all_checks: &all_checks
+  [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks]
+
+workflows:
+  test-and-release:
+    jobs:
+      - unit_test:
+          filters: *all_tags
+      - checks:
+          filters: *all_tags
+      - dev_api_test:
+          filters: *all_tags
+      - dev_api_checks:
+          filters: *all_tags
+      - dev_frontend_test:
+          filters: *all_tags
+      - dev_frontend_checks:
+          filters: *all_tags
+      - coverage_finalize:
+          requires: [unit_test, dev_api_test, dev_frontend_test]
+          filters: *all_tags
+      - build-and-release-package:
+          requires: *all_checks
+          filters: *release_filters
+      - build-and-release-image:
+          name: build-and-release-linux
+          target: tent
+          arch: amd64
+          requires: *all_checks
+          filters: *release_filters
+      - build-and-release-image:
+          name: build-and-release-macos
+          target: tent
+          arch: arm64
+          requires: *all_checks
+          filters: *release_filters
+      - build-and-release-base:
+          name: build-and-release-base-linux
+          arch: amd64
+          requires: *all_checks
+          filters: *release_filters
+      - build-and-release-base:
+          name: build-and-release-base-macos
+          arch: arm64
+          requires: *all_checks
+          filters: *release_filters
+      - build-and-release-image:
+          name: build-and-release-tent-test-linux
+          target: tent-test
+          arch: amd64
+          requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks, build-and-release-base-linux]
+          filters: *release_filters
+      - build-and-release-image:
+          name: build-and-release-tent-test-macos
+          target: tent-test
+          arch: arm64
+          requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks, build-and-release-base-macos]
+          filters: *release_filters
+      - update-description:
+          requires: [build-and-release-linux, build-and-release-macos]
+          filters: *release_filters
