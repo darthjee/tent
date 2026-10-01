@@ -90,6 +90,7 @@ Configuration::buildRule([
 | Option     | Type     | Required | Description |
 |------------|----------|----------|-------------|
 | `location` | `string` | Yes      | Base directory for static files |
+| `conditional` | `bool` | No     | Default `false`. On `GET` only: add `ETag` / `Last-Modified` to `200` responses and answer matching `If-None-Match` / `If-Modified-Since` with an empty-body `304 Not Modified` — see [Conditional requests](../../request-handlers.md#conditional-requests) |
 
 ---
 
