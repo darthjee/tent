@@ -72,6 +72,7 @@ require_once __DIR__ . '/lib/service/ConditionalRequestMatcher.php';
 require_once __DIR__ . '/lib/service/RequestProcessor.php';
 require_once __DIR__ . '/lib/service/ResponseCacher.php';
 require_once __DIR__ . '/lib/service/BackgroundRefresher.php';
+require_once __DIR__ . '/lib/service/ResponseSender.php';
 require_once __DIR__ . '/lib/middlewares/CacheStalenessMiddleware.php';
 require_once __DIR__ . '/lib/utils/CacheFilePath.php';
 require_once __DIR__ . '/lib/utils/CurlUtils.php';
