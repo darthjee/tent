@@ -3,6 +3,7 @@
 use Tent\Models\Request;
 use Tent\Models\Response;
 use Tent\Service\RequestProcessor;
+use Tent\Service\ResponseSender;
 
 require_once __DIR__ . '/loader.php';
 
@@ -19,11 +20,7 @@ if (file_exists($configFile)) {
  */
 function send_response(Response $response)
 {
-    http_response_code($response->httpCode());
-    foreach ($response->headers() as $header) {
-        header($header);
-    }
-    echo $response->body();
+    (new ResponseSender())->send($response);
 }
 
 $request = new Request();
