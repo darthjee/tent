@@ -5,22 +5,21 @@ show_help() {
   cat <<'EOF'
 Usage: scripts/build_docker_image.sh <command> <args...>
 
-Per-arch tag commands (tent, tent-test until #300):
-  build   <image> <arch> <version>   Native docker build, tagged <version>[-arm64]
-  ensure  <image> <arch> <version>   Pull <version>[-arm64], or build it if missing
-  release <image> <arch> <version>   Push <version>[-arm64] and latest[-arm64]
-  check   <image> <arch> <version>   Check the <version>[-arm64] tag
-
 Multi-arch commands:
   push-digest  <image> <arch> <version>  Build and push untagged by digest, writing
                                          digests/<image>-<arch>. Skips (writing a
                                          .skip marker) when <version> is already
                                          multi-arch; fails when it is single-arch.
-  check        <image> <arch> <ref>      Check a full ref (anything with '@' or ':',
-                                         e.g. darthjee/dev_tent-base@sha256:...)
+  check        <image> <arch> <version|ref>
+                                         Check <arch>'s variant of the published
+                                         multi-arch tag <image>:<version>, or a full
+                                         ref (anything with '@' or ':', e.g.
+                                         darthjee/dev_tent-base@sha256:...) as is
   check-digest <image> <arch>            Check the digest in digests/<image>-<arch>
   merge        <image> <version>         imagetools create <version> and latest from
-                                         both per-arch digests (no-op when complete)
+                                         both per-arch digests. When <version> is
+                                         already complete, only re-points a stale
+                                         or missing latest to it.
   verify       <image> <arch> <version>  Build with --load (no push) and check it
 
   help                                   Show this help
@@ -49,7 +48,7 @@ image_config() {
       IMAGE_NAME="darthjee/tent-test"
       # phpunit.xml/bootstrap.php baked into the image live under
       # dockerfiles/tent-test/, outside the "source" build context, so they
-      # are wired in as an extra named build context (see build_image()).
+      # are wired in as an extra named build context (see buildx_base_cmd()).
       EXTRA_BUILD_CONTEXT="tent-test-assets=dockerfiles/tent-test"
       ;;
     dev_tent)
@@ -77,12 +76,10 @@ arch_config() {
   case "$arch" in
     amd64)
       PLATFORM="linux/amd64"
-      ARCH_SUFFIX=""
       EXPECTED_MACHINE="x86_64"
       ;;
     arm64)
       PLATFORM="linux/arm64"
-      ARCH_SUFFIX="-arm64"
       EXPECTED_MACHINE="aarch64"
       ;;
     *)
@@ -91,56 +88,6 @@ arch_config() {
       exit 1
       ;;
   esac
-}
-
-build_image() {
-  local image="$1"
-  local arch="$2"
-  local version="$3"
-
-  image_config "$image"
-  arch_config "$arch"
-
-  local cmd=(docker build --platform "$PLATFORM" -f "$DOCKERFILE")
-
-  if [[ -n "$EXTRA_BUILD_CONTEXT" ]]; then
-    cmd+=(--build-context "$EXTRA_BUILD_CONTEXT")
-  fi
-
-  cmd+=(
-    "$CONTEXT"
-    -t "${IMAGE_NAME}:${version}${ARCH_SUFFIX}"
-    -t "${IMAGE_NAME}:latest${ARCH_SUFFIX}"
-  )
-
-  "${cmd[@]}"
-}
-
-ensure_image() {
-  local image="$1"
-  local arch="$2"
-  local version="$3"
-
-  image_config "$image"
-  arch_config "$arch"
-
-  if docker pull "${IMAGE_NAME}:${version}${ARCH_SUFFIX}"; then
-    docker tag "${IMAGE_NAME}:${version}${ARCH_SUFFIX}" "${IMAGE_NAME}:latest${ARCH_SUFFIX}"
-  else
-    build_image "$image" "$arch" "$version"
-  fi
-}
-
-release_image() {
-  local image="$1"
-  local arch="$2"
-  local version="$3"
-
-  image_config "$image"
-  arch_config "$arch"
-
-  docker push "${IMAGE_NAME}:${version}${ARCH_SUFFIX}"
-  docker push "${IMAGE_NAME}:latest${ARCH_SUFFIX}"
 }
 
 # PHP runtime contract every Tent image must satisfy (GD with JPEG/PNG, exif,
@@ -209,13 +156,13 @@ check_image() {
   arch_config "$arch"
 
   # A full ref containing '@' or ':' (e.g. darthjee/dev_tent-base@sha256:...,
-  # or the local tag built by verify) is used as
-  # is; a plain version keeps the per-arch tag used by tent/tent-test.
+  # or the local tag built by verify) is used as is; a plain version means the
+  # published multi-arch tag, whose <arch> variant is selected by --platform.
   local ref
   if [[ "$version_or_ref" == *@* || "$version_or_ref" == *:* ]]; then
     ref="$version_or_ref"
   else
-    ref="${IMAGE_NAME}:${version_or_ref}${ARCH_SUFFIX}"
+    ref="${IMAGE_NAME}:${version_or_ref}"
   fi
 
   echo "Checking ${ref} (${PLATFORM})"
@@ -291,6 +238,20 @@ ensure_builder() {
   else
     docker buildx create --use --name tent-builder --driver docker-container
   fi
+}
+
+# Prints the manifest (list) digest of <ref>, or an empty string when the ref
+# is missing or cannot be inspected.
+manifest_digest() {
+  local ref="$1"
+  local raw
+
+  if ! raw="$(docker buildx imagetools inspect "$ref" --format '{{json .Manifest}}' 2>/dev/null)"; then
+    echo ""
+    return 0
+  fi
+
+  jq -r '.digest // empty' <<<"$raw" 2>/dev/null || echo ""
 }
 
 digest_file() {
@@ -393,7 +354,21 @@ merge_image() {
 
   case "$status" in
     complete)
-      echo "${IMAGE_NAME}:${version} is already multi-arch; nothing to merge"
+      # A previous merge may have published <version> but failed before
+      # latest; re-point latest when it does not match <version>.
+      local v_digest latest_digest
+      v_digest="$(manifest_digest "${IMAGE_NAME}:${version}")"
+      latest_digest="$(manifest_digest "${IMAGE_NAME}:latest")"
+
+      if [[ -n "$v_digest" && "$v_digest" == "$latest_digest" ]]; then
+        echo "${IMAGE_NAME}:${version} is already multi-arch and latest is up to date; nothing to merge"
+        return 0
+      fi
+
+      echo "${IMAGE_NAME}:${version} is already multi-arch; re-pointing ${IMAGE_NAME}:latest to it"
+      docker buildx imagetools create \
+        -t "${IMAGE_NAME}:latest" \
+        "${IMAGE_NAME}:${version}"
       return 0
       ;;
     incomplete)
@@ -443,15 +418,6 @@ ARCH="${3:-}"
 VERSION="${4:-}"
 
 case "$COMMAND" in
-  build)
-    build_image "$IMAGE" "$ARCH" "$VERSION"
-    ;;
-  ensure)
-    ensure_image "$IMAGE" "$ARCH" "$VERSION"
-    ;;
-  release)
-    release_image "$IMAGE" "$ARCH" "$VERSION"
-    ;;
   check)
     check_image "$IMAGE" "$ARCH" "$VERSION"
     ;;
