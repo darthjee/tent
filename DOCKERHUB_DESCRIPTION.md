@@ -11,6 +11,12 @@ An intelligent PHP-based proxy server for routing, static file serving, and midd
 
 Project repository: <https://github.com/darthjee/tent>
 
+## Supported Platforms
+
+- Images are published as a single multi-arch tag for `linux/amd64` and `linux/arm64`; Docker pulls the right variant for your host automatically.
+- Older releases were published as `<version>` (amd64) and `<version>-arm64` (arm64). Those tags remain available on Docker Hub.
+- No new `-arm64` / `latest-arm64` tags are published. Use `<version>` / `latest` instead (`latest-arm64` no longer moves).
+
 ## Quick Start
 
 To run a proxy server using this image:
