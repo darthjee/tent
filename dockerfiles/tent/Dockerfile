@@ -1,4 +1,8 @@
-FROM darthjee/scripts:0.9.0 as scripts
+# darthjee/scripts:0.9.0 is published for linux/amd64 only. Only the plain
+# shell script deploy_frontend.sh is copied out of this stage (nothing runs in
+# it), so pinning it to amd64 is safe for both the amd64 and arm64 variants.
+# #301 replaces this line with the multi-arch 0.12.0 and drops the pin.
+FROM --platform=linux/amd64 darthjee/scripts:0.9.0 AS scripts
 FROM php:8.4-apache as base
 
 # Create app user and directory structure

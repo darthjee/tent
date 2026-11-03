@@ -1,6 +1,7 @@
 .PHONY: build-base build dev tests \
-        ci-build-tent ci-release-tent ci-build-tent-test ci-release-tent-test \
-        ci-check-tent ci-check-tent-test \
+        ci-push-digest-tent ci-check-digest-tent ci-merge-tent ci-verify-tent \
+        ci-push-digest-tent-test ci-check-digest-tent-test ci-merge-tent-test \
+        ci-verify-tent-test \
         ci-push-digest-base ci-check-digest-base ci-merge-base ci-verify-base
 
 PROJECT?=tent
@@ -48,23 +49,29 @@ dev-api:
 dev-up:
 	docker compose up $(PROJECT)_app
 
-ci-build-tent:
-	./scripts/build_docker_image.sh build tent $(ARCH) $(VERSION)
+ci-push-digest-tent:
+	./scripts/build_docker_image.sh push-digest tent $(ARCH) $(VERSION)
 
-ci-check-tent:
-	./scripts/build_docker_image.sh check tent $(ARCH) $(VERSION)
+ci-check-digest-tent:
+	./scripts/build_docker_image.sh check-digest tent $(ARCH) $(VERSION)
 
-ci-release-tent:
-	./scripts/build_docker_image.sh release tent $(ARCH) $(VERSION)
+ci-merge-tent:
+	./scripts/build_docker_image.sh merge tent $(VERSION)
 
-ci-build-tent-test:
-	./scripts/build_docker_image.sh build tent-test $(ARCH) $(VERSION)
+ci-verify-tent:
+	./scripts/build_docker_image.sh verify tent $(ARCH) $(VERSION)
 
-ci-check-tent-test:
-	./scripts/build_docker_image.sh check tent-test $(ARCH) $(VERSION)
+ci-push-digest-tent-test:
+	./scripts/build_docker_image.sh push-digest tent-test $(ARCH) $(VERSION)
 
-ci-release-tent-test:
-	./scripts/build_docker_image.sh release tent-test $(ARCH) $(VERSION)
+ci-check-digest-tent-test:
+	./scripts/build_docker_image.sh check-digest tent-test $(ARCH) $(VERSION)
+
+ci-merge-tent-test:
+	./scripts/build_docker_image.sh merge tent-test $(VERSION)
+
+ci-verify-tent-test:
+	./scripts/build_docker_image.sh verify tent-test $(ARCH) $(VERSION)
 
 ci-push-digest-base:
 	./scripts/build_docker_image.sh push-digest dev_tent-base $(ARCH) $(BASE_VERSION)
