@@ -4,6 +4,7 @@
         ci-push-digest-base ci-check-digest-base ci-merge-base ci-verify-base
 
 PROJECT?=tent
+DOCKER_ID_USER?=darthjee
 BASE_VERSION?=0.1.0
 VERSION?=1.0.3
 ARCH?=amd64
