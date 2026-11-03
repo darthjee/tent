@@ -20,3 +20,5 @@ source/vendor/
 
 .claude/state/
 dev/frontend/coverage/
+
+digests/
