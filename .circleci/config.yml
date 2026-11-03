@@ -194,39 +194,12 @@ jobs:
           name: Upload release package
           command: ./scripts/upload_release_package.sh release
 
-  build-and-release-image:
+  release-digest:
     executor: machine
     parameters:
       target:
         type: enum
-        enum: [tent, tent-test]
-      arch:
-        type: enum
-        enum: [amd64, arm64]
-    steps:
-      - checkout
-      - when:
-          condition:
-            equal: [arm64, << parameters.arch >>]
-          steps:
-            - setup_qemu
-            - run:
-                name: Prepare scripts image
-                command: ./scripts/prepare_scripts_image.sh arm64
-      - run:
-          name: Docker build
-          command: make ci-build-<< parameters.target >> ARCH=<< parameters.arch >> VERSION=${CIRCLE_TAG:-latest}
-      - run:
-          name: Docker check
-          command: make ci-check-<< parameters.target >> ARCH=<< parameters.arch >> VERSION=${CIRCLE_TAG:-latest}
-      - docker_login
-      - run:
-          name: Docker release
-          command: make ci-release-<< parameters.target >> ARCH=<< parameters.arch >> VERSION=${CIRCLE_TAG:-latest}
-
-  release-base-digest:
-    executor: machine
-    parameters:
+        enum: [base, tent, tent-test]
       arch:
         type: enum
         enum: [amd64, arm64]
@@ -242,17 +215,21 @@ jobs:
       - docker_login
       - run:
           name: Docker build and push by digest
-          command: make ci-push-digest-base ARCH=<< parameters.arch >>
+          command: make ci-push-digest-<< parameters.target >> ARCH=<< parameters.arch >> VERSION=${CIRCLE_TAG:-latest}
       - run:
           name: Docker check pushed digest
-          command: make ci-check-digest-base ARCH=<< parameters.arch >>
+          command: make ci-check-digest-<< parameters.target >> ARCH=<< parameters.arch >> VERSION=${CIRCLE_TAG:-latest}
       - persist_to_workspace:
           root: .
           paths:
             - digests
 
-  release-base-merge:
+  release-merge:
     executor: machine
+    parameters:
+      target:
+        type: enum
+        enum: [base, tent, tent-test]
     steps:
       - checkout
       - attach_workspace:
@@ -261,11 +238,14 @@ jobs:
       - docker_login
       - run:
           name: Docker merge multi-arch manifest
-          command: make ci-merge-base
+          command: make ci-merge-<< parameters.target >> VERSION=${CIRCLE_TAG:-latest}
 
-  verify-base:
+  verify:
     executor: machine
     parameters:
+      target:
+        type: enum
+        enum: [base, tent, tent-test]
       arch:
         type: enum
         enum: [amd64, arm64]
@@ -279,7 +259,7 @@ jobs:
       - setup_buildx
       - run:
           name: Docker build (no push) and check
-          command: make ci-verify-base ARCH=<< parameters.arch >>
+          command: make ci-verify-<< parameters.target >> ARCH=<< parameters.arch >>
 
   update-description:
     executor: scripts
@@ -323,49 +303,87 @@ workflows:
       - build-and-release-package:
           requires: *all_checks
           filters: *release_filters
-      - build-and-release-image:
-          name: build-and-release-linux
-          target: tent
-          arch: amd64
-          requires: *all_checks
-          filters: *release_filters
-      - build-and-release-image:
-          name: build-and-release-macos
-          target: tent
-          arch: arm64
-          requires: *all_checks
-          filters: *release_filters
-      - verify-base:
+      # Branch-level verify: build and check with no push (branches only).
+      - verify:
           name: verify-base-linux
+          target: base
           arch: amd64
-      - verify-base:
+      - verify:
           name: verify-base-macos
+          target: base
           arch: arm64
-      - release-base-digest:
-          name: release-base-digest-linux
+      - verify:
+          name: verify-tent-linux
+          target: tent
+          arch: amd64
+          requires: *all_checks
+      - verify:
+          name: verify-tent-macos
+          target: tent
+          arch: arm64
+          requires: *all_checks
+      - verify:
+          name: verify-tent-test-linux
+          target: tent-test
+          arch: amd64
+          requires: *all_checks
+      - verify:
+          name: verify-tent-test-macos
+          target: tent-test
+          arch: arm64
+          requires: *all_checks
+      # Tag release: push each arch by digest, check it, then merge.
+      - release-digest:
+          name: release-digest-base-linux
+          target: base
           arch: amd64
           requires: *all_checks
           filters: *release_filters
-      - release-base-digest:
-          name: release-base-digest-macos
+      - release-digest:
+          name: release-digest-base-macos
+          target: base
           arch: arm64
           requires: *all_checks
           filters: *release_filters
-      - release-base-merge:
-          requires: [release-base-digest-linux, release-base-digest-macos]
+      - release-merge:
+          name: release-merge-base
+          target: base
+          requires: [release-digest-base-linux, release-digest-base-macos]
           filters: *release_filters
-      - build-and-release-image:
-          name: build-and-release-tent-test-linux
+      - release-digest:
+          name: release-digest-tent-linux
+          target: tent
+          arch: amd64
+          requires: *all_checks
+          filters: *release_filters
+      - release-digest:
+          name: release-digest-tent-macos
+          target: tent
+          arch: arm64
+          requires: *all_checks
+          filters: *release_filters
+      - release-merge:
+          name: release-merge-tent
+          target: tent
+          requires: [release-digest-tent-linux, release-digest-tent-macos]
+          filters: *release_filters
+      - release-digest:
+          name: release-digest-tent-test-linux
           target: tent-test
           arch: amd64
-          requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks, release-base-merge]
+          requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks, release-merge-base]
           filters: *release_filters
-      - build-and-release-image:
-          name: build-and-release-tent-test-macos
+      - release-digest:
+          name: release-digest-tent-test-macos
           target: tent-test
           arch: arm64
-          requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks, release-base-merge]
+          requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks, release-merge-base]
+          filters: *release_filters
+      - release-merge:
+          name: release-merge-tent-test
+          target: tent-test
+          requires: [release-digest-tent-test-linux, release-digest-tent-test-macos]
           filters: *release_filters
       - update-description:
-          requires: [build-and-release-linux, build-and-release-macos]
+          requires: [release-merge-tent]
           filters: *release_filters
