@@ -74,6 +74,13 @@ commands:
           name: Set up QEMU
           command: docker run --privileged --rm tonistiigi/binfmt --install all
 
+  setup_buildx:
+    description: Create and select a buildx docker-container builder (needed to push by digest)
+    steps:
+      - run:
+          name: Set up buildx builder
+          command: docker buildx create --use --name tent-builder
+
 jobs:
   unit_test:
     docker:
@@ -217,7 +224,7 @@ jobs:
           name: Docker release
           command: make ci-release-<< parameters.target >> ARCH=<< parameters.arch >> VERSION=${CIRCLE_TAG:-latest}
 
-  build-and-release-base:
+  release-base-digest:
     executor: machine
     parameters:
       arch:
@@ -230,13 +237,49 @@ jobs:
             equal: [arm64, << parameters.arch >>]
           steps:
             - setup_qemu
-      - run:
-          name: Docker build
-          command: make ci-ensure-base ARCH=<< parameters.arch >>
+      - setup_buildx
+      # push-digest pushes as part of the build, so log in first.
       - docker_login
       - run:
-          name: Docker release
-          command: make ci-release-base ARCH=<< parameters.arch >>
+          name: Docker build and push by digest
+          command: make ci-push-digest-base ARCH=<< parameters.arch >>
+      - run:
+          name: Docker check pushed digest
+          command: make ci-check-digest-base ARCH=<< parameters.arch >>
+      - persist_to_workspace:
+          root: .
+          paths:
+            - digests
+
+  release-base-merge:
+    executor: machine
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - setup_buildx
+      - docker_login
+      - run:
+          name: Docker merge multi-arch manifest
+          command: make ci-merge-base
+
+  verify-base:
+    executor: machine
+    parameters:
+      arch:
+        type: enum
+        enum: [amd64, arm64]
+    steps:
+      - checkout
+      - when:
+          condition:
+            equal: [arm64, << parameters.arch >>]
+          steps:
+            - setup_qemu
+      - setup_buildx
+      - run:
+          name: Docker build (no push) and check
+          command: make ci-verify-base ARCH=<< parameters.arch >>
 
   update-description:
     executor: scripts
@@ -292,27 +335,36 @@ workflows:
           arch: arm64
           requires: *all_checks
           filters: *release_filters
-      - build-and-release-base:
-          name: build-and-release-base-linux
+      - verify-base:
+          name: verify-base-linux
+          arch: amd64
+      - verify-base:
+          name: verify-base-macos
+          arch: arm64
+      - release-base-digest:
+          name: release-base-digest-linux
           arch: amd64
           requires: *all_checks
           filters: *release_filters
-      - build-and-release-base:
-          name: build-and-release-base-macos
+      - release-base-digest:
+          name: release-base-digest-macos
           arch: arm64
           requires: *all_checks
+          filters: *release_filters
+      - release-base-merge:
+          requires: [release-base-digest-linux, release-base-digest-macos]
           filters: *release_filters
       - build-and-release-image:
           name: build-and-release-tent-test-linux
           target: tent-test
           arch: amd64
-          requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks, build-and-release-base-linux]
+          requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks, release-base-merge]
           filters: *release_filters
       - build-and-release-image:
           name: build-and-release-tent-test-macos
           target: tent-test
           arch: arm64
-          requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks, build-and-release-base-macos]
+          requires: [unit_test, checks, dev_api_test, dev_api_checks, dev_frontend_test, dev_frontend_checks, release-base-merge]
           filters: *release_filters
       - update-description:
           requires: [build-and-release-linux, build-and-release-macos]
