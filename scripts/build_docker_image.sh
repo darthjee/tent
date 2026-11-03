@@ -32,15 +32,18 @@ EOF
 image_config() {
   local image="$1"
   EXTRA_BUILD_CONTEXT=""
-  # Base-specific check extras (empty for every other image).
+  # Per-image check extras (empty unless set in the image's branch below):
+  # extensions/composer for dev_tent-base, deploy tooling for tent.
   CHECK_EXTENSIONS=""
   CHECK_COMPOSER=""
+  CHECK_DEPLOY=""
 
   case "$image" in
     tent)
       DOCKERFILE="dockerfiles/tent/Dockerfile"
       CONTEXT="source"
       IMAGE_NAME="darthjee/tent"
+      CHECK_DEPLOY=true
       ;;
     tent-test)
       DOCKERFILE="dockerfiles/tent-test/Dockerfile"
@@ -147,6 +150,42 @@ if ($failures) {
 echo "Image check OK ($machine)\n";
 PHP
 
+# Deploy tooling contract for the tent image (darthjee/scripts 0.12.0):
+# ssh/rsync/bash on PATH, deploy_frontend.sh prints the 0.12.0 usage (stderr,
+# exit 1) with no action, and generate_key_file writes $HOME/ssh_key (mode
+# 600) as the image's default user. Runs without set -e so every failure is
+# collected and reported together.
+read -r -d '' CHECK_DEPLOY_SH <<'SH' || true
+failures=()
+
+for cmd in ssh rsync bash; do
+  command -v "$cmd" >/dev/null 2>&1 || failures+=("command not on PATH: $cmd")
+done
+
+# No action: 0.12.0 prints usage on stderr and exits 1 (expected, not a failure).
+output="$(deploy_frontend.sh 2>&1)"
+status=$?
+[ "$status" -eq 1 ] || failures+=("deploy_frontend.sh without action: expected exit 1, got $status")
+expected="Actions: generate_key_file build generate_folder copy_files upload link run release cleanup"
+grep -qxF "$expected" <<<"$output" || failures+=("deploy_frontend.sh usage does not list: $expected")
+
+# Smoke test as the image's default user: the key lands in a writable $HOME with mode 600.
+if SSH_PRIVATE_KEY=dummy deploy_frontend.sh generate_key_file; then
+  mode="$(stat -c %a "$HOME/ssh_key" 2>/dev/null)"
+  [ "$mode" = "600" ] || failures+=("\$HOME/ssh_key: expected mode 600, got ${mode:-missing}")
+else
+  failures+=("deploy_frontend.sh generate_key_file failed (HOME=$HOME, user=$(id -un))")
+fi
+
+if [ "${#failures[@]}" -gt 0 ]; then
+  printf 'Deploy check FAILED:\n' >&2
+  printf '  - %s\n' "${failures[@]}" >&2
+  exit 1
+fi
+
+echo "Deploy check OK ($(id -un))"
+SH
+
 check_image() {
   local image="$1"
   local arch="$2"
@@ -180,6 +219,15 @@ check_image() {
       --entrypoint composer \
       "$ref" \
       --version
+  fi
+
+  # No --user: the deploy check runs as the image's default user (app);
+  # --rm makes sure the dummy key never persists.
+  if [[ -n "$CHECK_DEPLOY" ]]; then
+    docker run --rm --platform "$PLATFORM" \
+      --entrypoint bash \
+      "$ref" \
+      -c "$CHECK_DEPLOY_SH"
   fi
 }
 
