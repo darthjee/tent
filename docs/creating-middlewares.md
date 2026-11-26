@@ -292,6 +292,8 @@ Caches responses to disk and serves them on subsequent requests. Caching behavio
 - `location` and `matchers` control *where* and *whether* a response is cached.
 - `request_hasher` (optional) controls *how the cache key is derived* — a `RequestHasher` configuration (`class` key), following the same strategy pattern as matchers. Defaults to `Tent\Cache\QueryRequestHasher` (hash of the query string) when omitted. See [Creating Request Hashers](guides/tent/creating-request-hashers.md) for writing a custom one.
 
+- A request can be excluded from caching entirely, either by the `skip_cache_header` handler option (driven by a client header) or by a middleware calling `$request->skipCache()` (proxy-internal, never a header). See [Bypass cache from a middleware](guides/tent/cache-configuration.md#bypass-cache-from-a-middleware).
+
 See [FileCacheMiddleware Matchers](file-cache-middleware-matchers.md) for detailed matcher configuration.
 
 ### `CacheCleanupMiddleware`
@@ -395,6 +397,8 @@ Middlewares are applied in the order they are listed in the configuration:
 Place middlewares that can short-circuit (like `FileCacheMiddleware`) **before** middlewares that modify the request, so cached responses are served without unnecessary processing.
 
 This ordering advice applies within a single `middlewares` list. If a middleware needs to run ahead of a handler's own built-in defaults — for example, before `default_proxy`'s `Host` header rewriting — `middlewares` can't help, since those entries are always appended *after* the handler's defaults. Use the sibling `prependMiddlewares` rule key instead; its entries run *before* the handler's default middlewares while `middlewares` keeps running after them, unchanged. See [Defining Rules](guides/tent/defining-rules.md) and [Request Handlers — Middleware Order](request-handlers.md#middleware-order).
+
+Cache guards, such as a middleware that calls `skipCache()`, belong in `prependMiddlewares`: only there do they run before the built-in `FileCacheMiddleware` and fully bypass the cache (read and write). See [Bypass cache from a middleware](guides/tent/cache-configuration.md#bypass-cache-from-a-middleware).
 
 ### Performance Considerations
 

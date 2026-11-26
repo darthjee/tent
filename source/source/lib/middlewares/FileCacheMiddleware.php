@@ -60,6 +60,9 @@ use Tent\Cache\QueryRequestHasher;
  *   {@see \Tent\Cache\QueryRequestHasher} when omitted.
  * - `skip_cache_header`: Optional header name that disables cache read/write when present in the
  *   request or response.
+ *   A middleware can also force a full bypass in-process by calling `$request->skipCache()`:
+ *   no read, no write, no eviction and no header is involved. On a `default_proxy` handler the
+ *   guard must be declared in `prependMiddlewares` for the read path to be bypassed.
  * - `require_cache_header`: Optional header name that must be present in the response for it to be
  *   cached. Only gates the cache write path; request-side presence is never checked.
  * - `mode`: Either `'deny'` (default) or `'allow'`, controlling how the four options below are
@@ -295,13 +298,21 @@ class FileCacheMiddleware extends Middleware
     }
 
     /**
-     * Checks whether cache read should be bypassed based on the incoming request headers.
+     * Checks whether the cache should be bypassed for the request.
+     *
+     * The proxy-internal flag ({@see RequestInterface::skipCache()}) always wins, even when no
+     * skip header is configured; otherwise the configured skip header is looked up in the request.
      *
      * @param RequestInterface $request Current request.
-     * @return boolean True when skip header is configured and present in the request, false otherwise.
+     * @return boolean True when the request was flagged, or the skip header is configured and
+     *                 present in the request; false otherwise.
      */
     private function shouldSkipCache(RequestInterface $request): bool
     {
+        if ($request->cacheSkipped()) {
+            return true;
+        }
+
         if ($this->skipCacheHeader === null) {
             return false;
         }

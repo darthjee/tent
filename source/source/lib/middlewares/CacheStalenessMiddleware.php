@@ -214,8 +214,9 @@ class CacheStalenessMiddleware extends Middleware
     /**
      * Detects staleness on a cache hit and schedules a background refresh when needed.
      *
-     * No-op when the request has no response set yet (i.e. no cache hit occurred),
-     * or when the cached entry is still fresh. The (already cached) response is
+     * No-op when the request was flagged with `skipCache()` (checked first, so no timestamp is
+     * read, no refresh is scheduled and nothing is evicted), when the request has no response
+     * set yet (i.e. no cache hit occurred), or when the cached entry is still fresh. The (already cached) response is
      * never modified by this middleware.
      *
      * @param ProcessingRequest $request The incoming processing request.
@@ -223,6 +224,10 @@ class CacheStalenessMiddleware extends Middleware
      */
     public function processRequest(ProcessingRequest $request): ProcessingRequest
     {
+        if ($request->cacheSkipped()) {
+            return $request;
+        }
+
         if (!$request->hasResponse()) {
             return $request;
         }

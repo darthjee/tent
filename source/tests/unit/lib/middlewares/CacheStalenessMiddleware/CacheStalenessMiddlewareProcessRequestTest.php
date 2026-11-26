@@ -344,6 +344,42 @@ class CacheStalenessMiddlewareProcessRequestTest extends TestCase
         $this->assertNotEmpty($evictions);
     }
 
+    public function testNoRefreshScheduledWhenCacheSkippedFlagIsSet()
+    {
+        $request = $this->buildStaleRequest();
+        $request->skipCache();
+
+        $scheduled = 0;
+        $middleware = new CacheStalenessMiddleware(
+            $this->location,
+            300,
+            'http://api:80',
+            $this->createMock(HttpClientInterface::class),
+            function (callable $task) use (&$scheduled) {
+                $scheduled++;
+                $task();
+            }
+        );
+        $middleware->processRequest($request);
+
+        $this->assertSame(0, $scheduled);
+        $this->assertEmpty(glob($this->cacheDir . '/*.refreshing'));
+        $this->assertEmpty(glob($this->cacheDir . '/**/*.refreshing'));
+    }
+
+    public function testNoRefreshNorEvictionWhenCacheSkippedFlagIsSetWithEvictOn()
+    {
+        $request = $this->buildStaleRequest();
+        $request->skipCache();
+
+        $httpClient = $this->createMock(HttpClientInterface::class);
+        $httpClient->expects($this->never())->method('request');
+
+        $this->buildEvictingMiddleware($httpClient, ['4xx'])->processRequest($request);
+
+        $this->assertTrue((new FileCache($request, $this->location))->exists());
+    }
+
     private function buildStaleRequest(): ProcessingRequest
     {
         $request = $this->buildRequest('/users', 'GET');

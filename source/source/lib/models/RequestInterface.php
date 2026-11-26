@@ -51,4 +51,21 @@ interface RequestInterface
      * @return string
      */
     public function domain(): string;
+
+    /**
+     * Marks this request so that the cache middlewares must not read, write or evict.
+     *
+     * The flag is proxy-internal and one-way: it can only be set, never cleared, and it
+     * is never serialized into a header. It is honoured by FileCacheMiddleware and
+     * CacheStalenessMiddleware.
+     *
+     * @return void
+     */
+    public function skipCache(): void;
+
+    /**
+     * Tells whether the cache was skipped for this request (see skipCache()).
+     * @return boolean
+     */
+    public function cacheSkipped(): bool;
 }

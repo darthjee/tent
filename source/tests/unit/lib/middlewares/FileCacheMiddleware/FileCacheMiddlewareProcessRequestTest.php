@@ -301,4 +301,42 @@ class FileCacheMiddlewareProcessRequestTest extends TestCase
         ]);
         (new FileCache($this->request, $this->location))->store($response);
     }
+
+    public function testProcessRequestSkipsReadWhenCacheSkippedFlagIsSet()
+    {
+        $this->request = $this->buildRequest('/file.txt', 'GET');
+        $this->buildCache();
+        $this->request->skipCache();
+
+        $result = $this->buildMiddleware()->processRequest($this->request);
+
+        $this->assertFalse($result->hasResponse());
+    }
+
+    public function testProcessRequestSkipsReadWhenFlagSetAndMatchersWouldPass()
+    {
+        $this->request = $this->buildRequest('/file.txt', 'GET');
+        $this->buildCache();
+        $this->request->skipCache();
+
+        $result = $this->buildMiddleware([
+            'matchers' => [
+                ['class' => \Tent\Matchers\RequestMethodMatcher::class, 'requestMethods' => ['GET']]
+            ]
+        ])->processRequest($this->request);
+
+        $this->assertFalse($result->hasResponse());
+        $this->assertTrue((new FileCache($this->request, $this->location))->exists());
+    }
+
+    public function testProcessRequestDoesNotEvictWhenCacheSkippedFlagIsSet()
+    {
+        $this->request = $this->buildRequest('/file.txt', 'GET');
+        $this->buildCacheWithCode(404);
+        $this->request->skipCache();
+
+        $this->buildMiddleware(['evictOn' => ['4xx']])->processRequest($this->request);
+
+        $this->assertTrue((new FileCache($this->request, $this->location))->exists());
+    }
 }

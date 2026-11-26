@@ -38,6 +38,7 @@ class ProcessingRequest implements RequestInterface
     private $postFields;
     private $domain;
     private $cacheHash;
+    private bool $cacheSkipped = false;
 
     /**
      * List of attributes that can be set via constructor params.
@@ -316,5 +317,25 @@ class ProcessingRequest implements RequestInterface
     public function setCacheHash(string $hash): string
     {
         return $this->cacheHash = $hash;
+    }
+
+    /**
+     * Marks this request as not to be cached (proxy-internal, one-way, never a header).
+     *
+     * @return void
+     */
+    public function skipCache(): void
+    {
+        $this->cacheSkipped = true;
+    }
+
+    /**
+     * Tells whether the cache was skipped for this request.
+     *
+     * @return boolean
+     */
+    public function cacheSkipped(): bool
+    {
+        return $this->cacheSkipped;
     }
 }

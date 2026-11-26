@@ -7,4 +7,5 @@ require_once __DIR__ . '/handlers/RequestToBodyHandler.php';
 require_once __DIR__ . '/middlewares/DummyRequestMiddleware.php';
 require_once __DIR__ . '/middlewares/DummyResponseMiddleware.php';
 require_once __DIR__ . '/middlewares/QuickResponseMiddleware.php';
+require_once __DIR__ . '/middlewares/SkipCacheMiddleware.php';
 require_once __DIR__ . '/cache/DummyRequestHasher.php';

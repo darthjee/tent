@@ -186,4 +186,19 @@ class RequestTest extends TestCase
 
         $this->assertEquals('', $request->domain());
     }
+
+    public function testCacheSkippedIsFalse()
+    {
+        $request = new Request();
+
+        $this->assertFalse($request->cacheSkipped());
+    }
+
+    public function testCacheSkippedStaysFalseAfterSkipCache()
+    {
+        $request = new Request();
+        $request->skipCache();
+
+        $this->assertFalse($request->cacheSkipped());
+    }
 }
