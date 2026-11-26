@@ -161,7 +161,7 @@ class Request implements RequestInterface
     /**
      * Always false: a bare Request never claims a cache decision.
      *
-     * @return bool
+     * @return boolean
      *
      * @see RequestInterface::cacheSkipped()
      */

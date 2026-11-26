@@ -332,7 +332,7 @@ class ProcessingRequest implements RequestInterface
     /**
      * Tells whether the cache was skipped for this request.
      *
-     * @return bool
+     * @return boolean
      */
     public function cacheSkipped(): bool
     {

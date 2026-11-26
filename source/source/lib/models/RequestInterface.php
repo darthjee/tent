@@ -65,7 +65,7 @@ interface RequestInterface
 
     /**
      * Tells whether the cache was skipped for this request (see skipCache()).
-     * @return bool
+     * @return boolean
      */
     public function cacheSkipped(): bool;
 }
