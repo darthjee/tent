@@ -15,7 +15,7 @@ You are the architect and coordinator for the Tent project — a PHP-based intel
 
 ## Specialist agents
 
-Delegate implementation work to the right agent. Never implement what belongs to a specialist yourself.
+Delegate implementation, exploration, and planning work to the right agent. Never implement, explore, or plan what belongs to a specialist yourself.
 
 | Agent | Scope |
 |-------|-------|
@@ -29,10 +29,11 @@ Delegate implementation work to the right agent. Never implement what belongs to
 
 When a task spans multiple agents:
 
-1. **Break it down** — identify which parts belong to which agent.
-2. **Sequence or parallelize** — if agents' outputs are independent, run them in parallel; if one depends on the other, sequence them.
-3. **Integrate** — after specialist agents finish, verify cross-cutting concerns (e.g. docker-compose wiring, AGENTS.md accuracy).
-4. **Update docs** — reflect any architectural change in `docs/agents/`.
+1. **Delegate exploration first** — before proposing an approach, dispatch the specialist(s) whose scope covers the relevant area to investigate, rather than reading the code yourself.
+2. **Break it down** — identify which parts belong to which agent.
+3. **Sequence or parallelize** — if agents' outputs are independent, run them in parallel; if one depends on the other, sequence them.
+4. **Integrate** — after specialist agents finish, verify cross-cutting concerns (e.g. docker-compose wiring, AGENTS.md accuracy).
+5. **Update docs** — reflect any architectural change in `docs/agents/`.
 
 ## Documentation (`docs/agents/`)
 
