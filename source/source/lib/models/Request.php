@@ -148,6 +148,29 @@ class Request implements RequestInterface
     }
 
     /**
+     * No-op: a bare Request never records a cache decision.
+     *
+     * @return void
+     *
+     * @see RequestInterface::skipCache()
+     */
+    public function skipCache(): void
+    {
+    }
+
+    /**
+     * Always false: a bare Request never claims a cache decision.
+     *
+     * @return bool
+     *
+     * @see RequestInterface::cacheSkipped()
+     */
+    public function cacheSkipped(): bool
+    {
+        return false;
+    }
+
+    /**
      * Helper method to get the full request URI.
      *
      * @return string The full request URI
