@@ -3,6 +3,7 @@
 namespace Tent\Service;
 
 use Tent\Content\FileCache;
+use Tent\Content\EvictionPolicy;
 use Tent\Content\HeaderFilter;
 use Tent\Http\HttpClientInterface;
 use Tent\Log\Logger;
@@ -55,27 +56,37 @@ class BackgroundRefresher
     private ?HeaderFilter $headerFilter;
 
     /**
-     * @param RequestInterface    $request      The request to replay against the upstream server.
-     * @param FileCache           $cache        The cache entry to refresh.
-     * @param string              $host         Base URL of the upstream server (e.g. 'http://api:80').
-     * @param HttpClientInterface $httpClient   The HTTP client used to perform the upstream request.
-     * @param HeaderFilter|null   $headerFilter Optional filter applied to the refreshed response's
-     *                                          headers before it is re-stored in cache. Should
-     *                                          normally match the `HeaderFilter` configured on the
-     *                                          `FileCacheMiddleware` for the same cache location.
+     * @var EvictionPolicy Decides which non-successful upstream codes evict the stale entry.
+     */
+    private EvictionPolicy $evictionPolicy;
+
+    /**
+     * @param RequestInterface    $request        The request to replay against the upstream server.
+     * @param FileCache           $cache          The cache entry to refresh.
+     * @param string              $host           Base URL of the upstream server (e.g. 'http://api:80').
+     * @param HttpClientInterface $httpClient     The HTTP client used to perform the upstream request.
+     * @param HeaderFilter|null   $headerFilter   Optional filter applied to the refreshed response's
+     *                                            headers before it is re-stored in cache. Should
+     *                                            normally match the `HeaderFilter` configured on the
+     *                                            `FileCacheMiddleware` for the same cache location.
+     * @param EvictionPolicy|null $evictionPolicy Optional policy listing the upstream status codes
+     *                                          that evict the stale entry. Defaults to an empty
+     *                                          policy (never evicts).
      */
     public function __construct(
         RequestInterface $request,
         FileCache $cache,
         string $host,
         HttpClientInterface $httpClient,
-        ?HeaderFilter $headerFilter = null
+        ?HeaderFilter $headerFilter = null,
+        ?EvictionPolicy $evictionPolicy = null
     ) {
         $this->request = $request;
         $this->cache = $cache;
         $this->host = rtrim($host, '/');
         $this->httpClient = $httpClient;
         $this->headerFilter = $headerFilter;
+        $this->evictionPolicy = $evictionPolicy ?? new EvictionPolicy();
     }
 
     /**
@@ -110,8 +121,8 @@ class BackgroundRefresher
     /**
      * Performs the upstream refresh request and re-stores the result into the cache.
      *
-     * The stale entry is only removed and replaced when the upstream response is
-     * successful (2xx). Otherwise, the stale entry is kept so it can keep being served.
+     * The stale entry is replaced when the upstream response is successful (2xx), removed
+     * when its status code matches the eviction policy, and kept otherwise.
      *
      * @param string $uri The request path being refreshed (used for logging).
      * @return void
@@ -122,6 +133,8 @@ class BackgroundRefresher
 
         if ($response->isSuccessful()) {
             $this->replaceCache($response);
+        } elseif ($this->evictionPolicy->evicts($response->httpCode())) {
+            $this->evictCache($uri, $response);
         } else {
             $this->keepStaleCache($uri, $response);
         }
@@ -144,6 +157,22 @@ class BackgroundRefresher
     {
         $this->cache->remove();
         (new ResponseCacher($this->cache, $response, $this->headerFilter))->process();
+    }
+
+    /**
+     * Removes the stale entry because the upstream response matched the eviction policy.
+     *
+     * @param string   $uri      The request path being refreshed (used for logging).
+     * @param Response $response The fresh, unsuccessful upstream response.
+     * @return void
+     */
+    private function evictCache(string $uri, Response $response): void
+    {
+        $this->cache->remove();
+        Logger::warn(
+            '[' . $response->httpCode() . '] - background cache refresh got an evictable response, ' .
+            'evicting cache entry — uri: ' . $uri
+        );
     }
 
     /**

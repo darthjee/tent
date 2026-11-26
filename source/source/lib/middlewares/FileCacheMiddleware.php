@@ -4,6 +4,7 @@ namespace Tent\Middlewares;
 
 use Tent\Models\ProcessingRequest;
 use Tent\Models\FolderLocation;
+use Tent\Content\EvictionPolicy;
 use Tent\Content\FileCache;
 use Tent\Content\HeaderFilter;
 use Tent\Content\HeaderFilterBuilder;
@@ -73,6 +74,10 @@ use Tent\Cache\QueryRequestHasher;
  * - `allowed_headers` *(allow mode)*: Explicit, complete list of the only headers kept in cache
  *   storage; everything else is stripped. Required and non-empty when `mode` is `'allow'` — an
  *   empty/missing list throws `\InvalidArgumentException`.
+ * - `evictOn` (or `evict_on`): Optional list of status codes or wildcard patterns (e.g.
+ *   `['4xx', 500]`). A cached entry whose stored status matches is removed and treated as a miss
+ *   on read, and a response whose status matches is never stored (any existing entry for the key
+ *   is removed). Defaults to `[]` (disabled). Invalid values throw `\InvalidArgumentException`.
  *
  * `skip_cache_header`/`require_cache_header` gate whether a response is cached **at all**; the
  * `mode`/`excluded_headers`/`additional_excluded_headers`/`allowed_headers` options instead
@@ -114,6 +119,11 @@ class FileCacheMiddleware extends Middleware
     private HeaderFilter $headerFilter;
 
     /**
+     * @var EvictionPolicy Status codes that are never served from, nor written to, the cache.
+     */
+    private EvictionPolicy $evictionPolicy;
+
+    /**
      * Constructs a FileCacheMiddleware instance.
      *
      * @param FolderLocation     $location                  The base folder location for caching.
@@ -131,7 +141,10 @@ class FileCacheMiddleware extends Middleware
      * @param array|null         $allowedHeaders            Allow mode: explicit, complete list of the
      *                                                      only headers kept in cache storage.
      * @param string             $mode                      Either 'deny' (default) or 'allow'.
-     * @throws \InvalidArgumentException If $mode is invalid, or 'allow' mode has an empty/missing list.
+     * @param array|null         $evictOn                   Status codes/patterns that evict a cached
+     *                                                      entry on read and block caching on write.
+     * @throws \InvalidArgumentException If $mode is invalid, 'allow' mode has an empty/missing list,
+     *                                   or $evictOn has invalid entries.
      */
     public function __construct(
         FolderLocation $location,
@@ -142,7 +155,8 @@ class FileCacheMiddleware extends Middleware
         ?array $excludedHeaders = null,
         ?array $additionalExcludedHeaders = null,
         ?array $allowedHeaders = null,
-        string $mode = 'deny'
+        string $mode = 'deny',
+        ?array $evictOn = null
     ) {
         $this->location = $location;
 
@@ -156,6 +170,7 @@ class FileCacheMiddleware extends Middleware
             $additionalExcludedHeaders,
             $allowedHeaders
         );
+        $this->evictionPolicy = EvictionPolicy::build($evictOn);
     }
 
     /**
@@ -175,6 +190,11 @@ class FileCacheMiddleware extends Middleware
         $excludedHeaders = $attributes['excluded_headers'] ?? null;
         $additionalExcludedHeaders = $attributes['additional_excluded_headers'] ?? null;
         $allowedHeaders = $attributes['allowed_headers'] ?? null;
+        $evictOn = $attributes['evictOn'] ?? $attributes['evict_on'] ?? null;
+
+        if ($evictOn !== null && !is_array($evictOn)) {
+            throw new \InvalidArgumentException('evictOn must be an array');
+        }
 
         return new self(
             $location,
@@ -185,7 +205,8 @@ class FileCacheMiddleware extends Middleware
             $excludedHeaders,
             $additionalExcludedHeaders,
             $allowedHeaders,
-            $mode
+            $mode,
+            $evictOn
         );
     }
 
@@ -215,6 +236,11 @@ class FileCacheMiddleware extends Middleware
 
         $cache = new FileCache($request, $this->location, $this->requestHasher);
 
+        if ($cache->exists() && $this->evictionPolicy->evicts($cache->httpCode())) {
+            $cache->remove();
+            return $request;
+        }
+
         if ($cache->exists()) {
             $reader = new ResponseContentReader($request, $cache);
             $response = $reader->getResponse();
@@ -239,8 +265,14 @@ class FileCacheMiddleware extends Middleware
             return $response;
         }
 
+        $cache = new FileCache($response->request(), $this->location, $this->requestHasher);
+
+        if ($this->evictionPolicy->evicts($response->httpCode())) {
+            $cache->remove();
+            return $response;
+        }
+
         if ($this->isCacheable($response)) {
-            $cache = new FileCache($response->request(), $this->location, $this->requestHasher);
             (new ResponseCacher($cache, $response, $this->headerFilter))->process();
         }
         return $response;

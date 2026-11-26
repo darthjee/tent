@@ -50,11 +50,48 @@ Matchers inside `FileCacheMiddleware` control which responses are stored. **All*
 ['class' => 'Tent\Matchers\RequestMethodMatcher', 'requestMethods' => ['GET', 'HEAD']]
 ```
 
+### Evicting error responses (`evictOn`)
+
+`FileCacheMiddleware` accepts an optional `evictOn` (or `evict_on`) list of status codes or wildcard patterns. It is **disabled by default** (`[]`).
+
+```php
+[
+    'class' => 'Tent\Middlewares\FileCacheMiddleware',
+    'location' => './cache',
+    'evictOn' => ['4xx', 500]
+]
+```
+
+- On read, a cached entry whose stored status matches is removed and treated as a cache miss, so the request goes upstream.
+- On write, a response whose status matches is not stored, and any existing entry for the same key is removed.
+- Invalid values (a non-array, or entries that are neither an integer nor a pattern such as `4xx`) throw `\InvalidArgumentException` when the middleware is built.
+
 ### Cache file structure
 
 Cache files are named from a hash of the request path. Each unique URI maps to a unique cache file. The `location` directory is created automatically if it does not exist.
 
 > **Note**: There is no built-in cache expiry. To clear the cache, delete the files in the `location` directory.
+
+---
+
+## `CacheStalenessMiddleware`
+
+Serves stale cache hits immediately and refreshes the entry in the background. Configure it **after** `FileCacheMiddleware`, with the same `location`.
+
+```php
+[
+    'class' => 'Tent\Middlewares\CacheStalenessMiddleware',
+    'location' => './cache',
+    'host' => 'http://api:80',
+    'maxAgeSeconds' => 300,
+    'evictOn' => ['4xx']
+]
+```
+
+- **`location`**, **`host`**, **`maxAgeSeconds`** (or `max_age_seconds`) — see above; the header-filter options (`mode`, `excluded_headers`, `additional_excluded_headers`, `allowed_headers`) are also accepted.
+- **`evictOn`** (or `evict_on`, camelCase wins) — optional list of status codes or wildcard patterns. When a background refresh receives a non-2xx response matching the list, the cache entry is removed instead of kept. Defaults to `[]` (disabled): non-2xx refresh responses keep the stale entry. Network errors or exceptions during the refresh **never** evict. Invalid values throw `\InvalidArgumentException` when the middleware is built.
+
+Use the same `evictOn` list on both `FileCacheMiddleware` and `CacheStalenessMiddleware` for a given `location`, so the read/write policy and the refresh policy stay consistent.
 
 ---
 

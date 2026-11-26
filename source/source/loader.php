@@ -78,6 +78,7 @@ require_once __DIR__ . '/lib/utils/CacheFilePath.php';
 require_once __DIR__ . '/lib/utils/CurlUtils.php';
 require_once __DIR__ . '/lib/utils/ContentType.php';
 require_once __DIR__ . '/lib/utils/HttpCodeMatcher.php';
+require_once __DIR__ . '/lib/content/EvictionPolicy.php';
 require_once __DIR__ . '/lib/utils/StringUtils.php';
 require_once __DIR__ . '/lib/validators/RequestPathValidator.php';
 
