@@ -256,4 +256,4 @@ In the default development setup, cache files are stored in `docker_volumes/cach
 
 Cached files are named based on a hash of the request path, ensuring that each unique URL maps to a unique cache file. The directory is created automatically if it does not exist.
 
-> **Note**: There is currently no built-in cache expiry or invalidation mechanism. To clear the cache, delete the files in the configured `location` directory.
+> **Note**: Cached entries do not expire on their own, but there are built-in ways to remove or refresh them: `evictOn` on `FileCacheMiddleware` (status-based eviction), `CacheStalenessMiddleware` (background refresh of stale entries) and `CacheCleanupMiddleware` (invalidation on mutating methods). To clear the cache manually, delete the files in the configured `location` directory.

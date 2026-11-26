@@ -69,6 +69,56 @@ Configuration::buildRule([
 ]);
 ```
 
+## Bypass cache from a middleware
+
+A custom middleware can bypass the cache for a single request by calling `skipCache()` on the `ProcessingRequest`. The flag is proxy-internal: it is one-way (it cannot be cleared), it is never sent as a header to the upstream or the client, and it cannot be set from configuration.
+
+```php
+use Tent\Middlewares\Middleware;
+use Tent\Models\ProcessingRequest;
+
+class SkipCacheForAdminsMiddleware extends Middleware
+{
+    public static function build(array $attributes): self
+    {
+        return new self();
+    }
+
+    public function processRequest(ProcessingRequest $request): ProcessingRequest
+    {
+        if (str_starts_with($request->requestPath(), '/admin/')) {
+            $request->skipCache();
+        }
+
+        return $request;
+    }
+}
+```
+
+Declare the guard in `prependMiddlewares` so it runs before the handler's built-in `FileCacheMiddleware`:
+
+```php
+Configuration::buildRule([
+    'handler' => [
+        'type'  => 'default_proxy',
+        'host'  => 'http://api:3000',
+        'cache' => './cache/api'
+    ],
+    'prependMiddlewares' => [
+        ['class' => 'SkipCacheForAdminsMiddleware']
+    ],
+    'matchers' => [
+        ['method' => 'GET', 'uri' => '/', 'type' => 'begins_with']
+    ]
+]);
+```
+
+When the flag is set, `FileCacheMiddleware` performs no cache read, no cache write and no `evictOn` eviction, and `CacheStalenessMiddleware` schedules no background refresh. `CacheCleanupMiddleware` ignores the flag.
+
+**Placement matters.** A full bypass (no read and no write) works only from `prependMiddlewares`. If the guard is declared in `middlewares`, it runs after the built-in `FileCacheMiddleware`, which short-circuits the chain on a cache hit; in that position only the write is skipped on a `default_proxy` handler.
+
+> **Warning**: every flagged request goes upstream. If your trigger is client-controllable, so is the bypass, and a client can use it to amplify load on your backend.
+
 ## Require header before caching
 
 When you only want to cache responses that opt in explicitly, configure `require_cache_header`. It is the write-only counterpart to `skip_cache_header`: it only checks the **response**, never the request, and gates the cache write — a response is only stored when the configured header is present in it:
