@@ -491,4 +491,72 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
             'evictOn' => $evictOn,
         ]);
     }
+
+    public function testProcessResponseDoesNotStoreWhenCacheSkippedFlagIsSet()
+    {
+        $response = $this->buildResponse(200);
+        $this->request->skipCache();
+
+        $this->buildMiddleware()->processResponse($response);
+
+        $this->assertFalse((new FileCache($this->request, $this->location))->exists());
+    }
+
+    public function testProcessResponseKeepsExistingEntryWhenCacheSkippedFlagIsSet()
+    {
+        $this->buildMiddleware()->processResponse($this->buildResponse(200));
+        $before = new FileCache($this->request, $this->location);
+        $timestamp = $before->timestamp();
+
+        $response = new Response([
+            'body' => 'new body', 'httpCode' => 200, 'headers' => $this->headers,
+            'request' => $this->request
+        ]);
+        $this->request->skipCache();
+        $this->buildMiddleware()->processResponse($response);
+
+        $after = new FileCache($this->request, $this->location);
+        $this->assertEquals('cached body', $after->content());
+        $this->assertEquals($timestamp, $after->timestamp());
+    }
+
+    public function testProcessResponseStoresNothingWithRequireCacheHeaderWhenFlagIsSet()
+    {
+        $response = $this->buildResponse(200, [], ['X-Cache-Allow: 1']);
+        $this->request->skipCache();
+
+        FileCacheMiddleware::build([
+            'location' => $this->cacheDir,
+            'require_cache_header' => 'X-Cache-Allow',
+            'matchers' => [
+                ['class' => \Tent\Matchers\StatusCodeMatcher::class, 'httpCodes' => [200]]
+            ],
+        ])->processResponse($response);
+
+        $this->assertFalse((new FileCache($this->request, $this->location))->exists());
+        $this->assertEquals($this->headers, $response->headers());
+    }
+
+    public function testProcessResponseDoesNotEvictWhenCacheSkippedFlagIsSet()
+    {
+        $this->buildEvictingMiddleware(['4xx'])->processResponse($this->buildResponse(200));
+        $response = $this->buildResponse(401);
+        $this->request->skipCache();
+
+        $this->buildEvictingMiddleware(['4xx'])->processResponse($response);
+
+        $this->assertTrue((new FileCache($this->request, $this->location))->exists());
+    }
+
+    public function testProcessResponseWithBareRequestFallbackBehavesAsBefore()
+    {
+        $response = new Response(['body' => 'cached body', 'httpCode' => 200, 'headers' => []]);
+
+        $middleware = FileCacheMiddleware::build([
+            'location' => $this->cacheDir,
+            'require_cache_header' => 'X-Cache-Allow',
+        ]);
+
+        $this->assertSame($response, $middleware->processResponse($response));
+    }
 }
