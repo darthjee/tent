@@ -1,3 +1,6 @@
 {
-  "version": "2.4.0"
+  "version": "2.4.0",
+  "auto-fix-all": {
+    "ignored_check_patterns": ["Codacy"]
+  }
 }
