@@ -135,7 +135,7 @@ Configuration::buildRule([
 
 `skip_cache_header`/`require_cache_header` decide **whether** a response is cached at all; `mode`/`excluded_headers`/`additional_excluded_headers`/`allowed_headers` decide which headers are stripped from what gets stored once a response is being cached — the two are independent and can be combined freely. See [Request Handlers](../../request-handlers.md#defaultproxyrequesthandler-default_proxy) for the full option table, including how `excluded_headers` fully overrides the default list and why an empty `allowed_headers` throws.
 
-If you also use `CacheStalenessMiddleware` (see [Middlewares](./middlewares.md)) for the same `location`, configure it with the same header-filtering options — its background-refresh writes go through the same filter and should stay consistent with `FileCacheMiddleware`'s configuration.
+If you also use `CacheStalenessMiddleware` (see [Middlewares](./middlewares.md)) for the same `location`, configure it with the same header-filtering options — its background-refresh writes go through the same filter and should stay consistent with `FileCacheMiddleware`'s configuration. The same applies to `evictOn` (or `evict_on`): use matching lists on both middlewares so that entries evicted on read/write by `FileCacheMiddleware` and entries evicted after a failed background refresh follow the same rule. It is disabled by default, and refresh exceptions never evict.
 
 ## Manual `FileCacheMiddleware` setup
 
