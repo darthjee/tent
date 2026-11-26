@@ -269,6 +269,115 @@ class CacheStalenessMiddlewareProcessRequestTest extends TestCase
         $this->assertSame('stale body', $result->response()->body());
     }
 
+    public function testEvictsEntryWhenRefreshMatchesEvictOn()
+    {
+        $request = $this->buildStaleRequest();
+        $middleware = $this->buildEvictingMiddleware($this->clientReturning(404), ['4xx']);
+        $middleware->processRequest($request);
+
+        $this->assertFalse((new FileCache($request, $this->location))->exists());
+    }
+
+    public function testEvictsEntryOnWildcardFamily()
+    {
+        $request = $this->buildStaleRequest();
+        $middleware = $this->buildEvictingMiddleware($this->clientReturning(410), ['4xx']);
+        $middleware->processRequest($request);
+
+        $this->assertFalse((new FileCache($request, $this->location))->exists());
+    }
+
+    public function testKeepsEntryWhenCodeDoesNotMatchEvictOn()
+    {
+        $request = $this->buildStaleRequest();
+        $middleware = $this->buildEvictingMiddleware($this->clientReturning(500), ['4xx']);
+        $middleware->processRequest($request);
+
+        $this->assertEquals('stale body', (new FileCache($request, $this->location))->content());
+    }
+
+    public function testKeepsEntryByDefaultOn4xx()
+    {
+        $request = $this->buildStaleRequest();
+        $middleware = $this->buildMiddleware($this->clientReturning(404), 300);
+        $middleware->processRequest($request);
+
+        $this->assertEquals('stale body', (new FileCache($request, $this->location))->content());
+    }
+
+    public function testDoesNotEvictWhenRefreshThrows()
+    {
+        $request = $this->buildStaleRequest();
+        $httpClient = $this->createMock(HttpClientInterface::class);
+        $httpClient->method('request')->willThrowException(new \RuntimeException('down'));
+
+        $middleware = $this->buildEvictingMiddleware($httpClient, ['4xx', '5xx']);
+        $middleware->processRequest($request);
+
+        $this->assertEquals('stale body', (new FileCache($request, $this->location))->content());
+    }
+
+    public function testSentinelIsRemovedAfterEviction()
+    {
+        $request = $this->buildStaleRequest();
+        $middleware = $this->buildEvictingMiddleware($this->clientReturning(404), ['4xx']);
+        $middleware->processRequest($request);
+
+        $cache = new FileCache($request, $this->location);
+        $this->assertFileDoesNotExist($cache->metaFilePath() . '.refreshing');
+    }
+
+    public function testEvictionLogsWarningWithCode()
+    {
+        $request = $this->buildStaleRequest();
+        $logger = $this->createMock(LoggerInstance::class);
+        $messages = [];
+        $logger->method('log')->willReturnCallback(function ($message, $level) use (&$messages) {
+            $messages[] = $message;
+        });
+        Logger::setInstance($logger);
+
+        $middleware = $this->buildEvictingMiddleware($this->clientReturning(404), ['4xx']);
+        $middleware->processRequest($request);
+
+        $evictions = array_filter($messages, fn($m) => str_contains($m, '[404]') && str_contains($m, 'evict'));
+        $this->assertNotEmpty($evictions);
+    }
+
+    private function buildStaleRequest(): ProcessingRequest
+    {
+        $request = $this->buildRequest('/users', 'GET');
+        $this->storeCache($request, 'stale body', time() - 1000);
+        $this->setResponseOnRequest($request, 'stale body');
+        return $request;
+    }
+
+    private function clientReturning(int $httpCode): HttpClientInterface
+    {
+        $httpClient = $this->createMock(HttpClientInterface::class);
+        $httpClient->method('request')
+            ->willReturn(['body' => 'error body', 'httpCode' => $httpCode, 'headers' => []]);
+        return $httpClient;
+    }
+
+    private function buildEvictingMiddleware(HttpClientInterface $httpClient, array $evictOn): CacheStalenessMiddleware
+    {
+        return new CacheStalenessMiddleware(
+            $this->location,
+            300,
+            'http://api:80',
+            $httpClient,
+            function (callable $task) {
+                $task();
+            },
+            null,
+            null,
+            null,
+            'deny',
+            $evictOn
+        );
+    }
+
     private function buildMiddleware(HttpClientInterface $httpClient, int $maxAgeSeconds): CacheStalenessMiddleware
     {
         return new CacheStalenessMiddleware(

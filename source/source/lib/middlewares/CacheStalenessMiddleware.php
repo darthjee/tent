@@ -2,6 +2,7 @@
 
 namespace Tent\Middlewares;
 
+use Tent\Content\EvictionPolicy;
 use Tent\Content\FileCache;
 use Tent\Content\HeaderFilter;
 use Tent\Content\HeaderFilterBuilder;
@@ -69,6 +70,13 @@ use Tent\Service\BackgroundRefresher;
  * to match `FileCacheMiddleware`'s configuration for the same `location`, to avoid inconsistent
  * header filtering between a direct cache write and a background-refresh write of the same
  * cache entry.
+ *
+ * ## Eviction on failed refresh
+ *
+ * By default a non-successful (non-2xx) refresh response keeps the stale entry. Configure
+ * `evictOn` (or `evict_on`) with a list of status codes or wildcard patterns (e.g. `['4xx', 500]`)
+ * to remove the cache entry when the upstream answers with a matching code. Exceptions
+ * (network failures) never evict. Defaults to `[]` (never evict).
  */
 class CacheStalenessMiddleware extends Middleware
 {
@@ -110,6 +118,11 @@ class CacheStalenessMiddleware extends Middleware
     private HeaderFilter $headerFilter;
 
     /**
+     * @var EvictionPolicy Status codes that evict the cache entry when a refresh gets them.
+     */
+    private EvictionPolicy $evictionPolicy;
+
+    /**
      * @param FolderLocation           $location                  Base folder location for caching.
      * @param integer                  $maxAgeSeconds             Maximum age, in seconds, before
      *                                                            staleness.
@@ -127,7 +140,11 @@ class CacheStalenessMiddleware extends Middleware
      *                                                            list of the only headers kept in
      *                                                            cache storage.
      * @param string                   $mode                      Either 'deny' (default) or 'allow'.
-     * @throws \InvalidArgumentException If $mode is invalid, or 'allow' mode has an empty/missing list.
+     * @param array|null               $evictOn                   Status codes/patterns (e.g. '4xx')
+     *                                                            that evict the entry when a refresh
+     *                                                            receives them. Defaults to none.
+     * @throws \InvalidArgumentException If $mode is invalid, 'allow' mode has an empty/missing list,
+     *                                   or $evictOn has invalid entries.
      */
     public function __construct(
         FolderLocation $location,
@@ -138,7 +155,8 @@ class CacheStalenessMiddleware extends Middleware
         ?array $excludedHeaders = null,
         ?array $additionalExcludedHeaders = null,
         ?array $allowedHeaders = null,
-        string $mode = 'deny'
+        string $mode = 'deny',
+        ?array $evictOn = null
     ) {
         $this->location = $location;
         $this->maxAgeSeconds = $maxAgeSeconds;
@@ -151,6 +169,7 @@ class CacheStalenessMiddleware extends Middleware
             $additionalExcludedHeaders,
             $allowedHeaders
         );
+        $this->evictionPolicy = EvictionPolicy::build($evictOn);
     }
 
     /**
@@ -158,7 +177,9 @@ class CacheStalenessMiddleware extends Middleware
      *
      * @param array $attributes Must include `location`, `host` and `maxAgeSeconds`
      *                          (or `max_age_seconds`). Optionally `mode`, `excluded_headers`,
-     *                          `additional_excluded_headers`, `allowed_headers`.
+     *                          `additional_excluded_headers`, `allowed_headers`,
+     *                          `evictOn` (or `evict_on`).
+     * @throws \InvalidArgumentException If `evictOn` is not an array or has invalid entries.
      * @return CacheStalenessMiddleware
      */
     public static function build(array $attributes): CacheStalenessMiddleware
@@ -170,6 +191,11 @@ class CacheStalenessMiddleware extends Middleware
         $excludedHeaders = $attributes['excluded_headers'] ?? null;
         $additionalExcludedHeaders = $attributes['additional_excluded_headers'] ?? null;
         $allowedHeaders = $attributes['allowed_headers'] ?? null;
+        $evictOn = $attributes['evictOn'] ?? $attributes['evict_on'] ?? null;
+
+        if ($evictOn !== null && !is_array($evictOn)) {
+            throw new \InvalidArgumentException('evictOn must be an array');
+        }
 
         return new self(
             $location,
@@ -180,7 +206,8 @@ class CacheStalenessMiddleware extends Middleware
             $excludedHeaders,
             $additionalExcludedHeaders,
             $allowedHeaders,
-            $mode
+            $mode,
+            $evictOn
         );
     }
 
@@ -256,7 +283,14 @@ class CacheStalenessMiddleware extends Middleware
      */
     private function scheduleRefresh(ProcessingRequest $request, FileCache $cache, string $sentinel): void
     {
-        $refresher = new BackgroundRefresher($request, $cache, $this->host, $this->httpClient, $this->headerFilter);
+        $refresher = new BackgroundRefresher(
+            $request,
+            $cache,
+            $this->host,
+            $this->httpClient,
+            $this->headerFilter,
+            $this->evictionPolicy
+        );
 
         ($this->scheduler)(function () use ($refresher, $sentinel) {
             try {

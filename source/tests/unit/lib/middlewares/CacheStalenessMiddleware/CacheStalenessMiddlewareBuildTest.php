@@ -201,4 +201,73 @@ class CacheStalenessMiddlewareBuildTest extends TestCase
         $property->setAccessible(true);
         return $property->getValue($middleware);
     }
+
+    public function testBuildDefaultsToEmptyEvictionPolicy()
+    {
+        $middleware = CacheStalenessMiddleware::build($this->attributes());
+
+        $this->assertTrue($this->evictionPolicy($middleware)->isEmpty());
+    }
+
+    public function testBuildParsesEvictOn()
+    {
+        $middleware = CacheStalenessMiddleware::build($this->attributes(['evictOn' => ['4xx']]));
+
+        $this->assertTrue($this->evictionPolicy($middleware)->evicts(404));
+        $this->assertFalse($this->evictionPolicy($middleware)->evicts(500));
+    }
+
+    public function testBuildParsesSnakeCaseEvictOn()
+    {
+        $middleware = CacheStalenessMiddleware::build($this->attributes(['evict_on' => [500]]));
+
+        $this->assertTrue($this->evictionPolicy($middleware)->evicts(500));
+    }
+
+    public function testBuildCamelCaseEvictOnWins()
+    {
+        $middleware = CacheStalenessMiddleware::build(
+            $this->attributes(['evictOn' => [404], 'evict_on' => [500]])
+        );
+
+        $this->assertTrue($this->evictionPolicy($middleware)->evicts(404));
+        $this->assertFalse($this->evictionPolicy($middleware)->evicts(500));
+    }
+
+    public function testBuildExplicitEmptyEvictOnNeverEvicts()
+    {
+        $middleware = CacheStalenessMiddleware::build($this->attributes(['evictOn' => []]));
+
+        $this->assertTrue($this->evictionPolicy($middleware)->isEmpty());
+    }
+
+    public function testBuildThrowsWhenEvictOnIsNotAnArray()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        CacheStalenessMiddleware::build($this->attributes(['evictOn' => '4xx']));
+    }
+
+    public function testBuildThrowsWhenEvictOnHasInvalidEntry()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        CacheStalenessMiddleware::build($this->attributes(['evictOn' => ['abc']]));
+    }
+
+    private function attributes(array $extra = []): array
+    {
+        return array_merge([
+            'location' => '/tmp/cache',
+            'host' => 'http://api:80',
+            'maxAgeSeconds' => 300,
+        ], $extra);
+    }
+
+    private function evictionPolicy(CacheStalenessMiddleware $middleware)
+    {
+        $property = (new \ReflectionClass($middleware))->getProperty('evictionPolicy');
+        $property->setAccessible(true);
+        return $property->getValue($middleware);
+    }
 }
