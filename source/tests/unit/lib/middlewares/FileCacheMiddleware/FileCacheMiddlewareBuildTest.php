@@ -202,4 +202,54 @@ class FileCacheMiddlewareBuildTest extends TestCase
         $property->setAccessible(true);
         return $property->getValue($middleware);
     }
+
+    public function testBuildDefaultsEvictionPolicyToDisabled()
+    {
+        $middleware = FileCacheMiddleware::build(['location' => '/tmp/cache']);
+
+        $this->assertTrue($this->getEvictionPolicy($middleware)->isEmpty());
+    }
+
+    public function testBuildParsesEvictOn()
+    {
+        $middleware = FileCacheMiddleware::build(['location' => '/tmp/cache', 'evictOn' => ['4xx']]);
+
+        $this->assertTrue($this->getEvictionPolicy($middleware)->evicts(404));
+    }
+
+    public function testBuildParsesSnakeCaseEvictOn()
+    {
+        $middleware = FileCacheMiddleware::build(['location' => '/tmp/cache', 'evict_on' => [500]]);
+
+        $this->assertTrue($this->getEvictionPolicy($middleware)->evicts(500));
+    }
+
+    public function testBuildExplicitEmptyEvictOnIsDisabled()
+    {
+        $middleware = FileCacheMiddleware::build(['location' => '/tmp/cache', 'evictOn' => []]);
+
+        $this->assertTrue($this->getEvictionPolicy($middleware)->isEmpty());
+    }
+
+    public function testBuildThrowsWhenEvictOnIsNotAnArray()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        FileCacheMiddleware::build(['location' => '/tmp/cache', 'evictOn' => '4xx']);
+    }
+
+    public function testBuildThrowsWhenEvictOnHasInvalidEntry()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        FileCacheMiddleware::build(['location' => '/tmp/cache', 'evictOn' => ['abc']]);
+    }
+
+    private function getEvictionPolicy(FileCacheMiddleware $middleware)
+    {
+        $reflection = new \ReflectionClass($middleware);
+        $property = $reflection->getProperty('evictionPolicy');
+        $property->setAccessible(true);
+        return $property->getValue($middleware);
+    }
 }

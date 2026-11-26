@@ -246,4 +246,59 @@ class FileCacheMiddlewareProcessRequestTest extends TestCase
         $cache = new FileCache($this->request, $this->location);
         $cache->store($this->response);
     }
+
+    public function testProcessRequestTreatsEvictedStoredCodeAsMiss()
+    {
+        $this->path = '/file.txt';
+        $this->request = $this->buildRequest($this->path, 'GET');
+        $this->buildCacheWithCode(404);
+
+        $result = $this->buildMiddleware(['evictOn' => ['4xx']])->processRequest($this->request);
+
+        $this->assertFalse($result->hasResponse());
+    }
+
+    public function testProcessRequestRemovesEvictedEntryFiles()
+    {
+        $this->path = '/file.txt';
+        $this->request = $this->buildRequest($this->path, 'GET');
+        $this->buildCacheWithCode(404);
+
+        $this->buildMiddleware(['evictOn' => ['4xx']])->processRequest($this->request);
+
+        $this->assertFalse((new FileCache($this->request, $this->location))->exists());
+    }
+
+    public function testProcessRequestServesNonMatchingCodeWithEvictOn()
+    {
+        $this->path = '/file.txt';
+        $this->request = $this->buildRequest($this->path, 'GET');
+        $this->buildCache();
+
+        $result = $this->buildMiddleware(['evictOn' => ['4xx']])->processRequest($this->request);
+
+        $this->assertEquals('cached body', $result->response()->body());
+    }
+
+    public function testProcessRequestServesStoredErrorByDefault()
+    {
+        $this->path = '/file.txt';
+        $this->request = $this->buildRequest($this->path, 'GET');
+        $this->buildCacheWithCode(404);
+
+        $result = $this->buildMiddleware()->processRequest($this->request);
+
+        $this->assertEquals(404, $result->response()->httpCode());
+    }
+
+    private function buildCacheWithCode(int $httpCode): void
+    {
+        $response = new Response([
+            'body' => 'cached body',
+            'httpCode' => $httpCode,
+            'headers' => ['Content-Type: text/plain'],
+            'request' => $this->request
+        ]);
+        (new FileCache($this->request, $this->location))->store($response);
+    }
 }

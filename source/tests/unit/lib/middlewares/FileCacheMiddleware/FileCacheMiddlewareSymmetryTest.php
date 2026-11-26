@@ -254,4 +254,19 @@ class FileCacheMiddlewareSymmetryTest extends TestCase
             ]
         ]);
     }
+
+    public function testEvictedCodeOnWriteIsAbsentOnNextRead()
+    {
+        $middleware = FileCacheMiddleware::build([
+            'location' => $this->cacheDir,
+            'evictOn' => ['4xx'],
+        ]);
+
+        $request = $this->buildRequest('GET');
+        $middleware->processResponse($this->buildResponse(404, $request));
+
+        $result = $middleware->processRequest($this->buildRequest('GET'));
+
+        $this->assertFalse($result->hasResponse());
+    }
 }

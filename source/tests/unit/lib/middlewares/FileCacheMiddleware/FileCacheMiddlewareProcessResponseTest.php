@@ -440,4 +440,55 @@ class FileCacheMiddlewareProcessResponseTest extends TestCase
             ],
         ]);
     }
+
+    public function testProcessResponseDoesNotStoreEvictedCode()
+    {
+        $response = $this->buildResponse(404);
+
+        $this->buildEvictingMiddleware(['4xx'])->processResponse($response);
+
+        $this->assertFalse((new FileCache($this->request, $this->location))->exists());
+    }
+
+    public function testProcessResponseRemovesExistingEntryWhenCodeEvicted()
+    {
+        $this->buildEvictingMiddleware(['4xx'])->processResponse($this->buildResponse(200));
+        $this->assertTrue((new FileCache($this->request, $this->location))->exists());
+
+        $this->buildEvictingMiddleware(['4xx'])->processResponse($this->buildResponse(404));
+
+        $this->assertFalse((new FileCache($this->request, $this->location))->exists());
+    }
+
+    public function testProcessResponseStoresNonEvictedCode()
+    {
+        $response = $this->buildResponse(200);
+
+        $this->buildEvictingMiddleware(['4xx'])->processResponse($response);
+
+        $this->assertTrue((new FileCache($this->request, $this->location))->exists());
+    }
+
+    public function testProcessResponseStoresErrorWhenPolicyDisabled()
+    {
+        $response = $this->buildResponse(404);
+
+        $this->buildEvictingMiddleware([])->processResponse($response);
+
+        $this->assertTrue((new FileCache($this->request, $this->location))->exists());
+    }
+
+    private function buildEvictingMiddleware(array $evictOn): FileCacheMiddleware
+    {
+        return FileCacheMiddleware::build([
+            'location' => $this->cacheDir,
+            'matchers' => [
+                [
+                    'class' => \Tent\Matchers\StatusCodeMatcher::class,
+                    'httpCodes' => ['2xx', '4xx'],
+                ]
+            ],
+            'evictOn' => $evictOn,
+        ]);
+    }
 }
