@@ -106,4 +106,24 @@ class ResponseTest extends TestCase
             'just above range (300)' => [300],
         ];
     }
+
+    public function testIsTimeoutIsTrueFor504()
+    {
+        $response = new Response(['body' => '', 'httpCode' => 504, 'headers' => []]);
+        $this->assertTrue($response->isTimeout());
+    }
+
+    /**
+     * @dataProvider nonTimeoutHttpCodesProvider
+     */
+    public function testIsTimeoutIsFalseForOtherCodes(int $httpCode)
+    {
+        $response = new Response(['body' => '', 'httpCode' => $httpCode, 'headers' => []]);
+        $this->assertFalse($response->isTimeout());
+    }
+
+    public function nonTimeoutHttpCodesProvider(): array
+    {
+        return [[502], [200], [0]];
+    }
 }

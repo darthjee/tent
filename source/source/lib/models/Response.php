@@ -102,6 +102,16 @@ class Response extends SimpleModel
     }
 
     /**
+     * Checks whether the response represents a gateway timeout (504).
+     *
+     * @return boolean
+     */
+    public function isTimeout(): bool
+    {
+        return $this->httpCode() === 504;
+    }
+
+    /**
      * Sets the response body content.
      *
      * @param string $body The new resposne body content.
