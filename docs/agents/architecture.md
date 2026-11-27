@@ -114,7 +114,7 @@ Cache and file abstractions used by `FileCacheMiddleware`: `Cache`, `File`, `Fil
 
 ### HTTP Client (`source/source/lib/http/`)
 
-Thin abstraction over cURL: `HttpClientInterface`, `CurlHttpClient`, and `CurlHttpExecutor`. Used by proxy handlers to forward requests upstream.
+Thin abstraction over cURL: `HttpClientInterface`, `CurlHttpClient`, and `CurlHttpExecutor`. Used by proxy handlers to forward requests upstream. `UpstreamFailureNormalizer` decorates every proxy client and maps transport failures to `502` (or `504` on cURL timeout) instead of an empty `200`; `connect_timeout`/`timeout` options configure the default `CurlHttpClient`.
 
 ### Utils (`source/source/lib/utils/`)
 
