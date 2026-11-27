@@ -59,6 +59,26 @@ class FileUtils
     }
 
     /**
+     * Checks, without accessing the filesystem, that a path cannot traverse out
+     * of the directory it is relative to.
+     *
+     * Only whole segments are matched, so `...`, `..foo` or `%2e%2e` are valid
+     * names. A NUL byte is also rejected, as filesystem functions throw on it.
+     *
+     * @param string $path Path made of `/`-separated segments.
+     *
+     * @return boolean True when there is no `.` or `..` segment, nor NUL byte.
+     */
+    public static function hasSafeSegments(string $path): bool
+    {
+        if (str_contains($path, "\0")) {
+            return false;
+        }
+
+        return array_intersect(explode('/', $path), ['.', '..']) === [];
+    }
+
+    /**
      * Checks if a file exists at the given path and is a regular file.
      *
      * @param string $path The file path to check.

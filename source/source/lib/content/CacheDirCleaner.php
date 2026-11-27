@@ -4,6 +4,7 @@ namespace Tent\Content;
 
 use Tent\Models\FolderLocation;
 use Tent\Log\Logger;
+use Tent\Utils\FileUtils;
 use Tent\Utils\RemovalResult;
 use Tent\Utils\SafeRemover;
 
@@ -234,7 +235,7 @@ class CacheDirCleaner
      * 1. the location must not be empty nor `/`;
      * 2. the path must start with `<location>/`;
      * 3. no segment after the location may be `.` or `..`, and no NUL byte may
-     *    appear there (see {@see self::hasSafeSegments()});
+     *    appear there (see {@see FileUtils::hasSafeSegments()});
      * 4. the real parent directory must not be outside the real location (see
      *    {@see self::resolvesInsideBase()}).
      *
@@ -262,31 +263,12 @@ class CacheDirCleaner
             return $this->refuse($dir, 'outside cache location');
         }
 
-        if (!$this->hasSafeSegments(substr($dir, strlen($prefix)))) {
+        if (!FileUtils::hasSafeSegments(substr($dir, strlen($prefix)))) {
             // Paths reserved for the trash are ignored silently, however spelled.
             return $this->trash->contains($dir) ? false : $this->refuse($dir, 'dot segment');
         }
 
         return $this->resolvesInsideBase($dir, $base);
-    }
-
-    /**
-     * Checks, without accessing the filesystem, that a path cannot traverse out
-     * of the directory it is relative to.
-     *
-     * Only whole segments are matched, so `...`, `..foo` or `%2e%2e` are valid
-     * names. A NUL byte is also rejected, as filesystem functions throw on it.
-     *
-     * @param string $path Part of a path following the cache location.
-     * @return boolean True when there is no `.` or `..` segment, nor NUL byte.
-     */
-    private function hasSafeSegments(string $path): bool
-    {
-        if (str_contains($path, "\0")) {
-            return false;
-        }
-
-        return array_intersect(explode('/', $path), ['.', '..']) === [];
     }
 
     /**
