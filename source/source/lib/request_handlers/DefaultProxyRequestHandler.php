@@ -174,6 +174,8 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
      * @param array|null               $allowedHeaders            Allow mode: explicit, complete list of the only
      *          headers kept in cache storage.
      * @param string                   $mode                      Either 'deny' (default) or 'allow'.
+     * @param integer                  $connectTimeout            Connection timeout in seconds (default 5).
+     * @param integer                  $timeout                   Total request timeout in seconds (default 30).
      */
     public function __construct(
         string $host,
@@ -187,9 +189,11 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
         ?array $excludedHeaders = null,
         ?array $additionalExcludedHeaders = null,
         ?array $allowedHeaders = null,
-        string $mode = 'deny'
+        string $mode = 'deny',
+        int $connectTimeout = 5,
+        int $timeout = 30
     ) {
-        parent::__construct($host, $httpClient);
+        parent::__construct($host, $httpClient, $connectTimeout, $timeout);
         $this->cache = $cache;
         $this->cacheCodes = $cacheCodes;
         $this->skipCacheHeader = $skipCacheHeader;
@@ -225,9 +229,11 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
      *     excluded headers list.
      *   - 'allowed_headers' (array): Allow mode: explicit, complete list of the only headers kept
      *     in cache storage. Required and non-empty when 'mode' is 'allow'.
+     *   - 'connect_timeout' (int): Connection timeout in seconds. Defaults to 5.
+     *   - 'timeout' (int): Total request timeout in seconds. Defaults to 30.
      * @return self
      * @throws \InvalidArgumentException If 'host' is missing, 'mode' is invalid, or 'allow' mode
-     *   has an empty/missing 'allowed_headers'.
+     *   has an empty/missing 'allowed_headers', or a timeout is not a non-negative integer.
      */
     public static function build(array $params): self
     {
@@ -245,6 +251,8 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
         $additionalExcludedHeaders = $params['additional_excluded_headers'] ?? null;
         $allowedHeaders = $params['allowed_headers'] ?? null;
         $mode = $params['mode'] ?? 'deny';
+        $connectTimeout = self::timeoutParam($params, 'connect_timeout', 5);
+        $timeout = self::timeoutParam($params, 'timeout', 30);
         return new self(
             $host,
             $cache,
@@ -257,7 +265,9 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
             $excludedHeaders,
             $additionalExcludedHeaders,
             $allowedHeaders,
-            $mode
+            $mode,
+            $connectTimeout,
+            $timeout
         );
     }
 

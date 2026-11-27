@@ -54,7 +54,12 @@ class ResponseSender
      */
     public function send(Response $response): void
     {
-        ($this->statusEmitter)($response->httpCode());
+        $code = $response->httpCode();
+        if ($code < 100 || $code > 599) {
+            $code = 500;
+        }
+
+        ($this->statusEmitter)($code);
         foreach ($response->headers() as $header) {
             ($this->headerEmitter)($header, false);
         }

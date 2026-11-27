@@ -7,6 +7,8 @@ use Tent\Models\RequestInterface;
 use Tent\Models\Response;
 use Tent\Http\HttpClientInterface;
 use Tent\Http\CurlHttpClient;
+use Tent\Http\UpstreamFailureNormalizer;
+use InvalidArgumentException;
 use Tent\Log\Logger;
 
 /**
@@ -80,13 +82,22 @@ class ProxyRequestHandler extends RequestHandler
     /**
      * Constructs a ProxyRequestHandler.
      *
-     * @param string                   $host       The target host to which requests will be proxied.
-     * @param HttpClientInterface|null $httpClient Optional HTTP client to use for requests. Defaults to CurlHttpClient.
+     * @param string                   $host           The target host to which requests will be proxied.
+     * @param HttpClientInterface|null $httpClient     Optional HTTP client. Defaults to CurlHttpClient.
+     *              It is always wrapped in an UpstreamFailureNormalizer (502/504 on transport failures).
+     * @param integer                  $connectTimeout Connection timeout in seconds (default 5).
+     * @param integer                  $timeout        Total request timeout in seconds (default 30).
      */
-    public function __construct(string $host, ?HttpClientInterface $httpClient = null)
-    {
+    public function __construct(
+        string $host,
+        ?HttpClientInterface $httpClient = null,
+        int $connectTimeout = 5,
+        int $timeout = 30
+    ) {
         $this->server = new Server($host);
-        $this->httpClient = $httpClient ?? new CurlHttpClient();
+        $this->httpClient = new UpstreamFailureNormalizer(
+            $httpClient ?? new CurlHttpClient(['connect_timeout' => $connectTimeout, 'timeout' => $timeout])
+        );
     }
 
     /**
@@ -95,13 +106,19 @@ class ProxyRequestHandler extends RequestHandler
      * Example:
      *   ProxyRequestHandler::build(['host' => 'http://api.com'])
      *
-     * @param array $params Associative array with key 'host' (string).
+     * @param array $params Associative array with keys:
+     *   - 'host' (string)
+     *   - 'connect_timeout' (int, optional): connection timeout in seconds. Defaults to 5.
+     *   - 'timeout' (int, optional): total request timeout in seconds. Defaults to 30.
      * @return ProxyRequestHandler
+     * @throws InvalidArgumentException If a timeout is not a non-negative integer.
      */
     public static function build(array $params): self
     {
         $host = $params['host'] ?? '';
-        return new self($host);
+        $connectTimeout = self::timeoutParam($params, 'connect_timeout', 5);
+        $timeout = self::timeoutParam($params, 'timeout', 30);
+        return new self($host, null, $connectTimeout, $timeout);
     }
 
     /**
@@ -144,6 +161,30 @@ class ProxyRequestHandler extends RequestHandler
         );
 
         return $result;
+    }
+
+    /**
+     * Reads a timeout parameter, validating it is a non-negative integer.
+     *
+     * @param array   $params  The build parameters.
+     * @param string  $key     The parameter key.
+     * @param integer $default The value used when the key is absent.
+     * @return integer
+     * @throws InvalidArgumentException If the value is not a non-negative integer.
+     */
+    protected static function timeoutParam(array $params, string $key, int $default): int
+    {
+        if (!array_key_exists($key, $params)) {
+            return $default;
+        }
+
+        $value = $params[$key];
+
+        if (!is_int($value) || $value < 0) {
+            throw new InvalidArgumentException("Parameter '$key' must be a non-negative integer");
+        }
+
+        return $value;
     }
 
     /**

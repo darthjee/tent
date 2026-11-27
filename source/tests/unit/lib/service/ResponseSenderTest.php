@@ -108,4 +108,26 @@ class ResponseSenderTest extends TestCase
             'headers' => $headers,
         ]);
     }
+
+    /**
+     * @dataProvider statusCodeProvider
+     */
+    public function testSendClampsInvalidStatusCodes(int $given, int $expected)
+    {
+        $response = new Response(['body' => '', 'httpCode' => $given, 'headers' => []]);
+
+        $this->send($response);
+
+        $this->assertSame([$expected], $this->statuses);
+    }
+
+    public function statusCodeProvider(): array
+    {
+        return [
+            'zero' => [0, 500],
+            'above range' => [600, 500],
+            'bad gateway' => [502, 502],
+            'gateway timeout' => [504, 504],
+        ];
+    }
 }

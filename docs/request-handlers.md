@@ -8,6 +8,7 @@ This guide explains the available `RequestHandler` types in Tent, when to use ea
 - [Which Handler Should I Use?](#which-handler-should-i-use)
 - [DefaultProxyRequestHandler (`default_proxy`)](#defaultproxyrequesthandler-default_proxy)
 - [ProxyRequestHandler (`proxy`)](#proxyrequesthandler-proxy)
+- [Upstream failures and timeouts](#upstream-failures-and-timeouts)
 - [StaticFileHandler (`static`)](#staticfilehandler-static)
 - [Using `class` Instead of `type`](#using-class-instead-of-type)
 - [Middleware Order](#middleware-order)
@@ -64,6 +65,8 @@ It automatically adds:
 | `excluded_headers` | `array` | No | `Set-Cookie`, `Set-Cookie2`, `WWW-Authenticate`, `Proxy-Authenticate` | *(deny mode)* Full override of the headers stripped from cache storage |
 | `additional_excluded_headers` | `array` | No | — | *(deny mode)* Always merged on top of the resolved `excluded_headers` list |
 | `allowed_headers` | `array` | No | — | *(allow mode)* Explicit, complete list of the only headers kept in cache storage. Required and non-empty when `mode` is `'allow'` |
+| `connect_timeout` | `int` (seconds) | No | `5` | Maximum time to establish the connection to the backend (`CURLOPT_CONNECTTIMEOUT`). Must be a non-negative integer (otherwise `\InvalidArgumentException`); `0` disables the timeout |
+| `timeout` | `int` (seconds) | No | `30` | Maximum total time for the whole upstream request (`CURLOPT_TIMEOUT`). Must be a non-negative integer (otherwise `\InvalidArgumentException`); `0` disables the timeout |
 
 ### Example: Default proxy with built-in cache
 
@@ -237,6 +240,8 @@ Use this handler when you want custom behavior that differs from `default_proxy`
 | Option | Type | Required | Default | Description |
 |---|---|---|---|---|
 | `host` | `string` | Yes (practical) | `''` | Backend host used for proxying |
+| `connect_timeout` | `int` (seconds) | No | `5` | Maximum time to establish the connection to the backend (`CURLOPT_CONNECTTIMEOUT`). Must be a non-negative integer (otherwise `\InvalidArgumentException`); `0` disables the timeout |
+| `timeout` | `int` (seconds) | No | `30` | Maximum total time for the whole upstream request (`CURLOPT_TIMEOUT`). Must be a non-negative integer (otherwise `\InvalidArgumentException`); `0` disables the timeout |
 
 ### Example: Fully custom proxy stack
 
@@ -288,6 +293,33 @@ Configuration::buildRule([
         ['method' => 'GET', 'uri' => '/@vite/', 'type' => 'begins_with'],
         ['method' => 'GET', 'uri' => '/node_modules/', 'type' => 'begins_with'],
         ['method' => 'GET', 'uri' => '/@react-refresh', 'type' => 'exact']
+    ]
+]);
+```
+
+---
+
+## Upstream failures and timeouts
+
+Both `proxy` and `default_proxy` accept `connect_timeout` (default `5` seconds) and `timeout` (default `30` seconds). They configure the default cURL client only; an injected `httpClient` is still wrapped by the failure handling below, but is responsible for its own timeouts.
+
+When the backend cannot be reached or does not answer in time, Tent no longer returns an empty `200`:
+
+- Transport failure (connection refused, DNS failure, reset, or no HTTP status at all) → `502 Bad Gateway`
+- Timeout (connect or total) → `504 Gateway Timeout`
+
+The response has an empty body and no upstream headers. The synthesized status goes through the rule's response middlewares like any other response, so a `StatusCodeMatcher` with `5xx` matches it. It is not cached under the default `cacheCodes` (`['2xx']`). Each failure logs a warn-level line with the method, the upstream URL without its query string, the cURL errno and the cURL error message.
+
+```php
+Configuration::buildRule([
+    'handler' => [
+        'type' => 'default_proxy',
+        'host' => 'http://api:80',
+        'connect_timeout' => 2,
+        'timeout' => 10
+    ],
+    'matchers' => [
+        ['method' => 'GET', 'uri' => '/persons', 'type' => 'exact']
     ]
 ]);
 ```

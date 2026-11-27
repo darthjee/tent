@@ -398,4 +398,35 @@ class DefaultProxyRequestHandlerBuildTest extends TestCase
         $property->setAccessible(true);
         return $property->getValue($fileCacheMiddleware);
     }
+
+    public function testBuildAcceptsValidTimeouts()
+    {
+        $handler = DefaultProxyRequestHandler::build([
+            'host' => 'http://api.com',
+            'cache' => false,
+            'connect_timeout' => 0,
+            'timeout' => 10
+        ]);
+        $this->assertInstanceOf(DefaultProxyRequestHandler::class, $handler);
+    }
+
+    /**
+     * @dataProvider invalidTimeoutProvider
+     */
+    public function testBuildRejectsInvalidTimeouts(string $key, $value)
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        DefaultProxyRequestHandler::build(['host' => 'http://api.com', 'cache' => false, $key => $value]);
+    }
+
+    public static function invalidTimeoutProvider(): array
+    {
+        $cases = [];
+        foreach (['connect_timeout', 'timeout'] as $key) {
+            foreach ([-1, 'abc', 2.5] as $value) {
+                $cases["$key " . var_export($value, true)] = [$key, $value];
+            }
+        }
+        return $cases;
+    }
 }
