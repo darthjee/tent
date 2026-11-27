@@ -26,6 +26,17 @@ RUN apt-get update && apt-get install -y \
 # PHP runtime limits for Tent (uploads)
 RUN printf 'upload_max_filesize=20M\npost_max_size=25M\n' > /usr/local/etc/php/conf.d/tent.ini
 
+# Apache access log: TENT_ACCESS_LOG_FORMAT presets and the tent.d drop-in
+# directory. Written at build time (as root), since the image runs as app.
+# The tent-assets build context is dockerfiles/tent.
+COPY --from=tent-assets apache/00-tent-access-log.conf /etc/apache2/conf-enabled/00-tent-access-log.conf
+COPY --from=tent-assets apache/envvars-tent.sh /tmp/envvars-tent.sh
+RUN set -eu; \
+    cat /tmp/envvars-tent.sh >> /etc/apache2/envvars; \
+    rm /tmp/envvars-tent.sh; \
+    mkdir -p /etc/apache2/tent.d; \
+    apache2ctl -t
+
 USER app
 
 WORKDIR /var/www/html

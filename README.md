@@ -331,6 +331,7 @@ Middlewares make Tent highly customizable, enabling advanced routing, header man
    - `FRONTEND_DEV_MODE=true`: Proxies frontend requests to Vite dev server (hot reload)
    - `FRONTEND_DEV_MODE=false`: Serves frontend from static build at `dev/frontend/dist/`
    - `LOG_LEVEL`: Controls Tent log verbosity. Accepted values: `debug` (default), `info`, `warn`, `error`. Only messages at or above the configured level are written to stdout.
+   - `TENT_ACCESS_LOG_FORMAT`: Apache access-log preset of the published `darthjee/tent` image (from 1.4.0); it has no effect on this development stack (`dev_tent`). Accepted values: `safe` (default) and `combined`. See [Access log](docs/guides/tent/reference.md#access-log).
 
 3. **Build and start:**
    ```bash

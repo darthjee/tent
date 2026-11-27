@@ -151,6 +151,17 @@ When `LOG_LEVEL=debug`, Tent emits `Logger::debug()` calls with a standardized `
 
 Note: the proxy and cache entries log for **every** response status, not just 404.
 
+In the upstream proxy entry, `<UPSTREAM_URL>` is the upstream base URL plus the request path, **without the query string** (query strings may carry credentials). The upstream request itself still forwards the query string.
+
+#### Apache access log
+
+The Apache access log is a separate stream from the PHP `Logger`. Apache writes it after PHP returns, so neither `LOG_LEVEL` nor any PHP class or `configuration/` rule affects it. It is configured by the published `darthjee/tent` image:
+
+- `TENT_ACCESS_LOG_FORMAT` selects a named preset: `safe` (default when unset or empty; no query string, no `Referer`) or `combined` (the stock Debian format). Any other value stops Apache from starting.
+- `*.conf` files mounted under `/etc/apache2/tent.d/` are included after the presets, so a drop-in always wins over the variable.
+
+See the [Tent reference guide](../guides/tent/reference.md) for the consumer-facing documentation.
+
 ---
 
 ## Configuration Rules Pattern

@@ -33,17 +33,24 @@ image_config() {
   local image="$1"
   EXTRA_BUILD_CONTEXT=""
   # Per-image check extras (empty unless set in the image's branch below):
-  # extensions/composer for dev_tent-base, deploy tooling for tent.
+  # extensions/composer for dev_tent-base, deploy tooling and Apache access
+  # log for tent.
   CHECK_EXTENSIONS=""
   CHECK_COMPOSER=""
   CHECK_DEPLOY=""
+  CHECK_ACCESS_LOG=""
 
   case "$image" in
     tent)
       DOCKERFILE="dockerfiles/tent/Dockerfile"
       CONTEXT="source"
       IMAGE_NAME="darthjee/tent"
+      # The Apache access-log assets live under dockerfiles/tent/, outside
+      # the "source" build context, so they are wired in as an extra named
+      # build context (see buildx_base_cmd()).
+      EXTRA_BUILD_CONTEXT="tent-assets=dockerfiles/tent"
       CHECK_DEPLOY=true
+      CHECK_ACCESS_LOG=true
       ;;
     tent-test)
       DOCKERFILE="dockerfiles/tent-test/Dockerfile"
@@ -186,6 +193,123 @@ fi
 echo "Deploy check OK ($(id -un))"
 SH
 
+# Access-log contract for the tent image: TENT_ACCESS_LOG_FORMAT selects the
+# preset (safe, the default, logs neither query strings nor Referer) and a
+# /etc/apache2/tent.d drop-in always wins. Starts Apache as the image's default
+# user, sends one probe request and asserts on its access line according to
+# $EXPECT (safe, combined or dropin). Runs without set -e so every failure is
+# collected and reported together.
+read -r -d '' CHECK_ACCESS_LOG_SH <<'SH' || true
+failures=()
+log=/tmp/out
+line=""
+ready=""
+
+# In foreground mode Apache signals its whole process group on shutdown, which
+# includes this script.
+trap ':' TERM
+
+apache2-foreground >>"$log" 2>&1 &
+apache_pid=$!
+
+# Poll until Apache answers (any status), giving up early if it exits.
+for _ in $(seq 1 150); do
+  if curl -s -o /dev/null --max-time 10 http://localhost/; then
+    ready=true
+    break
+  fi
+  kill -0 "$apache_pid" 2>/dev/null || break
+  sleep 0.2
+done
+
+if [ -n "$ready" ]; then
+  curl -s -o /dev/null --max-time 10 -H 'Referer: http://x/?ref=LEAK' \
+    'http://localhost/probe?token=SMOKE' || failures+=("probe request failed")
+
+  # The access line is written after the response is sent, so poll for it.
+  # Lines starting with "[" belong to the error log, which shares the output.
+  for _ in $(seq 1 50); do
+    line="$(grep -F '/probe' "$log" | grep -v '^\[')"
+    [ -n "$line" ] && break
+    sleep 0.2
+  done
+  [ -n "$line" ] || failures+=("no access line for /probe")
+else
+  failures+=("Apache did not become ready (user=$(id -un))")
+fi
+
+if [ -n "$line" ]; then
+  case "$EXPECT" in
+    safe)
+      # status, %O, %D and then the quoted user agent (no Referer in between).
+      pattern='"GET /probe HTTP/1\.1" [0-9]+ [0-9]+ [0-9]+ "curl/'
+      [[ "$line" =~ $pattern ]] || failures+=('expected "GET /probe HTTP/1.1" <status> <bytes> <duration> "<user agent>"')
+      [[ "$line" != *SMOKE* ]] || failures+=("query string was logged (SMOKE)")
+      [[ "$line" != *LEAK* ]] || failures+=("Referer was logged (LEAK)")
+      ;;
+    combined)
+      [[ "$line" == *'?token=SMOKE'* ]] || failures+=("expected the query string: ?token=SMOKE")
+      [[ "$line" == *'http://x/?ref=LEAK'* ]] || failures+=("expected the Referer: http://x/?ref=LEAK")
+      ;;
+    dropin)
+      [[ "$line" == *'DROPIN GET /probe '* ]] || failures+=("expected the tent.d drop-in format: DROPIN GET /probe <status>")
+      [[ "$line" != *SMOKE* ]] || failures+=("query string was logged (SMOKE)")
+      ;;
+    *)
+      failures+=("unknown EXPECT: ${EXPECT:-unset}")
+      ;;
+  esac
+fi
+
+kill "$apache_pid" 2>/dev/null
+wait "$apache_pid" 2>/dev/null
+
+case_name="EXPECT=${EXPECT:-unset}, TENT_ACCESS_LOG_FORMAT=${TENT_ACCESS_LOG_FORMAT-<unset>}"
+
+if [ "${#failures[@]}" -gt 0 ]; then
+  printf 'Access-log check FAILED: (%s)\n' "$case_name" >&2
+  printf '  - %s\n' "${failures[@]}" >&2
+  printf 'Apache output:\n' >&2
+  cat "$log" >&2
+  exit 1
+fi
+
+echo "Access-log check OK ($case_name, $(id -un))"
+SH
+
+# Runs CHECK_ACCESS_LOG_SH in a fresh container of <ref>; the remaining
+# arguments are extra "docker run" options. No --user: Apache runs as the
+# image's default user (app).
+run_access_log_case() {
+  local ref="$1"
+  shift
+
+  docker run --rm --platform "$PLATFORM" "$@" \
+    --entrypoint bash \
+    "$ref" \
+    -c "$CHECK_ACCESS_LOG_SH"
+}
+
+# Runs every access-log case against <ref>. The body is a subshell, so the EXIT
+# trap removing the drop-in temp dir stays local to this function.
+check_access_log() (
+  ref="$1"
+  dropin_dir="$(mktemp -d)"
+  trap 'rm -rf "$dropin_dir"' EXIT
+
+  mkdir "${dropin_dir}/tent.d"
+  echo 'LogFormat "DROPIN %m %U %>s" combined' > "${dropin_dir}/tent.d/zz-test.conf"
+  # Readable by the image's user (uid 1000), whatever the host umask is.
+  chmod 755 "$dropin_dir" "${dropin_dir}/tent.d"
+  chmod 644 "${dropin_dir}/tent.d/zz-test.conf"
+
+  run_access_log_case "$ref" -e EXPECT=safe
+  run_access_log_case "$ref" -e EXPECT=safe -e TENT_ACCESS_LOG_FORMAT=
+  run_access_log_case "$ref" -e EXPECT=combined -e TENT_ACCESS_LOG_FORMAT=combined
+  run_access_log_case "$ref" -e EXPECT=dropin -e TENT_ACCESS_LOG_FORMAT=combined \
+    -v "${dropin_dir}/tent.d:/etc/apache2/tent.d:ro"
+)
+
 check_image() {
   local image="$1"
   local arch="$2"
@@ -228,6 +352,10 @@ check_image() {
       --entrypoint bash \
       "$ref" \
       -c "$CHECK_DEPLOY_SH"
+  fi
+
+  if [[ -n "$CHECK_ACCESS_LOG" ]]; then
+    check_access_log "$ref"
   fi
 }
 
