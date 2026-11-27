@@ -89,4 +89,23 @@ class CurlHttpClientGetTest extends TestCase
         $this->assertEquals('value', $body['args']['test']);
         $this->assertEquals('bar', $body['args']['foo']);
     }
+
+    public function testRequestForwardsTimeout()
+    {
+        $client = new CurlHttpClient(['timeout' => 1]);
+
+        $result = $client->request('GET', $this->baseUrl . '/delay/3', []);
+
+        $this->assertSame(CURLE_OPERATION_TIMEDOUT, $result['errno']);
+    }
+
+    public function testRequestDefaultTimeoutAllowsShortDelay()
+    {
+        $client = new CurlHttpClient();
+
+        $result = $client->request('GET', $this->baseUrl . '/delay/1', []);
+
+        $this->assertSame(0, $result['errno']);
+        $this->assertSame(200, $result['httpCode']);
+    }
 }
