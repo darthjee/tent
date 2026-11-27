@@ -19,7 +19,7 @@ source/
       content/              ← Cache and file abstractions (Cache, File, FileCache, ResponseContent)
       exceptions/           ← Custom exceptions (FileNotFoundException, InvalidFilePathException)
       http/                 ← HTTP client abstraction (CurlHttpClient, HttpClientInterface)
-      utils/                ← Utility helpers (CacheFilePath, ContentType, CurlUtils, FileUtils, StringUtils, HttpCodeMatcher)
+      utils/                ← Utility helpers (CacheFilePath, ContentType, CurlUtils, FileUtils, SafeRemover, StringUtils, HttpCodeMatcher)
       validators/           ← Input validation (RequestPathValidator)
       request_handlers/     ← DefaultProxyRequestHandler, ProxyRequestHandler, StaticFileHandler, MissingRequestHandler
       middlewares/          ← FileCacheMiddleware, CacheStalenessMiddleware, SetHeadersMiddleware, SetPathMiddleware, RenameHeaderMiddleware, RedirectMiddleware
@@ -112,13 +112,17 @@ See [`adding-request-matchers.md`](../adding-request-matchers.md) for how to add
 
 Cache and file abstractions used by `FileCacheMiddleware`: `Cache`, `File`, `FileCache`, `ResponseContent`, `HeaderFilter`, `ExcludedHeaderFilter`, `AllowedHeaderFilter`, and `HeaderFilterBuilder`.
 
+`CacheDirCleaner` (with `CacheDirResolver`) deletes cache directories on behalf of `CacheCleanupMiddleware`. Both it and `FileCache::remove()` tolerate other writers deleting the same entries concurrently, by removing through `SafeRemover`: anything already gone is success, while a real failure is logged and never thrown. `CacheDirCleaner` restarts a walk interrupted by a vanished directory (3 attempts in total) and unlinks symbolic links without following them.
+
 ### HTTP Client (`source/source/lib/http/`)
 
 Thin abstraction over cURL: `HttpClientInterface`, `CurlHttpClient`, and `CurlHttpExecutor`. Used by proxy handlers to forward requests upstream. `UpstreamFailureNormalizer` decorates every proxy client and maps transport failures to `502` (or `504` on cURL timeout) instead of an empty `200`; `connect_timeout`/`timeout` options configure the default `CurlHttpClient`.
 
 ### Utils (`source/source/lib/utils/`)
 
-Internal helpers: `CacheFilePath` (cache key generation), `ContentType` (MIME mapping), `CurlUtils`, `FileUtils`, `StringUtils`, `HttpCodeMatcher` (wildcard HTTP code matching like `"2xx"`).
+Internal helpers: `CacheFilePath` (cache key generation), `ContentType` (MIME mapping), `CurlUtils`, `FileUtils`, `StringUtils`, `HttpCodeMatcher` (wildcard HTTP code matching like `"2xx"`), and `SafeRemover` (concurrency-tolerant file and directory removal).
+
+`SafeRemover::removeFile()` / `removeDir()` return a `RemovalResult` enum: `Removed`, `AlreadyGone` (the path no longer exists after the failed operation; nothing logged) or `Failed` (the path still exists). On `Failed`, `SafeRemover` itself logs `cache removal failed — file|dir: <path> — <error>` at `warn` level, so callers do not log removal failures.
 
 ### Validators (`source/source/lib/validators/`)
 

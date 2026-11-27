@@ -6,6 +6,7 @@ use Tent\Models\FolderLocation;
 use Tent\Utils\FileUtils;
 use Tent\Models\Response;
 use Tent\Utils\CacheFilePath;
+use Tent\Utils\SafeRemover;
 use Tent\Models\ProcessingRequest;
 use Tent\Cache\RequestHasher;
 use Tent\Cache\QueryRequestHasher;
@@ -236,17 +237,17 @@ class FileCache implements Cache
      * (used by background refreshers) only stores into a cache that does
      * not already `exist()`.
      *
+     * Files that are missing, or removed concurrently by another writer, are
+     * tolerated silently. Real removal failures are logged at `warn` level by
+     * {@see SafeRemover} and are never thrown.
+     *
      * @return void
      */
     public function remove(): void
     {
-        if (FileUtils::exists($this->bodyFilePath)) {
-            unlink($this->bodyFilePath);
-        }
-
-        if (FileUtils::exists($this->metaFilePath)) {
-            unlink($this->metaFilePath);
-        }
+        $remover = new SafeRemover();
+        $remover->removeFile($this->bodyFilePath);
+        $remover->removeFile($this->metaFilePath);
 
         $this->content = null;
     }

@@ -29,6 +29,8 @@ require_once __DIR__ . '/lib/middlewares/Middleware.php';
 require_once __DIR__ . '/lib/models/FolderLocation.php';
 require_once __DIR__ . '/lib/utils/FileUtils.php';
 require_once __DIR__ . '/lib/utils/PlaceholderPattern.php';
+require_once __DIR__ . '/lib/utils/RemovalResult.php';
+require_once __DIR__ . '/lib/utils/SafeRemover.php';
 require_once __DIR__ . '/lib/log/LoggerInstance.php';
 require_once __DIR__ . '/lib/log/NullLoggerInstance.php';
 require_once __DIR__ . '/lib/log/Logger.php';
