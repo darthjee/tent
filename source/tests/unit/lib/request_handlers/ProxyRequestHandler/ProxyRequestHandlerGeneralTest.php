@@ -49,9 +49,12 @@ class ProxyRequestHandlerGeneralTest extends TestCase
     public function testHandleRequestAppendsQueryString()
     {
         $this->initVariables(['requestQuery' => 'page=1&limit=10']);
-        $this->createMockHttpClient(
-            ['body' => 'response body', 'httpCode' => 200, 'headers' => []]
-        );
+
+        $this->httpClient = $this->createMock(HttpClientInterface::class);
+        $this->httpClient->expects($this->once())
+            ->method('request')
+            ->with('GET', 'http://backend:8080/api/users?page=1&limit=10', [])
+            ->willReturn(['body' => 'response body', 'httpCode' => 200, 'headers' => []]);
 
         $handler = new ProxyRequestHandler($this->host, $this->httpClient);
         $response = $handler->handleRequest($this->request);
@@ -130,6 +133,25 @@ class ProxyRequestHandlerGeneralTest extends TestCase
     public function testLogsDebugForAllUpstreamStatuses(): void
     {
         $this->initVariables();
+
+        $instance = $this->createMock(LoggerInstance::class);
+        $instance->expects($this->once())
+            ->method('log')
+            ->with(
+                '[200] - upstream response — method: GET, uri: /api/users, upstream: http://backend:8080/api/users',
+                'debug'
+            );
+        Logger::setInstance($instance);
+
+        $this->createMockHttpClient(['body' => '{"users":[]}', 'httpCode' => 200, 'headers' => []]);
+
+        $handler = new ProxyRequestHandler($this->host, $this->httpClient);
+        $handler->handleRequest($this->request);
+    }
+
+    public function testLogsDebugWithoutQueryString(): void
+    {
+        $this->initVariables(['requestQuery' => 'token=SMOKE']);
 
         $instance = $this->createMock(LoggerInstance::class);
         $instance->expects($this->once())

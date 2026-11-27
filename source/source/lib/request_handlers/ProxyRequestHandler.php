@@ -134,10 +134,13 @@ class ProxyRequestHandler extends RequestHandler
 
         $result = new Response($response);
 
+        // The query string may carry credentials, so it is never logged.
+        $loggedUrl = $this->server()->fullUrl($request->requestPath());
+
         Logger::debug(
             '[' . $result->httpCode() . '] - upstream response — method: ' . $request->requestMethod() .
             ', uri: ' . $request->requestPath() .
-            ', upstream: ' . $url
+            ', upstream: ' . $loggedUrl
         );
 
         return $result;
