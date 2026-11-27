@@ -14,6 +14,9 @@ BASE_IMAGE?=$(DOCKER_ID_USER)/$(MOD)$(PROJECT)-base
 IMAGE?=$(DOCKER_ID_USER)/$(MOD)$(PROJECT)
 DOCKER_FILE_BASE?=dockerfiles/$(MOD)$(PROJECT)-base/Dockerfile
 DOCKER_FILE?=dockerfiles/$(MOD)$(PROJECT)/Dockerfile
+# Extra named build context used by the tent image (Apache assets outside the
+# "source" context). Ignored by the Dockerfiles that do not reference it.
+BUILD_CONTEXTS?=--build-context tent-assets=dockerfiles/tent
 
 all:
 	@echo "Usage:"
@@ -32,7 +35,7 @@ build:
 		docker tag $(IMAGE):latest $(IMAGE):cached; \
 		docker rmi $(IMAGE):latest; \
 	fi
-	docker build -f $(DOCKER_FILE) source -t $(IMAGE) -t $(IMAGE) -t $(IMAGE):$(BASE_VERSION)
+	docker build -f $(DOCKER_FILE) $(BUILD_CONTEXTS) source -t $(IMAGE) -t $(IMAGE) -t $(IMAGE):$(BASE_VERSION)
 	if (docker images | grep $(IMAGE) | grep cached); then \
 	  docker rmi $(IMAGE):cached; \
 	fi

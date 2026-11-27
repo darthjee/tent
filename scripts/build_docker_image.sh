@@ -43,6 +43,10 @@ image_config() {
       DOCKERFILE="dockerfiles/tent/Dockerfile"
       CONTEXT="source"
       IMAGE_NAME="darthjee/tent"
+      # The Apache access-log assets live under dockerfiles/tent/, outside
+      # the "source" build context, so they are wired in as an extra named
+      # build context (see buildx_base_cmd()).
+      EXTRA_BUILD_CONTEXT="tent-assets=dockerfiles/tent"
       CHECK_DEPLOY=true
       ;;
     tent-test)
