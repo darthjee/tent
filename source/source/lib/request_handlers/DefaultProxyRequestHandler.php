@@ -174,8 +174,8 @@ class DefaultProxyRequestHandler extends ProxyRequestHandler
      * @param array|null               $allowedHeaders            Allow mode: explicit, complete list of the only
      *          headers kept in cache storage.
      * @param string                   $mode                      Either 'deny' (default) or 'allow'.
-     * @param int                      $connectTimeout            Connection timeout in seconds (default 5).
-     * @param int                      $timeout                   Total request timeout in seconds (default 30).
+     * @param integer                  $connectTimeout            Connection timeout in seconds (default 5).
+     * @param integer                  $timeout                   Total request timeout in seconds (default 30).
      */
     public function __construct(
         string $host,

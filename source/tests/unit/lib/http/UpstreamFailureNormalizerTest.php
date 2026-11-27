@@ -5,41 +5,10 @@ namespace Tent\Tests\Http;
 require_once __DIR__ . '/../../../support/loader.php';
 
 use PHPUnit\Framework\TestCase;
-use Tent\Http\HttpClientInterface;
 use Tent\Http\UpstreamFailureNormalizer;
 use Tent\Log\Logger;
-use Tent\Log\LoggerInstance;
-
-class CapturingLoggerInstance extends LoggerInstance
-{
-    public array $lines = [];
-
-    public function log(string $message, string $level): void
-    {
-        $this->lines[] = [$level, $message];
-    }
-}
-
-class StubHttpClient implements HttpClientInterface
-{
-    private array $result;
-
-    public function __construct(array $result)
-    {
-        $this->result = $result;
-    }
-
-    public function request(
-        string $method,
-        string $url,
-        array $headers,
-        ?string $body = null,
-        array $uploadedFiles = [],
-        array $postFields = []
-    ): array {
-        return $this->result;
-    }
-}
+use Tent\Tests\Support\Http\StubHttpClient;
+use Tent\Tests\Support\Log\CapturingLoggerInstance;
 
 class UpstreamFailureNormalizerTest extends TestCase
 {

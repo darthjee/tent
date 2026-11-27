@@ -401,7 +401,12 @@ class DefaultProxyRequestHandlerBuildTest extends TestCase
 
     public function testBuildAcceptsValidTimeouts()
     {
-        $handler = DefaultProxyRequestHandler::build(['host' => 'http://api.com', 'cache' => false, 'connect_timeout' => 0, 'timeout' => 10]);
+        $handler = DefaultProxyRequestHandler::build([
+            'host' => 'http://api.com',
+            'cache' => false,
+            'connect_timeout' => 0,
+            'timeout' => 10
+        ]);
         $this->assertInstanceOf(DefaultProxyRequestHandler::class, $handler);
     }
 

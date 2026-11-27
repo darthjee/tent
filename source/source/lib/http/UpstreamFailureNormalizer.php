@@ -28,7 +28,19 @@ class UpstreamFailureNormalizer implements HttpClientInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Sends the request through the decorated client and normalizes transport failures.
+     *
+     * @param string      $method        The HTTP method.
+     * @param string      $url           The target URL.
+     * @param array       $headers       Headers to send.
+     * @param string|null $body          Optional request body.
+     * @param array       $uploadedFiles Optional uploaded files.
+     * @param array       $postFields    Optional POST fields.
+     * @return array{
+     *   body: string,
+     *   httpCode: int,
+     *   headers: string[]
+     * } Array with response body, status code, and headers.
      */
     public function request(
         string $method,

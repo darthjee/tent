@@ -82,11 +82,11 @@ class ProxyRequestHandler extends RequestHandler
     /**
      * Constructs a ProxyRequestHandler.
      *
-     * @param string                   $host       The target host to which requests will be proxied.
-     * @param HttpClientInterface|null $httpClient Optional HTTP client to use for requests. Defaults to CurlHttpClient.
-     *          It is always wrapped in an UpstreamFailureNormalizer (502/504 on transport failures).
-     * @param int                      $connectTimeout Connection timeout in seconds (default 5).
-     * @param int                      $timeout        Total request timeout in seconds (default 30).
+     * @param string                   $host           The target host to which requests will be proxied.
+     * @param HttpClientInterface|null $httpClient     Optional HTTP client. Defaults to CurlHttpClient.
+     *              It is always wrapped in an UpstreamFailureNormalizer (502/504 on transport failures).
+     * @param integer                  $connectTimeout Connection timeout in seconds (default 5).
+     * @param integer                  $timeout        Total request timeout in seconds (default 30).
      */
     public function __construct(
         string $host,
@@ -166,10 +166,10 @@ class ProxyRequestHandler extends RequestHandler
     /**
      * Reads a timeout parameter, validating it is a non-negative integer.
      *
-     * @param array  $params  The build parameters.
-     * @param string $key     The parameter key.
-     * @param int    $default The value used when the key is absent.
-     * @return int
+     * @param array   $params  The build parameters.
+     * @param string  $key     The parameter key.
+     * @param integer $default The value used when the key is absent.
+     * @return integer
      * @throws InvalidArgumentException If the value is not a non-negative integer.
      */
     protected static function timeoutParam(array $params, string $key, int $default): int

@@ -3,6 +3,8 @@
 require_once __DIR__ . '/../../source/loader.php';
 
 require_once __DIR__ . '/utils/FileSystemUtils.php';
+require_once __DIR__ . '/http/StubHttpClient.php';
+require_once __DIR__ . '/log/CapturingLoggerInstance.php';
 require_once __DIR__ . '/handlers/RequestToBodyHandler.php';
 require_once __DIR__ . '/middlewares/DummyRequestMiddleware.php';
 require_once __DIR__ . '/middlewares/DummyResponseMiddleware.php';
