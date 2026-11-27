@@ -14,6 +14,21 @@ use Tent\Utils\SafeRemover;
  * affected by a mutating request, without the middleware itself knowing how
  * cache directory paths are built or how directories are safely removed.
  *
+ * ## Rename-then-delete
+ *
+ * A directory is first moved, with a single `rename()`, into the trash folder
+ * `<location>/.tent-trash/<unix-ts>.<random>` (see {@see CacheTrash}) and only
+ * then deleted. This makes the invalidation atomic for readers, lets only one
+ * of several concurrent cleaners walk the tree, and keeps new cache writes out
+ * of the tree being deleted. The trash folder itself is never removed.
+ *
+ * - a rename lost to another cleaner (the directory is already gone) is silent;
+ * - when the directory cannot be moved (including when the trash folder is not
+ *   a real directory), a `warn` is logged and it is deleted in place instead;
+ * - targets resolving to the trash folder, or inside it, are ignored.
+ *
+ * ## Concurrency and failures
+ *
  * Deletion tolerates other writers removing the same entries concurrently:
  *
  * - anything already gone counts as success and is not logged;
@@ -45,6 +60,8 @@ class CacheDirCleaner
 
     private SafeRemover $remover;
 
+    private CacheTrash $trash;
+
     /**
      * @param FolderLocation   $location Base cache directory (must match FileCacheMiddleware).
      * @param SafeRemover|null $remover  Optional helper used to remove files and directories.
@@ -55,6 +72,7 @@ class CacheDirCleaner
         $this->location = $location;
         $this->resolver = new CacheDirResolver($location);
         $this->remover = $remover ?? new SafeRemover();
+        $this->trash = new CacheTrash($location);
     }
 
     /**
@@ -100,7 +118,9 @@ class CacheDirCleaner
      * Called once per walk attempt. This is a test seam, allowing specs to
      * simulate concurrent deletions, and is not part of the public API.
      *
-     * @param string $dir Absolute path to the directory to walk.
+     * @param string $dir Absolute path to the directory to walk: usually an entry
+     *                    of the trash folder, or the cache directory itself when
+     *                    it is deleted in place.
      * @return \Iterator
      * @throws \UnexpectedValueException When the directory cannot be opened.
      */
@@ -113,8 +133,36 @@ class CacheDirCleaner
     }
 
     /**
-     * Deletes a directory and all its contents if it is safely scoped under
-     * the configured cache location.
+     * Moves a directory to another path, without emitting PHP warnings.
+     *
+     * This is a test seam, allowing specs to simulate lost races and rename
+     * failures, and is not part of the public API.
+     *
+     * @param string $from Path of the directory to move.
+     * @param string $to   New path of the directory.
+     * @return boolean True when the directory was moved.
+     */
+    protected function renameDir(string $from, string $to): bool
+    {
+        return @rename($from, $to);
+    }
+
+    /**
+     * Returns the current Unix timestamp, used to name trash entries.
+     *
+     * This is a test seam, allowing specs to age trash entries, and is not part
+     * of the public API.
+     *
+     * @return integer The current Unix timestamp.
+     */
+    protected function now(): int
+    {
+        return time();
+    }
+
+    /**
+     * Invalidates a directory if it is safely scoped under the configured cache
+     * location and does not resolve into the trash folder.
      *
      * Existence is not checked beforehand: it is decided by the removal itself.
      * A symbolic link standing in place of the directory is removed without
@@ -128,18 +176,102 @@ class CacheDirCleaner
     private function deleteDir(string $dir): void
     {
         $base = rtrim($this->location->basePath(), '/');
-        if (!str_starts_with($dir, $base . '/')) {
+        if (!str_starts_with($dir, $base . '/') || $this->trash->contains($dir)) {
             return;
         }
 
         if (is_link($dir)) {
-            $result = $this->remover->removeFile($dir);
-        } elseif (file_exists($dir) && !is_dir($dir)) {
+            $this->logRemoval($dir, $this->remover->removeFile($dir));
+        } elseif (!file_exists($dir) || is_dir($dir)) {
+            $this->trashDir($dir);
+        }
+    }
+
+    /**
+     * Moves a directory into the trash folder, then deletes it from there.
+     *
+     * Winning the rename is what invalidates the directory, so the debug line is
+     * logged right then, whatever happens while deleting the trash entry. When
+     * the directory cannot be moved, it is deleted in place.
+     *
+     * @param string $dir Absolute path to the directory to delete.
+     * @return void
+     */
+    private function trashDir(string $dir): void
+    {
+        if (!$this->trash->ensure()) {
+            $this->deleteInPlace($dir, 'cache trash is not a real directory — path: ' . $this->trash->path());
             return;
-        } else {
-            $result = $this->removeDirRecursive($dir);
         }
 
+        $entry = $this->trash->path() . '/' . $this->trash->newEntryName($this->now());
+        $error = $this->attemptRename($dir, $entry);
+
+        if ($error !== null) {
+            $this->deleteInPlace($dir, 'cache trash rename failed — dir: ' . $dir . ', reason: ' . $error);
+            return;
+        }
+
+        $this->logRemoval($dir, RemovalResult::Removed);
+        $this->removeDirRecursive($entry);
+    }
+
+    /**
+     * Renames a directory, reporting the reason when it fails.
+     *
+     * The error message is read right after the operation, so it always
+     * describes the rename itself.
+     *
+     * @param string $from Path of the directory to move.
+     * @param string $to   New path of the directory.
+     * @return string|null Null when the directory was moved, otherwise the failure reason.
+     */
+    private function attemptRename(string $from, string $to): ?string
+    {
+        try {
+            error_clear_last();
+            if ($this->renameDir($from, $to)) {
+                return null;
+            }
+
+            return error_get_last()['message'] ?? 'unknown error';
+        } catch (\Throwable $exception) {
+            return $exception->getMessage();
+        }
+    }
+
+    /**
+     * Fallback used when a directory could not be moved into the trash.
+     *
+     * A directory which no longer exists (e.g. another cleaner won the rename)
+     * is silently ignored. Otherwise the failure is logged at `warn` level and
+     * the directory is deleted where it is.
+     *
+     * @param string $dir     Absolute path to the directory to delete.
+     * @param string $warning Warning describing why the directory was not moved.
+     * @return void
+     */
+    private function deleteInPlace(string $dir, string $warning): void
+    {
+        // A failed rename() does not clear the stat cache.
+        clearstatcache(true, $dir);
+        if (!file_exists($dir) && !is_link($dir)) {
+            return;
+        }
+
+        Logger::warn($warning);
+        $this->logRemoval($dir, $this->removeDirRecursive($dir));
+    }
+
+    /**
+     * Logs the debug line of a cleared directory, when this call removed it.
+     *
+     * @param string        $dir    Resolved path of the cache directory.
+     * @param RemovalResult $result Outcome of its removal.
+     * @return void
+     */
+    private function logRemoval(string $dir, RemovalResult $result): void
+    {
         if ($result === RemovalResult::Removed) {
             Logger::debug('cache cleared — dir: ' . $dir);
         }
