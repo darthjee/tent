@@ -26,6 +26,13 @@ use Tent\Cache\QueryRequestHasher;
  *
  * Used by FileCacheMiddleware to provide persistent caching for proxy/static responses.
  *
+ * ## Reserved trash folder
+ *
+ * `<location>/.tent-trash` is reserved for directories being invalidated
+ * (see {@see CacheTrash}). An entry whose resolved directory lies inside it is
+ * uncacheable: it is never reported as a hit, {@see store()} writes nothing and
+ * {@see remove()} does nothing.
+ *
  * ## Example: Direct usage
  *
  * ```php
@@ -105,6 +112,11 @@ class FileCache implements Cache
     private string $hash;
 
     /**
+     * @var boolean Whether the entry resolves inside the reserved trash folder.
+     */
+    private bool $reserved;
+
+    /**
      * Constructs a Cache object.
      *
      * @param ProcessingRequest  $request       The request associated with this cache.
@@ -129,6 +141,8 @@ class FileCache implements Cache
 
         $this->bodyFilePath = CacheFilePath::path('body', $this->basePath(), $this->hash);
         $this->metaFilePath = CacheFilePath::path('meta', $this->basePath(), $this->hash);
+
+        $this->reserved = (new CacheTrash($location))->contains($this->basePath());
     }
 
     /**
@@ -180,13 +194,17 @@ class FileCache implements Cache
     /**
      * Returns the raw Unix timestamp stored when this entry was last written.
      *
-     * Returns null when the entry has no metadata (e.g. cache miss) or the
-     * metadata does not include a `timestamp` field.
+     * Returns null when the entry has no metadata (e.g. cache miss), the
+     * metadata does not include a `timestamp` field, or the entry is reserved.
      *
      * @return integer|null The stored Unix timestamp, or null when unavailable.
      */
     public function timestamp(): ?int
     {
+        if ($this->reserved) {
+            return null;
+        }
+
         $meta = $this->readMeta();
         return $meta['timestamp'] ?? null;
     }
@@ -207,23 +225,35 @@ class FileCache implements Cache
     /**
      * Checks if the cached response files exist.
      *
+     * Always false for a reserved entry.
+     *
      * @see FileUtils::exists()
      *
      * @return boolean True if both body and metadata cache files exist, false otherwise.
      */
     public function exists(): bool
     {
+        if ($this->reserved) {
+            return false;
+        }
+
         return FileUtils::exists($this->bodyFilePath) && FileUtils::exists($this->metaFilePath);
     }
 
     /**
      * Stores the response body and metadata into cache files.
      *
+     * Nothing is created nor written for a reserved entry.
+     *
      * @param Response $response The response to cache.
      * @return void
      */
     public function store(Response $response): void
     {
+        if ($this->reserved) {
+            return;
+        }
+
         $this->ensureCacheFolderExists();
         file_put_contents($this->bodyFilePath, $response->body());
         file_put_contents($this->metaFilePath, json_encode($this->buildMeta($response)));
@@ -241,10 +271,16 @@ class FileCache implements Cache
      * tolerated silently. Real removal failures are logged at `warn` level by
      * {@see SafeRemover} and are never thrown.
      *
+     * Nothing is removed for a reserved entry.
+     *
      * @return void
      */
     public function remove(): void
     {
+        if ($this->reserved) {
+            return;
+        }
+
         $remover = new SafeRemover();
         $remover->removeFile($this->bodyFilePath);
         $remover->removeFile($this->metaFilePath);

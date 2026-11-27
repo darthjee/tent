@@ -72,6 +72,12 @@ Cache files are named from a hash of the request path. Each unique URI maps to a
 
 > **Note**: There is no built-in cache expiry. To clear the cache, delete the files in the `location` directory.
 
+#### The `.tent-trash` folder
+
+`CacheCleanupMiddleware` creates a `.tent-trash/` folder inside `location`, where cache directories are moved before being deleted. It is permanent, so tools listing or backing up the cache volume will see it. It is safe to delete when it is empty: it is recreated on demand. Leftovers from interrupted deletions are swept automatically once they are older than 10 minutes, at most one per cleanup target, by later cleanups. It must be a real directory: if a link or a file takes its place, a warning is logged and cache directories are deleted in place.
+
+Its name is reserved: a request whose path resolves to `/.tent-trash` or anything under it (in any letter case) is proxied normally, but never cached. Deeper occurrences, such as `/users/.tent-trash`, are cached as usual.
+
 ---
 
 ## `CacheStalenessMiddleware`
@@ -98,6 +104,8 @@ Use the same `evictOn` list on both `FileCacheMiddleware` and `CacheStalenessMid
 ## `CacheCleanupMiddleware`
 
 Deletes stale `FileCacheMiddleware` cache directories when a mutating request (`POST`, `PATCH`, `PUT`, `DELETE`) arrives, before the request is forwarded upstream. Use it alongside `FileCacheMiddleware` so writes don't leave outdated `GET` responses cached.
+
+Invalidation is atomic: each cache directory is first renamed into the [`.tent-trash` folder](#the-tent-trash-folder) and then deleted, so readers never see a partially deleted directory (if the rename is not possible, a warning is logged and the directory is deleted in place).
 
 ```php
 [

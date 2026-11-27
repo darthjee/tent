@@ -55,16 +55,16 @@ class CacheDirCleanerRecursiveRemovalTest extends TestCase
     {
         $racedFile = $this->targetDir . '/raced.body';
         $this->buildTree([$racedFile, $this->targetDir . '/sibling.body', $this->targetDir . '/nested/other.body']);
-        $remover = new class ($racedFile) extends SafeRemover {
+        $remover = new class (basename($racedFile)) extends SafeRemover {
             public int $races = 0;
 
-            public function __construct(private string $racedFile)
+            public function __construct(private string $racedName)
             {
             }
 
             public function removeFile(string $path): RemovalResult
             {
-                if ($path === $this->racedFile) {
+                if (basename($path) === $this->racedName) {
                     unlink($path);
                     $this->races++;
                 }
@@ -79,16 +79,16 @@ class CacheDirCleanerRecursiveRemovalTest extends TestCase
 
         $this->assertSame(1, $remover->races);
         $this->assertDirectoryDoesNotExist($this->targetDir);
+        $this->assertTrashIsEmpty();
         $this->assertSame([$this->clearedLine()], $logger->lines);
     }
 
     public function testToleratesSubdirectoryRemovedMidWalk()
     {
-        $subDir = $this->targetDir . '/nested';
-        $this->buildTree([$subDir . '/entry.body', $this->targetDir . '/sibling.body']);
-        $cleaner = $this->racingCleaner(function (int $attempt) use ($subDir) {
+        $this->buildTree([$this->targetDir . '/nested/entry.body', $this->targetDir . '/sibling.body']);
+        $cleaner = $this->racingCleaner(function (int $attempt, string $dir) {
             if ($attempt === 1) {
-                FileSystemUtils::removeDirRecursive($subDir);
+                FileSystemUtils::removeDirRecursive($dir . '/nested');
                 throw new \UnexpectedValueException('subdirectory vanished');
             }
         });
@@ -97,6 +97,7 @@ class CacheDirCleanerRecursiveRemovalTest extends TestCase
         $cleaner->clean('collection', '/users');
 
         $this->assertDirectoryDoesNotExist($this->targetDir);
+        $this->assertTrashIsEmpty();
         $this->assertSame([$this->clearedLine()], $logger->lines);
     }
 
@@ -111,8 +112,8 @@ class CacheDirCleanerRecursiveRemovalTest extends TestCase
 
         $cleaner->clean('collection', '/users');
 
-        $this->assertFalse(is_link($link));
         $this->assertDirectoryDoesNotExist($this->targetDir);
+        $this->assertTrashIsEmpty();
         $this->assertStringEqualsFile($target, 'content');
     }
 
@@ -134,12 +135,12 @@ class CacheDirCleanerRecursiveRemovalTest extends TestCase
     {
         $visited = $this->targetDir . '/visited.body';
         $this->buildTree([$visited, $this->targetDir . '/unreached.body', $this->targetDir . '/nested/deep.body']);
-        $interruptedWalk = function () use ($visited): \Generator {
-            yield new \SplFileInfo($visited);
+        $interruptedWalk = function (string $dir): \Generator {
+            yield new \SplFileInfo($dir . '/visited.body');
             throw new \UnexpectedValueException('walk interrupted');
         };
         $cleaner = $this->racingCleaner(
-            fn (int $attempt): ?\Iterator => $attempt === 1 ? $interruptedWalk() : null
+            fn (int $attempt, string $dir): ?\Iterator => $attempt === 1 ? $interruptedWalk($dir) : null
         );
         $logger = $this->captureLogs();
 
@@ -147,6 +148,7 @@ class CacheDirCleanerRecursiveRemovalTest extends TestCase
 
         $this->assertSame(2, $cleaner->attempts);
         $this->assertDirectoryDoesNotExist($this->targetDir);
+        $this->assertTrashIsEmpty();
         $this->assertSame([$this->clearedLine()], $logger->lines);
     }
 
@@ -161,9 +163,12 @@ class CacheDirCleanerRecursiveRemovalTest extends TestCase
 
         $cleaner->clean('collection', '/users');
 
+        $entry = $cleaner->walkedDirs[0];
         $this->assertSame(3, $cleaner->attempts);
-        $this->assertFileExists($file);
-        $this->assertSingleRootWarning($logger);
+        $this->assertSame([$entry, $entry, $entry], $cleaner->walkedDirs);
+        $this->assertTrashEntry($entry);
+        $this->assertFileExists($entry . '/entry.body');
+        $this->assertClearedWithSingleRootWarning($logger, $entry);
     }
 
     public function testResolvedPathThatIsAFileIsLeftUntouched()
@@ -194,7 +199,7 @@ class CacheDirCleanerRecursiveRemovalTest extends TestCase
         $this->assertSame([$this->clearedLine()], $logger->lines);
     }
 
-    public function testNoDebugLogWhenRootRemovedByConcurrentWriterMidWalk()
+    public function testSilentWhenTrashEntryRemovedByConcurrentWriterMidWalk()
     {
         $this->buildTree([$this->targetDir . '/nested/entry.body']);
         $cleaner = $this->racingCleaner(function (int $attempt, string $dir) {
@@ -207,7 +212,8 @@ class CacheDirCleanerRecursiveRemovalTest extends TestCase
 
         $this->assertSame(1, $cleaner->attempts);
         $this->assertDirectoryDoesNotExist($this->targetDir);
-        $this->assertSame([], $logger->lines);
+        $this->assertTrashIsEmpty();
+        $this->assertSame([$this->clearedLine()], $logger->lines);
     }
 
     public function testRealFileFailureLeavesRootAndLogsOnlyHelperWarnings()
@@ -215,14 +221,14 @@ class CacheDirCleanerRecursiveRemovalTest extends TestCase
         $stuckFile = $this->targetDir . '/stuck.body';
         $sibling = $this->targetDir . '/sibling.body';
         $this->buildTree([$stuckFile, $sibling]);
-        $remover = new class ($stuckFile) extends SafeRemover {
-            public function __construct(private string $stuckFile)
+        $remover = new class (basename($stuckFile)) extends SafeRemover {
+            public function __construct(private string $stuckName)
             {
             }
 
             public function removeFile(string $path): RemovalResult
             {
-                if ($path === $this->stuckFile) {
+                if (basename($path) === $this->stuckName) {
                     return RemovalResult::Failed;
                 }
 
@@ -234,17 +240,20 @@ class CacheDirCleanerRecursiveRemovalTest extends TestCase
 
         $cleaner->clean('collection', '/users');
 
+        $entry = $cleaner->walkedDirs[0];
         $this->assertSame(1, $cleaner->attempts);
-        $this->assertFileExists($stuckFile);
-        $this->assertFileDoesNotExist($sibling);
-        $this->assertSingleRootWarning($logger);
+        $this->assertTrashEntry($entry);
+        $this->assertFileExists($entry . '/stuck.body');
+        $this->assertFileDoesNotExist($entry . '/sibling.body');
+        $this->assertClearedWithSingleRootWarning($logger, $entry);
     }
 
     /**
      * Builds a cleaner whose walk can be disturbed before each attempt.
      *
-     * The callback receives the attempt number and the directory. It may throw,
-     * return a replacement iterator, or return null to use the real one.
+     * The callback receives the attempt number and the walked directory (the
+     * trash entry). It may throw, return a replacement iterator, or return null
+     * to use the real one.
      */
     private function racingCleaner(\Closure $onAttempt, ?SafeRemover $remover = null): CacheDirCleaner
     {
@@ -252,6 +261,7 @@ class CacheDirCleanerRecursiveRemovalTest extends TestCase
 
         return new class ($location, $onAttempt, $remover) extends CacheDirCleaner {
             public int $attempts = 0;
+            public array $walkedDirs = [];
 
             public function __construct(
                 FolderLocation $location,
@@ -264,6 +274,7 @@ class CacheDirCleanerRecursiveRemovalTest extends TestCase
             protected function createIterator(string $dir): \Iterator
             {
                 $this->attempts++;
+                $this->walkedDirs[] = $dir;
 
                 return ($this->onAttempt)($this->attempts, $dir) ?? parent::createIterator($dir);
             }
@@ -293,11 +304,28 @@ class CacheDirCleanerRecursiveRemovalTest extends TestCase
         return ['debug', 'cache cleared — dir: ' . $this->targetDir];
     }
 
-    private function assertSingleRootWarning(CapturingLoggerInstance $logger): void
+    private function assertTrashEntry(string $dir): void
     {
-        $this->assertCount(1, $logger->lines);
-        [$level, $message] = $logger->lines[0];
+        $this->assertMatchesRegularExpression(
+            '#^' . preg_quote($this->cacheDir . '/.tent-trash/', '#') . '\d+\.[0-9a-f]{16}$#',
+            $dir
+        );
+    }
+
+    private function assertTrashIsEmpty(): void
+    {
+        $trashDir = $this->cacheDir . '/.tent-trash';
+
+        $this->assertDirectoryExists($trashDir);
+        $this->assertSame([], array_values(array_diff(scandir($trashDir), ['.', '..'])));
+    }
+
+    private function assertClearedWithSingleRootWarning(CapturingLoggerInstance $logger, string $entry): void
+    {
+        $this->assertCount(2, $logger->lines);
+        $this->assertSame($this->clearedLine(), $logger->lines[0]);
+        [$level, $message] = $logger->lines[1];
         $this->assertSame('warn', $level);
-        $this->assertStringStartsWith('cache removal failed — dir: ' . $this->targetDir . ' — ', $message);
+        $this->assertStringStartsWith('cache removal failed — dir: ' . $entry . ' — ', $message);
     }
 }
