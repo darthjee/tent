@@ -275,4 +275,15 @@ class ProxyRequestHandlerGeneralTest extends TestCase
             'query' => $this->requestQuery
         ]);
     }
+
+    public function testInjectedClientFailureBecomes502()
+    {
+        $this->initVariables();
+        $this->createMockHttpClient(['body' => '', 'httpCode' => 0, 'headers' => []]);
+
+        $handler = new ProxyRequestHandler($this->host, $this->httpClient);
+        $response = $handler->handleRequest($this->request);
+
+        $this->assertSame(502, $response->httpCode());
+    }
 }
