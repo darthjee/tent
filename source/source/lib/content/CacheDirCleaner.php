@@ -27,6 +27,19 @@ use Tent\Utils\SafeRemover;
  *   a real directory), a `warn` is logged and it is deleted in place instead;
  * - targets resolving to the trash folder, or inside it, are ignored.
  *
+ * ## Orphans
+ *
+ * A request interrupted while deleting (e.g. by `max_execution_time`) leaves an
+ * entry behind in the trash. After its own deletion, every `clean()` and
+ * `cleanPath()` call sweeps at most one of those orphans:
+ *
+ * - only entries moved into the trash at least `ORPHAN_GRACE_SECONDS` ago are
+ *   orphans, as younger ones may still be under deletion;
+ * - an orphan is claimed by renaming it to a new entry name, so that a single
+ *   cleaner deletes it;
+ * - files not named as trash entries are left alone;
+ * - nothing is swept when the trash folder is not a real directory.
+ *
  * ## Concurrency and failures
  *
  * Deletion tolerates other writers removing the same entries concurrently:
@@ -54,6 +67,10 @@ class CacheDirCleaner
 {
     private const MAX_WALK_ATTEMPTS = 3;
 
+    private const ORPHAN_GRACE_SECONDS = 600;
+
+    private const MAX_ORPHANS_PER_CALL = 1;
+
     private FolderLocation $location;
 
     private CacheDirResolver $resolver;
@@ -79,9 +96,10 @@ class CacheDirCleaner
      * Resolves the cache directory for the given target and request path,
      * then deletes it if it exists.
      *
-     * Does nothing when the target cannot be meaningfully applied
-     * (e.g. `entity` on a single-segment path) or when the resolved
-     * directory does not exist.
+     * Nothing is deleted for the request path when the target cannot be
+     * meaningfully applied (e.g. `entity` on a single-segment path) or when the
+     * resolved directory does not exist. In every case, one orphan of the trash
+     * folder may then be swept.
      *
      * @param string $target Target type, either 'collection' or 'entity'.
      * @param string $path   Request path, e.g. '/users/1'.
@@ -94,6 +112,8 @@ class CacheDirCleaner
         if ($dir !== null) {
             $this->deleteDir($dir);
         }
+
+        $this->sweepOrphan();
     }
 
     /**
@@ -102,6 +122,7 @@ class CacheDirCleaner
      *
      * Unlike `clean()`, this has no `collection`/`entity` segment-count
      * restriction, so it can be used for explicit `custom` cleanup targets.
+     * One orphan of the trash folder may then be swept.
      *
      * @param string $path Concrete request path, e.g. '/games/space-invaders.json'.
      * @return void
@@ -109,6 +130,7 @@ class CacheDirCleaner
     public function cleanPath(string $path): void
     {
         $this->deleteDir($this->resolver->resolveExact($path));
+        $this->sweepOrphan();
     }
 
     /**
@@ -148,7 +170,7 @@ class CacheDirCleaner
     }
 
     /**
-     * Returns the current Unix timestamp, used to name trash entries.
+     * Returns the current Unix timestamp, used to name and age trash entries.
      *
      * This is a test seam, allowing specs to age trash entries, and is not part
      * of the public API.
@@ -213,7 +235,7 @@ class CacheDirCleaner
         }
 
         $this->logRemoval($dir, RemovalResult::Removed);
-        $this->removeDirRecursive($entry);
+        $this->deleteEntry($entry);
     }
 
     /**
@@ -253,14 +275,101 @@ class CacheDirCleaner
      */
     private function deleteInPlace(string $dir, string $warning): void
     {
-        // A failed rename() does not clear the stat cache.
-        clearstatcache(true, $dir);
-        if (!file_exists($dir) && !is_link($dir)) {
+        if ($this->isGone($dir)) {
             return;
         }
 
         Logger::warn($warning);
         $this->logRemoval($dir, $this->removeDirRecursive($dir));
+    }
+
+    /**
+     * Claims and deletes at most `MAX_ORPHANS_PER_CALL` orphans of the trash folder.
+     *
+     * An orphan claimed by another cleaner is silently skipped, in favour of the
+     * next one. Any other claim failure is logged at `warn` level and ends the
+     * sweep. The trash folder itself is never created nor removed.
+     *
+     * @return void
+     */
+    private function sweepOrphan(): void
+    {
+        if (!$this->trash->isUsable()) {
+            return;
+        }
+
+        $now = $this->now();
+        $claimed = 0;
+
+        foreach ($this->orphanNames($now) as $name) {
+            $orphan = $this->trash->path() . '/' . $name;
+            $entry = $this->trash->path() . '/' . $this->trash->newEntryName($now);
+            $error = $this->attemptRename($orphan, $entry);
+
+            if ($error === null) {
+                Logger::debug('cache trash orphan swept — entry: ' . $name);
+                $this->deleteEntry($entry);
+
+                if (++$claimed >= self::MAX_ORPHANS_PER_CALL) {
+                    return;
+                }
+            } elseif (!$this->isGone($orphan)) {
+                Logger::warn('cache trash orphan claim failed — entry: ' . $name . ', reason: ' . $error);
+                return;
+            }
+        }
+    }
+
+    /**
+     * Lists the entries of the trash folder which are past the grace period.
+     *
+     * Files not named as trash entries are never listed.
+     *
+     * @param integer $now Current Unix timestamp.
+     * @return string[] Names of the orphan entries.
+     */
+    private function orphanNames(int $now): array
+    {
+        $names = @scandir($this->trash->path());
+
+        return array_filter($names ?: [], function (string $name) use ($now): bool {
+            $timestamp = $this->trash->entryTimestamp($name);
+
+            return $timestamp !== null && $timestamp <= $now - self::ORPHAN_GRACE_SECONDS;
+        });
+    }
+
+    /**
+     * Deletes an entry of the trash folder.
+     *
+     * Anything other than a real directory (e.g. a symbolic link) is unlinked
+     * without being followed.
+     *
+     * @param string $entry Path of the entry.
+     * @return void
+     */
+    private function deleteEntry(string $entry): void
+    {
+        if (is_link($entry) || !is_dir($entry)) {
+            $this->remover->removeFile($entry);
+            return;
+        }
+
+        $this->removeDirRecursive($entry);
+    }
+
+    /**
+     * Checks, after a failed operation, whether a path no longer exists.
+     *
+     * @param string $path Path to check.
+     * @return boolean True when nothing, not even a symbolic link, stands at the path.
+     */
+    private function isGone(string $path): bool
+    {
+        // A failed rename() does not clear the stat cache.
+        clearstatcache(true, $path);
+
+        return !file_exists($path) && !is_link($path);
     }
 
     /**
