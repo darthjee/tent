@@ -74,15 +74,13 @@ class CacheDirCleanerCleanPathTest extends TestCase
     public function testCleanPathDoesNotDeleteDirOutsideBaseLocation()
     {
         $outsideDir = sys_get_temp_dir() . '/cache_dir_cleaner_clean_path_outside_' . uniqid();
-        mkdir($outsideDir, 0777, true);
+        mkdir($outsideDir . '/GET', 0777, true);
+        file_put_contents($outsideDir . '/GET/entry.body', 'content');
 
         try {
-            $escapingLocation = new FolderLocation($this->cacheDir . '/games/../..');
-            $cleaner = new CacheDirCleaner($escapingLocation);
+            $this->cleaner->cleanPath('/../' . basename($outsideDir));
 
-            $cleaner->cleanPath(basename($outsideDir));
-
-            $this->assertDirectoryExists($outsideDir);
+            $this->assertFileExists($outsideDir . '/GET/entry.body');
         } finally {
             FileSystemUtils::removeDirRecursive($outsideDir);
         }

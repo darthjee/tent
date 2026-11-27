@@ -52,6 +52,20 @@ use Tent\Utils\SafeRemover;
  * - symbolic links are removed without being followed, including when the
  *   resolved directory is itself a link.
  *
+ * ## Safety
+ *
+ * Only paths genuinely under the configured cache location are touched. Before
+ * anything is moved or deleted, a path is refused, with a `warn`, when:
+ *
+ * - it is not under the location, or the location is empty or `/`;
+ * - it has a `.` or `..` segment (or a NUL byte) after the location;
+ * - its real parent directory is outside the real path of the location, e.g.
+ *   through an intermediate symbolic link.
+ *
+ * The cache location itself may be a symbolic link, but a symbolic link to
+ * somewhere outside of it cannot be used as a cache subdirectory. A link swapped
+ * in between this check and the deletion is not detected.
+ *
  * ## Example
  *
  * ```php
@@ -184,11 +198,14 @@ class CacheDirCleaner
 
     /**
      * Invalidates a directory if it is safely scoped under the configured cache
-     * location and does not resolve into the trash folder.
+     * location (see {@see self::isSafelyScoped()}) and does not resolve into the
+     * trash folder.
      *
-     * Existence is not checked beforehand: it is decided by the removal itself.
-     * A symbolic link standing in place of the directory is removed without
-     * touching its target, while any other non-directory is left alone.
+     * Nothing on the filesystem is changed unless both conditions hold.
+     * Existence of the directory itself is not checked beforehand: it is decided
+     * by the removal. A symbolic link standing in place of the directory is
+     * removed without touching its target, while any other non-directory is left
+     * alone.
      *
      * The debug line is only logged when this call removed the directory (or link).
      *
@@ -197,8 +214,7 @@ class CacheDirCleaner
      */
     private function deleteDir(string $dir): void
     {
-        $base = rtrim($this->location->basePath(), '/');
-        if (!str_starts_with($dir, $base . '/') || $this->trash->contains($dir)) {
+        if (!$this->isSafelyScoped($dir) || $this->trash->contains($dir)) {
             return;
         }
 
@@ -207,6 +223,117 @@ class CacheDirCleaner
         } elseif (!file_exists($dir) || is_dir($dir)) {
             $this->trashDir($dir);
         }
+    }
+
+    /**
+     * Checks that a directory is genuinely under the configured cache location,
+     * before anything is done to it.
+     *
+     * The checks run in this order:
+     *
+     * 1. the location must not be empty nor `/`;
+     * 2. the path must start with `<location>/`;
+     * 3. no segment after the location may be `.` or `..`, and no NUL byte may
+     *    appear there (see {@see self::hasSafeSegments()});
+     * 4. the real parent directory must not be outside the real location (see
+     *    {@see self::resolvesInsideBase()}).
+     *
+     * Refusals are logged at `warn` level. Two cases are silent: when there is
+     * nothing to delete (the location or the parent directory does not exist)
+     * and when a path with a `.` or `..` segment is reserved for the trash.
+     *
+     * Known limitation (TOCTOU): a component swapped for a symbolic link between
+     * this check and the `rename()` is not prevented. PHP offers no
+     * `openat()`-style traversal to close that window, and exploiting it requires
+     * write access inside the cache directory.
+     *
+     * @param string $dir Path to the directory to delete.
+     * @return boolean True when the path stays under the cache location.
+     */
+    private function isSafelyScoped(string $dir): bool
+    {
+        $base = rtrim($this->location->basePath(), '/');
+        if ($base === '') {
+            return $this->refuse($dir, 'misconfigured cache location');
+        }
+
+        $prefix = $base . '/';
+        if (!str_starts_with($dir, $prefix)) {
+            return $this->refuse($dir, 'outside cache location');
+        }
+
+        if (!$this->hasSafeSegments(substr($dir, strlen($prefix)))) {
+            // Paths reserved for the trash are ignored silently, however spelled.
+            return $this->trash->contains($dir) ? false : $this->refuse($dir, 'dot segment');
+        }
+
+        return $this->resolvesInsideBase($dir, $base);
+    }
+
+    /**
+     * Checks, without accessing the filesystem, that a path cannot traverse out
+     * of the directory it is relative to.
+     *
+     * Only whole segments are matched, so `...`, `..foo` or `%2e%2e` are valid
+     * names. A NUL byte is also rejected, as filesystem functions throw on it.
+     *
+     * @param string $path Part of a path following the cache location.
+     * @return boolean True when there is no `.` or `..` segment, nor NUL byte.
+     */
+    private function hasSafeSegments(string $path): bool
+    {
+        if (str_contains($path, "\0")) {
+            return false;
+        }
+
+        return array_intersect(explode('/', $path), ['.', '..']) === [];
+    }
+
+    /**
+     * Checks that the real path of the parent directory is, or lies under, the
+     * real path of the cache location, logging a refusal otherwise.
+     *
+     * Both sides are resolved, so the location may itself be a symbolic link.
+     * The final component is never resolved: a link standing in place of the
+     * directory is to be removed, not followed. The comparison is case-sensitive.
+     *
+     * The realpath cache is cleared first, as it may outlive the request and
+     * hide a directory replaced by a link by another process.
+     *
+     * @param string $dir  Path to the directory to delete.
+     * @param string $base Cache location, without a trailing slash.
+     * @return boolean False when the parent is outside the location, or when
+     *                 either of them does not exist (which is not logged).
+     */
+    private function resolvesInsideBase(string $dir, string $base): bool
+    {
+        clearstatcache(true);
+        $realBase = realpath($base);
+        $realParent = realpath(dirname($dir));
+
+        if ($realBase === false || $realParent === false) {
+            return false;
+        }
+
+        if ($realParent === $realBase || str_starts_with($realParent, $realBase . '/')) {
+            return true;
+        }
+
+        return $this->refuse($dir, 'resolves outside cache location (' . $realParent . ')');
+    }
+
+    /**
+     * Logs the refusal to delete a directory.
+     *
+     * @param string $dir    Path to the refused directory.
+     * @param string $reason Why it was refused.
+     * @return boolean Always false, so that checks can return it.
+     */
+    private function refuse(string $dir, string $reason): bool
+    {
+        Logger::warn('cache cleanup refused — dir: ' . $dir . ', reason: ' . $reason);
+
+        return false;
     }
 
     /**

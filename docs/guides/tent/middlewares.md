@@ -107,6 +107,11 @@ Deletes stale `FileCacheMiddleware` cache directories when a mutating request (`
 
 Invalidation is atomic: each cache directory is first renamed into the [`.tent-trash` folder](#the-tent-trash-folder) and then deleted, so readers never see a partially deleted directory (if the rename is not possible, a warning is logged and the directory is deleted in place).
 
+Cleanup never reaches outside `location`. The following are refused, leaving the cache untouched, and logged at `warn` level (`cache cleanup refused — …`):
+
+- paths with `.` or `..` segments, so `custom` targets must not contain them;
+- directories whose parent resolves outside `location`, so cache subdirectories must not be symlinks. `location` itself may be a symlink (e.g. to a Docker volume): symlink it instead.
+
 ```php
 [
     'class'    => 'Tent\Middlewares\CacheCleanupMiddleware',

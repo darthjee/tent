@@ -127,15 +127,13 @@ class CacheDirCleanerCleanTest extends TestCase
     public function testCleanDoesNotDeleteDirOutsideBaseLocation()
     {
         $outsideDir = sys_get_temp_dir() . '/cache_dir_cleaner_outside_' . uniqid();
-        mkdir($outsideDir, 0777, true);
+        mkdir($outsideDir . '/GET', 0777, true);
+        file_put_contents($outsideDir . '/GET/entry.body', 'content');
 
         try {
-            $escapingLocation = new FolderLocation($this->cacheDir . '/users/../..');
-            $cleaner = new CacheDirCleaner($escapingLocation);
+            $this->cleaner->clean('collection', '/../' . basename($outsideDir) . '/x');
 
-            $cleaner->clean('collection', basename($outsideDir));
-
-            $this->assertDirectoryExists($outsideDir);
+            $this->assertFileExists($outsideDir . '/GET/entry.body');
         } finally {
             FileSystemUtils::removeDirRecursive($outsideDir);
         }
