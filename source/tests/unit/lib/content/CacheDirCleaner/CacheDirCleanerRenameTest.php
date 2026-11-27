@@ -294,10 +294,38 @@ class CacheDirCleanerRenameTest extends TestCase
     {
         return [
             'entry' => ['/.tent-trash/x'],
-            'dot segment' => ['/./.tent-trash/x'],
-            'parent segment' => ['/users/../.tent-trash/x'],
             'trash itself' => ['/.tent-trash'],
             'upper case' => ['/.TENT-TRASH/x'],
+        ];
+    }
+
+    /**
+     * @dataProvider unsafeReservedPathProvider
+     */
+    public function testReservedCustomTargetWithDotSegmentsIsRefusedAsUnsafe(string $path)
+    {
+        $planted = $this->cacheDir . '/' . trim($path, '/') . '/GET/entry.body';
+        mkdir($this->cacheDir . '/users');
+        $this->buildTree([$planted]);
+        $cleaner = $this->seamedCleaner();
+        $logger = $this->captureLogs();
+
+        $cleaner->cleanPath($path);
+
+        $this->assertStringEqualsFile($planted, 'content');
+        $this->assertSame([], $cleaner->renames);
+        $this->assertSame([], $cleaner->walkedDirs);
+        $this->assertSame(
+            [['warn', 'cache cleanup refused — path: ' . $path . ', reason: unsafe path']],
+            $logger->lines
+        );
+    }
+
+    public function unsafeReservedPathProvider(): array
+    {
+        return [
+            'dot segment' => ['/./.tent-trash/x'],
+            'parent segment' => ['/users/../.tent-trash/x'],
         ];
     }
 

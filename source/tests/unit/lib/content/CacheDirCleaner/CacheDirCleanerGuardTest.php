@@ -37,7 +37,7 @@ class CacheDirCleanerGuardTest extends TestCase
     public function testRefusesParentSegmentLeavingTheCache()
     {
         $survivor = $this->plantFile($this->testDir . '/GET');
-        $this->expectRefusal($this->cacheDir . '/../GET', 'dot segment');
+        $this->expectUnsafePathRefusal('/..');
 
         $this->cleaner()->cleanPath('/..');
 
@@ -47,7 +47,7 @@ class CacheDirCleanerGuardTest extends TestCase
     public function testRefusesParentSegmentInCollectionTarget()
     {
         $survivor = $this->plantFile($this->testDir . '/GET');
-        $this->expectRefusal($this->cacheDir . '/../GET', 'dot segment');
+        $this->expectUnsafePathRefusal('/../x');
 
         $this->cleaner()->clean('collection', '/../x');
 
@@ -58,7 +58,7 @@ class CacheDirCleanerGuardTest extends TestCase
     {
         mkdir($this->cacheDir . '/games');
         $survivor = $this->plantFile($this->cacheDir . '/users.json/GET');
-        $this->expectRefusal($this->cacheDir . '/games/../users.json/GET', 'dot segment');
+        $this->expectUnsafePathRefusal('/games/../users.json');
 
         $this->cleaner()->cleanPath('/games/../users.json');
 
@@ -68,7 +68,7 @@ class CacheDirCleanerGuardTest extends TestCase
     public function testRefusesCurrentDirSegment()
     {
         $survivor = $this->plantFile($this->cacheDir . '/users.json/GET');
-        $this->expectRefusal($this->cacheDir . '/./users.json/GET', 'dot segment');
+        $this->expectUnsafePathRefusal('/./users.json');
 
         $this->cleaner()->cleanPath('/./users.json');
 
@@ -101,7 +101,7 @@ class CacheDirCleanerGuardTest extends TestCase
 
     public function testRefusesNulByteWithoutThrowing()
     {
-        $this->expectRefusal($this->cacheDir . "/users\0.json/GET", 'dot segment');
+        $this->expectUnsafePathRefusal("/users\0.json");
 
         $this->cleaner()->cleanPath("/users\0.json");
     }
@@ -266,6 +266,11 @@ class CacheDirCleanerGuardTest extends TestCase
     private function expectRefusal(string $dir, string $reason): void
     {
         $this->expectSingleLog('cache cleanup refused — dir: ' . $dir . ', reason: ' . $reason, 'warn');
+    }
+
+    private function expectUnsafePathRefusal(string $path): void
+    {
+        $this->expectSingleLog('cache cleanup refused — path: ' . $path . ', reason: unsafe path', 'warn');
     }
 
     private function expectCleared(string $dir): void

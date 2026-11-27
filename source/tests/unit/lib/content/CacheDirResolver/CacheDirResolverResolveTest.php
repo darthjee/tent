@@ -67,4 +67,52 @@ class CacheDirResolverResolveTest extends TestCase
 
         $this->assertSame('/cache/users/GET', $dir);
     }
+
+    /**
+     * @dataProvider unsafePathProvider
+     */
+    public function testResolveCollectionReturnsNullForUnsafePath(string $path)
+    {
+        $this->assertNull($this->resolver->resolve('collection', $path));
+    }
+
+    /**
+     * @dataProvider unsafePathProvider
+     */
+    public function testResolveEntityReturnsNullForUnsafePath(string $path)
+    {
+        $this->assertNull($this->resolver->resolve('entity', $path));
+    }
+
+    public function unsafePathProvider(): array
+    {
+        return [
+            'relative parent segment' => ['/a/../b'],
+            'parent segment above root' => ['/../x'],
+            'trailing current segment' => ['/a/.'],
+            'NUL byte' => ["/a/b\0c"],
+        ];
+    }
+
+    /**
+     * @dataProvider safeLookAlikeProvider
+     */
+    public function testResolveStillResolvesSafeLookAlikes(string $name)
+    {
+        $path = '/users/' . $name;
+
+        $this->assertSame('/cache/users/GET', $this->resolver->resolve('collection', $path));
+        $this->assertSame('/cache/users/' . $name . '/GET', $this->resolver->resolve('entity', $path));
+    }
+
+    public function safeLookAlikeProvider(): array
+    {
+        return [
+            'three dots' => ['...'],
+            'name starting with two dots' => ['..foo'],
+            'name containing two dots' => ['a..b'],
+            'dot-prefixed name' => ['.git'],
+            'encoded dots' => ['%2e%2e'],
+        ];
+    }
 }
