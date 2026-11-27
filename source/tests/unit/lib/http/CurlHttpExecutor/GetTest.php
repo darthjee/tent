@@ -107,4 +107,46 @@ class GetTest extends TestCase
         $this->assertEquals('value', $body['args']['test']);
         $this->assertEquals('bar', $body['args']['foo']);
     }
+
+    public function testRequestReturnsNoErrorOnSuccess()
+    {
+        $executor = new Get([
+            'url' => $this->baseUrl . '/get',
+            'headers' => []
+        ]);
+
+        $result = $executor->request();
+
+        $this->assertSame(0, $result['errno']);
+        $this->assertSame('', $result['error']);
+    }
+
+    public function testRequestReportsTimeout()
+    {
+        $executor = new Get([
+            'url' => $this->baseUrl . '/delay/3',
+            'headers' => [],
+            'timeout' => 1
+        ]);
+
+        $result = $executor->request();
+
+        $this->assertSame(CURLE_OPERATION_TIMEDOUT, $result['errno']);
+    }
+
+    public function testRequestReportsUnreachableUpstream()
+    {
+        $executor = new Get([
+            'url' => 'http://127.0.0.1:1',
+            'headers' => [],
+            'connect_timeout' => 1
+        ]);
+
+        $result = $executor->request();
+
+        $this->assertNotSame(0, $result['errno']);
+        $this->assertNotEmpty($result['error']);
+        $this->assertSame(0, $result['httpCode']);
+        $this->assertSame('', $result['body']);
+    }
 }

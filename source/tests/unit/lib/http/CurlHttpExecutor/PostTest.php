@@ -194,4 +194,32 @@ class PostTest extends TestCase
             unlink($tmpFile);
         }
     }
+
+    public function testRequestReturnsNoErrorOnSuccess()
+    {
+        $executor = new Post([
+            'url' => $this->baseUrl . '/post',
+            'headers' => [],
+            'body' => ''
+        ]);
+
+        $result = $executor->request();
+
+        $this->assertSame(0, $result['errno']);
+        $this->assertSame('', $result['error']);
+    }
+
+    public function testRequestReportsTimeout()
+    {
+        $executor = new Post([
+            'url' => $this->baseUrl . '/delay/3',
+            'headers' => [],
+            'body' => 'x',
+            'timeout' => 1
+        ]);
+
+        $result = $executor->request();
+
+        $this->assertSame(CURLE_OPERATION_TIMEDOUT, $result['errno']);
+    }
 }

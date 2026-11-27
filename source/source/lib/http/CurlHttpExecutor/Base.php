@@ -42,6 +42,16 @@ abstract class Base
     protected ?CurlHandle $curlHandle;
 
     /**
+     * @var int Connection timeout in seconds
+     */
+    protected int $connectTimeout;
+
+    /**
+     * @var int Total request timeout in seconds
+     */
+    protected int $timeout;
+
+    /**
      * Initializes the executor with the given options.
      *
      * @param array $options Associative array with keys:
@@ -50,6 +60,8 @@ abstract class Base
      *  - 'body': (optional) The request body/payload to send (for POST requests).
      *  - 'uploadedFiles': (optional) Uploaded files in $_FILES format.
      *  - 'postFields': (optional) POST form fields.
+     *  - 'connect_timeout': (optional) Connection timeout in seconds (default 5).
+     *  - 'timeout': (optional) Total request timeout in seconds (default 30).
      */
     public function __construct(array $options)
     {
@@ -58,6 +70,8 @@ abstract class Base
         $this->body = $options['body'] ?? null;
         $this->uploadedFiles = $options['uploadedFiles'] ?? [];
         $this->postFields = $options['postFields'] ?? [];
+        $this->connectTimeout = $options['connect_timeout'] ?? 5;
+        $this->timeout = $options['timeout'] ?? 30;
     }
 
     /**
@@ -68,7 +82,9 @@ abstract class Base
      * @return array{
      *   body: string,
      *   httpCode: int,
-     *   headers: string[]
+     *   headers: string[],
+     *   errno: int,
+     *   error: string
      * } Array with response body, status code, and headers.
      */
     public function request(): array
@@ -103,6 +119,8 @@ abstract class Base
         curl_setopt($this->curlHandle, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->curlHandle, CURLOPT_HEADER, true);
         curl_setopt($this->curlHandle, CURLOPT_HTTPHEADER, $headerLines);
+        curl_setopt($this->curlHandle, CURLOPT_CONNECTTIMEOUT, $this->connectTimeout);
+        curl_setopt($this->curlHandle, CURLOPT_TIMEOUT, $this->timeout);
     }
 
     /**
@@ -114,12 +132,19 @@ abstract class Base
      * @return array{
      *   body: string,
      *   httpCode: int,
-     *   headers: string[]
+     *   headers: string[],
+     *   errno: int,
+     *   error: string
      * } Array with response body, status code, and headers.
      */
     protected function executeCurlRequest(): array
     {
         $response = curl_exec($this->curlHandle);
+        if ($response === false) {
+            $response = '';
+        }
+        $errno = curl_errno($this->curlHandle);
+        $error = curl_error($this->curlHandle);
         $headerSize = curl_getinfo($this->curlHandle, CURLINFO_HEADER_SIZE);
         $httpCode = curl_getinfo($this->curlHandle, CURLINFO_HTTP_CODE);
 
@@ -133,7 +158,9 @@ abstract class Base
         return [
             'body' => $responseBody,
             'httpCode' => $httpCode,
-            'headers' => $headerLines
+            'headers' => $headerLines,
+            'errno' => $errno,
+            'error' => $error
         ];
     }
 }
