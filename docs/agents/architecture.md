@@ -114,6 +114,15 @@ Cache and file abstractions used by `FileCacheMiddleware`: `Cache`, `File`, `Fil
 
 `CacheDirCleaner` (with `CacheDirResolver`) deletes cache directories on behalf of `CacheCleanupMiddleware`. Both it and `FileCache::remove()` tolerate other writers deleting the same entries concurrently, by removing through `SafeRemover`: anything already gone is success, while a real failure is logged and never thrown. `CacheDirCleaner` restarts a walk interrupted by a vanished directory (3 attempts in total) and unlinks symbolic links without following them.
 
+Invalidation is rename-then-delete: `CacheDirCleaner` first moves the target directory, with a single `rename()`, into `<base>/.tent-trash/<unix-ts>.<16 hex chars>` and then deletes that private tree. Readers see the invalidation atomically, and new cache writes never land in the tree being deleted. The trash folder is created on demand and never removed. A symbolic link standing in place of the target is unlinked without being renamed.
+
+- A lost rename race (the source is gone after the failed `rename()`) counts as already gone: nothing is logged and nothing is walked.
+- A real rename failure, or an unusable trash (a link, a regular file, or a folder that cannot be created), logs a `warn` and falls back to deleting the directory in place.
+- The `cache cleared — dir: <original path>` debug line is logged when this call won the rename (or, on the fallback path, removed the directory).
+- After its own deletion, each `clean()` / `cleanPath()` call sweeps at most one orphan: a trash entry older than a 10-minute grace period (by the timestamp in its name), claimed by renaming it to a new entry name before deleting it (`cache trash orphan swept — entry: <name>` at `debug`). Names not matching the entry pattern are left alone.
+
+`CacheTrash` is the single source of truth for the folder name, the entry names and the reserved path rule shared by `FileCache` and `CacheDirCleaner`: a resolved cache path which, after lexical normalization (`FileUtils::normalizePath()`) and compared case-insensitively, equals or lies under `<base>/.tent-trash` is reserved. `FileCache` never reports a hit, stores or removes anything for it, and a cleanup target resolving there is a no-op.
+
 ### HTTP Client (`source/source/lib/http/`)
 
 Thin abstraction over cURL: `HttpClientInterface`, `CurlHttpClient`, and `CurlHttpExecutor`. Used by proxy handlers to forward requests upstream. `UpstreamFailureNormalizer` decorates every proxy client and maps transport failures to `502` (or `504` on cURL timeout) instead of an empty `200`; `connect_timeout`/`timeout` options configure the default `CurlHttpClient`.
