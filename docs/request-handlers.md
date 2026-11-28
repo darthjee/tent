@@ -303,7 +303,7 @@ Configuration::buildRule([
 
 Both `proxy` and `default_proxy` accept `connect_timeout` (default `5` seconds) and `timeout` (default `30` seconds). They configure the default cURL client only; an injected `httpClient` is still wrapped by the failure handling below, but is responsible for its own timeouts.
 
-These options and the failure handling below cover the handler's own upstream requests, not the refresh of [`CacheStalenessMiddleware`](guides/tent/middlewares.md#limitations-of-the-refresh).
+These options and the failure handling below cover the handler's own upstream requests, not the refresh of [`CacheStalenessMiddleware`](guides/tent/middlewares.md#limitations-of-the-refresh), which keeps the stale entry when it [fails](guides/tent/middlewares.md#failed-refreshes).
 
 When the backend cannot be reached or does not answer in time, Tent no longer returns an empty `200`:
 

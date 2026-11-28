@@ -148,7 +148,7 @@ Configuration::buildRule([
 - **`location`** (required) — use the same value as `FileCacheMiddleware`. It does not select the entry: the one checked and refreshed is always the one which was served.
 - **`host`** (required) — base URL of the upstream the refresh is sent to, usually the handler's `host`.
 - **`maxAgeSeconds`** (or `max_age_seconds`) — age, in seconds, above which an entry is stale. Always set it: it defaults to `0`.
-- **`evictOn`** (or `evict_on`, camelCase wins) — optional list of status codes or wildcard patterns. When a refresh receives a non-2xx response matching the list, the cache entry is removed instead of kept. Defaults to `[]` (disabled): non-2xx refresh responses keep the stale entry. Network errors or exceptions during the refresh **never** evict. Invalid values throw `\InvalidArgumentException` when the middleware is built.
+- **`evictOn`** (or `evict_on`, camelCase wins) — optional list of status codes or wildcard patterns. When a refresh receives a non-2xx response matching the list, the cache entry is removed instead of kept. Defaults to `[]` (disabled): non-2xx refresh responses keep the stale entry. A [failed refresh](#failed-refreshes), such as an interrupted transfer, **never** evicts, whatever its status code. Invalid values throw `\InvalidArgumentException` when the middleware is built.
 
 Use the same `evictOn` list on both `FileCacheMiddleware` and `CacheStalenessMiddleware` for a given `location`, so the read/write policy and the refresh policy stay consistent.
 
@@ -159,6 +159,14 @@ Use the same `evictOn` list on both `FileCacheMiddleware` and `CacheStalenessMid
 - Every middleware of the handler runs in the response phase, so it also works when listed before `FileCacheMiddleware` or in `prependMiddlewares`. Listing it after, with the same `location`, is recommended for readability.
 - While a refresh is in flight, a sentinel file (`<meta-file>.refreshing`) keeps other stale hits on the same entry from starting another one (best effort).
 - `FileCacheMiddleware` never writes a response back into the entry it was served from, so an entry evicted by a refresh stays evicted.
+
+### Failed refreshes
+
+A refresh fails when cURL reports a transport error (e.g. a connection failure, a timeout, or an interrupted or partial transfer) or when the upstream request raises an exception. The stale entry is then kept untouched: it is neither replaced, re-dated nor evicted, whatever status code was received and whatever `evictOn` lists. A `warn` line is logged, which for a transport error reads:
+
+```text
+[refresh] - background cache refresh failed — uri: <request path>, reason: upstream transport failure (cURL errno: <errno>), keeping stale cache
+```
 
 ### Header filtering
 
@@ -182,15 +190,15 @@ The refresh is a direct request to `host`, replaying the request which hit the s
 
 **What is stored**
 
-- Any `2xx` response is stored: `FileCacheMiddleware`'s `matchers` (`cacheCodes` on `default_proxy`), `require_cache_header` and a `skip_cache_header` in the response are ignored.
+- Any `2xx` response of a refresh which did not [fail](#failed-refreshes) is stored: `FileCacheMiddleware`'s `matchers` (`cacheCodes` on `default_proxy`), `require_cache_header` and a `skip_cache_header` in the response are ignored.
 - Neither the handler nor any `processResponse()` is applied before storing, so the processing of a custom handler (see [`class` override](../../request-handlers.md#using-class-instead-of-type)) is lost on a refreshed entry. Response middlewares still run on every response served.
-- A transfer interrupted after a `2xx` status line (connection dropped or timeout in the middle of the body) replaces the entry with an **empty body**.
+- A response with neither `Content-Length` nor chunked encoding ends when the upstream closes the connection. If it is closed cleanly before the body is complete, no transport error is reported, and a truncated `2xx` body replaces the entry.
 
 **Timing**
 
 - The handler's `connect_timeout` and `timeout` are ignored: the refresh waits up to 5 seconds to connect and 30 seconds in total.
-- A refresh which neither stores nor evicts leaves the entry's age unchanged, so the next stale hit tries again.
-- If a refresh is cut short (a PHP fatal error, or the process being killed), its sentinel file is left behind and the entry is not refreshed again until that file or the entry's directory is deleted.
+- A refresh which neither stores nor evicts, a failed one included, leaves the entry's age unchanged, so the next stale hit tries again. While the upstream is down, stale hits therefore keep attempting refreshes and, on the shipped image, waiting for them.
+- If PHP dies during a refresh (a fatal error, or the process being killed), its sentinel file is left behind and the entry is not refreshed again until that file or the entry's directory is deleted.
 
 ---
 

@@ -342,6 +342,7 @@ Stale-while-revalidate for `FileCacheMiddleware`: a cached response older than `
 - `host` (required) is the upstream base URL to re-contact when refreshing (e.g. the same `host` configured on the rule's `proxy`/`default_proxy` handler).
 - `maxAgeSeconds` (or `max_age_seconds`) is the age, in seconds, past which a cached entry is considered stale. It defaults to `0`, so always set it.
 - `evictOn` (or `evict_on`) optionally lists the status codes that remove the entry when a refresh receives them.
+- A [failed refresh](guides/tent/middlewares.md#failed-refreshes) (a transport error, including an interrupted or partial transfer, or an exception from the upstream request) keeps the stale entry untouched, whatever its status code, and logs a warning.
 - It acts in the response phase, and only on responses served from cache by `FileCacheMiddleware`: a response set by another middleware, a custom one included, never triggers a refresh. Configuring it **after** `FileCacheMiddleware` is recommended, although any position in the same handler works.
 - The refresh write uses the header filter of that `FileCacheMiddleware`. The `mode`, `excluded_headers`, `additional_excluded_headers` and `allowed_headers` options of this middleware are **deprecated**: ignored, with a warning logged, and to be removed in the next major version.
 - A sentinel file (`<meta-file>.refreshing`) debounces concurrent stale requests for the same entry so only one refresh runs at a time (best effort).
