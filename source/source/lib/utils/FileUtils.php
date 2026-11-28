@@ -79,6 +79,52 @@ class FileUtils
     }
 
     /**
+     * Writes a file atomically, with mode `0644` whatever the umask.
+     *
+     * The content is written to a temporary file in the same directory, named
+     * `<path>.tmp-<random hex>`, which is then renamed over `$path`. Readers see
+     * either the previous file or the complete new one.
+     *
+     * A symbolic link standing at `$path` is replaced by the new file by the
+     * `rename()`: it is never followed, so its target is left untouched. Links
+     * among the parent directories of `$path` are followed as usual.
+     *
+     * The temporary file is removed when anything fails. It is only left behind
+     * when the process dies before the rename. The parent directory is never
+     * created.
+     *
+     * @param string $path    Path of the file to write.
+     * @param string $content Content of the file.
+     *
+     * @return boolean True when the file was written, false otherwise. Nothing is thrown.
+     */
+    public static function writeAtomically(string $path, string $content): bool
+    {
+        $temporary = '';
+
+        try {
+            $temporary = $path . '.tmp-' . bin2hex(random_bytes(8));
+
+            if (
+                @file_put_contents($temporary, $content) === strlen($content)
+                && @chmod($temporary, 0644)
+                && @rename($temporary, $path)
+            ) {
+                return true;
+            }
+        } catch (\Throwable) {
+            // Reported through the return value, like any other failure.
+        }
+
+        // False for a path with a NUL byte, on which unlink() would throw.
+        if (file_exists($temporary)) {
+            @unlink($temporary);
+        }
+
+        return false;
+    }
+
+    /**
      * Checks if a file exists at the given path and is a regular file.
      *
      * @param string $path The file path to check.

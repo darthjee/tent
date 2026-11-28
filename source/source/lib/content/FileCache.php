@@ -46,6 +46,17 @@ use Tent\Cache\QueryRequestHasher;
  * {@see \Tent\Service\CacheContentReader}. Safe look-alikes, such as `...`,
  * `..foo`, `a..b` or names with a backslash, are cacheable.
  *
+ * ## Symbolic links and permissions
+ *
+ * Writes are contained in the cache location and never follow symbolic links out
+ * of it: an entry whose directory resolves outside of it is not stored (with a
+ * `warn`), and a link standing in place of a cache file is replaced. Directories
+ * are created with mode `0755` at most, and files are set to `0644`, whatever
+ * the umask. See {@see store()}.
+ *
+ * Reads still trust the cache directory: symbolic links are not checked on cache
+ * hits, so the directory must be writable only by tent.
+ *
  * ## Example: Direct usage
  *
  * ```php
@@ -266,18 +277,38 @@ class FileCache implements Cache
      *
      * Nothing is created nor written for an inert entry.
      *
+     * Nothing is created nor written either, and a `warn` is logged, when the
+     * entry directory, or its deepest existing ancestor, resolves outside the
+     * cache location (see {@see FolderLocation::contains()}), e.g. through a
+     * symbolic link. This is checked before the directory is created, and again
+     * afterwards. The cache location may itself be a link, and is created when
+     * missing.
+     *
+     * Each file is written atomically with mode `0644` (see
+     * {@see FileUtils::writeAtomically()}), so that a symbolic link standing in
+     * its place is replaced, never followed. The body is written first and the
+     * metadata last: as {@see exists()} requires both, a new entry is only
+     * reported once complete. The metadata is not written when the body cannot
+     * be.
+     *
+     * Known limitation (TOCTOU): a directory swapped for a symbolic link between
+     * these checks and the creation or the writes is not prevented; checking
+     * again after the creation only narrows that window. PHP offers no
+     * `openat()`-style traversal to close it, and exploiting it requires write
+     * access inside the cache directory.
+     *
      * @param Response $response The response to cache.
      * @return void
      */
     public function store(Response $response): void
     {
-        if ($this->inert) {
+        if ($this->inert || !$this->prepareCacheFolder()) {
             return;
         }
 
-        $this->ensureCacheFolderExists();
-        file_put_contents($this->bodyFilePath, $response->body());
-        file_put_contents($this->metaFilePath, json_encode($this->buildMeta($response)));
+        if (FileUtils::writeAtomically($this->bodyFilePath, $response->body())) {
+            FileUtils::writeAtomically($this->metaFilePath, (string) json_encode($this->buildMeta($response)));
+        }
     }
 
     /**
@@ -378,14 +409,91 @@ class FileCache implements Cache
     /**
      * Ensures the cache folder exists, creating it if necessary.
      *
+     * Directories are created with mode `0755`, which the umask may only reduce.
+     *
      * @return void
      */
     protected function ensureCacheFolderExists(): void
     {
         $basePath = $this->basePath();
         if (!is_dir($basePath)) {
-            mkdir($basePath, 0777, true);
+            mkdir($basePath, 0755, true);
         }
+    }
+
+    /**
+     * Creates the entry directory, making sure that nothing is created, nor going
+     * to be written, outside the cache location.
+     *
+     * @return boolean True when the entry can be written into its directory.
+     */
+    private function prepareCacheFolder(): bool
+    {
+        $basePath = $this->basePath();
+        $ancestor = $this->deepestExistingAncestor($basePath);
+
+        // Only a cache location yet to be created is missing here, holding no link.
+        if (!$this->isMissing($ancestor) && !$this->isContained($ancestor)) {
+            return false;
+        }
+
+        $this->ensureCacheFolderExists();
+
+        // A failed creation has already been reported by mkdir().
+        return is_dir($basePath) && $this->isContained($basePath);
+    }
+
+    /**
+     * Walks up a path until something exists, without going above the cache location.
+     *
+     * A symbolic link counts as existing even when its target does not, so that
+     * it is checked rather than skipped over.
+     *
+     * @param string $path Path under the cache location.
+     * @return string The deepest existing ancestor (possibly the path itself), or
+     *                the cache location when nothing exists up to it.
+     */
+    private function deepestExistingAncestor(string $path): string
+    {
+        $root = rtrim($this->location->basePath(), '/');
+
+        while ($path !== $root && $this->isMissing($path)) {
+            $path = dirname($path);
+        }
+
+        return $path;
+    }
+
+    /**
+     * Checks that nothing, not even a dangling symbolic link, stands at a path.
+     *
+     * @param string $path Path to check.
+     * @return boolean True when the path is free.
+     */
+    private function isMissing(string $path): bool
+    {
+        return !file_exists($path) && !is_link($path);
+    }
+
+    /**
+     * Checks that a path resolves inside the cache location, logging a `warn`
+     * about the skipped store otherwise.
+     *
+     * @param string $path Existing path, used to store the entry.
+     * @return boolean False when the entry must not be stored.
+     */
+    private function isContained(string $path): bool
+    {
+        if ($this->location->contains($path)) {
+            return true;
+        }
+
+        Logger::warn(
+            'cache store skipped — path: ' . $this->path . ', method: ' . $this->request->requestMethod() .
+            ', reason: resolves outside cache location'
+        );
+
+        return false;
     }
 
     /**

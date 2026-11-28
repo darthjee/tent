@@ -75,6 +75,7 @@ class CacheTrash
     /**
      * Creates the trash folder when it is missing and checks that it can be used.
      *
+     * The folder is created with mode `0755`, which the umask may only reduce.
      * The cache location itself is not created. Anything already standing in
      * place of the folder is never deleted nor repaired.
      *
@@ -85,7 +86,7 @@ class CacheTrash
         $path = $this->path();
 
         // May fail because the folder already exists, so the result is checked below.
-        @mkdir($path, 0777);
+        @mkdir($path, 0755);
         clearstatcache(true, $path);
 
         return $this->isUsable();
