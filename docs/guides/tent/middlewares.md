@@ -149,6 +149,9 @@ Configuration::buildRule([
 - **`host`** (required) — base URL of the upstream the refresh is sent to, usually the handler's `host`.
 - **`maxAgeSeconds`** (or `max_age_seconds`) — age, in seconds, above which an entry is stale. Always set it: it defaults to `0`.
 - **`evictOn`** (or `evict_on`, camelCase wins) — optional list of status codes or wildcard patterns. When a refresh receives a non-2xx response matching the list, the cache entry is removed instead of kept. Defaults to `[]` (disabled): non-2xx refresh responses keep the stale entry. A [failed refresh](#failed-refreshes), such as an interrupted transfer, **never** evicts, whatever its status code. Invalid values throw `\InvalidArgumentException` when the middleware is built.
+- **`sentinelTtlSeconds`** (or `sentinel_ttl_seconds`, snake_case wins) — age, in seconds, after which the sentinel of a refresh is [considered abandoned](#when-a-refresh-happens) and taken over. Defaults to `60`, twice the 30 seconds total timeout of a refresh, and is not related to `maxAgeSeconds`. Pass a plain integer number of seconds: the value goes through PHP's integer cast and never throws, so a string with no leading number (e.g. `'abc'`) becomes `0`, one with a leading number keeps it (`'5m'` means 5 seconds) and fractions are truncated (`0.5` becomes `0`). An explicit value which is, or is cast to, `0` or less means the sentinel never expires.
+
+> **Behaviour change:** abandoned refresh sentinels are now taken over after 60s (logged at `warn`); set `sentinel_ttl_seconds: 0` to restore the previous never-expire behaviour.
 
 Use the same `evictOn` list on both `FileCacheMiddleware` and `CacheStalenessMiddleware` for a given `location`, so the read/write policy and the refresh policy stay consistent.
 
@@ -157,7 +160,14 @@ Use the same `evictOn` list on both `FileCacheMiddleware` and `CacheStalenessMid
 - The check runs in the response phase (`processResponse()`) and only acts on responses `FileCacheMiddleware` served from cache. A cache miss, an entry evicted on read, a request flagged with [`skipCache()`](./cache-configuration.md#bypass-cache-from-a-middleware) or a response set by any other middleware (custom ones included) never triggers a refresh.
 - The response being sent is never modified.
 - Every middleware of the handler runs in the response phase, so it also works when listed before `FileCacheMiddleware` or in `prependMiddlewares`. Listing it after, with the same `location`, is recommended for readability.
-- While a refresh is in flight, a sentinel file (`<meta-file>.refreshing`) keeps other stale hits on the same entry from starting another one (best effort).
+- While a refresh is in flight, a sentinel file (`<meta-file>.refreshing`) keeps other stale hits on the same entry from starting another one (best effort). It holds the time it was written and is removed when the refresh finishes.
+- A sentinel older than [`sentinelTtlSeconds`](#options) is considered abandoned: the next stale hit on its entry takes it over (overwrites it and refreshes the entry). Its age is counted from the time it holds, or from its modification time when it holds no valid one. A `warn` line is logged:
+
+  ```text
+  [stale] - abandoned refresh sentinel taken over — uri: <request path>, age: <seconds>, sentinelTtlSeconds: <ttl>
+  ```
+
+- The sentinel is not a lock: simultaneous stale hits (two takeovers included), or a slow refresh outliving the TTL, can cause a duplicate refresh. A refresh which was taken over also removes the sentinel of its successor when it finishes (see [#333](https://github.com/darthjee/tent/issues/333)).
 - `FileCacheMiddleware` never writes a response back into the entry it was served from, so an entry evicted by a refresh stays evicted.
 
 ### Failed refreshes
@@ -198,7 +208,7 @@ The refresh is a direct request to `host`, replaying the request which hit the s
 
 - The handler's `connect_timeout` and `timeout` are ignored: the refresh waits up to 5 seconds to connect and 30 seconds in total.
 - A refresh which neither stores nor evicts, a failed one included, leaves the entry's age unchanged, so the next stale hit tries again. While the upstream is down, stale hits therefore keep attempting refreshes and, on the shipped image, waiting for them.
-- If PHP dies during a refresh (a fatal error, or the process being killed), its sentinel file is left behind and the entry is not refreshed again until that file or the entry's directory is deleted.
+- If PHP dies during a refresh (a fatal error, or the process being killed), its sentinel file is left behind. The entry recovers by itself: the first stale hit after [`sentinelTtlSeconds`](#options) takes the sentinel over and refreshes it. Only with a TTL `<= 0` is the entry not refreshed again until that file or the entry's directory is deleted.
 
 ---
 

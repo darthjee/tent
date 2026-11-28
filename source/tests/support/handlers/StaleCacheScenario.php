@@ -154,4 +154,16 @@ trait StaleCacheScenario
         $meta['timestamp'] = time() - $age;
         file_put_contents($cache->metaFilePath(), json_encode($meta));
     }
+
+    /**
+     * Leaves the sentinel of a refresh next to the entry, as a refresh which died would.
+     * Returns its path.
+     */
+    private function leakSentinel(int $age): string
+    {
+        $sentinel = $this->entry()->metaFilePath() . CacheStalenessMiddleware::REFRESH_SENTINEL_SUFFIX;
+        file_put_contents($sentinel, (string) (time() - $age));
+
+        return $sentinel;
+    }
 }

@@ -167,6 +167,37 @@ class ProxyRequestHandlerStalenessTest extends TestCase
         $this->assertNotContains('Set-Cookie: session=abc', $headers);
     }
 
+    public function testStaleHitTakesOverALeakedSentinel()
+    {
+        $this->storeEntry(1000);
+        $sentinel = $this->leakSentinel(3600);
+        $handler = $this->buildProxy([$this->fileCacheConfig(), $this->stalenessConfig()]);
+
+        $response = $handler->handleRequest($this->buildRequest());
+
+        $this->assertSame('cached body', $response->body());
+        $this->assertSame(1, $this->scheduled);
+        $this->assertSame('fresh body', $this->entry()->content());
+        $this->assertFileDoesNotExist($sentinel);
+    }
+
+    public function testDisabledSentinelTtlKeepsALeakedSentinelDebouncing()
+    {
+        $this->storeEntry(1000);
+        $sentinel = $this->leakSentinel(3600);
+        $handler = $this->buildProxy([
+            $this->fileCacheConfig(),
+            $this->stalenessConfig(['sentinel_ttl_seconds' => 0]),
+        ]);
+
+        $response = $handler->handleRequest($this->buildRequest());
+
+        $this->assertSame('cached body', $response->body());
+        $this->assertSame(0, $this->scheduled);
+        $this->assertSame('cached body', $this->entry()->content());
+        $this->assertFileExists($sentinel);
+    }
+
     private function buildProxy(array $middlewares, array $prepended = [], ?array $upstreamResult = null)
     {
         return $this->buildHandler([
