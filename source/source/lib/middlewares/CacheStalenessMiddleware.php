@@ -86,8 +86,12 @@ use Tent\Utils\FileUtils;
  *
  * By default a non-successful (non-2xx) refresh response keeps the stale entry. Configure
  * `evictOn` (or `evict_on`) with a list of status codes or wildcard patterns (e.g. `['4xx', 500]`)
- * to remove the cache entry when the upstream answers with a matching code. Exceptions
- * (network failures) never evict. Defaults to `[]` (never evict).
+ * to remove the cache entry when the upstream answers with a matching code. Defaults to `[]`
+ * (never evict).
+ *
+ * Transport failures (non-zero cURL `errno`, e.g. a connection failure or an interrupted
+ * transfer, whatever status code came with it) and exceptions never replace nor evict the
+ * entry: it is kept untouched and a warning is logged.
  */
 class CacheStalenessMiddleware extends Middleware
 {

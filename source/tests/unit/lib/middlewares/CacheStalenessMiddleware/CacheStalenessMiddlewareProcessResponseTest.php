@@ -22,6 +22,7 @@ use Tent\Http\HttpClientInterface;
 use Tent\Middlewares\FileCacheMiddleware;
 use Tent\Tests\Support\Utils\FileSystemUtils;
 use Tent\Tests\Support\Cache\DummyRequestHasher;
+use Tent\Tests\Support\Http\StubHttpClient;
 
 class CacheStalenessMiddlewareProcessResponseTest extends TestCase
 {
@@ -354,6 +355,26 @@ class CacheStalenessMiddlewareProcessResponseTest extends TestCase
 
         $this->assertSame($response, $result);
         $this->assertEquals('stale body', (new FileCache($request, $this->location))->content());
+    }
+
+    public function testTransportFailureKeepsTheEntryAndRemovesTheSentinel()
+    {
+        $request = $this->buildStaleRequest();
+        $cache = new FileCache($request, $this->location);
+        $timestamp = $cache->timestamp();
+
+        $httpClient = new StubHttpClient([
+            'body' => '',
+            'httpCode' => 503,
+            'headers' => [],
+            'errno' => CURLE_PARTIAL_FILE,
+            'error' => 'transfer closed',
+        ]);
+        $this->buildEvictingMiddleware($httpClient, ['5xx'])->processResponse($request->response());
+
+        $this->assertSame('stale body', $cache->content());
+        $this->assertSame($timestamp, $cache->timestamp());
+        $this->assertFileDoesNotExist($cache->metaFilePath() . '.refreshing');
     }
 
     public function testSentinelIsRemovedAfterEviction()

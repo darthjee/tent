@@ -20,6 +20,11 @@ use Tent\Models\Response;
  * `register_shutdown_function()`) is decided by the caller, keeping this class free of
  * any FPM/SAPI-specific concerns.
  *
+ * A transport failure reported by the HTTP client (non-zero cURL `errno`, e.g. a partial
+ * transfer, a timeout or a connection failure) is a failed refresh, whatever status code came
+ * with it: the stale entry is neither replaced, re-dated nor evicted, and a warning is logged.
+ * Results without an `errno` are judged by their status code alone.
+ *
  * ## Example
  *
  * ```php
@@ -122,7 +127,8 @@ class BackgroundRefresher
      * Performs the upstream refresh request and re-stores the result into the cache.
      *
      * The stale entry is replaced when the upstream response is successful (2xx), removed
-     * when its status code matches the eviction policy, and kept otherwise.
+     * when its status code matches the eviction policy, and kept otherwise. A transport
+     * failure raises an exception in `fetch()`, before the cache is touched.
      *
      * @param string $uri The request path being refreshed (used for logging).
      * @return void
@@ -207,6 +213,8 @@ class BackgroundRefresher
      * Issues the upstream request and builds a Response from it.
      *
      * @return Response The fresh upstream response.
+     * @throws \RuntimeException If the client reports a transport failure (non-zero `errno`).
+     *                           The message carries the `errno` only, no request data.
      */
     private function fetch(): Response
     {
@@ -220,6 +228,12 @@ class BackgroundRefresher
             $this->request->uploadedFiles(),
             $this->request->postFields()
         );
+
+        $errno = $rawResponse['errno'] ?? 0;
+        if ($errno !== 0) {
+            throw new \RuntimeException("upstream transport failure (cURL errno: $errno), keeping stale cache");
+        }
+
         $rawResponse['request'] = $this->request;
 
         return new Response($rawResponse);
