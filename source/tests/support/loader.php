@@ -7,6 +7,7 @@ require_once __DIR__ . '/utils/PhpWarningCatcher.php';
 require_once __DIR__ . '/http/StubHttpClient.php';
 require_once __DIR__ . '/log/CapturingLoggerInstance.php';
 require_once __DIR__ . '/handlers/RequestToBodyHandler.php';
+require_once __DIR__ . '/handlers/StaleCacheScenario.php';
 require_once __DIR__ . '/middlewares/DummyRequestMiddleware.php';
 require_once __DIR__ . '/middlewares/DummyResponseMiddleware.php';
 require_once __DIR__ . '/middlewares/QuickResponseMiddleware.php';
