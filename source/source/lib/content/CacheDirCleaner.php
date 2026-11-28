@@ -303,37 +303,34 @@ class CacheDirCleaner
             return $this->trash->contains($dir) ? false : $this->refuse($dir, 'dot segment');
         }
 
-        return $this->resolvesInsideBase($dir, $base);
+        return $this->resolvesInsideBase($dir);
     }
 
     /**
      * Checks that the real path of the parent directory is, or lies under, the
-     * real path of the cache location, logging a refusal otherwise.
+     * real path of the cache location (see {@see FolderLocation::contains()}),
+     * logging a refusal otherwise.
      *
-     * Both sides are resolved, so the location may itself be a symbolic link.
      * The final component is never resolved: a link standing in place of the
-     * directory is to be removed, not followed. The comparison is case-sensitive.
+     * directory is to be removed, not followed.
      *
-     * The realpath cache is cleared first, as it may outlive the request and
-     * hide a directory replaced by a link by another process.
-     *
-     * @param string $dir  Path to the directory to delete.
-     * @param string $base Cache location, without a trailing slash.
+     * @param string $dir Path to the directory to delete.
      * @return boolean False when the parent is outside the location, or when
      *                 either of them does not exist (which is not logged).
      */
-    private function resolvesInsideBase(string $dir, string $base): bool
+    private function resolvesInsideBase(string $dir): bool
     {
-        clearstatcache(true);
-        $realBase = realpath($base);
-        $realParent = realpath(dirname($dir));
+        $parent = dirname($dir);
+
+        if ($this->location->contains($parent)) {
+            return true;
+        }
+
+        $realBase = realpath($this->location->basePath());
+        $realParent = realpath($parent);
 
         if ($realBase === false || $realParent === false) {
             return false;
-        }
-
-        if ($realParent === $realBase || str_starts_with($realParent, $realBase . '/')) {
-            return true;
         }
 
         return $this->refuse($dir, 'resolves outside cache location (' . $realParent . ')');
