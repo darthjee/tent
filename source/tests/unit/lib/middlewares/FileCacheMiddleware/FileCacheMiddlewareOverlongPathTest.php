@@ -7,11 +7,11 @@ require_once __DIR__ . '/../../../../support/loader.php';
 use PHPUnit\Framework\TestCase;
 use Tent\Log\Logger;
 use Tent\Log\LoggerInstance;
-use Tent\Log\NullLoggerInstance;
 use Tent\Middlewares\FileCacheMiddleware;
 use Tent\Models\FolderLocation;
 use Tent\Models\ProcessingRequest;
 use Tent\Models\Response;
+use Tent\Tests\Support\Log\CapturingLoggerInstance;
 use Tent\Tests\Support\Utils\FileSystemUtils;
 use Tent\Tests\Support\Utils\PhpWarningCatcher;
 
@@ -21,13 +21,16 @@ class FileCacheMiddlewareOverlongPathTest extends TestCase
 
     private FileCacheMiddleware $middleware;
 
+    private CapturingLoggerInstance $logger;
+
     private PhpWarningCatcher $catcher;
 
     protected function setUp(): void
     {
         $this->cacheDir = sys_get_temp_dir() . '/filecache_middleware_overlong_test_' . uniqid();
         mkdir($this->cacheDir, 0777, true);
-        Logger::setInstance(new NullLoggerInstance());
+        $this->logger = new CapturingLoggerInstance();
+        Logger::setInstance($this->logger);
         $this->middleware = new FileCacheMiddleware(new FolderLocation($this->cacheDir), evictOn: ['4xx']);
 
         $this->catcher = new PhpWarningCatcher();
@@ -54,6 +57,20 @@ class FileCacheMiddlewareOverlongPathTest extends TestCase
 
         $this->assertSame($request, $result);
         $this->assertFalse($result->hasResponse());
+    }
+
+    public function testWholeRequestLogsASingleWarning()
+    {
+        $request = $this->buildRequest();
+
+        $this->middleware->processRequest($request);
+        $this->middleware->processResponse(
+            new Response(['body' => 'upstream body', 'httpCode' => 200, 'request' => $request])
+        );
+
+        $this->assertCount(1, $this->logger->lines);
+        $this->assertSame('warn', $this->logger->lines[0][0]);
+        $this->assertStringEndsWith(', reason: path too long', $this->logger->lines[0][1]);
     }
 
     /**

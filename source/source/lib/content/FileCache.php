@@ -67,8 +67,9 @@ use Tent\Cache\QueryRequestHasher;
  * longer suffix appended to a cache file path requires a larger headroom.
  *
  * The check is lexical, so the filesystem is not touched. A single `warn` is
- * logged, with the reason `path too long` and the path (and method) truncated. A
- * request which is also unsafe is only reported as such.
+ * logged per request, however many instances are built for it, with the reason
+ * `path too long` and the path (and method) truncated. A request which is also
+ * unsafe is only reported as such.
  *
  * Entries written without that headroom by earlier versions, which wrote files
  * directly, are therefore permanent misses: they are neither stored again nor
@@ -596,7 +597,7 @@ class FileCache implements Cache
     }
 
     /**
-     * Checks whether the filesystem cannot hold the entry, logging a `warn` when so.
+     * Checks whether the filesystem cannot hold the entry, reporting it when so.
      *
      * @return boolean True when the entry must not touch the filesystem.
      */
@@ -606,13 +607,30 @@ class FileCache implements Cache
             return false;
         }
 
+        $this->reportOverlongPath();
+
+        return true;
+    }
+
+    /**
+     * Logs a `warn` about the overlong entry, unless already done for the request,
+     * as separate instances read and write its cache.
+     *
+     * @return void
+     */
+    private function reportOverlongPath(): void
+    {
+        if ($this->request->overlongPathReported()) {
+            return;
+        }
+
         Logger::warn(
             'cache bypassed — path: ' . $this->truncateForLog($this->path) .
             ', method: ' . $this->truncateForLog($this->request->requestMethod()) .
             ', reason: path too long'
         );
 
-        return true;
+        $this->request->markOverlongPathReported();
     }
 
     /**
