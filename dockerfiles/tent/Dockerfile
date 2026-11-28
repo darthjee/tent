@@ -23,8 +23,9 @@ RUN apt-get update && apt-get install -y \
     a2enmod rewrite; \
     rm -rf /var/lib/apt/lists/*
 
-# PHP runtime limits for Tent (uploads)
-RUN printf 'upload_max_filesize=20M\npost_max_size=25M\n' > /usr/local/etc/php/conf.d/tent.ini
+# PHP runtime settings: production ini (display_errors off, log_errors on,
+# upload limits), shipped from the tent-assets context.
+COPY --chmod=0644 --from=tent-assets php/tent.ini /usr/local/etc/php/conf.d/tent.ini
 
 # Apache access log: TENT_ACCESS_LOG_FORMAT presets and the tent.d drop-in
 # directory. Written at build time (as root), since the image runs as app.
