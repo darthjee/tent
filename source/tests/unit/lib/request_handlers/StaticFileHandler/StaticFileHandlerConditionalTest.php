@@ -134,6 +134,20 @@ class StaticFileHandlerConditionalTest extends TestCase
         $this->assertEquals(403, $response->httpCode());
     }
 
+    /**
+     * @testWith ["/a..b"]
+     *           ["/a\\b"]
+     */
+    public function testExistingFileWithForbiddenNameReturns403WithOptionOn(string $path)
+    {
+        file_put_contents($this->testDir . $path, 'Hello World');
+
+        $response = $this->handle(true, 'GET', $path, ['If-None-Match' => '*']);
+
+        $this->assertInstanceOf(ForbiddenResponse::class, $response);
+        $this->assertEquals(403, $response->httpCode());
+    }
+
     public function testHeadWithOptionOnIsUnchanged()
     {
         $headers = ['If-None-Match' => $this->etag()];

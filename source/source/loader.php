@@ -72,6 +72,7 @@ require_once __DIR__ . '/lib/matchers/NegativeMatcher.php';
 require_once __DIR__ . '/lib/models/Rule.php';
 require_once __DIR__ . '/lib/models/Server.php';
 require_once __DIR__ . '/lib/service/ResponseContentReader.php';
+require_once __DIR__ . '/lib/service/CacheContentReader.php';
 require_once __DIR__ . '/lib/service/ConditionalRequestMatcher.php';
 require_once __DIR__ . '/lib/service/RequestProcessor.php';
 require_once __DIR__ . '/lib/service/ResponseCacher.php';

@@ -42,6 +42,10 @@ use Tent\Cache\QueryRequestHasher;
  * does nothing. The request itself is not affected, so it is processed (e.g.
  * proxied) as usual.
  *
+ * This is the only path screening applied to cache hits, which are read through
+ * {@see \Tent\Service\CacheContentReader}. Safe look-alikes, such as `...`,
+ * `..foo`, `a..b` or names with a backslash, are cacheable.
+ *
  * ## Example: Direct usage
  *
  * ```php
