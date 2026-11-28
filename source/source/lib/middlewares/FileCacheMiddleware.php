@@ -265,6 +265,11 @@ class FileCacheMiddleware extends Middleware
      *
      * Only stores the response if it matches all configured matchers.
      *
+     * A response served from an entry is never written back into it: the entry may have
+     * been evicted meanwhile (e.g. by a {@see CacheStalenessMiddleware} refresh running
+     * earlier in the response phase), and storing it again would undo the eviction,
+     * dating the stale content as new.
+     *
      * @param Response $response The response to cache.
      * @return Response The original response.
      */
@@ -281,7 +286,7 @@ class FileCacheMiddleware extends Middleware
             return $response;
         }
 
-        if ($this->isCacheable($response)) {
+        if ($this->isCacheable($response) && !$this->wasServedFrom($response->request(), $cache)) {
             (new ResponseCacher($cache, $response, $this->headerFilter))->process();
         }
         return $response;
@@ -301,6 +306,20 @@ class FileCacheMiddleware extends Middleware
             }
         }
         return true;
+    }
+
+    /**
+     * Checks whether the response of the request was served from the given entry.
+     *
+     * @param ProcessingRequest $request Current request.
+     * @param FileCache         $cache   The entry about to be written.
+     * @return boolean True when the request was a cache hit on this very entry.
+     */
+    private function wasServedFrom(ProcessingRequest $request, FileCache $cache): bool
+    {
+        $hit = $request->cacheHit();
+
+        return $hit !== null && $hit->cache()->metaFilePath() === $cache->metaFilePath();
     }
 
     /**

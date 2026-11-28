@@ -128,6 +128,35 @@ class FileCacheMiddlewareCacheHitTest extends TestCase
         $this->assertNull($request->cacheHit());
     }
 
+    public function testProcessResponseDoesNotWriteBackTheServedEntryOnceRemoved()
+    {
+        $request = $this->buildRequest();
+        $this->storeCache($request);
+        $middleware = $this->buildMiddleware();
+        $middleware->processRequest($request);
+        (new FileCache($request, $this->location))->remove();
+
+        $middleware->processResponse($request->response());
+
+        $this->assertFalse((new FileCache($request, $this->location))->exists());
+    }
+
+    public function testProcessResponseStoresAResponseServedFromAnotherCacheLocation()
+    {
+        $request = $this->buildRequest();
+        $this->storeCache($request);
+        $this->buildMiddleware()->processRequest($request);
+        $otherLocation = $this->cacheDir . '/other';
+
+        FileCacheMiddleware::build(['location' => $otherLocation])
+            ->processResponse($request->response());
+
+        $this->assertSame(
+            'cached body',
+            (new FileCache($request, new FolderLocation($otherLocation)))->content()
+        );
+    }
+
     private function buildRequest(array $headers = []): ProcessingRequest
     {
         return new ProcessingRequest([

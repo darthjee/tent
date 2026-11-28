@@ -73,6 +73,22 @@ class ProxyRequestHandlerStalenessTest extends TestCase
         $this->assertSame('fresh body', $this->entry()->content());
     }
 
+    public function testEvictionByARefreshRunningBeforeTheCacheIsNotUndone()
+    {
+        $this->refreshResult = ['body' => 'gone', 'httpCode' => 404, 'headers' => []];
+        $this->storeEntry(1000);
+        $handler = $this->buildProxy([
+            $this->stalenessConfig(['evictOn' => ['4xx']]),
+            $this->fileCacheConfig(),
+        ]);
+
+        $response = $handler->handleRequest($this->buildRequest());
+
+        $this->assertSame('cached body', $response->body());
+        $this->assertSame(1, $this->scheduled);
+        $this->assertFalse($this->entry()->exists());
+    }
+
     public function testRequestMiddlewaresAfterTheCacheAreStillSkippedOnAHit()
     {
         $this->storeEntry(1000);

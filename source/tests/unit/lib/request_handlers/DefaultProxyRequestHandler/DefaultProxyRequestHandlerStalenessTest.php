@@ -43,6 +43,19 @@ class DefaultProxyRequestHandlerStalenessTest extends TestCase
         $this->assertSame('fresh body', $this->entry()->content());
     }
 
+    public function testEvictionByAPrependedRefreshIsNotUndone()
+    {
+        $this->refreshResult = ['body' => 'gone', 'httpCode' => 404, 'headers' => []];
+        $this->storeEntry(1000);
+
+        $response = $this->buildDefaultProxy('prependMiddlewares', [], ['evictOn' => ['4xx']])
+            ->handleRequest($this->buildRequest());
+
+        $this->assertSame('cached body', $response->body());
+        $this->assertSame(1, $this->scheduled);
+        $this->assertFalse($this->entry()->exists());
+    }
+
     public function testRefreshAppliesTheHeaderFilterOfTheHandlerCache()
     {
         $this->refreshResult['headers'] = ['X-Test: 1', 'X-Secret: 1', 'Set-Cookie: session=abc'];
@@ -57,13 +70,13 @@ class DefaultProxyRequestHandlerStalenessTest extends TestCase
         $this->assertNotContains('Set-Cookie: session=abc', $headers);
     }
 
-    private function buildDefaultProxy(string $placement, array $params = [])
+    private function buildDefaultProxy(string $placement, array $params = [], array $staleness = [])
     {
         return $this->buildHandler(array_merge([
             'type' => 'default_proxy',
             'host' => 'http://backend:8080',
             'cache' => $this->cacheDir,
-            $placement => [$this->stalenessConfig()],
+            $placement => [$this->stalenessConfig($staleness)],
         ], $params));
     }
 }
