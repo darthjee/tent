@@ -203,6 +203,35 @@ class StaticFileHandlerGeneralTest extends TestCase
         $this->assertEquals(403, $response->httpCode());
     }
 
+    /**
+     * @dataProvider forbiddenPathProvider
+     */
+    public function testHandleRequestReturnsForbiddenResponseForExistingFileWithForbiddenName(string $path)
+    {
+        $directory = dirname($this->testDir . $path);
+        if (!is_dir($directory)) {
+            mkdir($directory, 0777, true);
+        }
+        file_put_contents($this->testDir . $path, 'Hello World');
+        $handler = new StaticFileHandler(new FolderLocation($this->testDir));
+        $processingRequest = new ProcessingRequest(['request' => new Request(['requestPath' => $path])]);
+
+        $response = $handler->handleRequest($processingRequest);
+
+        $this->assertInstanceOf(ForbiddenResponse::class, $response);
+        $this->assertEquals(403, $response->httpCode());
+    }
+
+    public function forbiddenPathProvider(): array
+    {
+        return [
+            'three dots' => ['/...'],
+            'leading double dot directory' => ['/..foo/x'],
+            'inner double dot' => ['/a..b'],
+            'backslash' => ['/a\\b'],
+        ];
+    }
+
     public function testLogsDebugWhenFileNotFound(): void
     {
         $location = new FolderLocation($this->testDir);

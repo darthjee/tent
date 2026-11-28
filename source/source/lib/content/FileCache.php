@@ -3,6 +3,7 @@
 namespace Tent\Content;
 
 use Tent\Models\FolderLocation;
+use Tent\Log\Logger;
 use Tent\Utils\FileUtils;
 use Tent\Models\Response;
 use Tent\Utils\CacheFilePath;
@@ -26,12 +27,24 @@ use Tent\Cache\QueryRequestHasher;
  *
  * Used by FileCacheMiddleware to provide persistent caching for proxy/static responses.
  *
- * ## Reserved trash folder
+ * ## Uncacheable entries
  *
- * `<location>/.tent-trash` is reserved for directories being invalidated
- * (see {@see CacheTrash}). An entry whose resolved directory lies inside it is
- * uncacheable: it is never reported as a hit, {@see store()} writes nothing and
- * {@see remove()} does nothing.
+ * An entry is inert when either:
+ *
+ * - its resolved directory lies inside `<location>/.tent-trash`, which is
+ *   reserved for directories being invalidated (see {@see CacheTrash});
+ * - its request path or method has a `.` or `..` segment, or a NUL byte (see
+ *   {@see FileUtils::hasSafeSegments()}), as it could resolve outside the cache
+ *   location. A `warn` is logged in this case.
+ *
+ * An inert entry is uncacheable: it is never reported as a hit, nothing is read,
+ * {@see store()} writes nothing and creates no directory, and {@see remove()}
+ * does nothing. The request itself is not affected, so it is processed (e.g.
+ * proxied) as usual.
+ *
+ * This is the only path screening applied to cache hits, which are read through
+ * {@see \Tent\Service\CacheContentReader}. Safe look-alikes, such as `...`,
+ * `..foo`, `a..b` or names with a backslash, are cacheable.
  *
  * ## Example: Direct usage
  *
@@ -112,9 +125,10 @@ class FileCache implements Cache
     private string $hash;
 
     /**
-     * @var boolean Whether the entry resolves inside the reserved trash folder.
+     * @var boolean Whether the entry is uncacheable: it resolves inside the reserved
+     *              trash folder, or its request path or method is unsafe.
      */
-    private bool $reserved;
+    private bool $inert;
 
     /**
      * Constructs a Cache object.
@@ -142,16 +156,23 @@ class FileCache implements Cache
         $this->bodyFilePath = CacheFilePath::path('body', $this->basePath(), $this->hash);
         $this->metaFilePath = CacheFilePath::path('meta', $this->basePath(), $this->hash);
 
-        $this->reserved = (new CacheTrash($location))->contains($this->basePath());
+        $unsafe = $this->hasUnsafePath();
+        $this->inert = $unsafe || (new CacheTrash($location))->contains($this->basePath());
     }
 
     /**
      * Returns the content of the cached response body.
      *
+     * Always empty for an inert entry.
+     *
      * @return string The cached response body content.
      */
     public function content(): string
     {
+        if ($this->inert) {
+            return '';
+        }
+
         if ($this->content == null) {
             $this->content = file_get_contents($this->bodyFilePath);
         }
@@ -195,13 +216,13 @@ class FileCache implements Cache
      * Returns the raw Unix timestamp stored when this entry was last written.
      *
      * Returns null when the entry has no metadata (e.g. cache miss), the
-     * metadata does not include a `timestamp` field, or the entry is reserved.
+     * metadata does not include a `timestamp` field, or the entry is inert.
      *
      * @return integer|null The stored Unix timestamp, or null when unavailable.
      */
     public function timestamp(): ?int
     {
-        if ($this->reserved) {
+        if ($this->inert) {
             return null;
         }
 
@@ -225,7 +246,7 @@ class FileCache implements Cache
     /**
      * Checks if the cached response files exist.
      *
-     * Always false for a reserved entry.
+     * Always false for an inert entry.
      *
      * @see FileUtils::exists()
      *
@@ -233,7 +254,7 @@ class FileCache implements Cache
      */
     public function exists(): bool
     {
-        if ($this->reserved) {
+        if ($this->inert) {
             return false;
         }
 
@@ -243,14 +264,14 @@ class FileCache implements Cache
     /**
      * Stores the response body and metadata into cache files.
      *
-     * Nothing is created nor written for a reserved entry.
+     * Nothing is created nor written for an inert entry.
      *
      * @param Response $response The response to cache.
      * @return void
      */
     public function store(Response $response): void
     {
-        if ($this->reserved) {
+        if ($this->inert) {
             return;
         }
 
@@ -271,13 +292,13 @@ class FileCache implements Cache
      * tolerated silently. Real removal failures are logged at `warn` level by
      * {@see SafeRemover} and are never thrown.
      *
-     * Nothing is removed for a reserved entry.
+     * Nothing is removed for an inert entry.
      *
      * @return void
      */
     public function remove(): void
     {
-        if ($this->reserved) {
+        if ($this->inert) {
             return;
         }
 
@@ -292,13 +313,13 @@ class FileCache implements Cache
      * Reads and decodes the metadata file.
      *
      * Returns an empty array if the file doesn't exist, is not readable,
-     * or if JSON decoding fails.
+     * if JSON decoding fails, or if the entry is inert.
      *
      * @return array The decoded metadata array, or empty array on failure.
      */
     protected function readMeta(): array
     {
-        if (!is_readable($this->metaFilePath)) {
+        if ($this->inert || !is_readable($this->metaFilePath)) {
             return [];
         }
 
@@ -365,5 +386,26 @@ class FileCache implements Cache
         if (!is_dir($basePath)) {
             mkdir($basePath, 0777, true);
         }
+    }
+
+    /**
+     * Checks whether the request path or method could lead outside the cache
+     * location, logging a `warn` when it does.
+     *
+     * The method is checked too, as it is the last segment of the entry directory.
+     *
+     * @return boolean True when the entry must not touch the filesystem.
+     */
+    private function hasUnsafePath(): bool
+    {
+        $method = $this->request->requestMethod();
+
+        if (FileUtils::hasSafeSegments($this->path . '/' . $method)) {
+            return false;
+        }
+
+        Logger::warn('cache bypassed — path: ' . $this->path . ', method: ' . $method . ', reason: unsafe path');
+
+        return true;
     }
 }

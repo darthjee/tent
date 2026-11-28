@@ -10,7 +10,7 @@ use Tent\Content\HeaderFilter;
 use Tent\Content\HeaderFilterBuilder;
 use Tent\Log\Logger;
 use Tent\Models\Response;
-use Tent\Service\ResponseContentReader;
+use Tent\Service\CacheContentReader;
 use Tent\Service\ResponseCacher;
 use Tent\Matchers\RequestResponseMatcher;
 use Tent\Models\RequestInterface;
@@ -245,7 +245,7 @@ class FileCacheMiddleware extends Middleware
         }
 
         if ($cache->exists()) {
-            $reader = new ResponseContentReader($request, $cache);
+            $reader = new CacheContentReader($request, $cache);
             $response = $reader->getResponse();
             Logger::debug('[' . $response->httpCode() . '] - serving from cache — uri: ' . $request->requestPath());
             $request->setResponse($response);

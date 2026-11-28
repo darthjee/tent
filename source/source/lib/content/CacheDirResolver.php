@@ -12,6 +12,11 @@ use Tent\Utils\FileUtils;
  * corresponds to a `collection` or `entity` target, without it knowing how
  * cache directory paths are built from a request path.
  *
+ * No directory is resolved for an unsafe path, i.e. one with a `.` or `..`
+ * segment, or a NUL byte (see {@see FileUtils::hasSafeSegments()}).
+ * `CacheDirCleaner` refuses those paths before resolving them, so this is only
+ * defence-in-depth.
+ *
  * ## Example
  *
  * ```php
@@ -39,7 +44,8 @@ class CacheDirResolver
      * Resolves the cache directory for a given target and request path.
      *
      * Returns null when the target cannot be meaningfully applied
-     * (e.g. `entity` on a single-segment path) or is unknown.
+     * (e.g. `entity` on a single-segment path) or is unknown, and when the
+     * path is unsafe.
      *
      * @param string $target Target type, either 'collection' or 'entity'.
      * @param string $path   Request path, e.g. '/users/1'.
@@ -47,6 +53,10 @@ class CacheDirResolver
      */
     public function resolve(string $target, string $path): ?string
     {
+        if (!FileUtils::hasSafeSegments($path)) {
+            return null;
+        }
+
         $segments = array_values(array_filter(explode('/', $path)));
 
         if ($target === 'collection') {
@@ -65,11 +75,17 @@ class CacheDirResolver
      * can be used for single-segment paths (e.g. '/games.json') as well as
      * deeper ones.
      *
+     * Returns null when the path is unsafe.
+     *
      * @param string $path Concrete request path, e.g. '/games/space-invaders.json'.
-     * @return string
+     * @return string|null
      */
-    public function resolveExact(string $path): string
+    public function resolveExact(string $path): ?string
     {
+        if (!FileUtils::hasSafeSegments($path)) {
+            return null;
+        }
+
         $segments = array_values(array_filter(explode('/', $path)));
         $base = $this->location->basePath();
 

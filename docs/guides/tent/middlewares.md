@@ -112,6 +112,8 @@ Cleanup never reaches outside `location`. The following are refused, leaving the
 - paths with `.` or `..` segments, so `custom` targets must not contain them;
 - directories whose parent resolves outside `location`, so cache subdirectories must not be symlinks. `location` itself may be a symlink (e.g. to a Docker volume): symlink it instead.
 
+Unsafe cleanup paths (with a `.` or `..` segment, or a NUL byte) are refused with a `warn` line ending in `reason: unsafe path`, as described in [Path safety](./cache-configuration.md#path-safety).
+
 ```php
 [
     'class'    => 'Tent\Middlewares\CacheCleanupMiddleware',

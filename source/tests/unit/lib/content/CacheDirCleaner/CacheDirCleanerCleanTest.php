@@ -10,6 +10,7 @@ use Tent\Log\Logger;
 use Tent\Log\LoggerInstance;
 use Tent\Log\NullLoggerInstance;
 use Tent\Models\FolderLocation;
+use Tent\Tests\Support\Log\CapturingLoggerInstance;
 use Tent\Tests\Support\Utils\FileSystemUtils;
 
 class CacheDirCleanerCleanTest extends TestCase
@@ -137,5 +138,54 @@ class CacheDirCleanerCleanTest extends TestCase
         } finally {
             FileSystemUtils::removeDirRecursive($outsideDir);
         }
+    }
+
+    /**
+     * @dataProvider unsafeTargetProvider
+     */
+    public function testCleanRefusesUnsafePathWithoutDeletingAnything(string $target, string $path)
+    {
+        $outsideName = basename($this->cacheDir) . '_target';
+        $path = str_replace('{outside}', $outsideName, $path);
+        $outsideDir = dirname($this->cacheDir) . '/' . $outsideName;
+        $planted = [
+            $outsideDir . '/GET/entry.body',
+            $this->cacheDir . '/a/GET/entry.body',
+            $this->cacheDir . '/b/GET/entry.body',
+            $this->cacheDir . '/a/b/GET/entry.body',
+        ];
+        foreach ($planted as $file) {
+            mkdir(dirname($file), 0777, true);
+            file_put_contents($file, 'content');
+        }
+        $logger = new CapturingLoggerInstance();
+        Logger::setInstance($logger);
+
+        try {
+            $this->cleaner->clean($target, $path);
+
+            foreach ($planted as $file) {
+                $this->assertStringEqualsFile($file, 'content');
+            }
+            $this->assertDirectoryDoesNotExist($this->cacheDir . '/.tent-trash');
+            $this->assertSame(
+                [['warn', 'cache cleanup refused — path: ' . $path . ', reason: unsafe path']],
+                $logger->lines
+            );
+        } finally {
+            FileSystemUtils::removeDirRecursive($outsideDir);
+        }
+    }
+
+    public function unsafeTargetProvider(): array
+    {
+        return [
+            'collection above the root' => ['collection', '/../{outside}/x'],
+            'entity above the root' => ['entity', '/../{outside}'],
+            'collection staying inside the root' => ['collection', '/a/../b'],
+            'entity with a current segment' => ['entity', '/a/./b'],
+            'collection with a trailing current segment' => ['collection', '/a/.'],
+            'entity with a NUL byte' => ['entity', "/a/b\0c"],
+        ];
     }
 }

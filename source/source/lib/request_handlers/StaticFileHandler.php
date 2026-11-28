@@ -120,7 +120,9 @@ class StaticFileHandler extends RequestHandler
      *
      * The file path determined by combining the base directory and request path.
      *
-     * The file path is validated to prevent directory traversal attacks.
+     * The file path is validated to prevent directory traversal attacks: the
+     * {@see ResponseContentReader} rejects any path with `..` or a backslash, and a
+     * ForbiddenResponse is returned. This validation must always apply to static files.
      *
      * If the file does not exist or is not a regular file, a MissingResponse is returned.
      *

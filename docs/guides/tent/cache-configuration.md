@@ -119,6 +119,25 @@ When the flag is set, `FileCacheMiddleware` performs no cache read, no cache wri
 
 > **Warning**: every flagged request goes upstream. If your trigger is client-controllable, so is the bypass, and a client can use it to amplify load on your backend.
 
+## Path safety
+
+Cache entries are stored under `<location>/<request path>/<METHOD>`, so a request which could traverse outside the cache root, `location`, is never cached. This is the case when its path or its HTTP method has:
+
+- a segment which is exactly `.` or `..`, as in `/users/../admin`;
+- a NUL byte.
+
+Such a request is proxied upstream as usual, just without caching: nothing is read from the cache, nothing is written to it and no directory is created. A `warn` line is logged (`cache bypassed — path: <path>, method: <method>, reason: unsafe path`). The check applies to the path the cache receives, so it also covers paths rewritten by a middleware. In the shipped Apache image, dot segments in the raw request line can reach tent, which is why tent checks them itself.
+
+The same rule applies to the cleanup targets of [`CacheCleanupMiddleware`](./middlewares.md#cachecleanupmiddleware): an unsafe path is refused with a `warn` line (`cache cleanup refused — path: <path>, reason: unsafe path`) and nothing is deleted for it.
+
+Only whole segments are matched, so the following are not unsafe:
+
+- names such as `...`, `..foo` or `a..b`;
+- dot-prefixed names such as `.git`;
+- percent-encoded sequences such as `%2e%2e`: tent does not URL-decode the path, so in its cache path they are literal names.
+
+> **Trust boundary**: the cache directory must be writable only by tent. Symbolic links inside it are not defended against when cache entries are read or written.
+
 ## Require header before caching
 
 When you only want to cache responses that opt in explicitly, configure `require_cache_header`. It is the write-only counterpart to `skip_cache_header`: it only checks the **response**, never the request, and gates the cache write — a response is only stored when the configured header is present in it:

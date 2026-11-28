@@ -13,6 +13,10 @@ use Tent\Models\RequestInterface;
  * Service class responsible for reading files and returning their contents as Responses.
  *
  * This class handles file path validation and existence checks before reading the file.
+ *
+ * The request path is validated with {@see RequestPathValidator}, which protects
+ * content located directly by that path, such as static files. Cache hits are read
+ * through {@see CacheContentReader}, as the cache screens paths itself.
  */
 class ResponseContentReader
 {

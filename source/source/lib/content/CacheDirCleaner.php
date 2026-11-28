@@ -4,6 +4,7 @@ namespace Tent\Content;
 
 use Tent\Models\FolderLocation;
 use Tent\Log\Logger;
+use Tent\Utils\FileUtils;
 use Tent\Utils\RemovalResult;
 use Tent\Utils\SafeRemover;
 
@@ -25,7 +26,8 @@ use Tent\Utils\SafeRemover;
  * - a rename lost to another cleaner (the directory is already gone) is silent;
  * - when the directory cannot be moved (including when the trash folder is not
  *   a real directory), a `warn` is logged and it is deleted in place instead;
- * - targets resolving to the trash folder, or inside it, are ignored.
+ * - targets resolving to the trash folder, or inside it, are ignored (unless
+ *   their path is unsafe, see "Safety").
  *
  * ## Orphans
  *
@@ -54,8 +56,13 @@ use Tent\Utils\SafeRemover;
  *
  * ## Safety
  *
+ * A request path with a `.` or `..` segment, or a NUL byte (see
+ * {@see FileUtils::hasSafeSegments()}), is refused up front, with a `warn`:
+ * no directory is resolved nor deleted for it.
+ *
  * Only paths genuinely under the configured cache location are touched. Before
- * anything is moved or deleted, a path is refused, with a `warn`, when:
+ * anything is moved or deleted, a resolved directory is refused, with a `warn`,
+ * when:
  *
  * - it is not under the location, or the location is empty or `/`;
  * - it has a `.` or `..` segment (or a NUL byte) after the location;
@@ -110,10 +117,10 @@ class CacheDirCleaner
      * Resolves the cache directory for the given target and request path,
      * then deletes it if it exists.
      *
-     * Nothing is deleted for the request path when the target cannot be
-     * meaningfully applied (e.g. `entity` on a single-segment path) or when the
-     * resolved directory does not exist. In every case, one orphan of the trash
-     * folder may then be swept.
+     * Nothing is deleted for the request path when it is unsafe (which is logged
+     * at `warn` level), when the target cannot be meaningfully applied (e.g.
+     * `entity` on a single-segment path) or when the resolved directory does not
+     * exist. In every case, one orphan of the trash folder may then be swept.
      *
      * @param string $target Target type, either 'collection' or 'entity'.
      * @param string $path   Request path, e.g. '/users/1'.
@@ -121,7 +128,7 @@ class CacheDirCleaner
      */
     public function clean(string $target, string $path): void
     {
-        $dir = $this->resolver->resolve($target, $path);
+        $dir = $this->acceptsPath($path) ? $this->resolver->resolve($target, $path) : null;
 
         if ($dir !== null) {
             $this->deleteDir($dir);
@@ -136,14 +143,22 @@ class CacheDirCleaner
      *
      * Unlike `clean()`, this has no `collection`/`entity` segment-count
      * restriction, so it can be used for explicit `custom` cleanup targets.
-     * One orphan of the trash folder may then be swept.
+     *
+     * Nothing is deleted for the request path when it is unsafe (which is logged
+     * at `warn` level) or when the resolved directory does not exist. In every
+     * case, one orphan of the trash folder may then be swept.
      *
      * @param string $path Concrete request path, e.g. '/games/space-invaders.json'.
      * @return void
      */
     public function cleanPath(string $path): void
     {
-        $this->deleteDir($this->resolver->resolveExact($path));
+        $dir = $this->acceptsPath($path) ? $this->resolver->resolveExact($path) : null;
+
+        if ($dir !== null) {
+            $this->deleteDir($dir);
+        }
+
         $this->sweepOrphan();
     }
 
@@ -197,6 +212,24 @@ class CacheDirCleaner
     }
 
     /**
+     * Checks that a request path is safe to resolve into a cache directory,
+     * logging a refusal otherwise.
+     *
+     * @param string $path Request path received to be cleaned.
+     * @return boolean False when the path has a `.` or `..` segment, or a NUL byte.
+     */
+    private function acceptsPath(string $path): bool
+    {
+        if (FileUtils::hasSafeSegments($path)) {
+            return true;
+        }
+
+        Logger::warn('cache cleanup refused — path: ' . $path . ', reason: unsafe path');
+
+        return false;
+    }
+
+    /**
      * Invalidates a directory if it is safely scoped under the configured cache
      * location (see {@see self::isSafelyScoped()}) and does not resolve into the
      * trash folder.
@@ -234,13 +267,16 @@ class CacheDirCleaner
      * 1. the location must not be empty nor `/`;
      * 2. the path must start with `<location>/`;
      * 3. no segment after the location may be `.` or `..`, and no NUL byte may
-     *    appear there (see {@see self::hasSafeSegments()});
+     *    appear there (see {@see FileUtils::hasSafeSegments()});
      * 4. the real parent directory must not be outside the real location (see
      *    {@see self::resolvesInsideBase()}).
      *
      * Refusals are logged at `warn` level. Two cases are silent: when there is
      * nothing to delete (the location or the parent directory does not exist)
      * and when a path with a `.` or `..` segment is reserved for the trash.
+     *
+     * Request paths are already screened by {@see self::acceptsPath()}, so the
+     * segment check here is only defence-in-depth.
      *
      * Known limitation (TOCTOU): a component swapped for a symbolic link between
      * this check and the `rename()` is not prevented. PHP offers no
@@ -262,31 +298,12 @@ class CacheDirCleaner
             return $this->refuse($dir, 'outside cache location');
         }
 
-        if (!$this->hasSafeSegments(substr($dir, strlen($prefix)))) {
+        if (!FileUtils::hasSafeSegments(substr($dir, strlen($prefix)))) {
             // Paths reserved for the trash are ignored silently, however spelled.
             return $this->trash->contains($dir) ? false : $this->refuse($dir, 'dot segment');
         }
 
         return $this->resolvesInsideBase($dir, $base);
-    }
-
-    /**
-     * Checks, without accessing the filesystem, that a path cannot traverse out
-     * of the directory it is relative to.
-     *
-     * Only whole segments are matched, so `...`, `..foo` or `%2e%2e` are valid
-     * names. A NUL byte is also rejected, as filesystem functions throw on it.
-     *
-     * @param string $path Part of a path following the cache location.
-     * @return boolean True when there is no `.` or `..` segment, nor NUL byte.
-     */
-    private function hasSafeSegments(string $path): bool
-    {
-        if (str_contains($path, "\0")) {
-            return false;
-        }
-
-        return array_intersect(explode('/', $path), ['.', '..']) === [];
     }
 
     /**
