@@ -137,6 +137,15 @@ If you do use the same dev/prod split pattern:
 - `FRONTEND_DEV_MODE=true`: proxies frontend requests to a frontend dev server (example above uses `http://frontend:8080`).
 - `FRONTEND_DEV_MODE=false`: serves frontend files from `/var/www/html/static` using static rules.
 
+### PHP Error Output
+
+PHP diagnostics (errors, warnings, notices and deprecations) are written to the container's stderr (`docker logs`), not to responses.
+
+- To change PHP settings, mount a `zz-<name>.ini` file into `/usr/local/etc/php/conf.d/`. Do not mount over `tent.ini`: that replaces the whole production configuration and shows diagnostics in responses again.
+- To change the Apache log level, mount a `*.conf` file into `/etc/apache2/tent.d/`.
+- Logs may contain server paths and request data. Restrict access to them and configure log rotation (Docker's default `json-file` driver does not rotate).
+- **Upgrading** from an image without these settings: expect new `[php:*]` lines on stderr, and move any `tent.ini` mount to a `zz-<name>.ini` file. See the [upgrade note](https://github.com/darthjee/tent/blob/main/docs/guides/tent/reference.md#upgrade-note).
+
 ## Exposed Port
 
 - **80**: The HTTP server listens on port 80 inside the container. Map this to your desired host port (e.g., `8080:80`).
@@ -161,11 +170,17 @@ services:
       - ./dev/frontend/dist:/var/www/html/static/
     env_file:
       - .env
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 ```
 
 ## More Information
 
 - **[How to Use darthjee/tent](https://github.com/darthjee/tent/blob/main/docs/guides/how-to-use-tent.md)** — Complete integration guide: Docker setup, all request handlers, cache configuration, Host header handling, middlewares, and full examples
+- **[PHP error output](https://github.com/darthjee/tent/blob/main/docs/guides/tent/reference.md#php-error-output)** — Log prefixes, PHP and log-level overrides, log rotation, and the upgrade note
 - See the [README](https://github.com/darthjee/tent) for development instructions and advanced configuration.
 - Issues and contributions are welcome!
 

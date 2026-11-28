@@ -187,6 +187,30 @@ The Apache access log is a separate stream from the PHP `Logger`. Apache writes 
 
 See the [Tent reference guide](../guides/tent/reference.md) for the consumer-facing documentation.
 
+#### PHP error output
+
+`ResponseSender` emits status and headers only after the whole pipeline has run, so a PHP diagnostic printed during a request would corrupt the response: body prefixed, headers dropped, status forced to 200. The published `darthjee/tent` image therefore logs diagnostics instead of displaying them:
+
+- `/usr/local/etc/php/conf.d/tent.ini` (source: `dockerfiles/tent/php/tent.ini`) sets `display_errors = Off`, `log_errors = On` and the upload limits. `error_log` is left unset, so under mod_php engine diagnostics go to the Apache error log, which is linked to stderr. That is the same stream as the PHP `Logger`'s `error_log()` output.
+- `/etc/apache2/conf-enabled/00-tent-0-php-log-level.conf` (source: `dockerfiles/tent/apache/00-tent-0-php-log-level.conf`) sets `LogLevel warn php:info`. Without it, deprecations are dropped. The file name must sort before `00-tent-access-log.conf`, which includes `tent.d`, so that a drop-in there can still override the level.
+
+| Prefix on stderr | What is logged with it |
+|------------------|------------------------|
+| `[php:error]` (or higher) | Fatal errors, including uncaught exceptions |
+| `[php:warn]` | Warnings |
+| `[php:notice]` | Notices, and every `Logger` message, whatever its own level |
+| `[php:info]` | Deprecations |
+
+`LOG_LEVEL` filters only Tent's own messages, never engine diagnostics.
+
+Consumers override PHP settings with a `/usr/local/etc/php/conf.d/zz-<name>.ini` file (mounting over `tent.ini` replaces the whole production configuration) and the log level with a `*.conf` file in `/etc/apache2/tent.d/`.
+
+**Development and production differ on purpose.** `dev_tent-base`, `dev_tent` and `tent-test` do not use these settings and keep `display_errors` on, for local debugging and PHPUnit output. `scripts/build_docker_image.sh` checks both sides when it verifies `tent`, `tent-test` and `dev_tent-base`; for `tent` it also checks the log-level file and runs a request which raises a warning and a deprecation.
+
+**Not covered:** output which is not a PHP diagnostic (a stray `echo`, a byte order mark) still reaches the client before the headers ([#335](https://github.com/darthjee/tent/issues/335)), and source-tarball deployments use their own PHP configuration.
+
+See [PHP error output](../guides/tent/reference.md#php-error-output) in the reference guide for the consumer-facing documentation.
+
 ---
 
 ## Configuration Rules Pattern

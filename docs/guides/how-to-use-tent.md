@@ -20,4 +20,4 @@
 - [Static Files](./tent/static-files.md) — Where to place static assets and how to share a build-output volume with Tent.
 - [Complete Example Layout](./tent/complete-example.md) — A full project layout combining `docker-compose.yml`, configuration, and rule files.
 - [Extending Tent](./tent/extending-tent.md) — Mounting a custom `loader.php` to add matchers, middlewares, or handlers, and testing them with the `darthjee/tent-test` image.
-- [Reference](./tent/reference.md) — Quick-reference tables for container paths, handlers, middlewares, cache matchers, and rule matchers, plus the access-log settings (`TENT_ACCESS_LOG_FORMAT`, `/etc/apache2/tent.d/`).
+- [Reference](./tent/reference.md) — Quick-reference tables for container paths, handlers, middlewares, cache matchers, and rule matchers, plus the access-log settings (`TENT_ACCESS_LOG_FORMAT`, `/etc/apache2/tent.d/`) and PHP error output.
