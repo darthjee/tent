@@ -5,6 +5,17 @@ namespace Tent\Utils;
 class FileUtils
 {
     /**
+     * Length, in bytes, of the suffix {@see writeAtomically()} appends to a path
+     * to name its temporary file.
+     */
+    public const TEMPORARY_SUFFIX_LENGTH = 21;
+
+    /**
+     * Start of the temporary file suffix, completed with random hexadecimal digits.
+     */
+    private const TEMPORARY_SUFFIX_PREFIX = '.tmp-';
+
+    /**
      * Constructs the full file path by combining multiple path segments.
      *
      * @param string ...$paths Variable number of path segments to concatenate.
@@ -83,7 +94,8 @@ class FileUtils
      *
      * The content is written to a temporary file in the same directory, named
      * `<path>.tmp-<random hex>`, which is then renamed over `$path`. Readers see
-     * either the previous file or the complete new one.
+     * either the previous file or the complete new one. The suffix of that name is
+     * {@see TEMPORARY_SUFFIX_LENGTH} bytes long.
      *
      * A symbolic link standing at `$path` is replaced by the new file by the
      * `rename()`: it is never followed, so its target is left untouched. Links
@@ -103,7 +115,9 @@ class FileUtils
         $temporary = '';
 
         try {
-            $temporary = $path . '.tmp-' . bin2hex(random_bytes(8));
+            // Each random byte takes two hexadecimal digits.
+            $randomBytes = intdiv(self::TEMPORARY_SUFFIX_LENGTH - strlen(self::TEMPORARY_SUFFIX_PREFIX), 2);
+            $temporary = $path . self::TEMPORARY_SUFFIX_PREFIX . bin2hex(random_bytes($randomBytes));
 
             if (
                 @file_put_contents($temporary, $content) === strlen($content)
