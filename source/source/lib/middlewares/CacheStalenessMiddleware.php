@@ -233,9 +233,11 @@ class CacheStalenessMiddleware extends Middleware
      * They are otherwise ignored.
      *
      * `sentinel_ttl_seconds` (or `sentinelTtlSeconds`) is the age, in seconds, after which the
-     * sentinel of a refresh is abandoned and taken over. It is cast to an integer and defaults
-     * to 60, whatever `maxAgeSeconds` is. An explicit value `<= 0`, which any non numeric value
-     * is cast to, means the sentinel never expires.
+     * sentinel of a refresh is abandoned and taken over. It defaults to 60, whatever
+     * `maxAgeSeconds` is. Pass a plain integer: the value goes through PHP's integer cast, so a
+     * string with no leading number (e.g. `'abc'`) becomes `0`, one with a leading number keeps
+     * it (`'5m'` means 5 seconds) and fractions are truncated (`0.5` becomes `0`). An explicit
+     * value which is, or is cast to, `<= 0` means the sentinel never expires.
      *
      * @param array $attributes Must include `location`, `host` and `maxAgeSeconds`
      *                          (or `max_age_seconds`). Optionally `evictOn` (or `evict_on`)
