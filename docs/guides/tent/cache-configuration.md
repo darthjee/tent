@@ -126,17 +126,15 @@ Cache entries are stored under `<location>/<request path>/<METHOD>`, so a reques
 - a segment which is exactly `.` or `..`, as in `/users/../admin`;
 - a NUL byte.
 
-Such a request is proxied upstream unchanged: nothing is read from the cache, nothing is written to it and no directory is created. A `warn` line is logged (`cache bypassed — path: <path>, method: <method>, reason: unsafe path`). The check applies to the path the cache receives, so it also covers paths rewritten by a middleware. In the shipped Apache image, dot segments in the raw request line can reach tent, which is why tent checks them itself.
+Such a request is proxied upstream as usual, just without caching: nothing is read from the cache, nothing is written to it and no directory is created. A `warn` line is logged (`cache bypassed — path: <path>, method: <method>, reason: unsafe path`). The check applies to the path the cache receives, so it also covers paths rewritten by a middleware. In the shipped Apache image, dot segments in the raw request line can reach tent, which is why tent checks them itself.
 
 The same rule applies to the cleanup targets of [`CacheCleanupMiddleware`](./middlewares.md#cachecleanupmiddleware): an unsafe path is refused with a `warn` line (`cache cleanup refused — path: <path>, reason: unsafe path`) and nothing is deleted for it.
 
 Only whole segments are matched, so the following are not unsafe:
 
-- names such as `...`, `..foo` or `a..b` (see the limitation below);
+- names such as `...`, `..foo` or `a..b`;
 - dot-prefixed names such as `.git`;
-- percent-encoded sequences such as `%2e%2e`, which are literal names, as tent does not URL-decode the path.
-
-> **Known limitation**: a path containing `..` anywhere (including `...`, `..foo` and `a..b`) or a backslash is stored in the cache, but serving it back is refused by a stricter check on cache reads, so every request after the first one fails. Until this is fixed, disable the cache (`'cache' => false`) on rules which receive such paths.
+- percent-encoded sequences such as `%2e%2e`: tent does not URL-decode the path, so in its cache path they are literal names.
 
 > **Trust boundary**: the cache directory must be writable only by tent. Symbolic links inside it are not defended against when cache entries are read or written.
 
