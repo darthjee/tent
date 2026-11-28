@@ -223,7 +223,7 @@ Configuration::buildRule([
 
 With `mode: 'allow'`, `allowed_headers` becomes the explicit, complete list of the only headers kept in cache storage — everything else is stripped. `allowed_headers` is required and must be non-empty in this mode; an empty/missing list throws `\InvalidArgumentException` (an empty allowlist would silently strip every header). Note that `skip_cache_header`/`require_cache_header` gate whether a response is cached **at all**, while `mode`/`excluded_headers`/`additional_excluded_headers`/`allowed_headers` instead control which individual headers are stripped from what gets stored once a response is being cached — the two option groups are independent and can be combined freely.
 
-`Tent\Middlewares\CacheStalenessMiddleware`'s background-refresh writes accept the same four options, so they should normally be configured to match `FileCacheMiddleware`'s configuration for the same `location`.
+`Tent\Middlewares\CacheStalenessMiddleware`'s background-refresh writes reuse the header filter of `FileCacheMiddleware` automatically, so these options only need to be set on the handler (or on a manual `FileCacheMiddleware`). The same four options on `CacheStalenessMiddleware` are deprecated: ignored, with a warning logged. See [Middlewares](guides/tent/middlewares.md#cachestalenessmiddleware).
 
 ---
 
@@ -302,6 +302,8 @@ Configuration::buildRule([
 ## Upstream failures and timeouts
 
 Both `proxy` and `default_proxy` accept `connect_timeout` (default `5` seconds) and `timeout` (default `30` seconds). They configure the default cURL client only; an injected `httpClient` is still wrapped by the failure handling below, but is responsible for its own timeouts.
+
+These options and the failure handling below cover the handler's own upstream requests, not the refresh of [`CacheStalenessMiddleware`](guides/tent/middlewares.md#limitations-of-the-refresh).
 
 When the backend cannot be reached or does not answer in time, Tent no longer returns an empty `200`:
 

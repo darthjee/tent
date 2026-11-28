@@ -222,6 +222,12 @@ Configuration::buildRule([
     ],
     'middlewares' => [
         [
+            'class' => 'Tent\\Middlewares\\SetHeadersMiddleware',
+            'headers' => [
+                'Host' => 'api.com'
+            ]
+        ],
+        [
             'class' => 'Tent\\Middlewares\\FileCacheMiddleware',
             'location' => './cache',
             'matchers' => [
@@ -230,16 +236,12 @@ Configuration::buildRule([
                     'httpCodes' => [200, 301]
                 ]
             ]
-        ],
-        [
-            'class' => 'Tent\\Middlewares\\SetHeadersMiddleware',
-            'headers' => [
-                'Host' => 'api.com'
-            ]
         ]
     ]
 ]);
 ```
+
+`SetHeadersMiddleware` comes first because a cache hit skips the request middlewares listed after `FileCacheMiddleware`, and a [`CacheStalenessMiddleware`](guides/tent/middlewares.md#cachestalenessmiddleware) refresh would then miss the header.
 
 ---
 

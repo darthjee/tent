@@ -127,7 +127,7 @@ An unsafe return value is not caught by Tent — it flows straight through to th
 
 ## Performance
 
-The computed hash is memoized on the request (`ProcessingRequest::cacheHash()` / `setCacheHash()`), so `hash()` runs **at most once per request**, even though both `FileCacheMiddleware::processRequest()` (cache read) and `processResponse()` (cache write) construct a `FileCache` internally. `CacheStalenessMiddleware`, when paired with a preceding `FileCacheMiddleware`, transparently reuses that same memoized hash — it has no `request_hasher` option of its own.
+The computed hash is memoized on the request (`ProcessingRequest::cacheHash()` / `setCacheHash()`), so `hash()` runs **at most once per request**, even though both `FileCacheMiddleware::processRequest()` (cache read) and `processResponse()` (cache write) construct a `FileCache` internally. `CacheStalenessMiddleware` computes no hash: it checks and refreshes the very entry `FileCacheMiddleware` served, wherever it is placed in the handler — it has no `request_hasher` option of its own.
 
 That said, `hash()` still runs once on **every** cache-eligible request, so keep it cheap: prefer a single pass over headers/query data and a fast hashing algorithm (`sha256` is fine) over anything that performs I/O, calls out to another service, or does expensive parsing.
 
@@ -187,4 +187,4 @@ Omitting `request_hasher` keeps the default `Tent\Cache\QueryRequestHasher` beha
 - **Keep it deterministic**: the same logical request must always produce the same hash, or cache hits will never occur.
 - **Keep it cheap**: it runs on every cache-eligible request — see [Performance](#performance).
 - **Use a fixed-length, filesystem-safe output** (e.g. `hash('sha256', ...)`) — see [Edge Cases](#edge-cases).
-- **Don't configure `request_hasher` on `CacheStalenessMiddleware`**: it has no such option and transparently reuses the hash already computed by the paired `FileCacheMiddleware`.
+- **Don't configure `request_hasher` on `CacheStalenessMiddleware`**: it has no such option and acts on the entry served by `FileCacheMiddleware`, so it already follows that middleware's hasher.
