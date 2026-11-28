@@ -52,13 +52,14 @@ use Tent\Cache\QueryRequestHasher;
  *
  * Lengths are measured in bytes, on the exact strings built for the filesystem
  * (the request path is not decoded, and duplicate slashes count), against the
- * limits of 255 bytes per name and 4096 bytes per path (the latter including the
- * terminating NUL). An entry is overlong when either:
+ * limits of 255 bytes per name and 4094 bytes per path. The latter is two bytes
+ * short of `PATH_MAX` (4096): the kernel counts the terminating NUL, and PHP's
+ * filesystem functions keep one more byte. An entry is overlong when either:
  *
  * - a segment of the request path, or the method, is longer than 255 bytes;
  * - the name of its body or metadata file is longer than 255 bytes, e.g. with a
  *   custom {@see RequestHasher} returning a long hash;
- * - the path of its body or metadata file is longer than 4095 bytes. The cache
+ * - the path of its body or metadata file is longer than 4094 bytes. The cache
  *   location counts here, but its segments are not checked one by one.
  *
  * Both file checks keep a headroom for the files derived from those two, the
@@ -134,10 +135,15 @@ class FileCache implements Cache
     private const NAME_MAX = 255;
 
     /**
-     * Size of the longest path the filesystem accepts, in bytes, including its
-     * terminating NUL.
+     * Size of the kernel's path buffer, in bytes, including the terminating NUL.
      */
     private const PATH_MAX = 4096;
+
+    /**
+     * Longest path PHP's filesystem functions accept, in bytes: they reject paths
+     * of `PATH_MAX - 1` bytes, even though the kernel would still take them.
+     */
+    private const LONGEST_PATH = self::PATH_MAX - 2;
 
     /**
      * Bytes kept free for the suffix of any file derived from a cache file. It must
@@ -629,14 +635,14 @@ class FileCache implements Cache
     }
 
     /**
-     * Checks for a cache file path which, along with its derived suffix and the
-     * terminating NUL, exceeds `PATH_MAX`.
+     * Checks for a cache file path which, along with its derived suffix, is longer
+     * than the filesystem functions accept.
      *
      * @return boolean True when the path is overlong.
      */
     private function hasOverlongFilePath(): bool
     {
-        return $this->longestFilePathLength() + self::DERIVED_SUFFIX_HEADROOM > self::PATH_MAX - 1;
+        return $this->longestFilePathLength() + self::DERIVED_SUFFIX_HEADROOM > self::LONGEST_PATH;
     }
 
     /**
