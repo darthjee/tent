@@ -336,6 +336,10 @@ class FileCache implements Cache
      * afterwards. The cache location may itself be a link, and is created when
      * missing.
      *
+     * A directory which cannot be created (e.g. permission denied, full or
+     * read-only disk, lower filesystem limits) is logged at `warn` level, and
+     * nothing is written. No PHP warning is raised.
+     *
      * Each file is written atomically with mode `0644` (see
      * {@see FileUtils::writeAtomically()}), so that a symbolic link standing in
      * its place is replaced, never followed. The body is written first and the
@@ -463,14 +467,32 @@ class FileCache implements Cache
      *
      * Directories are created with mode `0755`, which the umask may only reduce.
      *
-     * @return void
+     * A failed creation never raises a PHP warning, which could be printed into
+     * the response: it is logged at `warn` level instead, along with the reason.
+     *
+     * @return boolean True when the folder exists.
      */
-    protected function ensureCacheFolderExists(): void
+    protected function ensureCacheFolderExists(): bool
     {
         $basePath = $this->basePath();
-        if (!is_dir($basePath)) {
-            mkdir($basePath, 0755, true);
+        if (is_dir($basePath)) {
+            return true;
         }
+
+        // So that an earlier error is never reported as the reason.
+        error_clear_last();
+
+        // The folder may have been created meanwhile by a concurrent request.
+        if (@mkdir($basePath, 0755, true) || is_dir($basePath)) {
+            return true;
+        }
+
+        Logger::warn(
+            'cache store skipped — path: ' . $this->path . ', method: ' . $this->request->requestMethod() .
+            ', reason: ' . (error_get_last()['message'] ?? 'mkdir failed')
+        );
+
+        return false;
     }
 
     /**
@@ -489,10 +511,8 @@ class FileCache implements Cache
             return false;
         }
 
-        $this->ensureCacheFolderExists();
-
-        // A failed creation has already been reported by mkdir().
-        return is_dir($basePath) && $this->isContained($basePath);
+        // A failed creation has already been logged.
+        return $this->ensureCacheFolderExists() && is_dir($basePath) && $this->isContained($basePath);
     }
 
     /**
