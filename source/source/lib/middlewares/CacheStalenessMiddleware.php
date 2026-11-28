@@ -34,6 +34,22 @@ use Tent\Utils\FileUtils;
  * request as it was when the cache hit was served: request middlewares placed after
  * `FileCacheMiddleware` do not run on a cache hit, so their changes are not part of it.
  *
+ * ## Debounce and abandoned refreshes
+ *
+ * While a refresh is scheduled or running, a sentinel file holding the time it was written sits
+ * next to the cache entry's meta file, and further stale hits of that entry do not schedule
+ * another one. The sentinel is removed when the refresh finishes.
+ *
+ * A refresh whose process dies (fatal error, killed worker, container restart, ...) leaves its
+ * sentinel behind. Hence a sentinel older than `sentinelTtlSeconds` (or `sentinel_ttl_seconds`)
+ * is considered abandoned: the next stale hit of the entry overwrites it, schedules the refresh
+ * and logs a warning. The TTL defaults to 60 seconds, twice the 30 seconds total timeout of the
+ * refresh HTTP client, and does not depend on `maxAgeSeconds`. A value `<= 0` disables the
+ * expiry: the sentinel then debounces until it is removed.
+ *
+ * The sentinel is a best-effort debounce, not a lock: concurrent stale hits, or a refresh
+ * outliving the TTL, may result in more than one refresh of the same entry.
+ *
  * ## Non-blocking caveat
  *
  * Tent has no real async/job-queue infrastructure. "Background" execution is approximated via
@@ -104,6 +120,17 @@ class CacheStalenessMiddleware extends Middleware
     public const REFRESH_SENTINEL_SUFFIX = '.refreshing';
 
     /**
+     * Default sentinel TTL, in seconds: twice the fixed 30s total cURL timeout of the
+     * refresh HTTP client, so that a healthy refresh is not taken over.
+     */
+    private const DEFAULT_SENTINEL_TTL_SECONDS = 60;
+
+    /**
+     * Maximum number of bytes read from a sentinel file.
+     */
+    private const SENTINEL_READ_LIMIT = 32;
+
+    /**
      * Header filtering attributes, accepted for backward compatibility but ignored.
      */
     private const DEPRECATED_ATTRIBUTES = [
@@ -140,6 +167,11 @@ class CacheStalenessMiddleware extends Middleware
     private EvictionPolicy $evictionPolicy;
 
     /**
+     * @var integer Age, in seconds, after which a sentinel is abandoned (`<= 0`: never).
+     */
+    private int $sentinelTtlSeconds;
+
+    /**
      * @param FolderLocation           $location                  Base folder location for caching,
      *                                                            the same as the one of
      *                                                            `FileCacheMiddleware`. The entry
@@ -164,6 +196,12 @@ class CacheStalenessMiddleware extends Middleware
      * @param array|null               $evictOn                   Status codes/patterns (e.g. '4xx')
      *                                                            that evict the entry when a refresh
      *                                                            receives them. Defaults to none.
+     * @param integer|null             $sentinelTtlSeconds        Age, in seconds, after which the
+     *                                                            sentinel of a refresh is abandoned
+     *                                                            and taken over. Defaults to 60,
+     *                                                            twice the 30s total cURL timeout
+     *                                                            of the refresh client. A value
+     *                                                            `<= 0` means it never expires.
      * @throws \InvalidArgumentException If $evictOn has invalid entries.
      */
     public function __construct(
@@ -176,13 +214,15 @@ class CacheStalenessMiddleware extends Middleware
         ?array $additionalExcludedHeaders = null,
         ?array $allowedHeaders = null,
         string $mode = 'deny',
-        ?array $evictOn = null
+        ?array $evictOn = null,
+        ?int $sentinelTtlSeconds = null
     ) {
         $this->maxAgeSeconds = $maxAgeSeconds;
         $this->host = $host;
         $this->httpClient = $httpClient ?? new CurlHttpClient();
         $this->scheduler = $scheduler ?? self::defaultScheduler(...);
         $this->evictionPolicy = EvictionPolicy::build($evictOn);
+        $this->sentinelTtlSeconds = $sentinelTtlSeconds ?? self::DEFAULT_SENTINEL_TTL_SECONDS;
     }
 
     /**
@@ -280,7 +320,8 @@ class CacheStalenessMiddleware extends Middleware
 
     /**
      * Triggers a background refresh for the given request/cache hit pair, unless one is
-     * already in flight (debounced via a sentinel file).
+     * already in flight (debounced via a sentinel file). An abandoned sentinel, older than the
+     * sentinel TTL, does not debounce: it is overwritten and the refresh is scheduled.
      *
      * @param ProcessingRequest $request The request which was served from cache.
      * @param CacheHit          $hit     The stale cache hit to refresh.
@@ -290,14 +331,55 @@ class CacheStalenessMiddleware extends Middleware
     {
         $sentinel = $this->sentinelPath($hit->cache());
 
-        if (file_exists($sentinel)) {
-            Logger::debug('[stale] - refresh already in progress, skipping — uri: ' . $request->requestPath());
+        if ($this->isRefreshInFlight($request, $sentinel)) {
             return;
         }
 
         $this->writeSentinel($sentinel);
 
         $this->scheduleRefresh($request, $hit, $sentinel);
+    }
+
+    /**
+     * Tells whether the sentinel stands for a refresh in flight, logging the outcome when the
+     * sentinel exists: a debug line when it debounces, a warning when it is abandoned.
+     *
+     * @param ProcessingRequest $request  The request which was served from cache.
+     * @param string            $sentinel The debounce sentinel file path.
+     * @return boolean True when no refresh must be scheduled.
+     */
+    private function isRefreshInFlight(ProcessingRequest $request, string $sentinel): bool
+    {
+        if (!file_exists($sentinel)) {
+            return false;
+        }
+
+        // A TTL <= 0 never expires, so the sentinel is not even read.
+        $age = $this->sentinelTtlSeconds <= 0 ? null : $this->sentinelAge($sentinel, time());
+
+        if ($this->isFresh($age)) {
+            Logger::debug('[stale] - refresh already in progress, skipping — uri: ' . $request->requestPath());
+            return true;
+        }
+
+        Logger::warn(
+            '[stale] - abandoned refresh sentinel taken over — uri: ' . $request->requestPath() .
+            ', age: ' . $age . ', sentinelTtlSeconds: ' . $this->sentinelTtlSeconds
+        );
+
+        return false;
+    }
+
+    /**
+     * The debounce rule: a sentinel is fresh while its age does not exceed the TTL. A disabled
+     * TTL and a sentinel which cannot be dated both count as fresh.
+     *
+     * @param integer|null $age Age of the sentinel, in seconds, or null when unknown.
+     * @return boolean
+     */
+    private function isFresh(?int $age): bool
+    {
+        return $this->sentinelTtlSeconds <= 0 || $age === null || $age <= $this->sentinelTtlSeconds;
     }
 
     /**
@@ -380,6 +462,58 @@ class CacheStalenessMiddleware extends Middleware
     private function sentinelPath(FileCache $cache): string
     {
         return $cache->metaFilePath() . self::REFRESH_SENTINEL_SUFFIX;
+    }
+
+    /**
+     * Computes the age of a sentinel from the timestamp it holds, falling back to its
+     * modification time when it holds no valid one.
+     *
+     * A timestamp more than one TTL in the future (an overflowing one included) is invalid, as
+     * it would otherwise debounce for as long as it stays ahead.
+     *
+     * @param string  $sentinel The sentinel file path.
+     * @param integer $now      The current Unix time.
+     * @return integer|null The age in seconds (negative when dated in the future), or null when
+     *                      the sentinel cannot be dated.
+     */
+    private function sentinelAge(string $sentinel, int $now): ?int
+    {
+        $stored = $this->storedTimestamp($sentinel);
+
+        if ($stored !== null && $stored - $now <= $this->sentinelTtlSeconds) {
+            return $now - $stored;
+        }
+
+        $modified = @filemtime($sentinel);
+
+        return $modified === false ? null : $now - $modified;
+    }
+
+    /**
+     * Reads the Unix timestamp held by a sentinel file.
+     *
+     * Only regular files (following links) are opened, as reading a FIFO or a device could
+     * block or never end, and at most {@see SENTINEL_READ_LIMIT} bytes are read.
+     *
+     * @param string $sentinel The sentinel file path.
+     * @return integer|null The timestamp, or null when it cannot be read or is not made of
+     *                      digits only.
+     */
+    private function storedTimestamp(string $sentinel): ?int
+    {
+        if (!is_file($sentinel)) {
+            return null;
+        }
+
+        $content = @file_get_contents($sentinel, false, null, 0, self::SENTINEL_READ_LIMIT);
+
+        if ($content === false) {
+            return null;
+        }
+
+        $content = trim($content);
+
+        return ctype_digit($content) ? (int) $content : null;
     }
 
     /**
