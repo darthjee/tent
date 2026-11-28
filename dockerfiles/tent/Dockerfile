@@ -27,9 +27,13 @@ RUN apt-get update && apt-get install -y \
 # upload limits), shipped from the tent-assets context.
 COPY --chmod=0644 --from=tent-assets php/tent.ini /usr/local/etc/php/conf.d/tent.ini
 
-# Apache access log: TENT_ACCESS_LOG_FORMAT presets and the tent.d drop-in
-# directory. Written at build time (as root), since the image runs as app.
-# The tent-assets build context is dockerfiles/tent.
+# Apache logging: the php module log level (keeps PHP deprecations in the
+# error log), the access-log TENT_ACCESS_LOG_FORMAT presets and the tent.d
+# drop-in directory. Written at build time (as root), since the image runs as
+# app. The tent-assets build context is dockerfiles/tent.
+# 00-tent-0-* must sort before 00-tent-access-log.conf, which includes tent.d,
+# so a drop-in there can override the log level.
+COPY --from=tent-assets apache/00-tent-0-php-log-level.conf /etc/apache2/conf-enabled/00-tent-0-php-log-level.conf
 COPY --from=tent-assets apache/00-tent-access-log.conf /etc/apache2/conf-enabled/00-tent-access-log.conf
 COPY --from=tent-assets apache/envvars-tent.sh /tmp/envvars-tent.sh
 RUN set -eu; \
