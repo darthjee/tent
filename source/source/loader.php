@@ -54,6 +54,7 @@ require_once __DIR__ . '/lib/content/HeaderFilter.php';
 require_once __DIR__ . '/lib/content/ExcludedHeaderFilter.php';
 require_once __DIR__ . '/lib/content/AllowedHeaderFilter.php';
 require_once __DIR__ . '/lib/content/HeaderFilterBuilder.php';
+require_once __DIR__ . '/lib/content/CacheHit.php';
 require_once __DIR__ . '/lib/models/ForbiddenResponse.php';
 require_once __DIR__ . '/lib/models/MissingResponse.php';
 require_once __DIR__ . '/lib/models/NotModifiedResponse.php';

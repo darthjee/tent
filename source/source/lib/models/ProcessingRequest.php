@@ -2,6 +2,8 @@
 
 namespace Tent\Models;
 
+use Tent\Content\CacheHit;
+
 /**
  * Class ProcessingRequest
  *
@@ -40,6 +42,7 @@ class ProcessingRequest implements RequestInterface
     private $cacheHash;
     private bool $cacheSkipped = false;
     private bool $overlongPathReported = false;
+    private ?CacheHit $cacheHit = null;
 
     /**
      * List of attributes that can be set via constructor params.
@@ -338,6 +341,31 @@ class ProcessingRequest implements RequestInterface
     public function cacheSkipped(): bool
     {
         return $this->cacheSkipped;
+    }
+
+    /**
+     * Marks the response of this request as served from cache.
+     *
+     * Set by {@see \Tent\Middlewares\FileCacheMiddleware} on a cache hit only, and
+     * used by {@see \Tent\Middlewares\CacheStalenessMiddleware} for provenance: a
+     * response set by anything else carries no marker.
+     *
+     * @param CacheHit $hit The served cache entry and the header filter it was served with.
+     * @return CacheHit The stored marker.
+     */
+    public function setCacheHit(CacheHit $hit): CacheHit
+    {
+        return $this->cacheHit = $hit;
+    }
+
+    /**
+     * Returns the marker of a response served from cache.
+     *
+     * @return CacheHit|null The marker, or null when the response was not served from cache.
+     */
+    public function cacheHit(): ?CacheHit
+    {
+        return $this->cacheHit;
     }
 
     /**
