@@ -130,6 +130,12 @@ use Tent\Cache\QueryRequestHasher;
 class FileCache implements Cache
 {
     /**
+     * Bytes kept free for the suffix of any file derived from a cache file. It must
+     * be at least as long as every suffix appended to a body or meta file path.
+     */
+    public const DERIVED_SUFFIX_HEADROOM = FileUtils::TEMPORARY_SUFFIX_LENGTH;
+
+    /**
      * Longest file or directory name the filesystem holds, in bytes.
      */
     private const NAME_MAX = 255;
@@ -144,12 +150,6 @@ class FileCache implements Cache
      * of `PATH_MAX - 1` bytes, even though the kernel would still take them.
      */
     private const LONGEST_PATH = self::PATH_MAX - 2;
-
-    /**
-     * Bytes kept free for the suffix of any file derived from a cache file. It must
-     * be at least as long as every suffix appended to a body or meta file path.
-     */
-    private const DERIVED_SUFFIX_HEADROOM = FileUtils::TEMPORARY_SUFFIX_LENGTH;
 
     /**
      * Longest request path, or method, logged in full for an overlong entry, in bytes.

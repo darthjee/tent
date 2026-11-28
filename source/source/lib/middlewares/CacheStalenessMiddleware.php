@@ -83,8 +83,11 @@ class CacheStalenessMiddleware extends Middleware
 {
     /**
      * Suffix used for the debounce sentinel file written while a refresh is in flight.
+     *
+     * Appended to a cache file path, so it must not be longer than
+     * {@see FileCache::DERIVED_SUFFIX_HEADROOM}.
      */
-    private const REFRESH_SENTINEL_SUFFIX = '.refreshing';
+    public const REFRESH_SENTINEL_SUFFIX = '.refreshing';
 
     /**
      * @var FolderLocation The base folder location for caching (must match FileCacheMiddleware).
