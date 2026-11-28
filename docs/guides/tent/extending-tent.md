@@ -78,7 +78,7 @@ imagejpeg($thumbnail, $targetPath, 85);
 
 Upload and memory limits:
 
-- `upload_max_filesize=20M` and `post_max_size=25M` are set in `/usr/local/etc/php/conf.d/tent.ini`. You can't change them with `ini_set()`. To override them, mount or add another `.ini` file in `/usr/local/etc/php/conf.d/`.
+- `upload_max_filesize=20M` and `post_max_size=25M` are set in `/usr/local/etc/php/conf.d/tent.ini`. You can't change them with `ini_set()`. To override them, mount or add a `zz-<name>.ini` file in `/usr/local/etc/php/conf.d/`, and don't replace `tent.ini` itself (see [Overriding the defaults](./reference.md#overriding-the-defaults)).
 - `memory_limit` stays at PHP's default of `128M`. GD needs about 4–5 bytes per pixel while it decodes an image, so a 12 MP photo takes about 60 MB. Extensions that handle large images should raise the limit with `ini_set('memory_limit', '256M')` or a similar value.
 
 Only JPEG and PNG are guaranteed. Imagick (and the ImageMagick CLI) isn't included, and GD has no WebP, AVIF or FreeType support. The bundled GD can also handle GIF and BMP, but those formats aren't guaranteed.
