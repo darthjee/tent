@@ -123,6 +123,10 @@ Invalidation is rename-then-delete: `CacheDirCleaner` first moves the target dir
 
 `CacheTrash` is the single source of truth for the folder name, the entry names and the reserved path rule shared by `FileCache` and `CacheDirCleaner`: a resolved cache path which, after lexical normalization (`FileUtils::normalizePath()`) and compared case-insensitively, equals or lies under `<base>/.tent-trash` is reserved. `FileCache` never reports a hit, stores or removes anything for it, and a cleanup target resolving there is a no-op.
 
+Unsafe paths have one lexical definition, `FileUtils::hasSafeSegments()`: a segment which is exactly `.` or `..`, or a NUL byte. `FileCache` applies it to the request path and method (rewritten paths included) and makes such an entry inert, like a trash entry: no read, write, removal or directory creation, and a `warn` is logged, while the request is still proxied. `CacheDirCleaner` refuses such paths up front with a `warn`, and `CacheDirResolver` returns `null` for them as defence-in-depth. No `realpath()` check is made on the read/write path: the cache directory is trusted to be writable only by tent.
+
+Cache hits are read through `CacheContentReader` (`source/source/lib/service/`), which only accepts a `FileCache` and skips `RequestPathValidator`, as the entry has already screened the path. Static files are still read through `ResponseContentReader`, which applies the validator.
+
 ### HTTP Client (`source/source/lib/http/`)
 
 Thin abstraction over cURL: `HttpClientInterface`, `CurlHttpClient`, and `CurlHttpExecutor`. Used by proxy handlers to forward requests upstream. `UpstreamFailureNormalizer` decorates every proxy client and maps transport failures to `502` (or `504` on cURL timeout) instead of an empty `200`; `connect_timeout`/`timeout` options configure the default `CurlHttpClient`.
