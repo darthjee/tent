@@ -5,6 +5,8 @@ namespace Tent\Tests\Middlewares\CacheStalenessMiddleware;
 require_once __DIR__ . '/../../../../support/loader.php';
 
 use PHPUnit\Framework\TestCase;
+use Tent\Content\CacheHit;
+use Tent\Content\ExcludedHeaderFilter;
 use Tent\Content\FileCache;
 use Tent\Log\Logger;
 use Tent\Log\LoggerInstance;
@@ -67,11 +69,16 @@ class CacheStalenessMiddlewareOverlongPathTest extends TestCase
             'requestPath' => '/' . str_repeat('s', 300),
             'requestMethod' => 'GET'
         ]);
-        $request->setResponse(new Response(['body' => 'cached body', 'httpCode' => 200, 'request' => $request]));
+        $response = new Response(['body' => 'cached body', 'httpCode' => 200, 'request' => $request]);
+        $request->setResponse($response);
+        $request->setCacheHit(new CacheHit(
+            new FileCache($request, new FolderLocation($this->cacheDir)),
+            new ExcludedHeaderFilter([])
+        ));
 
-        $result = $middleware->processRequest($request);
+        $result = $middleware->processResponse($response);
 
-        $this->assertSame($request, $result);
+        $this->assertSame($response, $result);
         $this->assertSame(0, $scheduled);
         $this->assertSame(['.', '..'], scandir($this->cacheDir));
     }

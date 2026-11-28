@@ -4,6 +4,7 @@ namespace Tent\Middlewares;
 
 use Tent\Models\ProcessingRequest;
 use Tent\Models\FolderLocation;
+use Tent\Content\CacheHit;
 use Tent\Content\EvictionPolicy;
 use Tent\Content\FileCache;
 use Tent\Content\HeaderFilter;
@@ -220,7 +221,11 @@ class FileCacheMiddleware extends Middleware
     * requestMethods filter and matches all configured matchers. If not allowed, the request
     * is returned unmodified.
      *
-     * If a cached response exists for the request path, it is loaded and set on the request.
+     * If a cached response exists for the request path, it is loaded and set on the request,
+     * along with a {@see CacheHit} marker holding the served entry and this middleware's
+     * header filter, used by {@see CacheStalenessMiddleware}. No marker is set otherwise:
+     * on a miss, on an entry evicted on read, on a matcher mismatch, or when the cache
+     * is skipped.
      *
      * @param ProcessingRequest $request The incoming processing request.
      * @return ProcessingRequest The (potentially cached) processing request.
@@ -249,6 +254,7 @@ class FileCacheMiddleware extends Middleware
             $response = $reader->getResponse();
             Logger::debug('[' . $response->httpCode() . '] - serving from cache — uri: ' . $request->requestPath());
             $request->setResponse($response);
+            $request->setCacheHit(new CacheHit($cache, $this->headerFilter));
         }
 
         return $request;
@@ -258,6 +264,11 @@ class FileCacheMiddleware extends Middleware
      * Caches the response to a file.
      *
      * Only stores the response if it matches all configured matchers.
+     *
+     * A response served from an entry is never written back into it: the entry may have
+     * been evicted meanwhile (e.g. by a {@see CacheStalenessMiddleware} refresh running
+     * earlier in the response phase), and storing it again would undo the eviction,
+     * dating the stale content as new.
      *
      * @param Response $response The response to cache.
      * @return Response The original response.
@@ -275,7 +286,7 @@ class FileCacheMiddleware extends Middleware
             return $response;
         }
 
-        if ($this->isCacheable($response)) {
+        if ($this->isCacheable($response) && !$this->wasServedFrom($response->request(), $cache)) {
             (new ResponseCacher($cache, $response, $this->headerFilter))->process();
         }
         return $response;
@@ -295,6 +306,20 @@ class FileCacheMiddleware extends Middleware
             }
         }
         return true;
+    }
+
+    /**
+     * Checks whether the response of the request was served from the given entry.
+     *
+     * @param ProcessingRequest $request Current request.
+     * @param FileCache         $cache   The entry about to be written.
+     * @return boolean True when the request was a cache hit on this very entry.
+     */
+    private function wasServedFrom(ProcessingRequest $request, FileCache $cache): bool
+    {
+        $hit = $request->cacheHit();
+
+        return $hit !== null && $hit->cache()->metaFilePath() === $cache->metaFilePath();
     }
 
     /**

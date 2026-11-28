@@ -115,7 +115,7 @@ Configuration::buildRule([
 
 When the flag is set, `FileCacheMiddleware` performs no cache read, no cache write and no `evictOn` eviction, and `CacheStalenessMiddleware` schedules no background refresh. `CacheCleanupMiddleware` ignores the flag.
 
-**Placement matters.** A full bypass (no read and no write) works only from `prependMiddlewares`. If the guard is declared in `middlewares`, it runs after the built-in `FileCacheMiddleware`, which short-circuits the chain on a cache hit; in that position only the write is skipped on a `default_proxy` handler.
+**Placement matters.** A full bypass (no read and no write) works only from `prependMiddlewares`. If the guard is declared in `middlewares`, it runs after the built-in `FileCacheMiddleware`, which short-circuits the chain on a cache hit; in that position only the write of a cache miss is skipped on a `default_proxy` handler. On a hit the guard does not run, so a configured `CacheStalenessMiddleware` still refreshes a stale entry.
 
 > **Warning**: every flagged request goes upstream. If your trigger is client-controllable, so is the bypass, and a client can use it to amplify load on your backend.
 
@@ -224,11 +224,11 @@ Configuration::buildRule([
 
 `skip_cache_header`/`require_cache_header` decide **whether** a response is cached at all; `mode`/`excluded_headers`/`additional_excluded_headers`/`allowed_headers` decide which headers are stripped from what gets stored once a response is being cached — the two are independent and can be combined freely. See [Request Handlers](../../request-handlers.md#defaultproxyrequesthandler-default_proxy) for the full option table, including how `excluded_headers` fully overrides the default list and why an empty `allowed_headers` throws.
 
-If you also use `CacheStalenessMiddleware` (see [Middlewares](./middlewares.md)) for the same `location`, configure it with the same header-filtering options — its background-refresh writes go through the same filter and should stay consistent with `FileCacheMiddleware`'s configuration. The same applies to `evictOn` (or `evict_on`): use matching lists on both middlewares so that entries evicted on read/write by `FileCacheMiddleware` and entries evicted after a failed background refresh follow the same rule. It is disabled by default, and refresh exceptions never evict.
+If you also use [`CacheStalenessMiddleware`](./middlewares.md#cachestalenessmiddleware) for the same `location`, its background-refresh writes reuse `FileCacheMiddleware`'s header filter automatically; its own header-filter options are deprecated (ignored, with a warning logged). `evictOn` (or `evict_on`) is not shared: use matching lists on both middlewares so that entries evicted on read/write by `FileCacheMiddleware` and entries evicted when a background refresh receives a matching status code follow the same rule. It is disabled by default. A [failed refresh](./middlewares.md#failed-refreshes) (a transport error, including an interrupted or partial transfer, or an exception from the upstream request) keeps the stale entry, whatever its status code.
 
 ## Manual `FileCacheMiddleware` setup
 
-When using `proxy` instead of `default_proxy`, configure `FileCacheMiddleware` explicitly. Place it **before** header middlewares so cached responses are served without forwarding:
+When using `proxy` instead of `default_proxy`, configure `FileCacheMiddleware` explicitly. A cache hit skips every request middleware listed after it, and a [`CacheStalenessMiddleware`](./middlewares.md#cachestalenessmiddleware) refresh does not include their changes either, so list the ones the upstream needs, such as the `Host` header ones, **before** it:
 
 ```php
 Configuration::buildRule([
@@ -240,7 +240,17 @@ Configuration::buildRule([
         ['method' => 'GET', 'uri' => '/api/', 'type' => 'begins_with']
     ],
     'middlewares' => [
-        // Cache first — short-circuits on hit, skipping the backend entirely
+        // Fix the Host header for the backend
+        [
+            'class' => 'Tent\Middlewares\RenameHeaderMiddleware',
+            'from'  => 'Host',
+            'to'    => 'X-Forwarded-Host'
+        ],
+        [
+            'class'   => 'Tent\Middlewares\SetHeadersMiddleware',
+            'headers' => ['Host' => 'api']
+        ],
+        // Then cache — short-circuits on hit, skipping the backend entirely
         [
             'class'                 => 'Tent\Middlewares\FileCacheMiddleware',
             'location'              => './cache',
@@ -255,16 +265,6 @@ Configuration::buildRule([
                     'requestMethods' => ['GET']
                 ]
             ]
-        ],
-        // Then fix Host header for the backend
-        [
-            'class' => 'Tent\Middlewares\RenameHeaderMiddleware',
-            'from'  => 'Host',
-            'to'    => 'X-Forwarded-Host'
-        ],
-        [
-            'class'   => 'Tent\Middlewares\SetHeadersMiddleware',
-            'headers' => ['Host' => 'api']
         ]
     ]
 ]);
