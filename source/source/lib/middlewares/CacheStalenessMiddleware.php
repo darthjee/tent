@@ -12,6 +12,7 @@ use Tent\Log\Logger;
 use Tent\Models\FolderLocation;
 use Tent\Models\ProcessingRequest;
 use Tent\Service\BackgroundRefresher;
+use Tent\Utils\FileUtils;
 
 /**
  * Middleware that serves stale cache hits immediately while triggering a background refresh.
@@ -341,12 +342,17 @@ class CacheStalenessMiddleware extends Middleware
     /**
      * Writes the debounce sentinel file, ignoring failures (best-effort debounce).
      *
+     * The file is written atomically with mode `0644`, and a symbolic link standing
+     * in its place is replaced rather than followed (see
+     * {@see FileUtils::writeAtomically()}). Its directory is the one of an existing
+     * cache entry, so it is neither created nor checked here.
+     *
      * @param string $sentinel The sentinel file path.
      * @return void
      */
     private function writeSentinel(string $sentinel): void
     {
-        @file_put_contents($sentinel, (string) time());
+        FileUtils::writeAtomically($sentinel, (string) time());
     }
 
     /**

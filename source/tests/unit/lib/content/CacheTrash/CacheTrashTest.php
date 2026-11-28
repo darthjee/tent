@@ -105,6 +105,20 @@ class CacheTrashTest extends TestCase
         $this->assertDirectoryExists($this->trashDir);
     }
 
+    public function testEnsureCreatesFolderNotWritableByOthersUnderAPermissiveUmask()
+    {
+        $umask = umask(0000);
+
+        try {
+            $this->assertTrue($this->trash->ensure());
+        } finally {
+            umask($umask);
+        }
+
+        clearstatcache();
+        $this->assertSame(0755, fileperms($this->trashDir) & 0777);
+    }
+
     public function testEnsureAcceptsExistingFolderAndKeepsItsContent()
     {
         mkdir($this->trashDir);
