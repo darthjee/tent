@@ -232,8 +232,14 @@ class CacheStalenessMiddleware extends Middleware
      * `excluded_headers`, `additional_excluded_headers`, `allowed_headers`) is present.
      * They are otherwise ignored.
      *
+     * `sentinel_ttl_seconds` (or `sentinelTtlSeconds`) is the age, in seconds, after which the
+     * sentinel of a refresh is abandoned and taken over. It is cast to an integer and defaults
+     * to 60, whatever `maxAgeSeconds` is. An explicit value `<= 0`, which any non numeric value
+     * is cast to, means the sentinel never expires.
+     *
      * @param array $attributes Must include `location`, `host` and `maxAgeSeconds`
-     *                          (or `max_age_seconds`). Optionally `evictOn` (or `evict_on`).
+     *                          (or `max_age_seconds`). Optionally `evictOn` (or `evict_on`)
+     *                          and `sentinel_ttl_seconds` (or `sentinelTtlSeconds`).
      * @throws \InvalidArgumentException If `evictOn` is not an array or has invalid entries.
      * @return CacheStalenessMiddleware
      */
@@ -245,6 +251,9 @@ class CacheStalenessMiddleware extends Middleware
         $maxAgeSeconds = (int) ($attributes['maxAgeSeconds'] ?? $attributes['max_age_seconds'] ?? 0);
         $host = $attributes['host'] ?? '';
         $evictOn = $attributes['evictOn'] ?? $attributes['evict_on'] ?? null;
+        $sentinelTtl = $attributes['sentinel_ttl_seconds'] ?? $attributes['sentinelTtlSeconds'] ?? null;
+        // An absent value must stay null: cast to 0, it would mean "never expires".
+        $sentinelTtlSeconds = $sentinelTtl === null ? null : (int) $sentinelTtl;
 
         if ($evictOn !== null && !is_array($evictOn)) {
             throw new \InvalidArgumentException('evictOn must be an array');
@@ -254,7 +263,8 @@ class CacheStalenessMiddleware extends Middleware
             $location,
             $maxAgeSeconds,
             $host,
-            evictOn: $evictOn
+            evictOn: $evictOn,
+            sentinelTtlSeconds: $sentinelTtlSeconds
         );
     }
 

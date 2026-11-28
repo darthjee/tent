@@ -5,21 +5,32 @@ namespace Tent\Tests\Middlewares\CacheStalenessMiddleware;
 require_once __DIR__ . '/../../../../support/loader.php';
 
 use PHPUnit\Framework\TestCase;
+use Tent\Content\CacheHit;
+use Tent\Content\ExcludedHeaderFilter;
+use Tent\Content\FileCache;
 use Tent\Log\Logger;
 use Tent\Log\LoggerInstance;
 use Tent\Log\NullLoggerInstance;
 use Tent\Middlewares\CacheStalenessMiddleware;
+use Tent\Models\FolderLocation;
+use Tent\Models\ProcessingRequest;
+use Tent\Models\Response;
 use Tent\Tests\Support\Log\CapturingLoggerInstance;
+use Tent\Tests\Support\Utils\FileSystemUtils;
 
 class CacheStalenessMiddlewareBuildTest extends TestCase
 {
+    private string $cacheDir;
+
     protected function setUp(): void
     {
+        $this->cacheDir = sys_get_temp_dir() . '/cache_staleness_build_test_' . uniqid();
         Logger::setInstance(new NullLoggerInstance());
     }
 
     protected function tearDown(): void
     {
+        FileSystemUtils::removeDirRecursive($this->cacheDir);
         Logger::setInstance(new LoggerInstance());
     }
 
@@ -230,6 +241,72 @@ class CacheStalenessMiddlewareBuildTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
 
         CacheStalenessMiddleware::build($this->attributes(['evictOn' => ['abc']]));
+    }
+
+    public static function sentinelTtlCases(): array
+    {
+        // Extra attributes, sentinel age and number of refreshes scheduled.
+        return [
+            'snake case, within the TTL' => [['sentinel_ttl_seconds' => 300], 200, 0],
+            'snake case, over the TTL' => [['sentinel_ttl_seconds' => 300], 400, 1],
+            'camel case, within the TTL' => [['sentinelTtlSeconds' => 300], 200, 0],
+            'camel case, over the TTL' => [['sentinelTtlSeconds' => 300], 400, 1],
+            'numeric string, within the TTL' => [['sentinel_ttl_seconds' => '300'], 200, 0],
+            'numeric string, over the TTL' => [['sentinel_ttl_seconds' => '300'], 400, 1],
+            'absent, within 60 seconds' => [[], 30, 0],
+            'absent, over 60 seconds' => [[], 90, 1],
+            'null, over 60 seconds' => [['sentinel_ttl_seconds' => null], 90, 1],
+            'max age of zero, within 60 seconds' => [['maxAgeSeconds' => 0], 30, 0],
+            'max age of zero, over 60 seconds' => [['maxAgeSeconds' => 0], 90, 1],
+            'zero never expires' => [['sentinel_ttl_seconds' => 0], 86400, 0],
+            'negative never expires' => [['sentinel_ttl_seconds' => -1], 86400, 0],
+            'non numeric never expires' => [['sentinel_ttl_seconds' => 'abc'], 86400, 0],
+        ];
+    }
+
+    /**
+     * @dataProvider sentinelTtlCases
+     */
+    public function testBuildConfiguresTheSentinelTtl(array $extra, int $sentinelAge, int $expectedRefreshes)
+    {
+        $middleware = CacheStalenessMiddleware::build(
+            $this->attributes(array_merge(['location' => $this->cacheDir], $extra))
+        );
+
+        $this->assertSame($expectedRefreshes, $this->refreshesScheduledWithSentinel($middleware, $sentinelAge));
+    }
+
+    /**
+     * Serves a stale cache hit whose entry has a sentinel of the given age, counting the
+     * refreshes scheduled. They are recorded only, never run.
+     */
+    private function refreshesScheduledWithSentinel(CacheStalenessMiddleware $middleware, int $sentinelAge): int
+    {
+        $scheduled = 0;
+        $scheduler = (new \ReflectionClass($middleware))->getProperty('scheduler');
+        $scheduler->setAccessible(true);
+        $scheduler->setValue($middleware, function () use (&$scheduled) {
+            $scheduled++;
+        });
+
+        $request = new ProcessingRequest(['requestPath' => '/users', 'requestMethod' => 'GET']);
+        $response = new Response(['body' => 'stale body', 'httpCode' => 200, 'headers' => [], 'request' => $request]);
+        $cache = new FileCache($request, new FolderLocation($this->cacheDir));
+        $cache->store($response);
+
+        $meta = json_decode(file_get_contents($cache->metaFilePath()), true);
+        $meta['timestamp'] = time() - 1000;
+        file_put_contents($cache->metaFilePath(), json_encode($meta));
+        file_put_contents(
+            $cache->metaFilePath() . CacheStalenessMiddleware::REFRESH_SENTINEL_SUFFIX,
+            (string) (time() - $sentinelAge)
+        );
+
+        $request->setResponse($response);
+        $request->setCacheHit(new CacheHit($cache, new ExcludedHeaderFilter([])));
+        $middleware->processResponse($response);
+
+        return $scheduled;
     }
 
     private function attributes(array $extra = []): array
