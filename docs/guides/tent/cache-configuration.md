@@ -136,7 +136,13 @@ Only whole segments are matched, so the following are not unsafe:
 - dot-prefixed names such as `.git`;
 - percent-encoded sequences such as `%2e%2e`: tent does not URL-decode the path, so in its cache path they are literal names.
 
-> **Trust boundary**: the cache directory must be writable only by tent. Symbolic links inside it are not defended against when cache entries are read or written.
+> **Trust boundary**: the cache directory must still be writable only by tent, as symbolic links are checked when a response is stored, but not when it is read:
+>
+> - storing a response never follows a symbolic link out of `location`. If the entry directory resolves outside it, nothing is stored, a `warn` line is logged (`cache store skipped — path: <path>, method: <method>, reason: resolves outside cache location`) and the response itself is unaffected;
+> - a symbolic link standing in place of a cache file is replaced by a regular file when tent writes that file, leaving the link's target untouched;
+> - `location` itself may be a symbolic link (e.g. to a Docker volume), and links resolving inside it keep working;
+> - tent creates cache directories with mode `0755` and cache files with mode `0644`, so a permissive umask cannot make them group- or world-writable. Files are `0644` whatever the umask, while a stricter umask can further restrict directories;
+> - cache **reads** are not checked for symbolic links, to keep cache hits free of extra filesystem calls. A hit can therefore be served from outside `location`, and what follows a hit (e.g. [`CacheStalenessMiddleware`](./middlewares.md#cachestalenessmiddleware) removing a stale entry) is not confined to it either.
 
 ## Require header before caching
 
