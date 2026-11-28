@@ -144,6 +144,20 @@ Only whole segments are matched, so the following are not unsafe:
 > - tent creates cache directories with mode `0755` and cache files with mode `0644`, so a permissive umask cannot make them group- or world-writable. Files are `0644` whatever the umask, while a stricter umask can further restrict directories;
 > - cache **reads** are not checked for symbolic links, to keep cache hits free of extra filesystem calls. A hit can therefore be served from outside `location`, and what follows a hit (e.g. [`CacheStalenessMiddleware`](./middlewares.md#cachestalenessmiddleware) removing a stale entry) is not confined to it either.
 
+## Path length
+
+Since each segment of the request path becomes a directory name, a request which the filesystem cannot hold is never cached. This is the case when:
+
+- a segment of its path, or its HTTP method, is longer than 255 bytes;
+- the path of its cache file, including the cache `location`, would be longer than 4094 bytes (the longest path PHP accepts where `PATH_MAX` is 4096);
+- the name of its cache file would be longer than 255 bytes, which only a [custom request hasher](./creating-request-hashers.md) returning a long hash can cause.
+
+Both cache file limits include 21 bytes reserved for the temporary files used while writing, so a hash may have up to 224 bytes. Lengths are counted in bytes on the path as received, which tent does not URL-decode: `%41` counts as 3 bytes, and duplicate slashes count too.
+
+Such a request is proxied upstream as usual, just without caching: the response is unaffected, and nothing is read from, written to or removed from the cache. A single `warn` line is logged (`cache bypassed — path: <path>, method: <method>, reason: path too long`), where a path (or method) longer than 200 bytes is cut to its first 200 bytes, followed by `… (<N> bytes)`, `<N>` being its full length. A request which is also unsafe (see [Path safety](#path-safety)) is only reported as such.
+
+Any other failure to create a cache directory (e.g. permissions, a full or read-only disk, or a filesystem with lower limits) only skips the store too: a `warn` line is logged (`cache store skipped — path: <path>, method: <method>, reason: <error message>`) and the response is never affected.
+
 ## Require header before caching
 
 When you only want to cache responses that opt in explicitly, configure `require_cache_header`. It is the write-only counterpart to `skip_cache_header`: it only checks the **response**, never the request, and gates the cache write — a response is only stored when the configured header is present in it:

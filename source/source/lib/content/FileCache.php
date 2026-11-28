@@ -35,16 +35,46 @@ use Tent\Cache\QueryRequestHasher;
  *   reserved for directories being invalidated (see {@see CacheTrash});
  * - its request path or method has a `.` or `..` segment, or a NUL byte (see
  *   {@see FileUtils::hasSafeSegments()}), as it could resolve outside the cache
- *   location. A `warn` is logged in this case.
+ *   location. A `warn` is logged in this case;
+ * - the filesystem cannot hold it, as it is overlong (see below). A `warn` is
+ *   logged in this case.
  *
  * An inert entry is uncacheable: it is never reported as a hit, nothing is read,
  * {@see store()} writes nothing and creates no directory, and {@see remove()}
  * does nothing. The request itself is not affected, so it is processed (e.g.
  * proxied) as usual.
  *
- * This is the only path screening applied to cache hits, which are read through
- * {@see \Tent\Service\CacheContentReader}. Safe look-alikes, such as `...`,
- * `..foo`, `a..b` or names with a backslash, are cacheable.
+ * These are the only path screenings applied to cache hits, which are read
+ * through {@see \Tent\Service\CacheContentReader}. Safe look-alikes, such as
+ * `...`, `..foo`, `a..b` or names with a backslash, are cacheable.
+ *
+ * ## Overlong entries
+ *
+ * Lengths are measured in bytes, on the exact strings built for the filesystem
+ * (the request path is not decoded, and duplicate slashes count), against the
+ * limits of 255 bytes per name and 4094 bytes per path. The latter is two bytes
+ * short of `PATH_MAX` (4096): the kernel counts the terminating NUL, and PHP's
+ * filesystem functions keep one more byte. An entry is overlong when either:
+ *
+ * - a segment of the request path, or the method, is longer than 255 bytes;
+ * - the name of its body or metadata file is longer than 255 bytes, e.g. with a
+ *   custom {@see RequestHasher} returning a long hash;
+ * - the path of its body or metadata file is longer than 4094 bytes. The cache
+ *   location counts here, but its segments are not checked one by one.
+ *
+ * Both file checks keep a headroom for the files derived from those two, the
+ * longest being the temporary file of {@see FileUtils::writeAtomically()}. Any
+ * longer suffix appended to a cache file path requires a larger headroom.
+ *
+ * The check is lexical, so the filesystem is not touched. A single `warn` is
+ * logged per request, however many instances are built for it, with the reason
+ * `path too long` and the path (and method) truncated. A request which is also
+ * unsafe is only reported as such.
+ *
+ * Entries written without that headroom by earlier versions, which wrote files
+ * directly, are therefore permanent misses: they are neither stored again nor
+ * removed by {@see remove()}, and their files stay until their directory is
+ * invalidated (see {@see CacheDirCleaner}) or manually purged.
  *
  * ## Symbolic links and permissions
  *
@@ -101,6 +131,33 @@ use Tent\Cache\QueryRequestHasher;
 class FileCache implements Cache
 {
     /**
+     * Bytes kept free for the suffix of any file derived from a cache file. It must
+     * be at least as long as every suffix appended to a body or meta file path.
+     */
+    public const DERIVED_SUFFIX_HEADROOM = FileUtils::TEMPORARY_SUFFIX_LENGTH;
+
+    /**
+     * Longest file or directory name the filesystem holds, in bytes.
+     */
+    private const NAME_MAX = 255;
+
+    /**
+     * Size of the kernel's path buffer, in bytes, including the terminating NUL.
+     */
+    private const PATH_MAX = 4096;
+
+    /**
+     * Longest path PHP's filesystem functions accept, in bytes: they reject paths
+     * of `PATH_MAX - 1` bytes, even though the kernel would still take them.
+     */
+    private const LONGEST_PATH = self::PATH_MAX - 2;
+
+    /**
+     * Longest request path, or method, logged in full for an overlong entry, in bytes.
+     */
+    private const LOGGED_VALUE_MAX_LENGTH = 200;
+
+    /**
      * @var ProcessingRequest The request associated with this cache.
      */
     private ProcessingRequest $request;
@@ -137,7 +194,7 @@ class FileCache implements Cache
 
     /**
      * @var boolean Whether the entry is uncacheable: it resolves inside the reserved
-     *              trash folder, or its request path or method is unsafe.
+     *              trash folder, or its request path or method is unsafe or overlong.
      */
     private bool $inert;
 
@@ -167,8 +224,10 @@ class FileCache implements Cache
         $this->bodyFilePath = CacheFilePath::path('body', $this->basePath(), $this->hash);
         $this->metaFilePath = CacheFilePath::path('meta', $this->basePath(), $this->hash);
 
-        $unsafe = $this->hasUnsafePath();
-        $this->inert = $unsafe || (new CacheTrash($location))->contains($this->basePath());
+        // Short-circuited, so that an entry is reported with a single reason.
+        $this->inert = $this->hasUnsafePath()
+            || $this->hasOverlongPath()
+            || (new CacheTrash($location))->contains($this->basePath());
     }
 
     /**
@@ -283,6 +342,10 @@ class FileCache implements Cache
      * symbolic link. This is checked before the directory is created, and again
      * afterwards. The cache location may itself be a link, and is created when
      * missing.
+     *
+     * A directory which cannot be created (e.g. permission denied, full or
+     * read-only disk, lower filesystem limits) is logged at `warn` level, and
+     * nothing is written. No PHP warning is raised.
      *
      * Each file is written atomically with mode `0644` (see
      * {@see FileUtils::writeAtomically()}), so that a symbolic link standing in
@@ -411,14 +474,32 @@ class FileCache implements Cache
      *
      * Directories are created with mode `0755`, which the umask may only reduce.
      *
-     * @return void
+     * A failed creation never raises a PHP warning, which could be printed into
+     * the response: it is logged at `warn` level instead, along with the reason.
+     *
+     * @return boolean True when the folder exists.
      */
-    protected function ensureCacheFolderExists(): void
+    protected function ensureCacheFolderExists(): bool
     {
         $basePath = $this->basePath();
-        if (!is_dir($basePath)) {
-            mkdir($basePath, 0755, true);
+        if (is_dir($basePath)) {
+            return true;
         }
+
+        // So that an earlier error is never reported as the reason.
+        error_clear_last();
+
+        // The folder may have been created meanwhile by a concurrent request.
+        if (@mkdir($basePath, 0755, true) || is_dir($basePath)) {
+            return true;
+        }
+
+        Logger::warn(
+            'cache store skipped — path: ' . $this->path . ', method: ' . $this->request->requestMethod() .
+            ', reason: ' . (error_get_last()['message'] ?? 'mkdir failed')
+        );
+
+        return false;
     }
 
     /**
@@ -437,10 +518,8 @@ class FileCache implements Cache
             return false;
         }
 
-        $this->ensureCacheFolderExists();
-
-        // A failed creation has already been reported by mkdir().
-        return is_dir($basePath) && $this->isContained($basePath);
+        // A failed creation has already been logged.
+        return $this->ensureCacheFolderExists() && is_dir($basePath) && $this->isContained($basePath);
     }
 
     /**
@@ -515,5 +594,97 @@ class FileCache implements Cache
         Logger::warn('cache bypassed — path: ' . $this->path . ', method: ' . $method . ', reason: unsafe path');
 
         return true;
+    }
+
+    /**
+     * Checks whether the filesystem cannot hold the entry, reporting it when so.
+     *
+     * @return boolean True when the entry must not touch the filesystem.
+     */
+    private function hasOverlongPath(): bool
+    {
+        if (!$this->hasOverlongName() && !$this->hasOverlongFilePath()) {
+            return false;
+        }
+
+        $this->reportOverlongPath();
+
+        return true;
+    }
+
+    /**
+     * Logs a `warn` about the overlong entry, unless already done for the request,
+     * as separate instances read and write its cache.
+     *
+     * @return void
+     */
+    private function reportOverlongPath(): void
+    {
+        if ($this->request->overlongPathReported()) {
+            return;
+        }
+
+        Logger::warn(
+            'cache bypassed — path: ' . $this->truncateForLog($this->path) .
+            ', method: ' . $this->truncateForLog($this->request->requestMethod()) .
+            ', reason: path too long'
+        );
+
+        $this->request->markOverlongPathReported();
+    }
+
+    /**
+     * Checks for a name exceeding `NAME_MAX`: a segment of the request path, the
+     * method, or a cache file name, along with its derived suffix.
+     *
+     * The segments of the cache location are not checked.
+     *
+     * @return boolean True when any name is overlong.
+     */
+    private function hasOverlongName(): bool
+    {
+        $segments = explode('/', $this->path . '/' . $this->request->requestMethod());
+
+        // Measured without basename(), which depends on the locale.
+        $fileNameLength = $this->longestFilePathLength() - strlen($this->basePath() . '/');
+
+        return max(array_map('strlen', $segments)) > self::NAME_MAX
+            || $fileNameLength + self::DERIVED_SUFFIX_HEADROOM > self::NAME_MAX;
+    }
+
+    /**
+     * Checks for a cache file path which, along with its derived suffix, is longer
+     * than the filesystem functions accept.
+     *
+     * @return boolean True when the path is overlong.
+     */
+    private function hasOverlongFilePath(): bool
+    {
+        return $this->longestFilePathLength() + self::DERIVED_SUFFIX_HEADROOM > self::LONGEST_PATH;
+    }
+
+    /**
+     * Returns the length, in bytes, of the longest cache file path of the entry.
+     *
+     * @return integer The length of the longest of the body and meta file paths.
+     */
+    private function longestFilePathLength(): int
+    {
+        return max(strlen($this->bodyFilePath), strlen($this->metaFilePath));
+    }
+
+    /**
+     * Shortens a client-controlled value, so that it cannot bloat the logs.
+     *
+     * @param string $value Value to be logged.
+     * @return string The value itself or, when too long, its first bytes followed by its size.
+     */
+    private function truncateForLog(string $value): string
+    {
+        if (strlen($value) <= self::LOGGED_VALUE_MAX_LENGTH) {
+            return $value;
+        }
+
+        return substr($value, 0, self::LOGGED_VALUE_MAX_LENGTH) . '… (' . strlen($value) . ' bytes)';
     }
 }

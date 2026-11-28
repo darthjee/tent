@@ -39,6 +39,7 @@ class ProcessingRequest implements RequestInterface
     private $domain;
     private $cacheHash;
     private bool $cacheSkipped = false;
+    private bool $overlongPathReported = false;
 
     /**
      * List of attributes that can be set via constructor params.
@@ -337,5 +338,25 @@ class ProcessingRequest implements RequestInterface
     public function cacheSkipped(): bool
     {
         return $this->cacheSkipped;
+    }
+
+    /**
+     * Records that the cache bypass of this request, due to an overlong path, has been logged.
+     *
+     * @return void
+     */
+    public function markOverlongPathReported(): void
+    {
+        $this->overlongPathReported = true;
+    }
+
+    /**
+     * Tells whether the cache bypass due to an overlong path has already been logged.
+     *
+     * @return boolean
+     */
+    public function overlongPathReported(): bool
+    {
+        return $this->overlongPathReported;
     }
 }
