@@ -47,7 +47,7 @@ public function processRequest(ProcessingRequest $request): ProcessingRequest
 
 ### `processResponse(Response $response): Response`
 
-Called after the handler produces a response. Use this to:
+Called on every response before it is sent, whether it was produced by the handler or set by a request middleware (e.g. a cache hit). Use this to:
 
 - Add or modify response headers
 - Cache the response to disk
@@ -327,7 +327,7 @@ Deletes stale `FileCacheMiddleware` cache directories on mutating requests (`POS
 
 ### `CacheStalenessMiddleware`
 
-Serves a stale `FileCacheMiddleware` hit immediately while triggering a background refresh against the upstream, so the next request gets fresh content without anyone having to wait for it.
+Stale-while-revalidate for `FileCacheMiddleware`: a cached response older than `maxAgeSeconds` is still served as it is, and its entry is refreshed from the upstream for later requests.
 
 ```php
 [
@@ -338,11 +338,14 @@ Serves a stale `FileCacheMiddleware` hit immediately while triggering a backgrou
 ]
 ```
 
-- `location` must match the `location` used by the corresponding `FileCacheMiddleware`.
-- `host` is the upstream base URL to re-contact when refreshing (e.g. the same `host` configured on the rule's `proxy`/`default_proxy` handler).
-- `maxAgeSeconds` (or `max_age_seconds`) is the age, in seconds, past which a cached entry is considered stale.
-- **Must be configured after `FileCacheMiddleware`** in the rule's `middlewares` list — it only evaluates staleness when a cache hit already set a response on the request.
-- A short-lived sentinel file (`<meta-file>.refreshing`) debounces concurrent stale requests for the same entry so only one refresh runs at a time.
+- `location` (required) should match the `location` used by the corresponding `FileCacheMiddleware`. The entry checked and refreshed is always the one which was served.
+- `host` (required) is the upstream base URL to re-contact when refreshing (e.g. the same `host` configured on the rule's `proxy`/`default_proxy` handler).
+- `maxAgeSeconds` (or `max_age_seconds`) is the age, in seconds, past which a cached entry is considered stale. It defaults to `0`, so always set it.
+- `evictOn` (or `evict_on`) optionally lists the status codes that remove the entry when a refresh receives them.
+- It acts in the response phase, and only on responses served from cache by `FileCacheMiddleware`: a response set by another middleware, a custom one included, never triggers a refresh. Configuring it **after** `FileCacheMiddleware` is recommended, although any position in the same handler works.
+- The refresh write uses the header filter of that `FileCacheMiddleware`. The `mode`, `excluded_headers`, `additional_excluded_headers` and `allowed_headers` options of this middleware are **deprecated**: ignored, with a warning logged, and to be removed in the next major version.
+- A sentinel file (`<meta-file>.refreshing`) debounces concurrent stale requests for the same entry so only one refresh runs at a time (best effort).
+- The refresh is a direct request to `host`, not a new pass through the rule: see [the limitations of the refresh](guides/tent/middlewares.md#limitations-of-the-refresh) before enabling it.
 
 ```php
 Configuration::buildRule([
@@ -368,9 +371,9 @@ Configuration::buildRule([
 ]);
 ```
 
-**When to use**: When you want clients to always get an instant response from cache, even if it means occasionally serving slightly outdated content, while the cache quietly heals itself in the background.
+**When to use**: When serving slightly outdated content is acceptable, and cache entries should be renewed as they are requested.
 
-**Caveat — "background" is FPM-dependent**: Tent has no real async/job-queue infrastructure. The refresh is deferred via `fastcgi_finish_request()` + `register_shutdown_function()` when running under PHP-FPM, so the client gets the stale response immediately and the refresh happens afterwards in the same PHP process. Outside of PHP-FPM (e.g. CLI, built-in server, some Apache SAPIs without `fastcgi_finish_request`), the refresh runs synchronously and **will** add upstream latency to the current request. Don't rely on non-blocking behaviour outside PHP-FPM.
+**Caveat — "background" is FPM-dependent**: Tent has no real async/job-queue infrastructure. The refresh is deferred via `fastcgi_finish_request()` + `register_shutdown_function()` when running under PHP-FPM, so the client gets the stale response immediately and the refresh happens afterwards in the same PHP process. When `fastcgi_finish_request()` is not available (mod_php, CLI, built-in server), the refresh runs synchronously, before the response is sent. **This is the case of the shipped `php:8.4-apache` (mod_php) image**: there, a request hitting a stale entry waits for a full upstream round trip.
 
 ---
 
@@ -396,12 +399,14 @@ Middlewares are applied in the order they are listed in the configuration:
 
 Place middlewares that can short-circuit (like `FileCacheMiddleware`) **before** middlewares that modify the request, so cached responses are served without unnecessary processing.
 
+The exception is a rule using [`CacheStalenessMiddleware`](#cachestalenessmiddleware): request middlewares skipped by a cache hit are also missing from the refresh, so those the upstream needs (e.g. `Host` or authentication headers) must come **before** `FileCacheMiddleware`. On `default_proxy`, that means `prependMiddlewares`; a custom `Host` requires a `proxy` rule (see [the limitations of the refresh](guides/tent/middlewares.md#limitations-of-the-refresh)).
+
 This ordering advice applies within a single `middlewares` list. If a middleware needs to run ahead of a handler's own built-in defaults — for example, before `default_proxy`'s `Host` header rewriting — `middlewares` can't help, since those entries are always appended *after* the handler's defaults. Use the sibling `prependMiddlewares` rule key instead; its entries run *before* the handler's default middlewares while `middlewares` keeps running after them, unchanged. See [Defining Rules](guides/tent/defining-rules.md) and [Request Handlers — Middleware Order](request-handlers.md#middleware-order).
 
 Cache guards, such as a middleware that calls `skipCache()`, belong in `prependMiddlewares`: only there do they run before the built-in `FileCacheMiddleware` and fully bypass the cache (read and write). See [Bypass cache from a middleware](guides/tent/cache-configuration.md#bypass-cache-from-a-middleware).
 
 ### Performance Considerations
 
-- **Cache early**: Place `FileCacheMiddleware` at the start of the middlewares list so cached requests are resolved without forwarding to the backend.
+- **Cache early**: Place `FileCacheMiddleware` at the start of the middlewares list so cached requests are resolved without forwarding to the backend (see the `CacheStalenessMiddleware` exception above).
 - **Keep middlewares lightweight**: `processRequest` runs on every incoming request, so avoid expensive operations like database calls unless necessary.
 - **Use specific matchers**: Narrow the conditions under which a middleware applies (e.g., only cache `GET` requests with `200` responses) to avoid unintended behaviour.

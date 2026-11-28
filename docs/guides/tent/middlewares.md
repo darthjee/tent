@@ -70,7 +70,7 @@ Matchers inside `FileCacheMiddleware` control which responses are stored. **All*
 
 Cache files are named from a hash of the request path. Each unique URI maps to a unique cache file. The `location` directory is created automatically if it does not exist.
 
-> **Note**: There is no built-in cache expiry. To clear the cache, delete the files in the `location` directory.
+> **Note**: There is no built-in cache expiry (see [`CacheStalenessMiddleware`](#cachestalenessmiddleware) to refresh old entries). To clear the cache, delete the files in the `location` directory.
 
 #### The `.tent-trash` folder
 
@@ -82,22 +82,115 @@ Its name is reserved: a request whose path resolves to `/.tent-trash` or anythin
 
 ## `CacheStalenessMiddleware`
 
-Serves stale cache hits immediately and refreshes the entry in the background. Configure it **after** `FileCacheMiddleware`, with the same `location`.
+Stale-while-revalidate for `FileCacheMiddleware`: a cached response older than `maxAgeSeconds` is still served as it is, and its entry is refreshed from the upstream for later requests. Configure it **after** `FileCacheMiddleware`, with the same `location`.
+
+> **The refresh is not in the background on the shipped image.** `php:8.4-apache` runs PHP as mod_php, which has no `fastcgi_finish_request()`, so the refresh runs synchronously, before the response is sent: a request hitting a stale entry waits for a full upstream round trip. Only where that function exists (PHP-FPM) is the refresh deferred until after the response.
+
+On `default_proxy`, which already has a `FileCacheMiddleware` (`./cache` by default), only add this middleware:
 
 ```php
-[
-    'class' => 'Tent\Middlewares\CacheStalenessMiddleware',
-    'location' => './cache',
-    'host' => 'http://api:80',
-    'maxAgeSeconds' => 300,
-    'evictOn' => ['4xx']
-]
+Configuration::buildRule([
+    'handler' => [
+        'type' => 'default_proxy',
+        'host' => 'http://api:80'
+    ],
+    'matchers' => [
+        ['method' => 'GET', 'uri' => '/api/', 'type' => 'begins_with']
+    ],
+    'middlewares' => [
+        [
+            'class' => 'Tent\Middlewares\CacheStalenessMiddleware',
+            'location' => './cache',
+            'host' => 'http://api:80',
+            'maxAgeSeconds' => 300
+        ]
+    ]
+]);
 ```
 
-- **`location`**, **`host`**, **`maxAgeSeconds`** (or `max_age_seconds`) — see above; the header-filter options (`mode`, `excluded_headers`, `additional_excluded_headers`, `allowed_headers`) are also accepted.
-- **`evictOn`** (or `evict_on`, camelCase wins) — optional list of status codes or wildcard patterns. When a background refresh receives a non-2xx response matching the list, the cache entry is removed instead of kept. Defaults to `[]` (disabled): non-2xx refresh responses keep the stale entry. Network errors or exceptions during the refresh **never** evict. Invalid values throw `\InvalidArgumentException` when the middleware is built.
+On `proxy`, configure both, listing the request middlewares the upstream needs first (see [Limitations](#limitations-of-the-refresh)):
+
+```php
+Configuration::buildRule([
+    'handler' => [
+        'type' => 'proxy',
+        'host' => 'http://api:80'
+    ],
+    'matchers' => [
+        ['method' => 'GET', 'uri' => '/api/', 'type' => 'begins_with']
+    ],
+    'middlewares' => [
+        [
+            'class' => 'Tent\Middlewares\SetHeadersMiddleware',
+            'headers' => ['Host' => 'api']
+        ],
+        [
+            'class' => 'Tent\Middlewares\FileCacheMiddleware',
+            'location' => './cache',
+            'matchers' => [
+                ['class' => 'Tent\Matchers\StatusCodeMatcher', 'httpCodes' => ['2xx']]
+            ],
+            'evictOn' => ['4xx']
+        ],
+        [
+            'class' => 'Tent\Middlewares\CacheStalenessMiddleware',
+            'location' => './cache',
+            'host' => 'http://api:80',
+            'maxAgeSeconds' => 300,
+            'evictOn' => ['4xx']
+        ]
+    ]
+]);
+```
+
+### Options
+
+- **`location`** (required) — use the same value as `FileCacheMiddleware`. It does not select the entry: the one checked and refreshed is always the one which was served.
+- **`host`** (required) — base URL of the upstream the refresh is sent to, usually the handler's `host`.
+- **`maxAgeSeconds`** (or `max_age_seconds`) — age, in seconds, above which an entry is stale. Always set it: it defaults to `0`.
+- **`evictOn`** (or `evict_on`, camelCase wins) — optional list of status codes or wildcard patterns. When a refresh receives a non-2xx response matching the list, the cache entry is removed instead of kept. Defaults to `[]` (disabled): non-2xx refresh responses keep the stale entry. Network errors or exceptions during the refresh **never** evict. Invalid values throw `\InvalidArgumentException` when the middleware is built.
 
 Use the same `evictOn` list on both `FileCacheMiddleware` and `CacheStalenessMiddleware` for a given `location`, so the read/write policy and the refresh policy stay consistent.
+
+### When a refresh happens
+
+- The check runs in the response phase (`processResponse()`) and only acts on responses `FileCacheMiddleware` served from cache. A cache miss, an entry evicted on read, a request flagged with [`skipCache()`](./cache-configuration.md#bypass-cache-from-a-middleware) or a response set by any other middleware (custom ones included) never triggers a refresh.
+- The response being sent is never modified.
+- Every middleware of the handler runs in the response phase, so it also works when listed before `FileCacheMiddleware` or in `prependMiddlewares`. Listing it after, with the same `location`, is recommended for readability.
+- While a refresh is in flight, a sentinel file (`<meta-file>.refreshing`) keeps other stale hits on the same entry from starting another one (best effort).
+- `FileCacheMiddleware` never writes a response back into the entry it was served from, so an entry evicted by a refresh stays evicted.
+
+### Header filtering
+
+The refresh stores headers through the filter of the `FileCacheMiddleware` which served the entry, so [header filtering](./cache-configuration.md#filter-headers-stored-in-cache) is configured there (or on the `default_proxy` handler) only.
+
+The `mode`, `excluded_headers`, `additional_excluded_headers` and `allowed_headers` options of `CacheStalenessMiddleware` are **deprecated** and will be removed in the next major version. They are accepted but ignored, and no longer validated. When any of them is present, even with a `null` value, a `warn` line is logged each time the middleware is built, that is, on every request handled by the rule (`<keys>` lists the ones found, separated by commas):
+
+```text
+[deprecated] - CacheStalenessMiddleware ignores option(s): <keys> — the cache refresh uses the header filter of FileCacheMiddleware; they will be removed in the next major version
+```
+
+### Limitations of the refresh
+
+The refresh is a direct request to `host`, replaying the request which hit the stale entry. It does not go through the rule again.
+
+**What is sent**
+
+- The client's headers are replayed. A `Range` header can bring back a partial `206`, which then replaces the full entry. Conditional headers (e.g. `If-None-Match`) can bring back a `304`, which is not stored.
+- Request middlewares listed after `FileCacheMiddleware` do not run on a cache hit, so their changes (e.g. `Host`, authentication or path rewrites) are missing from the refresh. On `proxy`, list them before `FileCacheMiddleware`. On `default_proxy`, rule `middlewares` always come after the built-in cache, so use `prependMiddlewares`; a `Host` set there is overwritten by the built-in one (the handler's host), so a custom `Host` requires a `proxy` rule.
+- A cached non-`GET` entry (e.g. `POST`) is sent upstream again, body included. `default_proxy` caches every method, so add this middleware only to rules matching `GET`, or restrict a manual `FileCacheMiddleware` with a `RequestMethodMatcher`.
+
+**What is stored**
+
+- Any `2xx` response is stored: `FileCacheMiddleware`'s `matchers` (`cacheCodes` on `default_proxy`), `require_cache_header` and a `skip_cache_header` in the response are ignored.
+- Neither the handler nor any `processResponse()` is applied before storing, so the processing of a custom handler (see [`class` override](../../request-handlers.md#using-class-instead-of-type)) is lost on a refreshed entry. Response middlewares still run on every response served.
+- A transfer interrupted after a `2xx` status line (connection dropped or timeout in the middle of the body) replaces the entry with an **empty body**.
+
+**Timing**
+
+- The handler's `connect_timeout` and `timeout` are ignored: the refresh waits up to 5 seconds to connect and 30 seconds in total.
+- A refresh which neither stores nor evicts leaves the entry's age unchanged, so the next stale hit tries again.
+- If a refresh is cut short (a PHP fatal error, or the process being killed), its sentinel file is left behind and the entry is not refreshed again until that file or the entry's directory is deleted.
 
 ---
 
