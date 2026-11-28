@@ -85,7 +85,7 @@ Implement `processRequest(ProcessingRequest)` and/or `processResponse(Response)`
 | Class | Purpose |
 |-------|---------|
 | `FileCacheMiddleware` | Cache responses to disk; serve from cache on subsequent requests |
-| `CacheStalenessMiddleware` | Serve a stale `FileCacheMiddleware` hit immediately while triggering a background refresh; must run **after** `FileCacheMiddleware` with the same `location` |
+| `CacheStalenessMiddleware` | Serve a stale `FileCacheMiddleware` hit while triggering a background refresh; pairs with `FileCacheMiddleware` (same `location`) and acts in the response phase on cache hits |
 | `SetHeadersMiddleware` | Set or override request headers |
 | `SetPathMiddleware` | Rewrite the request path |
 | `RenameHeaderMiddleware` | Rename a request header (copy value to new name, remove original) |
@@ -110,7 +110,9 @@ See [`adding-request-matchers.md`](../adding-request-matchers.md) for how to add
 
 ### Content (`source/source/lib/content/`)
 
-Cache and file abstractions used by `FileCacheMiddleware`: `Cache`, `File`, `FileCache`, `ResponseContent`, `HeaderFilter`, `ExcludedHeaderFilter`, `AllowedHeaderFilter`, and `HeaderFilterBuilder`.
+Cache and file abstractions used by `FileCacheMiddleware`: `Cache`, `File`, `FileCache`, `CacheHit`, `ResponseContent`, `HeaderFilter`, `ExcludedHeaderFilter`, `AllowedHeaderFilter`, and `HeaderFilterBuilder`.
+
+The request-middleware chain stops at the first middleware which sets a response, so anything that has to react to a cache hit runs in the response phase, which visits every middleware of the handler. On a hit (only), `FileCacheMiddleware` records a `CacheHit` on `ProcessingRequest` (not on `RequestInterface`): the served `FileCache` entry plus its `HeaderFilter`. `CacheStalenessMiddleware::processResponse()` acts only on responses whose request carries it, and its `BackgroundRefresher` rewrites that entry with that filter; its own header filter options are deprecated and ignored. `FileCacheMiddleware::processResponse()` never writes a response back into the entry it was served from, so a refresh eviction is not undone by middleware ordering. On SAPIs without `fastcgi_finish_request()` (including the shipped mod_php image) the refresh runs synchronously.
 
 `CacheDirCleaner` (with `CacheDirResolver`) deletes cache directories on behalf of `CacheCleanupMiddleware`. Both it and `FileCache::remove()` tolerate other writers deleting the same entries concurrently, by removing through `SafeRemover`: anything already gone is success, while a real failure is logged and never thrown. `CacheDirCleaner` restarts a walk interrupted by a vanished directory (3 attempts in total) and unlinks symbolic links without following them.
 
@@ -133,7 +135,7 @@ Cache hits are read through `CacheContentReader` (`source/source/lib/service/`),
 
 ### HTTP Client (`source/source/lib/http/`)
 
-Thin abstraction over cURL: `HttpClientInterface`, `CurlHttpClient`, and `CurlHttpExecutor`. Used by proxy handlers to forward requests upstream. `UpstreamFailureNormalizer` decorates every proxy client and maps transport failures to `502` (or `504` on cURL timeout) instead of an empty `200`; `connect_timeout`/`timeout` options configure the default `CurlHttpClient`.
+Thin abstraction over cURL: `HttpClientInterface`, `CurlHttpClient`, and `CurlHttpExecutor`. Used by proxy handlers to forward requests upstream. `UpstreamFailureNormalizer` decorates every proxy client and maps transport failures to `502` (or `504` on cURL timeout) instead of an empty `200`; `connect_timeout`/`timeout` options configure the default `CurlHttpClient`. `BackgroundRefresher` uses an undecorated client with the default timeouts: a result with a non-zero cURL `errno` counts as a failed refresh, which never replaces or evicts the cache entry.
 
 ### Utils (`source/source/lib/utils/`)
 
