@@ -4,6 +4,7 @@ namespace Tent\Middlewares;
 
 use Tent\Models\ProcessingRequest;
 use Tent\Models\FolderLocation;
+use Tent\Content\CacheHit;
 use Tent\Content\EvictionPolicy;
 use Tent\Content\FileCache;
 use Tent\Content\HeaderFilter;
@@ -220,7 +221,11 @@ class FileCacheMiddleware extends Middleware
     * requestMethods filter and matches all configured matchers. If not allowed, the request
     * is returned unmodified.
      *
-     * If a cached response exists for the request path, it is loaded and set on the request.
+     * If a cached response exists for the request path, it is loaded and set on the request,
+     * along with a {@see CacheHit} marker holding the served entry and this middleware's
+     * header filter, used by {@see CacheStalenessMiddleware}. No marker is set otherwise:
+     * on a miss, on an entry evicted on read, on a matcher mismatch, or when the cache
+     * is skipped.
      *
      * @param ProcessingRequest $request The incoming processing request.
      * @return ProcessingRequest The (potentially cached) processing request.
@@ -249,6 +254,7 @@ class FileCacheMiddleware extends Middleware
             $response = $reader->getResponse();
             Logger::debug('[' . $response->httpCode() . '] - serving from cache — uri: ' . $request->requestPath());
             $request->setResponse($response);
+            $request->setCacheHit(new CacheHit($cache, $this->headerFilter));
         }
 
         return $request;
