@@ -33,12 +33,16 @@ image_config() {
   local image="$1"
   EXTRA_BUILD_CONTEXT=""
   # Per-image check extras (empty unless set in the image's branch below):
-  # extensions/composer for dev_tent-base, deploy tooling and Apache access
-  # log for tent.
+  # extensions/composer for dev_tent-base; deploy tooling, Apache access log,
+  # PHP log level and PHP diagnostics handling for tent; the expected
+  # display_errors setting (off in production, on in the dev and test images).
   CHECK_EXTENSIONS=""
   CHECK_COMPOSER=""
   CHECK_DEPLOY=""
   CHECK_ACCESS_LOG=""
+  CHECK_DISPLAY_ERRORS=""
+  CHECK_PHP_LOG_LEVEL=""
+  CHECK_PHP_DIAGNOSTICS=""
 
   case "$image" in
     tent)
@@ -51,6 +55,9 @@ image_config() {
       EXTRA_BUILD_CONTEXT="tent-assets=dockerfiles/tent"
       CHECK_DEPLOY=true
       CHECK_ACCESS_LOG=true
+      CHECK_DISPLAY_ERRORS=off
+      CHECK_PHP_LOG_LEVEL=true
+      CHECK_PHP_DIAGNOSTICS=true
       ;;
     tent-test)
       DOCKERFILE="dockerfiles/tent-test/Dockerfile"
@@ -60,11 +67,13 @@ image_config() {
       # dockerfiles/tent-test/, outside the "source" build context, so they
       # are wired in as an extra named build context (see buildx_base_cmd()).
       EXTRA_BUILD_CONTEXT="tent-test-assets=dockerfiles/tent-test"
+      CHECK_DISPLAY_ERRORS=on
       ;;
     dev_tent)
       DOCKERFILE="dockerfiles/dev_tent/Dockerfile"
       CONTEXT="dev/api"
       IMAGE_NAME="darthjee/dev_tent"
+      CHECK_DISPLAY_ERRORS=on
       ;;
     dev_tent-base)
       DOCKERFILE="dockerfiles/dev_tent-base/Dockerfile"
@@ -72,6 +81,7 @@ image_config() {
       IMAGE_NAME="darthjee/dev_tent-base"
       CHECK_EXTENSIONS="pcov"
       CHECK_COMPOSER=true
+      CHECK_DISPLAY_ERRORS=on
       ;;
     *)
       echo "Invalid image: $image" >&2
@@ -105,6 +115,10 @@ arch_config() {
 # images accidentally built on a base of the wrong architecture.
 # EXPECTED_EXTENSIONS adds per-image extensions (comma separated, e.g. pcov
 # for dev_tent-base); empty for every other image.
+# EXPECTED_DISPLAY_ERRORS (off or on; skipped when empty) pins the divergence
+# between the images: production must hide and log PHP diagnostics, while the
+# dev and test images deliberately keep showing them. The CLI reads the same
+# conf.d as mod_php.
 read -r -d '' CHECK_PHP <<'PHP' || true
 $failures = [];
 
@@ -141,6 +155,28 @@ foreach ($ini as $key => $expected) {
     if ($actual !== $expected) {
         $failures[] = "ini $key: expected $expected, got " . var_export($actual, true);
     }
+}
+
+$isOff = function ($key) {
+    return in_array(strtolower((string) ini_get($key)), ['', '0', 'off'], true);
+};
+$displayErrors = getenv('EXPECTED_DISPLAY_ERRORS') ?: '';
+$got = function ($key) {
+    return var_export(ini_get($key), true);
+};
+if ($displayErrors === 'off') {
+    if (!$isOff('display_errors')) {
+        $failures[] = 'ini display_errors: expected off, got ' . $got('display_errors');
+    }
+    if ($isOff('log_errors')) {
+        $failures[] = 'ini log_errors: expected on, got ' . $got('log_errors');
+    }
+} elseif ($displayErrors === 'on') {
+    if ($isOff('display_errors')) {
+        $failures[] = 'ini display_errors: expected on (dev default), got ' . $got('display_errors');
+    }
+} elseif ($displayErrors !== '') {
+    $failures[] = "unknown EXPECTED_DISPLAY_ERRORS: $displayErrors";
 }
 
 $expectedMachine = getenv('EXPECTED_MACHINE');
@@ -310,6 +346,168 @@ check_access_log() (
     -v "${dropin_dir}/tent.d:/etc/apache2/tent.d:ro"
 )
 
+# PHP log-level contract for the tent image: the conf raising mod_php to info
+# is enabled and loads before the access-log conf (which includes tent.d, so a
+# drop-in there can still override the level), and the production ini is
+# world-readable. Runs without set -e so every failure is collected and
+# reported together.
+read -r -d '' CHECK_PHP_LOG_LEVEL_SH <<'SH' || true
+failures=()
+conf_dir=/etc/apache2/conf-enabled
+level_conf=00-tent-0-php-log-level.conf
+access_conf=00-tent-access-log.conf
+ini=/usr/local/etc/php/conf.d/tent.ini
+
+if [ -f "$conf_dir/$level_conf" ]; then
+  grep -qxF 'LogLevel warn php:info' "$conf_dir/$level_conf" \
+    || failures+=("$conf_dir/$level_conf does not contain: LogLevel warn php:info")
+else
+  failures+=("missing: $conf_dir/$level_conf")
+fi
+
+# C locale order is the order Apache includes the files in.
+order="$(LC_ALL=C ls "$conf_dir/" | grep -xF -e "$level_conf" -e "$access_conf" | tr '\n' ' ')"
+[ "$order" = "$level_conf $access_conf " ] \
+  || failures+=("$conf_dir: expected $level_conf before $access_conf, got: ${order:-neither}")
+
+mode="$(stat -c %a "$ini" 2>/dev/null)"
+[ "$mode" = "644" ] || failures+=("$ini: expected mode 644, got ${mode:-missing}")
+
+if [ "${#failures[@]}" -gt 0 ]; then
+  printf 'PHP log-level check FAILED:\n' >&2
+  printf '  - %s\n' "${failures[@]}" >&2
+  exit 1
+fi
+
+echo "PHP log-level check OK"
+SH
+
+# PHP diagnostics contract for the tent image: a warning or deprecation raised
+# during a request leaves the response untouched and is written to the Apache
+# error log. Starts Apache as the image's default user and requests /probe:
+#   PROBE_MODE=baseline     nothing mounted; prints only the response's
+#                           "<status> <content type>"
+#   PROBE_MODE=diagnostics  a configure.php raising both diagnostics mounted;
+#                           expects $EXPECTED_HEAD (the baseline), a clean body
+#                           and both log lines
+# Runs without set -e so every failure is collected and reported together.
+read -r -d '' CHECK_PHP_DIAGNOSTICS_SH <<'SH' || true
+failures=()
+log=/tmp/out
+body=/tmp/body
+head=""
+ready=""
+
+# In foreground mode Apache signals its whole process group on shutdown, which
+# includes this script.
+trap ':' TERM
+
+apache2-foreground >>"$log" 2>&1 &
+apache_pid=$!
+
+# Poll until Apache answers (any status), giving up early if it exits.
+for _ in $(seq 1 150); do
+  if curl -s -o /dev/null --max-time 10 http://localhost/; then
+    ready=true
+    break
+  fi
+  kill -0 "$apache_pid" 2>/dev/null || break
+  sleep 0.2
+done
+
+if [ -n "$ready" ]; then
+  head="$(curl -s -o "$body" --max-time 10 -w '%{http_code} %{content_type}' http://localhost/probe)" \
+    || failures+=("probe request failed")
+else
+  failures+=("Apache did not become ready (user=$(id -un))")
+fi
+
+case "${PROBE_MODE:-}" in
+  baseline) ;;
+  diagnostics)
+    if [ -n "$ready" ]; then
+      [ "$head" = "$EXPECTED_HEAD" ] \
+        || failures+=("status and Content-Type: expected '$EXPECTED_HEAD', got '$head'")
+
+      for text in 'tent smoke' 'Warning:' 'Deprecated:'; do
+        ! grep -qF "$text" "$body" || failures+=("response body contains: $text")
+      done
+
+      warning='\[php:warn\].*tent smoke warning'
+      deprecation='\[php:info\].*tent smoke deprecated'
+      for _ in $(seq 1 50); do
+        grep -q "$warning" "$log" && grep -q "$deprecation" "$log" && break
+        sleep 0.2
+      done
+      grep -q "$warning" "$log" || failures+=("no [php:warn] log line with: tent smoke warning")
+      grep -q "$deprecation" "$log" || failures+=("no [php:info] log line with: tent smoke deprecated")
+    fi
+    ;;
+  *)
+    failures+=("unknown PROBE_MODE: ${PROBE_MODE:-unset}")
+    ;;
+esac
+
+kill "$apache_pid" 2>/dev/null
+wait "$apache_pid" 2>/dev/null
+
+if [ "${#failures[@]}" -gt 0 ]; then
+  printf 'PHP diagnostics check FAILED: (PROBE_MODE=%s)\n' "${PROBE_MODE:-unset}" >&2
+  printf '  - %s\n' "${failures[@]}" >&2
+  if [ -f "$body" ]; then
+    printf 'Response body:\n' >&2
+    cat "$body" >&2
+    printf '\n' >&2
+  fi
+  printf 'Apache output:\n' >&2
+  cat "$log" >&2
+  exit 1
+fi
+
+if [ "$PROBE_MODE" = "baseline" ]; then
+  echo "$head"
+else
+  echo "PHP diagnostics check OK ($head, $(id -un))"
+fi
+SH
+
+# Runs CHECK_PHP_DIAGNOSTICS_SH in a fresh container of <ref>; the remaining
+# arguments are extra "docker run" options. No --user: Apache runs as the
+# image's default user (app).
+run_php_diagnostics_case() {
+  local ref="$1"
+  shift
+
+  docker run --rm --platform "$PLATFORM" "$@" \
+    --entrypoint bash \
+    "$ref" \
+    -c "$CHECK_PHP_DIAGNOSTICS_SH"
+}
+
+# Requests /probe on <ref> without any configuration (the baseline), then with a
+# configure.php that raises a warning and a deprecation and defines no rules.
+# The body is a subshell, so the EXIT trap removing the temp dir stays local to
+# this function.
+check_php_diagnostics() (
+  ref="$1"
+  config_dir="$(mktemp -d)"
+  trap 'rm -rf "$config_dir"' EXIT
+
+  cat > "${config_dir}/configure.php" <<'PHP'
+<?php
+
+trigger_error('tent smoke warning', E_USER_WARNING);
+trigger_error('tent smoke deprecated', E_USER_DEPRECATED);
+PHP
+  # Readable by the image's user (uid 1000), whatever the host umask is.
+  chmod 755 "$config_dir"
+  chmod 644 "${config_dir}/configure.php"
+
+  baseline="$(run_php_diagnostics_case "$ref" -e PROBE_MODE=baseline)"
+  run_php_diagnostics_case "$ref" -e PROBE_MODE=diagnostics -e "EXPECTED_HEAD=${baseline}" \
+    -v "${config_dir}/configure.php:/var/www/html/configuration/configure.php:ro"
+)
+
 check_image() {
   local image="$1"
   local arch="$2"
@@ -334,6 +532,7 @@ check_image() {
   docker run --rm --platform "$PLATFORM" \
     -e "EXPECTED_MACHINE=${EXPECTED_MACHINE}" \
     -e "EXPECTED_EXTENSIONS=${CHECK_EXTENSIONS}" \
+    -e "EXPECTED_DISPLAY_ERRORS=${CHECK_DISPLAY_ERRORS}" \
     --entrypoint php \
     "$ref" \
     -r "$CHECK_PHP"
@@ -356,6 +555,17 @@ check_image() {
 
   if [[ -n "$CHECK_ACCESS_LOG" ]]; then
     check_access_log "$ref"
+  fi
+
+  if [[ -n "$CHECK_PHP_LOG_LEVEL" ]]; then
+    docker run --rm --platform "$PLATFORM" \
+      --entrypoint bash \
+      "$ref" \
+      -c "$CHECK_PHP_LOG_LEVEL_SH"
+  fi
+
+  if [[ -n "$CHECK_PHP_DIAGNOSTICS" ]]; then
+    check_php_diagnostics "$ref"
   fi
 }
 
