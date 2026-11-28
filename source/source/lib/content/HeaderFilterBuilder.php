@@ -4,8 +4,9 @@ namespace Tent\Content;
 
 /**
  * Shared `(mode, excluded_headers, additional_excluded_headers, allowed_headers)` →
- * `HeaderFilter` resolution helper, used identically by `Tent\Middlewares\FileCacheMiddleware`
- * and `Tent\Middlewares\CacheStalenessMiddleware` so both write paths stay in sync.
+ * `HeaderFilter` resolution helper, used by `Tent\Middlewares\FileCacheMiddleware`. Its filter
+ * is also applied to background cache refreshes (see
+ * `Tent\Middlewares\CacheStalenessMiddleware`), so both write paths stay in sync.
  *
  * ## Deny mode (`mode === 'deny'`, the default)
  *

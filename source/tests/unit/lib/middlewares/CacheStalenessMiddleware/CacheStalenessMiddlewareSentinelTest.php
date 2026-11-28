@@ -5,6 +5,8 @@ namespace Tent\Tests\Middlewares\CacheStalenessMiddleware;
 require_once __DIR__ . '/../../../../support/loader.php';
 
 use PHPUnit\Framework\TestCase;
+use Tent\Content\CacheHit;
+use Tent\Content\ExcludedHeaderFilter;
 use Tent\Content\FileCache;
 use Tent\Http\HttpClientInterface;
 use Tent\Log\Logger;
@@ -53,7 +55,7 @@ class CacheStalenessMiddlewareSentinelTest extends TestCase
 
     public function testSentinelIsARegularFileNotWritableByOthers()
     {
-        $this->buildMiddleware()->processRequest($this->request);
+        $this->buildMiddleware()->processResponse($this->request->response());
 
         $this->assertSame([['link' => false, 'file' => true, 'mode' => 0644]], $this->scheduled);
         $this->assertFileDoesNotExist($this->sentinel);
@@ -63,7 +65,7 @@ class CacheStalenessMiddlewareSentinelTest extends TestCase
     {
         symlink($this->outsideFile, $this->sentinel);
 
-        $this->buildMiddleware()->processRequest($this->request);
+        $this->buildMiddleware()->processResponse($this->request->response());
 
         $this->assertSame([['link' => false, 'file' => true, 'mode' => 0644]], $this->scheduled);
         $this->assertFileDoesNotExist($this->outsideFile);
@@ -74,7 +76,7 @@ class CacheStalenessMiddlewareSentinelTest extends TestCase
         file_put_contents($this->outsideFile, 'untouched');
         symlink($this->outsideFile, $this->sentinel);
 
-        $this->buildMiddleware()->processRequest($this->request);
+        $this->buildMiddleware()->processResponse($this->request->response());
 
         $this->assertSame([], $this->scheduled);
         $this->assertStringEqualsFile($this->outsideFile, 'untouched');
@@ -146,6 +148,7 @@ class CacheStalenessMiddlewareSentinelTest extends TestCase
         $meta['timestamp'] = time() - 1000;
         file_put_contents($cache->metaFilePath(), json_encode($meta));
         $request->setResponse($response);
+        $request->setCacheHit(new CacheHit($cache, new ExcludedHeaderFilter([])));
 
         return $request;
     }

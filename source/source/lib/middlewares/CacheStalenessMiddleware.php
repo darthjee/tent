@@ -2,40 +2,49 @@
 
 namespace Tent\Middlewares;
 
+use Tent\Content\CacheHit;
 use Tent\Content\EvictionPolicy;
 use Tent\Content\FileCache;
-use Tent\Content\HeaderFilter;
-use Tent\Content\HeaderFilterBuilder;
 use Tent\Http\CurlHttpClient;
 use Tent\Http\HttpClientInterface;
 use Tent\Log\Logger;
 use Tent\Models\FolderLocation;
 use Tent\Models\ProcessingRequest;
+use Tent\Models\Response;
 use Tent\Service\BackgroundRefresher;
 use Tent\Utils\FileUtils;
 
 /**
  * Middleware that serves stale cache hits immediately while triggering a background refresh.
  *
- * `CacheStalenessMiddleware` must be configured **after** `FileCacheMiddleware` in a rule's
- * `middlewares` list, sharing the same `location`: it only evaluates staleness when a cache
- * hit has already set a response on the request (i.e. `FileCacheMiddleware::processRequest()`
- * ran first and found an entry).
+ * `CacheStalenessMiddleware` pairs with a `FileCacheMiddleware` of the same handler: it acts in
+ * the response phase ({@see processResponse()}), and only on responses which
+ * `FileCacheMiddleware` served from cache, recognized by the {@see CacheHit} marker recorded on
+ * the request. A response produced by anything else (e.g. proxied, or set by another
+ * middleware) never triggers a refresh, even when a cache entry exists for the request.
+ *
+ * As every middleware of a handler runs in the response phase, it works wherever it is placed:
+ * after `FileCacheMiddleware`, before it, or in `prependMiddlewares`. Configuring it **after**
+ * `FileCacheMiddleware`, with the same `location`, is recommended for readability. The entry
+ * which is checked and refreshed is always the one which was served.
  *
  * When the cached entry's age (`time() - FileCache::timestamp()`) exceeds `maxAgeSeconds`,
  * the stale response is still returned as-is, but a `BackgroundRefresher` is scheduled to
- * re-contact `host` and overwrite the cache entry for future requests.
+ * re-contact `host` and overwrite the cache entry for future requests. The refresh replays the
+ * request as it was when the cache hit was served: request middlewares placed after
+ * `FileCacheMiddleware` do not run on a cache hit, so their changes are not part of it.
  *
  * ## Non-blocking caveat
  *
- * Tent runs under PHP-FPM/Apache with no real async/job-queue infrastructure. "Background"
- * execution is approximated via `fastcgi_finish_request()` + `register_shutdown_function()`
- * when available (PHP-FPM): the response is flushed to the client first, then the refresh
- * runs in the same PHP process during shutdown. When `fastcgi_finish_request()` is not
- * available (e.g. CLI, built-in server, some Apache SAPIs), the refresh runs synchronously
- * before the response middleware chain finishes — i.e. it *will* add upstream latency to
- * the current request in that case. Do not rely on "background" being non-blocking outside
- * of PHP-FPM.
+ * Tent has no real async/job-queue infrastructure. "Background" execution is approximated via
+ * `fastcgi_finish_request()` + `register_shutdown_function()` when available (PHP-FPM): the
+ * response is flushed to the client first, then the refresh runs in the same PHP process during
+ * shutdown. When `fastcgi_finish_request()` is not available (mod_php, CLI, built-in server),
+ * the refresh runs synchronously, before the response is returned.
+ *
+ * **This is the case of the shipped `php:8.4-apache` (mod_php) image**: there, a request
+ * hitting a stale entry waits for a full upstream round trip (unless a refresh of that entry is
+ * already in flight). Do not rely on "background" being non-blocking outside of PHP-FPM.
  *
  * ## Example configuration
  *
@@ -63,14 +72,15 @@ use Tent\Utils\FileUtils;
  * ]);
  * ```
  *
- * ## Header filtering options
+ * ## Header filtering
  *
- * Accepts the same `mode`/`excluded_headers`/`additional_excluded_headers`/`allowed_headers`
- * options as `FileCacheMiddleware` (see its docblock for full semantics), applied to its own
- * background-refresh cache write via `BackgroundRefresher`. These should normally be configured
- * to match `FileCacheMiddleware`'s configuration for the same `location`, to avoid inconsistent
- * header filtering between a direct cache write and a background-refresh write of the same
- * cache entry.
+ * The refresh write uses the header filter of the `FileCacheMiddleware` which served the entry,
+ * so that it strips exactly the same headers as a direct cache write.
+ *
+ * The `mode`, `excluded_headers`, `additional_excluded_headers` and `allowed_headers` options
+ * of this middleware are **deprecated**: they are still accepted, but ignored (and not
+ * validated), and a warning is logged when any of them is configured. They will be removed in
+ * the next major version.
  *
  * ## Eviction on failed refresh
  *
@@ -90,9 +100,14 @@ class CacheStalenessMiddleware extends Middleware
     public const REFRESH_SENTINEL_SUFFIX = '.refreshing';
 
     /**
-     * @var FolderLocation The base folder location for caching (must match FileCacheMiddleware).
+     * Header filtering attributes, accepted for backward compatibility but ignored.
      */
-    private FolderLocation $location;
+    private const DEPRECATED_ATTRIBUTES = [
+        'mode',
+        'excluded_headers',
+        'additional_excluded_headers',
+        'allowed_headers',
+    ];
 
     /**
      * @var integer Maximum age, in seconds, before a cache entry is considered stale.
@@ -116,18 +131,16 @@ class CacheStalenessMiddleware extends Middleware
     private $scheduler;
 
     /**
-     * @var HeaderFilter The filter applied to a refreshed response's headers before it is
-     *                   re-stored in cache.
-     */
-    private HeaderFilter $headerFilter;
-
-    /**
      * @var EvictionPolicy Status codes that evict the cache entry when a refresh gets them.
      */
     private EvictionPolicy $evictionPolicy;
 
     /**
-     * @param FolderLocation           $location                  Base folder location for caching.
+     * @param FolderLocation           $location                  Base folder location for caching,
+     *                                                            the same as the one of
+     *                                                            `FileCacheMiddleware`. The entry
+     *                                                            checked and refreshed is the one
+     *                                                            which was served.
      * @param integer                  $maxAgeSeconds             Maximum age, in seconds, before
      *                                                            staleness.
      * @param string                   $host                      Base URL of the upstream server.
@@ -136,19 +149,18 @@ class CacheStalenessMiddleware extends Middleware
      * @param callable|null            $scheduler                 Optional override for how refreshes
      *                                                             are run. Receives a
      *                                                             `BackgroundRefresher` instance.
-     * @param array|null               $excludedHeaders           Deny mode: full override of the
-     *                                                            excluded headers list.
-     * @param array|null               $additionalExcludedHeaders Deny mode: merged on top of the
-     *                                                            resolved excluded headers list.
-     * @param array|null               $allowedHeaders            Allow mode: explicit, complete
-     *                                                            list of the only headers kept in
-     *                                                            cache storage.
-     * @param string                   $mode                      Either 'deny' (default) or 'allow'.
+     * @param array|null               $excludedHeaders           Ignored (@deprecated, to be removed
+     *                                                            in the next major version).
+     * @param array|null               $additionalExcludedHeaders Ignored (@deprecated, to be removed
+     *                                                            in the next major version).
+     * @param array|null               $allowedHeaders            Ignored (@deprecated, to be removed
+     *                                                            in the next major version).
+     * @param string                   $mode                      Ignored (@deprecated, to be removed
+     *                                                            in the next major version).
      * @param array|null               $evictOn                   Status codes/patterns (e.g. '4xx')
      *                                                            that evict the entry when a refresh
      *                                                            receives them. Defaults to none.
-     * @throws \InvalidArgumentException If $mode is invalid, 'allow' mode has an empty/missing list,
-     *                                   or $evictOn has invalid entries.
+     * @throws \InvalidArgumentException If $evictOn has invalid entries.
      */
     public function __construct(
         FolderLocation $location,
@@ -162,39 +174,32 @@ class CacheStalenessMiddleware extends Middleware
         string $mode = 'deny',
         ?array $evictOn = null
     ) {
-        $this->location = $location;
         $this->maxAgeSeconds = $maxAgeSeconds;
         $this->host = $host;
         $this->httpClient = $httpClient ?? new CurlHttpClient();
         $this->scheduler = $scheduler ?? self::defaultScheduler(...);
-        $this->headerFilter = HeaderFilterBuilder::build(
-            $mode,
-            $excludedHeaders,
-            $additionalExcludedHeaders,
-            $allowedHeaders
-        );
         $this->evictionPolicy = EvictionPolicy::build($evictOn);
     }
 
     /**
      * Builds a CacheStalenessMiddleware instance from the given attributes.
      *
+     * A warning is logged when any of the deprecated header filtering attributes (`mode`,
+     * `excluded_headers`, `additional_excluded_headers`, `allowed_headers`) is present.
+     * They are otherwise ignored.
+     *
      * @param array $attributes Must include `location`, `host` and `maxAgeSeconds`
-     *                          (or `max_age_seconds`). Optionally `mode`, `excluded_headers`,
-     *                          `additional_excluded_headers`, `allowed_headers`,
-     *                          `evictOn` (or `evict_on`).
+     *                          (or `max_age_seconds`). Optionally `evictOn` (or `evict_on`).
      * @throws \InvalidArgumentException If `evictOn` is not an array or has invalid entries.
      * @return CacheStalenessMiddleware
      */
     public static function build(array $attributes): CacheStalenessMiddleware
     {
+        self::warnDeprecatedAttributes($attributes);
+
         $location = new FolderLocation($attributes['location']);
         $maxAgeSeconds = (int) ($attributes['maxAgeSeconds'] ?? $attributes['max_age_seconds'] ?? 0);
         $host = $attributes['host'] ?? '';
-        $mode = $attributes['mode'] ?? 'deny';
-        $excludedHeaders = $attributes['excluded_headers'] ?? null;
-        $additionalExcludedHeaders = $attributes['additional_excluded_headers'] ?? null;
-        $allowedHeaders = $attributes['allowed_headers'] ?? null;
         $evictOn = $attributes['evictOn'] ?? $attributes['evict_on'] ?? null;
 
         if ($evictOn !== null && !is_array($evictOn)) {
@@ -205,48 +210,60 @@ class CacheStalenessMiddleware extends Middleware
             $location,
             $maxAgeSeconds,
             $host,
-            null,
-            null,
-            $excludedHeaders,
-            $additionalExcludedHeaders,
-            $allowedHeaders,
-            $mode,
-            $evictOn
+            evictOn: $evictOn
         );
     }
 
     /**
-     * Detects staleness on a cache hit and schedules a background refresh when needed.
+     * Detects staleness of a response served from cache and schedules a background refresh
+     * when needed.
      *
-     * No-op when the request was flagged with `skipCache()` (checked first, so no timestamp is
-     * read, no refresh is scheduled and nothing is evicted), when the request has no response
-     * set yet (i.e. no cache hit occurred), or when the cached entry is still fresh. The (already cached) response is
-     * never modified by this middleware.
+     * No-op when the response's request is not a `ProcessingRequest`, was flagged with
+     * `skipCache()` (checked before anything else is read, so no refresh is scheduled and
+     * nothing is evicted), or carries no {@see CacheHit} marker (the response was not served
+     * from cache). Also a no-op when the served entry has no timestamp or is still fresh.
      *
-     * @param ProcessingRequest $request The incoming processing request.
-     * @return ProcessingRequest The unmodified processing request.
+     * The response is never modified by this middleware.
+     *
+     * @param Response $response The response being sent back.
+     * @return Response The unmodified response.
      */
-    public function processRequest(ProcessingRequest $request): ProcessingRequest
+    public function processResponse(Response $response): Response
     {
-        if ($request->cacheSkipped()) {
-            return $request;
+        $request = $response->request();
+
+        if (!$request instanceof ProcessingRequest || $request->cacheSkipped()) {
+            return $response;
         }
 
-        if (!$request->hasResponse()) {
-            return $request;
+        $hit = $request->cacheHit();
+
+        if ($hit !== null) {
+            $this->refreshWhenStale($request, $hit);
         }
 
-        $cache = new FileCache($request, $this->location);
-        $timestamp = $cache->timestamp();
+        return $response;
+    }
+
+    /**
+     * Triggers a refresh when the served cache entry is older than `maxAgeSeconds`.
+     *
+     * @param ProcessingRequest $request The request which was served from cache.
+     * @param CacheHit          $hit     The served cache entry and its header filter.
+     * @return void
+     */
+    private function refreshWhenStale(ProcessingRequest $request, CacheHit $hit): void
+    {
+        $timestamp = $hit->cache()->timestamp();
 
         if ($timestamp === null) {
-            return $request;
+            return;
         }
 
         $age = time() - $timestamp;
 
         if ($age <= $this->maxAgeSeconds) {
-            return $request;
+            return;
         }
 
         Logger::debug(
@@ -254,22 +271,20 @@ class CacheStalenessMiddleware extends Middleware
             ', age: ' . $age . ', maxAgeSeconds: ' . $this->maxAgeSeconds
         );
 
-        $this->triggerRefresh($request, $cache);
-
-        return $request;
+        $this->triggerRefresh($request, $hit);
     }
 
     /**
-     * Triggers a background refresh for the given request/cache pair, unless one is
+     * Triggers a background refresh for the given request/cache hit pair, unless one is
      * already in flight (debounced via a sentinel file).
      *
-     * @param ProcessingRequest $request The incoming processing request.
-     * @param FileCache         $cache   The stale cache entry to refresh.
+     * @param ProcessingRequest $request The request which was served from cache.
+     * @param CacheHit          $hit     The stale cache hit to refresh.
      * @return void
      */
-    private function triggerRefresh(ProcessingRequest $request, FileCache $cache): void
+    private function triggerRefresh(ProcessingRequest $request, CacheHit $hit): void
     {
-        $sentinel = $this->sentinelPath($cache);
+        $sentinel = $this->sentinelPath($hit->cache());
 
         if (file_exists($sentinel)) {
             Logger::debug('[stale] - refresh already in progress, skipping — uri: ' . $request->requestPath());
@@ -278,26 +293,26 @@ class CacheStalenessMiddleware extends Middleware
 
         $this->writeSentinel($sentinel);
 
-        $this->scheduleRefresh($request, $cache, $sentinel);
+        $this->scheduleRefresh($request, $hit, $sentinel);
     }
 
     /**
-     * Builds a `BackgroundRefresher` for the given request/cache pair and hands it to the
+     * Builds a `BackgroundRefresher` for the given request/cache hit pair and hands it to the
      * scheduler, removing the debounce sentinel once the refresh finishes.
      *
-     * @param ProcessingRequest $request  The incoming processing request.
-     * @param FileCache         $cache    The stale cache entry to refresh.
+     * @param ProcessingRequest $request  The request which was served from cache.
+     * @param CacheHit          $hit      The stale cache hit to refresh.
      * @param string            $sentinel The debounce sentinel file path.
      * @return void
      */
-    private function scheduleRefresh(ProcessingRequest $request, FileCache $cache, string $sentinel): void
+    private function scheduleRefresh(ProcessingRequest $request, CacheHit $hit, string $sentinel): void
     {
         $refresher = new BackgroundRefresher(
             $request,
-            $cache,
+            $hit->cache(),
             $this->host,
             $this->httpClient,
-            $this->headerFilter,
+            $hit->headerFilter(),
             $this->evictionPolicy
         );
 
@@ -308,6 +323,27 @@ class CacheStalenessMiddleware extends Middleware
                 self::removeSentinel($sentinel);
             }
         });
+    }
+
+    /**
+     * Logs a warning when deprecated header filtering attributes are configured.
+     *
+     * @param array $attributes The attributes the middleware is being built from.
+     * @return void
+     */
+    private static function warnDeprecatedAttributes(array $attributes): void
+    {
+        $present = array_intersect(self::DEPRECATED_ATTRIBUTES, array_keys($attributes));
+
+        if ($present === []) {
+            return;
+        }
+
+        Logger::warn(
+            '[deprecated] - CacheStalenessMiddleware ignores option(s): ' . implode(', ', $present) .
+            ' — the cache refresh uses the header filter of FileCacheMiddleware; ' .
+            'they will be removed in the next major version'
+        );
     }
 
     /**

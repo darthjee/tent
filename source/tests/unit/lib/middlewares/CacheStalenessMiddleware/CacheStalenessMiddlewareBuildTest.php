@@ -5,12 +5,11 @@ namespace Tent\Tests\Middlewares\CacheStalenessMiddleware;
 require_once __DIR__ . '/../../../../support/loader.php';
 
 use PHPUnit\Framework\TestCase;
-use Tent\Content\AllowedHeaderFilter;
-use Tent\Content\ExcludedHeaderFilter;
 use Tent\Log\Logger;
 use Tent\Log\LoggerInstance;
 use Tent\Log\NullLoggerInstance;
 use Tent\Middlewares\CacheStalenessMiddleware;
+use Tent\Tests\Support\Log\CapturingLoggerInstance;
 
 class CacheStalenessMiddlewareBuildTest extends TestCase
 {
@@ -33,21 +32,6 @@ class CacheStalenessMiddlewareBuildTest extends TestCase
         ]);
 
         $this->assertInstanceOf(CacheStalenessMiddleware::class, $middleware);
-    }
-
-    public function testBuildParsesLocation()
-    {
-        $middleware = CacheStalenessMiddleware::build([
-            'location' => '/tmp/cache',
-            'host' => 'http://api:80',
-            'maxAgeSeconds' => 300,
-        ]);
-
-        $reflection = new \ReflectionClass($middleware);
-        $prop = $reflection->getProperty('location');
-        $prop->setAccessible(true);
-
-        $this->assertEquals('/tmp/cache', $prop->getValue($middleware)->basePath());
     }
 
     public function testBuildParsesMaxAgeSeconds()
@@ -109,97 +93,90 @@ class CacheStalenessMiddlewareBuildTest extends TestCase
         $this->assertSame(0, $prop->getValue($middleware));
     }
 
-    public function testBuildDefaultsToDenyModeWithDefaultExcludedHeadersWhenOmitted()
+    /**
+     * @dataProvider deprecatedAttributes
+     */
+    public function testBuildAcceptsDeprecatedAttributeAndLogsWarning(string $name, mixed $value)
     {
-        $middleware = CacheStalenessMiddleware::build([
-            'location' => '/tmp/cache',
-            'host' => 'http://api:80',
-        ]);
+        $logger = $this->captureLogs();
 
-        $filter = $this->getHeaderFilter($middleware);
-        $this->assertInstanceOf(ExcludedHeaderFilter::class, $filter);
+        $middleware = CacheStalenessMiddleware::build($this->attributes([$name => $value]));
 
-        $response = new \Tent\Models\Response(['headers' => ['Set-Cookie: a=1', 'Content-Type: text/plain']]);
-        $this->assertEquals(['Content-Type: text/plain'], $filter->filter($response)->headers());
+        $this->assertInstanceOf(CacheStalenessMiddleware::class, $middleware);
+        $this->assertSame([['warn', $this->deprecationMessage($name)]], $logger->lines);
     }
 
-    public function testBuildWithExcludedHeadersAttributeOverridesDefaultList()
+    public static function deprecatedAttributes(): array
     {
-        $middleware = CacheStalenessMiddleware::build([
-            'location' => '/tmp/cache',
-            'host' => 'http://api:80',
-            'excluded_headers' => ['X-Custom'],
-        ]);
+        return [
+            'mode' => ['mode', 'allow'],
+            'excluded_headers' => ['excluded_headers', ['X-Custom']],
+            'additional_excluded_headers' => ['additional_excluded_headers', ['X-Custom']],
+            'allowed_headers' => ['allowed_headers', ['Content-Type']],
+        ];
+    }
 
-        $filter = $this->getHeaderFilter($middleware);
-        $response = new \Tent\Models\Response([
-            'headers' => ['Set-Cookie: a=1', 'X-Custom: 1', 'Content-Type: text/plain'],
-        ]);
-        $this->assertEquals(
-            ['Set-Cookie: a=1', 'Content-Type: text/plain'],
-            $filter->filter($response)->headers()
+    public function testBuildLogsASingleWarningNamingEveryDeprecatedAttributePresent()
+    {
+        $logger = $this->captureLogs();
+
+        CacheStalenessMiddleware::build($this->attributes([
+            'allowed_headers' => ['Content-Type'],
+            'excluded_headers' => [],
+            'mode' => 'deny',
+        ]));
+
+        $this->assertSame(
+            [['warn', $this->deprecationMessage('mode, excluded_headers, allowed_headers')]],
+            $logger->lines
         );
     }
 
-    public function testBuildWithAdditionalExcludedHeadersAttributeMergesOnTopOfDefaults()
+    public function testBuildWarnsWhenADeprecatedAttributeIsPresentWithNullValue()
     {
-        $middleware = CacheStalenessMiddleware::build([
-            'location' => '/tmp/cache',
-            'host' => 'http://api:80',
-            'additional_excluded_headers' => ['X-Custom'],
-        ]);
+        $logger = $this->captureLogs();
 
-        $filter = $this->getHeaderFilter($middleware);
-        $response = new \Tent\Models\Response([
-            'headers' => ['Set-Cookie: a=1', 'X-Custom: 1', 'Content-Type: text/plain'],
-        ]);
-        $this->assertEquals(['Content-Type: text/plain'], $filter->filter($response)->headers());
+        CacheStalenessMiddleware::build($this->attributes(['excluded_headers' => null]));
+
+        $this->assertSame([['warn', $this->deprecationMessage('excluded_headers')]], $logger->lines);
     }
 
-    public function testBuildWithAllowModeAndAllowedHeadersAttribute()
+    public function testBuildLogsNothingWithoutDeprecatedAttributes()
     {
-        $middleware = CacheStalenessMiddleware::build([
-            'location' => '/tmp/cache',
-            'host' => 'http://api:80',
-            'mode' => 'allow',
-            'allowed_headers' => ['Content-Type'],
-        ]);
+        $logger = $this->captureLogs();
 
-        $filter = $this->getHeaderFilter($middleware);
-        $this->assertInstanceOf(AllowedHeaderFilter::class, $filter);
+        CacheStalenessMiddleware::build($this->attributes(['evictOn' => ['4xx']]));
 
-        $response = new \Tent\Models\Response(['headers' => ['Set-Cookie: a=1', 'Content-Type: text/plain']]);
-        $this->assertEquals(['Content-Type: text/plain'], $filter->filter($response)->headers());
+        $this->assertSame([], $logger->lines);
     }
 
-    public function testBuildWithAllowModeAndMissingAllowedHeadersThrows()
+    public function testBuildDoesNotValidateDeprecatedMode()
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $middleware = CacheStalenessMiddleware::build($this->attributes(['mode' => 'invalid']));
 
-        CacheStalenessMiddleware::build([
-            'location' => '/tmp/cache',
-            'host' => 'http://api:80',
-            'mode' => 'allow',
-        ]);
+        $this->assertInstanceOf(CacheStalenessMiddleware::class, $middleware);
     }
 
-    public function testBuildWithInvalidModeThrows()
+    public function testBuildDoesNotRequireAllowedHeadersInDeprecatedAllowMode()
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $middleware = CacheStalenessMiddleware::build($this->attributes(['mode' => 'allow']));
 
-        CacheStalenessMiddleware::build([
-            'location' => '/tmp/cache',
-            'host' => 'http://api:80',
-            'mode' => 'invalid',
-        ]);
+        $this->assertInstanceOf(CacheStalenessMiddleware::class, $middleware);
     }
 
-    private function getHeaderFilter(CacheStalenessMiddleware $middleware)
+    private function captureLogs(): CapturingLoggerInstance
     {
-        $reflection = new \ReflectionClass($middleware);
-        $property = $reflection->getProperty('headerFilter');
-        $property->setAccessible(true);
-        return $property->getValue($middleware);
+        $logger = new CapturingLoggerInstance();
+        Logger::setInstance($logger);
+
+        return $logger;
+    }
+
+    private function deprecationMessage(string $names): string
+    {
+        return '[deprecated] - CacheStalenessMiddleware ignores option(s): ' . $names .
+            ' — the cache refresh uses the header filter of FileCacheMiddleware; ' .
+            'they will be removed in the next major version';
     }
 
     public function testBuildDefaultsToEmptyEvictionPolicy()
